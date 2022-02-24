@@ -1,0 +1,31 @@
+
+
+October - Flying out end of October
+
+Focus on acclimated ones only, can break down by traits...then see picture of figures. 
+
+Larger paper and we can trim it down, four panel figure terrestrial, marine, salt, by traits, then maybe toxonomic (B), (c) paris, (D), predicted response
+
+
+Take home message:
+
+1) Acclimation reduces costly physiological rates for freshwater and marine, but not terrestrial 
+	- Means that marine and freshwater systems can compensate for climate change, but terrestrial can't!
+2) But, its a win win for freshwater because they acclimate AND maintain opportunity for selection, but terrestrial and marine systems have reduced opportunity for selection.
+	- Means that while acclimation can help marine, it won't be able to save it from its evolutionary fate and terrestrial systems are completely screwed
+
+Reasons to look at traits: Because we have traits that underly others, which could, potentially provide a mechanism. For example, mtDNA function and performance and metabolism. A bit of a stretch, but maybe not!
+
+Journal list: Science first, then Nature, then cascade in Nature family journals
+
+18/01/2019
+
+1) Fonti will fix up the sampling variance formulas (slight corrections are needed), and then re-generate the long-format dataset that we can work with. 
+
+2) I will spit out the concerning data that we need to check based on both the sampling variance estimates that seem very odd (I think at least about 72 rows, but maybe more) along with effect sizes that look suspicious from the funnel plots. I'll then divvy up the checking for each of us and I think we should be able to really save a huge amount of time doing it altogether (on my own this will take me ages).
+
+3) I have run Q10, SQ10 (sd) and CVQ10 models already, now explicitly comparing acute to acclimation responses across the different habitat types. The model syntax is all sorted and models are now running fairly good now. So, it shouldn't be a problem to update the data and re-run the models plus some added ones. I will also add in "Class" in the nested taxonomic random effect. (but see point 4). I will also have a look at running the new trait model, and also sub-sample traits with sufficient data to update the trait*habitat*acclimation-acute model. 
+
+4) Shinichi and I will have a look at the phylogeny construction and see if it's feasible to get that together. We've also sorted out some ideas on pretty figures for mapping out the data nicely as we discussed which should show the geographic and taxonomic descriptors of the data. 
+
+The timeline I am aiming for (assuming nothing gets in the way) is to update the results and figures by early-mid March, so long as we are all happy with the data. I can then make a trip shortly after so we can discuss this all and revise anything we need. Then I will go away and hopefully write this beautiful piece of science in peace without the worries of moving and grants! 

@@ -1,0 +1,877 @@
+---
+title: "Acclimation Responses of Physiological Rates and Opprotunity for Selection"
+output:
+  html_document:
+    code_folding: hide
+    theme: united
+    toc: yes
+    toc_float: yes
+author: Shinichi Nakagawa & Daniel Noble
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+bibliography: bib.bib
+---
+
+```{r,echo=FALSE, cache=FALSE}
+  ## numbers >= 10^5 will be denoted in scientific notation,
+  ## and rounded to 2 digits
+  options(digits = 2)
+```
+
+# Deriving New Temperature Corrected Effect Sizes for Mean and Variance
+
+## *Q*~10~RR: Comparing mean physiological rates
+
+  Inspired by Seebacher et al. [-@seebacher2015physiological] we derive a temperature corrected effect size to compare physiological rates, *Q*~10~RR, also known as, the temparature response ratio. We note that this is just a variant of the log response ratio (lnRR), which is one of the most popular effect size statistics [@hedges1999meta; @nakagawa2012methodological]. Given this, we can easily derive the sampling error variance for *Q*~10~RR (on the log scale), but surprsingly, it has not been done before in the literature. *Q*~10~RR is defined as:
+
+  $$
+  Q_{10}RR = \left( \frac{R_{2}}{R_{1}} \right)^{ \left(\ \frac{10^{\circ}}{T_{2}-T_{1}} \right) },
+  $$
+  where *R* is the rate and *T* is the temparature in Celsius (but can be kelvins). If we take the natural logarithm at the both sides:
+
+  $$
+  \ln{Q_{10}RR} = { \left(\ \frac{10^{\circ}}{T_{2}-T_{1}} \right) }
+  \left( \ln{R_2} -  \ln{R_1} \right).
+  $$
+
+  Therefore, the sampling variance of ln*Q*~10~RR (*V*~ln*Q*10~RR) is, following Hedges et al. [-@hedges1999meta]:
+  $$
+  V_{\ln{Q_{10}RR}} = { \left(\ \frac{10^{\circ}}{T_{2}-T_{1}} \right) }^2
+  \left[ \frac{(\text{SD}_{1})^2}{n_{1}({R}_{1})^2} + \frac{(\text{SD}_{2})^2}{n_{2} ({R}_{2})^2} \right],
+  $$
+  where SD~1~ and SD~2~ are the sample standard deviation of *R*~1~ and *R*~2~ at two different temperatures (*T*~1~ and *T*~2~), respectively and *n* are sample size for estimating *R*. 
+
+  > [Wiki](https://en.wikipedia.org/wiki/Q10_(temperature_coefficient)) says "The *Q*~10~ temperature coefficient is a measure of the rate of change of a biological or chemical system as a consequence of increasing the temperature by 10&deg;C"
+
+ #<!--- degree = &deg;C; check out https://gist.github.com/DeoluA/5a4e7dac54dbc3df19fe --->#
+
+## *SQ*~10~: Comparing variances in physiological rates
+  So *Q*~10~RR can be more accurately called 'the tempature coefficent of the rate of change'. Once one realizes that the rate, *R* has a SD, then, we can define what we call 'the tempature coefficent of change in the variation in the rates', which is inspired by Nakagawa et al. [-@nakagawa2015meta]. We denote this as *SQ*~10~, which can be written as:
+
+  $$
+  SQ_{10} = \left( \frac{\text{SD}_{2}}{\text{SD}_{1}} \right)^{ \left(\ \frac{10^{\circ}}{T_{2}-T_{1}} \right) }.
+  $$  
+  Like *Q*~10~RR, we take the natural logarithm, then:
+  $$
+  \ln{SQ_{10}} = { \left(\ \frac{10^{\circ}}{T_{2}-T_{1}} \right) }
+  \left( \ln{\text{SD}_2} -  \ln{\text{SD}_1} \right).
+  $$
+  The sampling variance for ln*S*~10~ (*V*~ln*S*10~) is, according to Nakagawa et al. [-@nakagawa2015meta]:
+  $$
+  V_{\ln{SQ_{10}}} = { \left(\ \frac{10^{\circ}}{T_{2}-T_{1}} \right) }^2
+  \left[ \frac{1}{2\left( n_{1}-1 \right)} + \frac{1}{2\left(n_{2} - 1\right)} \right]
+  $$
+
+  What does *SQ*~10~ tell us? And how is it different from *Q*~10~RR? *Q*~10~RR is also referred to as 'thermal sensitvity'. *SQ*~10~ represents a change of individual variation at two temparature. It is hard to come up with a nifty name but let's call it 'thermal individual-variation change' or 'thermal idiosyncrasy' is probably shorter and better? Actually Dan says "thermal stability" may capture the essence of *SQ*~10~. 
+
+## *CVQ*~10~: Comparing Coefficient of Variance in Physiological Rates
+
+  We may want to derive *CVQ*~10~ (i.e., the coefficient of variance in Q10), which is the change in SD corrected for the mean (i.e., CV) given that we know there exsits the mean-variance relationship. NO idea how we call this but *CVQ*~10~ can be defiend as:
+  
+  $$
+  CVQ_{10} = \left( \frac{\text{CV}_{2}}{\text{CV}_{1}} \right)^{ \left(\ \frac{10^{\circ}}{T_{2}-T_{1}} \right) },
+  $$  
+  
+  Like *SQ*~10~, we take the natural logarithm, then:
+  
+  $$
+  \ln{CVQ_{10}} = { \left(\ \frac{10^{\circ}}{T_{2}-T_{1}} \right) }
+  \left( \ln{\text{CV}_2} -  \ln{\text{CV}_1} \right).
+  $$
+  
+  The sampling variance for ln*CV*~10~ (*V*~ln*CV*10~) is, follwoing Nakagawa et al. [-@nakagawa2015meta]:
+  
+  $$
+  V_{\ln{CVQ}_{10}} = { \left(\ \frac{10^{\circ}}{T_{2}-T_{1}} \right) }^2
+  \left[ \frac{(\text{SD}_{1})^2}{n_{1}({R}_{1})^2} + \frac{(\text{SD}_{2})^2}{n_{2} ({R}_{2})^2} + \frac{1}{2\left( n_{1}-1 \right)} + \frac{1}{2\left(n_{2} - 1\right)} \right]
+  $$
+  
+  Note that we assume there is no correlaiton between the mean and variance at the level of the sampling error although Nakagawa et al. [-@nakagawa2015meta] did. 
+
+## Mathematical equivalence of Q~10~ effects sizes to LnRR?
+
+  After some close inspection of things when interpreting, I (Dan) think we may not be getting at the question I (we) thought we are interested in. This only dawned on me when interpreting the effect size in detail. 
+
+  First, take a look back at Franks original paper. Basically, r1.1/2.1 to r1.2/r2.2 is really just discussing how the rate and variance change along the line of cold and warm acclimated. This is reflected strongly in the analyses presented throughout and the effect sizes we generate below. But, if we want to understand how exactly acclimation affects the mean and variance of physiological rates we need to compare to the post acclimation responses. However, contrary to what we have been thinking I do not think comparing r1.1 to r2.2 is relevant on its own (see the quite literal interpretations of this effect below). We certainly need to have an acute comparison otherwise post acclimation Q~10~ doesn't say much on it's own. There is no question that comparing r1.1 to r2.2 is relevant as a rate, but it's just that it needs to be relative to a non-acclimated response. The reason being is that the acclimation treatments are completely confounded with the measurement treatments. We already know from the Q~10~ analyses of acute responses below that, actually there are really strong effects on mean physiological rates in response to temperature, surprise, surprise. What is new, is that we show that this is a heteroscadastic! Which means that the variance around the population mean along these lines increases with temperature. This is totally new and unexplored. 
+
+  Nonetheless, this cool finding doesn't allow us to make conclusions about the extent to which 1) acclimation affects mean physiological rates and 2) how the variance of these physiological rates is impacted by acclimation. In other words, what we really need to do is contrast *Q*~10ac~RR (r1.1 to r1.2) with *Q*~10pa~RR (r1.1 to r2.2) effect sizes, or alternatively the slope of each acute response. Of course, comparing the slopes between cold acclimated response curves and warm acclimated response curves would limit the amount of data quite a bit as we would need to rely on fully factorial experiments. However, we can compare *Q*~10ac~RR (r1.1 to r1.2) with *Q*~10pa~RR (r1.1 to r2.2), as this is what was done in the original paper anyway and we can do this in an effect size framework as above:
+  $$
+  \ln{Q_{10}RR} = { \left(\ \frac{ { \left(\ \frac{10^{\circ}}{T_{2}-T_{1}} \right) }
+  \left( \ln{R_{1.2}} -  \ln{R_{1.1}} \right) }{ { \left(\ \frac{10^{\circ}}{T_{2}-T_{1}} \right) }
+  \left( \ln{R_{2.2}} -  \ln{R_{1.1}} \right)} \right) }
+  $$
+
+  But, this equation starts to look awfully familiar. We can easily see how this can be simplified. First, because we are taking a ratio the temperature correction factors completely cancel out. Second, we see that $\ln{R_{1.1}}$ is present in the denominator and numerator. So, this can go as well and our seemingly complex equation actually just simply condenses down mathematically to the good old fashioned log response ratio with the mean of the rates in the acclimation treatment 1 and acclimation 2 measured at the same temperature:
+
+  $$
+  \ln{RR} = {\ln \left( \frac{R_{1.2}}{R_{2.2}} \right)}
+  $$
+
+  Or, simply just:
+
+  $$
+  \ln{RR} = {\left( \ln{R_{1.2}} -  \ln{R_{2.2}} \right)}
+  $$
+
+  Mathematically, what this appears to mean (unless I made a mistake which of course is possible so check please), all we need to do to get at our question is simply just compare the mean physiological rates from the two acclimation treatments, measured at the same temperature. 
+
+  Actually, you will even notice that temperature is already corrected in these estimates, which means that we can actually compare across studies with wildly different temperatures anyway. Who the hell would have thought eh?
+
+# Setting up R
+
+```{r, include = FALSE}
+  knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE, tidy = TRUE, fig.width = 10)
+```
+
+```{r setup}
+    # clearning up
+    rm(list=ls())
+
+    # loading packages
+    devtools::install_github("haozhu233/kableExtra")
+    pacman::p_load(tidyverse, kableExtra, gridExtra, magrittr, Hmisc, googlesheets, metafor, stringr, formatR, rmarkdown, kableExtra)
+
+    # loading functions
+    source("../R/functions.R", chdir = TRUE)
+```
+
+## Loading and seeing data: R
+
+  We can view the data
+
+```{r data, message = FALSE}
+    # getting data from Google Sheet 
+    gs <- gs_title("q10_newdata")
+    data <- as_tibble(gs_read(ss = gs))
+    kable(data) %>%
+    kable_styling(font_size = 10) %>% 
+    	scroll_box(width = "100%", height = "200px")
+```
+
+# Getting *Q*~10~RR, *SQ*~10~ and *CVQ*~10~
+
+### Taxonomy of *Q*~10~RR and *SQ*~10~
+
+  We have 2 types but 3 kinds of *Q*~10~RR: acute termal sensitivity in the cold treatment (*Q*~10ac~RR), acute termal sensitivity in warm treatments (*Q*~10aw~RR) and post-acclimation thermal sensitivity (*Q*~10pa~RR). Likewise, we have 2 types but 3 kinds of *SQ*~10~: acute termal idiosyncrasy in the cold treatment (*SQ*~10ac~), acute termal idiosyncrasy in warm treatments (*SQ*~10aw~) and post-acclimation thermal idiosyncrasy (*SQ*~10pa~).
+
+  But we probably should combined *Q*~10ac~RR and *Q*~10aw~RR (also for *S*~10ac~ and *S*~10aw~) as one effect size measure because "cold" in cold treatments is relative not absolute (think about how to do this effectively).
+
+### Why do we need both *SQ*~10~ and *CVQ*~10~
+
+  *SQ*~10~ tells us probably more about predictability of the trait at one temperature and also, statistically, heteroscedasticity along temperature needs to be modeled. In contrast, *CVQ*~10~ tells us more about evolutionary potential at a particular temperature and controls for the fact that the variance will be affected with any changes in the mean, and so, this needs to be controlled. 
+
+### Create Effect Sizes
+
+```{r effect-size}
+    # Adding 
+    data$obs <- as.factor(1:dim(data)[1])
+
+    # getting effect sizes
+    data %<>% Q10S10(temp_1, temp_2, r1.1, r1.2, r2.1, r2.2, 
+                     r1.1_se, r1.2_se, r2.1_se, r2.2_se,r1.1_N, r1.2_N, r2.1_N, r2.2_N)
+
+    # adding species names
+    data %<>% mutate(spp_names = str_c(genus, species, sep = "_")) 
+
+    kable(data) %>%
+    kable_styling(font_size = 10) %>% 
+      scroll_box(width = "100%", height = "200px")
+```
+
+# Data exploration (the mean-variance relationship)
+
+```{r mv-relationship, warning=FALSE}
+
+    p1 <-ggplot(data) +
+      geom_point(aes(x = log(r1.1), y = log(r1.1_se*sqrt(r1.1_N)), color = habitat), size =1) +
+      labs(x = "ln(mean)", y = "ln(SD)", title = "R1.1")
+      
+    p2 <-  ggplot(data) +
+      geom_point(aes(x = log(r1.2), y = log(r1.2_se*sqrt(r1.2_N)), color = habitat), size =1) +
+      labs(x = "ln(mean)", y = "ln(SD)", title = "R1.2")
+
+    p3 <-ggplot(data) +
+      geom_point(aes(x = log(r2.1), y = log(r2.1_se*sqrt(r2.1_N)), color = habitat), size =1) +
+      labs(x = "ln(mean)", y = "ln(SD)", title = "R2.1")
+      
+    p4 <-  ggplot(data) +
+      geom_point(aes(x = log(r2.2), y = log(r2.2_se*sqrt(r2.2_N)), color = habitat), size =1) +
+      labs(x = "ln(mean)", y = "ln(SD)", title = "R2.2")
+
+    grid.arrange(p1, p2, p3, p4, nrow = 2)
+```
+
+As we can see, there are very strong relationships between the mean and the variance (standard deviation), but we also see some outliers on the bottom of the figures - we need to check these points. 
+
+# Meta-analysis for *Q*~10~RR
+
+### Meta-analysis for *Q*~10ac~RR
+
+```{r ma-Q10ac, cache=TRUE}
+    # data with sampling variance
+    data %>% filter(!is.na(V_lnQ10ac), V_lnQ10ac > 0) -> data1
+
+    m1 <- rma.mv(yi = lnQ10ac, V = V_lnQ10ac, random = list(~ 1 | record_num, ~ 1 | spp_names, ~ 1 | obs), data = data1)
+    summary(m1)
+    # heterogeneity
+    I2(m1)
+```
+
+So, just a note on **directionality**. We subtracted r1.2 from r1.1, which essentially means that when the rates of r1.2 are larger than the rates of r1.1 the effect size is **positive** and this essentially means that acclimation and measurement at r1.2 has a ***higher*** rate than acclimation and measurement at r1.1 across a 10&deg;C change. In contrast, when the effect size is **negative** this essentially means that acclimation and measurement at r1.2 has a ***lower*** rate than acclimation than acclimation and measurement at r1.1 across a 10&deg;C change.
+
+We can also convert this into a more understandable measure by exp the log ratio. It's not going to be perfectly accurate, but close enough for our purposes.
+
+```{r, cache=TRUE}
+    # data with sampling variance
+    estm1 <- get_est(m1, "Intercept")
+    exp(estm1$estimate)
+```
+
+**Interpretation**: In other words, on average cold acclimated populations have physiological rates at higher temperatures (r1.2) that are about `r (exp(estm1$estimate)-1)*100`% higher than physiological rates at lower temperatures (r1.1) over a 10&deg;C change in temperature.
+
+### Meta-analysis for *Q*~10aw~RR
+
+```{r, cache=TRUE}
+    # data with sampling variance
+    data %>% filter(!is.na(V_lnQ10aw), V_lnQ10aw > 0) -> data2
+
+    m2 <- rma.mv(yi = lnQ10aw, V = V_lnQ10aw, random = list(~ 1 | record_num, ~ 1 | spp_names, ~ 1 | obs), data = data2)
+    summary(m2)
+    # heterogeneity
+    I2(m2)
+```
+
+So, just a note on **directionality**. We subtracted r2.2 from r2.1, which essentially means that when the rates of r2.2 are larger than the rates of r2.1 the effect size is **positive** and this essentially means that acclimation and measurement at r2.2 has a ***higher*** rate than acclimation and measurement at r2.1 across a 10&deg;C change. In contrast, when the effect size is **negative** this essentially means that acclimation and measurement at r2.2 has a ***lower*** rate than acclimation than acclimation and measurement at r2.1 across a 10&deg;C change.
+
+We can also convert this into a more understandable measure by exp the log ratio. It's not going to be perfectly accurate, but close enough for our purposes.
+
+```{r, cache=TRUE}
+    # data with sampling variance
+    estm2 <- get_est(m2, "Intercept")
+    exp(estm2$estimate)
+```
+
+**Interpretation**: In other words, on average warm acclimated populations have physiological rates at higher temperatures (r2.2) that are about `r (exp(estm2$estimate)-1)*100`% higher than physiological rates at lower temperatures (r2.1) over a 10&deg;C change in temperature.
+
+### Meta-analysis for *Q*~10pa~RR
+
+```{r ma-Q10pa, cache=TRUE}
+    # data with sampling variance
+    data %>% filter(!is.na(V_lnQ10pa), V_lnQ10pa > 0) -> data3
+
+    m3 <- rma.mv(yi = lnQ10pa, V = V_lnQ10pa, random = list(~ 1 | record_num, ~ 1 | spp_names, ~ 1 | obs), data = data3)
+    summary(m3)
+    # heterogeneity
+    I2(m3)
+```
+
+So, just a note on **directionality**. We subtracted r2.2 from r1.1, which essentially means that when the rates of r2.2 are larger than the rates of r1.1 the effect size is **positive** and this essentially means that acclimation and measurement at r2.2 has a ***higher*** rate than acclimation at temp 1 and measurement at temp 1 (r1.1) across a 10&deg;C change. In contrast, when the effect size is **negative** this essentially means that acclimation and measurement at r2.2 has a ***lower*** rate than acclimation at temp 1 and measurement at temp 1 (r1.1) across a 10&deg;C change.
+
+We can also convert this into a more understandable measure by exp the log ratio. It's not going to be perfectly accurate, but close enough for our purposes.
+
+```{r, cache=TRUE}
+    # data with sampling variance
+    estm3 <- get_est(m3, "Intercept")
+    exp(estm3$estimate)
+```
+
+**Interpretation**:In other words, on average, physiological rates of warm acclimated animals, measured at warm temperatures have physiological rates that are about `r (exp(estm3$estimate)-1)*100`% higher than physiological rates at lower acclimation and measurement temperatures (r1.1) over a 10&deg;C change in temperature.
+
+# Meta-analysis for *SQ*~10~
+
+### Meta-analysis for *SQ*~10ac~
+
+```{r ma-S10ac, cache=TRUE}
+  # data with sampling variance
+  data %>% filter(!is.na(V_lnS10ac), lnS10ac != Inf,  lnS10ac != -Inf,  V_lnS10ac > 0) -> data4
+
+  m4 <- rma.mv(yi = lnS10ac, V = V_lnS10ac, random = list(~ 1 | record_num, ~ 1 | spp_names,  ~ 1 | obs), data = data4)
+  summary(m4)
+  # heterogeneity
+  I2(m4)
+```
+
+So, just a note on **directionality**. We subtracted r1.2 from r1.1, which essentially means that when the variance in rates of r1.2 are larger than the variance in rates of r1.1 the effect size is **positive** and this essentially means that acclimation and measurement at r1.2 has a ***higher*** variance than acclimation and measurement at r1.1 when comparing across a 10&deg;C change. In contrast, when the effect size is **negative** this essentially means that acclimation and measurement at r1.2 has a ***lower*** variance in rates than acclimation and measurement at r1.1 when comparing across a 10&deg;C change.
+
+We can also convert this into a more understandable measure by exp the log ratio. It's not going to be perfectly accurate, but close enough for our purposes.
+
+```{r, cache=TRUE}
+    # data with sampling variance
+    estm4 <- get_est(m4, "Intercept")
+    exp(estm4$estimate)
+```
+
+**Interpretation**: In other words, on average cold acclimated populations have variance in physiological rates at higher temperatures (r1.2) that are about `r (exp(estm4$estimate)-1)*100`% higher than the variance in physiological rates at lower temperatures (r1.1) when comparing across a 10&deg;C change in temperature.
+
+### Meta-analysis for *SQ*~10aw~
+
+```{r ma-S10aw, cache=TRUE}
+  # data with sampling variance
+  # why do we get V_lnS10aw < 0??? - need to check data
+  data %>% filter(!is.na(V_lnS10aw), lnS10aw != Inf,  lnS10aw != -Inf, V_lnS10aw > 0) -> data5
+
+  m5 <- rma.mv(yi = lnS10aw, V = V_lnS10aw, random = list(~ 1 | record_num, ~ 1 | spp_names, ~ 1 | obs), data = data5)
+  summary(m5)
+  # heterogeneity
+  I2(m5)
+```
+
+So, just a note on **directionality**. We subtracted r2.2 from r2.1, which essentially means that when the variance in rates of r2.2 are larger than the variance in rates of r2.1 the effect size is **positive** and this essentially means that acclimation and measurement at r2.2 has a ***higher*** variance than acclimation and measurement at r2.1 when comparing across a 10&deg;C change. In contrast, when the effect size is **negative** this essentially means that acclimation and measurement at r2.2 has a ***lower*** variance in rates than acclimation  and measurement at r2.1 when comparing across a 10&deg;C change.
+
+We can also convert this into a more understandable measure by exp the log ratio. It's not going to be perfectly accurate, but close enough for our purposes.
+
+```{r, cache=TRUE}
+    # data with sampling variance
+    estm5 <- get_est(m5, "Intercept")
+    exp(estm5$estimate)
+```
+
+**Interpretation**: In other words, on average warm acclimated populations have variances in physiological rates at higher temperatures (r2.2) that are about `r (exp(estm5$estimate)-1)*100`% higher than the variance in physiological rates at lower temperatures (r2.1) when comparing across a 10&deg;C change in temperature.
+
+### Meta-analysis for *SQ*~10pa~
+
+```{r ma-S10pa, cache=TRUE}
+    # data with sampling variance
+    # why do we get V_lnS10aw < 0??? - need to check data
+    data %>% filter(!is.na(V_lnS10pa), lnS10pa != Inf,  lnS10pa != -Inf, V_lnS10pa > 0) -> data6
+
+    m6 <- rma.mv(yi = lnS10pa, V = V_lnS10pa, random = list(~ 1 | record_num, ~ 1 | spp_names, ~ 1 | obs), data = data6)
+    summary(m6)
+    # heterogeneity
+    I2(m6)
+```
+
+So, just a note on **directionality**. We subtracted r2.2 from r1.1, which essentially means that when the variation in rates of r2.2 are larger than the variance in rates of r1.1 the effect size is **positive** and this essentially means that acclimation and measurement at r2.2 has a ***higher*** variance in rate than acclimation at temp 1 and measurement at temp 1 (r1.1) across a 10&deg;C change. In contrast, when the effect size is **negative** this essentially means that acclimation and measurement at r2.2 has a ***lower*** variance in physiological rates than acclimation at temp 1 and measurement at temp 1 (r1.1) across a 10&deg;C change.
+
+```{r, cache=TRUE}
+    # data with sampling variance
+    estm4 <- get_est(m6, "Intercept")
+    exp(estm4$estimate)
+```
+
+**Interpretation**: In other words, on average, the variance in physiological rates of warm acclimated animals, measured at warm temperatures are about `r (exp(estm4$estimate)-1)*100`% higher than the variance in physiological rates at lower acclimation and measurement temperatures (r1.1) over a 10&deg;C change in temperature. However, this is just the variance and does not account for the fact that the mean physiological rate also changes, so this is why we also want to know whether this is a *real* change in variance or simply just a result of the change in mean we observed above.
+
+# Meta-analysis for *CVQ*~10~
+
+### Meta-analysis for *CVQ*~10ac~
+
+```{r ma-SQ10ac, cache=TRUE}
+  # data with sampling variance
+  data %>% filter(!is.na(V_lnSQ10ac), lnSQ10ac != Inf,  lnSQ10ac != -Inf,  V_lnSQ10ac > 0) -> data7
+
+  m7 <- rma.mv(yi = lnSQ10ac, V = V_lnSQ10ac, random = list(~ 1 | record_num, ~ 1 | spp_names,  ~ 1 | obs), data = data7)
+  summary(m7)
+  # heterogeneity
+  I2(m7)
+```
+
+So, just a note on **directionality**. We subtracted r1.2 from r1.1, which essentially means that when the CV in rates of r1.2 are larger than the CV in rates of r1.1 the effect size is **positive** and this essentially means that acclimation and measurement at r1.2 has a ***higher*** coefficient of variation than acclimation and measurement at r1.1 when comparing across a 10&deg;C change. In contrast, when the effect size is **negative** this essentially means that acclimation and measurement at r1.2 has a ***lower*** coefficient of variation in rates than acclimation and measurement at r1.1 when comparing across a 10&deg;C change.
+
+We can also convert this into a more understandable measure by exp the log ratio. It's not going to be perfectly accurate, but close enough for our purposes.
+
+```{r, cache=TRUE}
+    # data with sampling variance
+    estm7 <- get_est(m7, "Intercept")
+    exp(estm7$estimate)
+```
+
+**Interpretation**: In other words, on average cold acclimated populations have variance in physiological rates at higher temperatures (r1.2) that are about `r (exp(estm7$estimate)-1)*100`% higher than the variance in physiological rates at lower temperatures (r1.1) when comparing across a 10&deg;C change in temperature.
+
+### Meta-analysis for *CVQ*~10aw~
+
+```{r ma-SQ10aw, cache=TRUE}
+  # data with sampling variance
+  # why do we get V_lnS10aw < 0??? - need to check data
+  data %>% filter(!is.na(V_lnSQ10aw), lnSQ10aw != Inf,  lnSQ10aw != -Inf, V_lnSQ10aw > 0) -> data8
+
+  m8 <- rma.mv(yi = lnSQ10aw, V = V_lnSQ10aw, random = list(~ 1 | record_num, ~ 1 | spp_names, ~ 1 | obs), data = data8)
+  summary(m8)
+  # heterogeneity
+  I2(m8)
+```
+
+So, just a note on **directionality**. We subtracted r2.2 from r2.1, which essentially means that when the variance in rates of r2.2 are larger than the variance in rates of r2.1 the effect size is **positive** and this essentially means that acclimation and measurement at r2.2 has a ***higher*** variance than acclimation and measurement at r2.1 when comparing across a 10&deg;C change. In contrast, when the effect size is **negative** this essentially means that acclimation and measurement at r2.2 has a ***lower*** variance in rates than acclimation  and measurement at r2.1 when comparing across a 10&deg;C change.
+
+We can also convert this into a more understandable measure by exp the log ratio. It's not going to be perfectly accurate, but close enough for our purposes.
+
+```{r, cache=TRUE}
+    # data with sampling variance
+    estm8 <- get_est(m8, "Intercept")
+    exp(estm8$estimate)
+```
+
+**Interpretation**: In other words, on average warm acclimated populations have variances in physiological rates at higher temperatures (r2.2) that are about `r (exp(estm8$estimate)-1)*100`% higher than the variance in physiological rates at lower temperatures (r2.1) when comparing across a 10&deg;C change in temperature.
+
+### Meta-analysis for *CVQ*~10pa~
+
+```{r ma-SQ10pa, cache=TRUE}
+    # data with sampling variance
+    # why do we get V_lnS10aw < 0??? - need to check data
+    data %>% filter(!is.na(V_lnSQ10pa), lnSQ10pa != Inf,  lnSQ10pa != -Inf, V_lnSQ10pa > 0) -> data9
+
+    m9 <- rma.mv(yi = lnSQ10pa, V = V_lnSQ10pa, random = list(~ 1 | record_num, ~ 1 | spp_names, ~ 1 | obs), data = data9)
+    summary(m9)
+    # heterogeneity
+    I2(m9)
+```
+
+So, just a note on **directionality**. We subtracted r2.2 from r1.1, which essentially means that when the coefficient of variation in rates of r2.2 are larger than the coefficient of variance in rates of r1.1 the effect size is **positive** and this essentially means that acclimation and measurement at r2.2 has a ***higher*** variance in rate than acclimation at temp 1 and measurement at temp 1 (r1.1) across a 10&deg;C change. In contrast, when the effect size is **negative** this essentially means that acclimation and measurement at r2.2 has a ***lower*** variance in physiological rates than acclimation at temp 1 and measurement at temp 1 (r1.1) across a 10&deg;C change.
+
+```{r, cache=TRUE}
+    # data with sampling variance
+    estm5 <- get_est(m9, "Intercept")
+    exp(estm5$estimate)
+```
+
+**Interpretation**: In other words, on average, the variance, controlling for changes in the mean, of physiological rates of warm acclimated animals, measured at warm temperatures are about `r (1-exp(estm5$estimate))*100`% **lower** than the variance in physiological rates at lower acclimation and measurement temperatures (r1.1) over a 10&deg;C change in temperature. 
+
+# Meta-regression for *Q*~10~RR: Habitat
+
+### *Q*~10ac~RR: Habitat
+
+```{r mr-Q10ac, cache=TRUE}
+
+    m1.1 <- rma.mv(yi = lnQ10ac, V = V_lnQ10ac, mod = ~ habitat - 1, random = list(~ 1 | record_num, ~ 1 | spp_names, ~ 1 | obs), data = data1)
+    summary(m1.1)
+    
+    # variance accounted for
+      R2(m1.1)
+
+    # get estimates
+      res1.1 <- get_est(m1.1, mod = "habitat")
+
+    # sample size
+      data1 %>% group_by(habitat) %>% count() -> sample_size
+      left_join(res1.1, sample_size, by =  c("name" = "habitat")) -> res1.1
+
+```
+
+**Interpretation**: Unsurprisingly, all mean physiological rates increase in the cold acclimated treatments. Freshwater physiological rates increase by `r (exp(res1.1$estimate[1])-1)*100`% at higher temperatures relative to colder temperatures, marine physiological rates increase by `r (exp(res1.1$estimate[2])-1)*100`% at higher temperatures relative to colder temperatures and terrestrial physiological rates increase by `r (exp(res1.1$estimate[3])-1)*100`% at higher temperatures relative to colder temperatures and significantly more than freshwater systems. In other words, for terrestrial species, physiological rates increase much more rapidly compared to marine and freshwater systems. 
+
+### *Q*~10aw~RR: Habitat
+
+```{r mr-Q10aw, cache=TRUE}
+
+    m2.1 <- rma.mv(yi = lnQ10aw, V = V_lnQ10aw, mod = ~ habitat - 1, random = list(~ 1 | record_num, ~ 1 | spp_names, ~ 1 | obs), data = data2)
+    summary(m2.1)
+    
+    # variance accounted for
+      R2(m2.1)
+
+    # get estimates and plot
+      res2.1 <- get_est(m2.1, mod = "habitat")
+    
+
+    # sample size
+      data2 %>% group_by(habitat) %>% count() -> sample_size
+      left_join(res2.1, sample_size, by =  c("name" = "habitat")) -> res2.1
+```
+
+**Interpretation**: Unsurprisingly, all mean physiological rates increase in the cold acclimated treatments. We largely see the same pattern at the higher acclimation temperature as we observe at the lower acclimation temperature. Freshwater physiological rates increase by `r (exp(res2.1$estimate[1])-1)*100`% at higher temperatures relative to colder temperatures, marine physiological rates increase by `r (exp(res2.1$estimate[2])-1)*100`% at higher temperatures relative to colder temperatures and terrestrial physiological rates increase by `r (exp(res2.1$estimate[3])-1)*100`% at higher temperatures relative to colder temperatures and significantly more than freshwater systems. Again, for terrestrial species, physiological rates increase much more rapidly compared to marine and freshwater systems. 
+
+### *Q*~10pa~RR: Habitat
+
+```{r mr-Q10pa, cache=TRUE}
+
+    m3.1 <- rma.mv(yi = lnQ10pa, V = V_lnQ10pa, mod = ~ habitat - 1, random = list(~ 1 | record_num, ~ 1 | spp_names, ~ 1 | obs), data = data3)
+    summary(m3.1)
+    # variance accounted for
+    R2(m3.1)
+
+    # get estimates and plot
+    res3.1 <- get_est(m3.1, mod = "habitat")
+    #s_plot(res3.1, title = "Q10pa - different habitats")
+
+    # sample size
+    data3 %>% group_by(habitat) %>% count() -> sample_size
+    left_join(res3.1, sample_size, by =  c("name" = "habitat")) -> res3.1
+```
+
+**Interpretation**: Freshwater physiological rates increase by `r (exp(res3.1$estimate[1])-1)*100`% when acclimated and measured at higher temperatures relative to animals acclimated and measured at colder temperatures, marine physiological rates increase by `r (exp(res3.1$estimate[2])-1)*100`% when acclimated and measured at higher temperatures relative to animals acclimated and measured at colder temperatures. Terrestrial physiological rates increase by `r (exp(res3.1$estimate[3])-1)*100`% when acclimated and measured at higher temperatures relative to animals acclimated and measured at colder temperatures. Again, for terrestrial species, post acclimation responses differ significantly from freshwater systems, but in all cases physiological rates are increased.  
+
+### A forest plot for *Q*~10~RR for 3 habitats
+
+```{r Q-forest}
+
+    # making a data frame for plotting
+      resQ <- bind_rows(res1.1, res2.1, res3.1)
+
+      lab <- c("FreshWater[acute1]", "Marin[acute1]", "Terrestrial[acute1]", "FreshWater[acute2]", "Marin[acute2]", "Terrestrial[acute2]", "FreshWater[acclim]", "Marin[acclim]", "Terrestrial[acclim]")
+      reord <- c(1, 4, 7, 2, 5, 8, 3, 6, 9)  
+
+      resQ$lab <-lab
+      resQ$reord <- reord
+      
+      resQ %<>% arrange(reord)  
+
+    # forest plot
+      f_plot(resQ, title = "lnQ10[acute] vs. lnQ10[acclim] in 3 habitats")
+
+```
+
+# Meta-regression for *SQ*~10~: Habitat
+
+### Meta-regression for *SQ*~10ac~: Habitat
+
+```{r mr-S10ac, cache=TRUE}
+
+    m4.1 <- rma.mv(yi = lnS10ac, V = V_lnS10ac, mod = ~ habitat - 1, random = list(~ 1 | record_num, ~ 1 | spp_names, ~ 1 | obs), data = data4)
+    summary(m4.1)
+    # variance accounted for
+    R2(m4.1)
+
+    # get estimates and plot
+    res4.1 <- get_est(m4.1, mod = "habitat")
+
+    # sample size
+    data4 %>% group_by(habitat) %>% count() -> sample_size
+    left_join(res4.1, sample_size, by =  c("name" = "habitat")) -> res4.1
+```
+
+**Interpretation**: Freshwater physiological rates increase by `r (exp(res3.1$estimate[1])-1)*100`% when acclimated and measured at higher temperatures relative to animals acclimated and measured at colder temperatures, marine physiological rates increase by `r (exp(res3.1$estimate[2])-1)*100`% when acclimated and measured at higher temperatures relative to animals acclimated and measured at colder temperatures. Terrestrial physiological rates increase by `r (exp(res3.1$estimate[3])-1)*100`% when acclimated and measured at higher temperatures relative to animals acclimated and measured at colder temperatures. Again, for terrestrial species, post acclimation responses differ significantly from freshwater systems, but in all cases physiological rates are increased. 
+
+### Meta-regression for *SQ*~10aw~: Habitat
+
+```{r mr-S10aw, cache=TRUE}
+
+    m5.1 <- rma.mv(yi = lnS10aw, V = V_lnS10aw, mod = ~ habitat - 1, random = list(~ 1 | record_num, ~ 1 | spp_names, ~ 1 | obs), data = data5)
+    summary(m5.1)
+    # variance accounted for
+    R2(m5.1)
+
+    # get estimates and plot
+    res5.1 <- get_est(m5.1, mod = "habitat")
+    #s_plot(res5.1, title = "S10aw - different habitats")
+
+    # sample size
+    data5 %>% group_by(habitat) %>% count() -> sample_size
+    left_join(res5.1, sample_size, by =  c("name" = "habitat")) -> res5.1
+```
+
+**Interpretation**: For populations acclimated to warm conditions, variance in freshwater physiological rates increase by `r (exp(res5.1$estimate[1])-1)*100`% when measured at higher temperatures relative to animals measured at colder temperatures, marine variance in physiological rates increase by `r (exp(res5.1$estimate[2])-1)*100`% when measured at higher temperatures relative to animals measured at colder temperatures. Variance in terrestrial physiological rates increase by `r (exp(res5.1$estimate[3])-1)*100`% when measured at higher temperatures relative to animals measured at colder temperatures. There doesn't appear to be any significant difference between organisms occupying major habitat types.
+
+### Meta-regression for *SQ*~10pa~: Habitat
+
+```{r mr-S10pa, cache=TRUE}
+
+    m6.1 <- rma.mv(yi = lnS10pa, V = V_lnS10pa, mod = ~ habitat - 1, random = list(~ 1 | record_num, ~ 1 | spp_names, ~ 1 | obs), data = data6)
+    summary(m6.1)
+    # variance accounted for
+    R2(m6.1)
+
+    # get estimates and plot
+    res6.1 <- get_est(m6.1, mod = "habitat")
+    #s_plot(res6.1, title = "S10pa - different habitats")
+
+    # sample size
+    data6 %>% group_by(habitat) %>% count() -> sample_size
+    left_join(res6.1, sample_size, by =  c("name" = "habitat")) -> res6.1
+```
+
+**Interpretation**: Variance in freshwater physiological rates increase by `r (exp(res5.1$estimate[1])-1)*100`% when acclimated and measured at higher temperatures relative to animals acclimated and measured at colder temperatures, marine variance in physiological rates increase by `r (exp(res5.1$estimate[2])-1)*100`% when acclimated and measured at higher temperatures relative to animals measured and aclimated at colder temperatures. Variance in terrestrial physiological rates increase by `r (exp(res5.1$estimate[3])-1)*100`% when acclimated and measured at higher temperatures relative to animals acclimated and measured at colder temperatures. Again, for terrestrial species, post acclimation responses differ significantly from freshwater systems, but in all cases physiological rates are increased. 
+
+### A forest plot for *SQ*~10~ for 3 habitats
+
+```{r S-forest}
+
+    # making a data frame for plotting
+      resS <- bind_rows(res4.1, res5.1, res6.1)
+      resS$lab <-lab
+      resS$reord <- reord
+        
+      resS %<>% arrange(reord)  
+
+    # forest plot
+      f_plot(resS, title = "lnS10[acute] vs. lnS10[acclim] in 3 habitats")
+
+```
+
+# Meta-regression for *CVQ*~10~: Habitat
+
+### *CVQ*~10ac~: Habitat
+
+```{r mr-SQ10ac, cache=TRUE}
+
+    m7.1 <- rma.mv(yi = lnSQ10ac, V = V_lnSQ10ac, mod = ~ habitat - 1, random = list(~ 1 | record_num, ~ 1 | spp_names, ~ 1 | obs), data = data7)
+    summary(m7.1)
+    # variance accounted for
+    R2(m7.1)
+
+    # get estimates and plot
+    res7.1 <- get_est(m7.1, mod = "habitat")
+    #s_plot(res7.1, title = "SQ10ac - different habitats")
+
+    # sample size
+    data7 %>% group_by(habitat) %>% count() -> sample_size
+    left_join(res7.1, sample_size, by =  c("name" = "habitat")) -> res7.1
+```
+
+### *CVQ*~10aw~: Habitat
+
+```{r mr-SQ10aw, cache=TRUE}
+
+    m8.1 <- rma.mv(yi = lnSQ10aw, V = V_lnSQ10aw, mod = ~ habitat - 1, random = list(~ 1 | record_num, ~ 1 | spp_names, ~ 1 | obs), data = data8)
+    summary(m8.1)
+    # variance accounted for
+    R2(m8.1)
+
+    # get estimates and plot
+    res8.1 <- get_est(m8.1, mod = "habitat")
+    #s_plot(res8.1, title = "SQ10aw - different habitats")
+
+    # sample size
+    data8 %>% group_by(habitat) %>% count() -> sample_size
+    left_join(res8.1, sample_size, by =  c("name" = "habitat")) -> res8.1
+```
+
+### *CVQ*~10pa~: Habitat
+
+```{r mr-SQ10pa, cache=TRUE}
+
+    m9.1 <- rma.mv(yi = lnSQ10pa, V = V_lnSQ10pa, mod = ~ habitat - 1, random = list(~ 1 | record_num, ~ 1 | spp_names, ~ 1 | obs), data = data9)
+    summary(m9.1)
+
+    # m9.2 <- rma.mv(yi = lnSQ10pa, V = V_lnSQ10pa, mod = ~ habitat , random = list(~ 1 | record_num, ~ 1 | spp_names, ~ 1 | obs), data = data9)
+    # summary(m9.2)
+
+    # variance accounted for
+      R2(m9.1)
+
+    # get estimates and plot
+      res9.1 <- get_est(m9.1, mod = "habitat")
+      #s_plot(res9.1, title = "SQ10pa - different habitats")
+
+    # sample size
+      data %>% group_by(habitat) %>% count() -> sample_size
+      left_join(res9.1, sample_size, by =  c("name" = "habitat")) -> res9.1
+```
+
+### A forest polot for *CVQ*~10~ for 3 habitats
+
+```{r SQ-forest}
+
+    # making a data frame for plotting
+      resSQ <- bind_rows(res7.1, res8.1, res9.1)
+      resSQ$lab <-lab
+      resSQ$reord <- reord
+        
+      resSQ %<>% arrange(reord)  
+
+    # forest plot
+      f_plot(resSQ, place = "negative", title = "lnSQ10[acute] vs. lnSQ10[acclim] in 3 habitats")
+
+```
+
+# Meta-regression for *Q*~10pa~RR: Traits in habitat
+
+We can now have a look at the relationship between traits and habitat, but first we need to explore how much data we have in the relevant trait categories across the different habitat types. Here, we will only look at acclimation responses as this is what makes most sense. 
+
+```{r, cache=TRUE}
+    table3 <- table(data3$trait_category, data3$habitat) 
+    kable(table3)
+```
+
+
+So, we can see that we have quite a lot of traits not present in terrestrial systems. So, for simplicity, lets just exclude for this analysis any trait habitat combination with less than n = 5. 
+
+```{r, cache=TRUE}
+    data3.2<- data3 %>% group_by(trait_category, habitat) %>% 
+    filter(n() >= 5) 
+```
+
+OK, so now we are confident that we have removed levels with insufficient sample sizes. Now we can model the interaction, we'll simply create a variable for interacting trait and habitat to make the modeling a little easier as then we will have the mean estimate for each of the categories. 
+
+```{r, cache=TRUE}
+    #Just to keep things easier for modelling just create a variable interacting trait and habitat
+    data3.2$trait_habitat <- data3.2 %$% paste0(habitat, "_", trait_category)
+
+    m10.1 <- rma.mv(yi = lnQ10pa, V = V_lnQ10pa, mod = ~ trait_habitat-1, random = list(~ 1 | record_num, ~ 1 | spp_names, ~ 1 | obs), data = data3.2)
+    summary(m10.1)
+
+    # variance accounted for
+      R2(m10.1)
+
+    # get estimates and plot
+      res10.1 <- get_est(m10.1, mod = "trait_habitat")
+
+    # sample size
+      data3.2 %>% group_by(trait_habitat) %>% count() -> sample_size
+      left_join(res10.1, sample_size, by =  c("name" = "trait_habitat")) -> res10.1
+```
+
+
+```{r, cache = TRUE}
+    forest_plot <- function(est_table, col=colour, ylabel = "", xlabel = "lnQ10RR", xlimits = c(-0.5, 1.6), n_pos = -0.25){
+      plot(1:nrow(est_table) ~ estimate, data = est_table, xlim = xlimits, ylab =ylabel, xlab = xlabel, col = colour, pch = 16, cex = 1.8, yaxt='n')
+      arrows(x0= est_table$estimate, y0 = 1:nrow(est_table), y1 = 1:nrow(est_table), x1 = est_table$upperCL, length = 0, angle =90, col = colour)
+      arrows(x0= est_table$estimate, y0 = 1:nrow(est_table), y1 = 1:nrow(est_table), x1 = est_table$lowerCL, length = 0, angle =90, col = colour)
+      abline(v = 0, lty = 2)
+      text(paste0("n = ", est_table$n), y = 1:nrow(est_table), x = n_pos, pos=2)
+      axis(side = 2, at = 1:nrow(est_table), labels = est_table$name, las = 1)
+    }
+
+    # making a data frame for plotting
+    # forest plot
+      colour <- c(rep("orange", 10), rep("blue", 11), rep("forestgreen", 4), rep("blue", 11))
+
+      par(mar = c(4,10,1,1))
+      forest_plot(est_table=res10.1)
+```
+
+
+Here, we can basically see that the mean actually is affected pretty much across the board, but we see a more nuanced effect. For example, in freshwater systems basically acclimation changes the mean response for all traits, but we see that in marine systems performance based indices's are unaffected (sprint, endurance), whereas metabolic processes are. In contrast, we see performance and metabolism affected in terrestrial systems but this doesn't seem to be related to metabolic enzymes.
+
+# Meta-regression for *SQ*~10pa~: Traits in habitat
+
+We can now look at the variance change across each of the categories. First, set the data up as above.
+
+```{r, cache=TRUE}
+    data6.1 <- data6 %>% group_by(trait_category, habitat) %>% 
+    filter(n() >= 5) 
+    table6 <- table(data6.1$trait_category, data6.1$habitat) 
+    kable(table6)
+```
+
+OK, so now that this is set up, lets model the variance
+
+```{r, cache=TRUE}
+    #Just to keep things easier for modelling just create a variable interacting trait and habitat
+    data6.1$trait_habitat <- data6.1 %$% paste0(habitat, "_", trait_category)
+
+    m11.1 <- rma.mv(yi = lnS10pa, V = V_lnS10pa, mod = ~ trait_habitat-1, random = list(~ 1 | record_num, ~ 1 | spp_names, ~ 1 | obs), data = data6.1)
+    summary(m11.1)
+
+    # variance accounted for
+      R2(m11.1)
+
+    # get estimates and plot
+      res11.1 <- get_est(m11.1, mod = "trait_habitat")
+
+    # sample size
+      data6.1 %>% group_by(trait_habitat) %>% count() -> sample_size
+      left_join(res11.1, sample_size, by =  c("name" = "trait_habitat")) -> res11.1
+```
+
+```{r, cache = TRUE}
+      colour <- c(rep("orange", 10), rep("blue", 11), rep("forestgreen", 4), rep("blue", 11))
+      par(mar = c(4,10,1,1))
+      forest_plot(est_table=res11.1, xlimits = c(-1.5, 1.4), n_pos = -1.1, xlab = "lnSQ_10")
+```
+
+# Meta-regression for *CVQ*~10pa~: Traits in habitat
+
+Of course, we may see changes in variance simply because we see a shit in the mean, which is potentially vary true because of the fact that we have strong mean-variance relationships in these data. So, better here to focus on changes in variance independent of the mean using *CVQ*~10pa~. 
+
+```{r, cache=TRUE}
+    data9.1 <- data9 %>% group_by(trait_category, habitat) %>% 
+    filter(n() >= 5) 
+    table9 <- table(data9.1$trait_category, data9.1$habitat) 
+    kable(table9)
+```
+
+OK, so now that this is set up, lets model the coefficient of variance.
+
+```{r, cache=TRUE}
+    #Just to keep things easier for modelling just create a variable interacting trait and habitat
+    data9.1$trait_habitat <- data9.1 %$% paste0(habitat, "_", trait_category)
+
+    m12.1 <- rma.mv(yi = lnSQ10pa, V = V_lnSQ10pa, mod = ~ trait_habitat-1, random = list(~ 1 | record_num, ~ 1 | spp_names, ~ 1 | obs), data = data9.1)
+    summary(m12.1)
+
+    # variance accounted for
+      R2(m12.1)
+
+    # get estimates and plot
+      res12.1 <- get_est(m12.1, mod = "trait_habitat")
+
+    # sample size
+      data9.1 %>% group_by(trait_habitat) %>% count() -> sample_size
+      left_join(res12.1, sample_size, by =  c("name" = "trait_habitat")) -> res12.1
+```
+
+
+```{r, cache = TRUE}
+      colour <- c(rep("orange", 10), rep("blue", 11), rep("forestgreen", 4), rep("blue", 11))
+      par(mar = c(4,10,1,1))
+      forest_plot(est_table=res12.1, xlimits = c(-1.8, 0.8), n_pos = -1.5, xlab = "lnCVQ_10")
+```
+
+# Log response Ratio of the Acclimation treatments
+
+As discussed above, these analyses seem not to get at exactly what we are after. We want to know how the Q~10~ changes as a function of acclimation, which essentially means comparing and contrasting Q~10aw~RR with Q~10pa~RR. Or, what appears to be an equivalent and more simple formulation, the log response ratio of the acclimation treatments at the same temperature. Now, whether we compare the cold versus the hot acclimation treatment direction or *vice versa* will likely be important. So, lets, for now just have a look at the habitat and trait models in the context of the log response ratio. Here is the equations that we will use:
+
+$$
+  \ln{RR} = {\ln \left( \frac{R_{1.2}}{R_{2.2}} \right)}
+$$
+
+and the the sampling variance for this is:
+
+$$
+  V_{\ln{RR}} = {\left( \frac{SD^2_{R_{1.2}}}{n_{R_{1.2}}M^2_{R_{1.2}}} \right)} + {\left( \frac{SD^2_{R_{2.2}} }{n_{R_{2.2}}M^2_{R_{2.2}}} \right)}
+$$
+
+First, we need a function for generating this new effect. I am going to just simply focus on the mean physiological rates for now given time constraints, but these will apply for variance too:
+  
+```{r}
+      lnRR <- function(data, r1_2, r2_2, se1_2, se2_2, n1_2, n2_2){
+           
+            sd1_2 <- se1_2*sqrt(n1_2)
+            sd2_2 <- se2_2*sqrt(n2_2)
+
+           # log response ratio
+           lnRR <- log(r1_2) - log(r2_2)
+           
+           # Sampling variance log RR
+          VlnRR <- ( (sd1_2^2) / (n1_2*(r1_2^2)) ) + ( (sd2_2^2) / (n2_2*(r2_2^2)) )
+
+          # Create the data table and add back into the data.
+           lnRR <- tibble(lnRRac = lnRR, V_lnRRac = VlnRR)
+        
+           data <- bind_cols(data, lnRR)
+        
+        return(data)
+      }
+```
+
+We can then add in this new effect size to the data. 
+
+```{r}
+# getting effect sizes
+    data %<>% lnRR(r1_2= data$r1.2, r2_2=data$r2.2, se1_2=data$r1.2_se, se2_2=data$r2.2_se, n1_2=data$r1.2_N, n2_2=data$r2.2_N)
+
+```
+
+Right, so now that we have all this we can do a meta-analysis of the **acclimation effects** on physiological rates and variance in physiological rates. 
+
+```{r}
+  data %>% filter(!is.na(V_lnRRac), V_lnRRac > 0) -> data_acclim
+
+  m_acclim <- rma.mv(yi = lnRRac, V = V_lnRRac, random = list(~ 1 | record_num, ~ 1 | spp_names, ~ 1 | obs), data = data_acclim)
+  summary(m_acclim)
+
+  est_acclim <- get_est(m_acclim)
+    
+```
+
+**Interpretation**: The above meta-analytic model suggests that across all organisms, traits and habitat types physiological rates of cold acclimated animals measured at higher temperatures are only `r (exp(est_acclim$estimate)-1)*100`% higher than animals acclimated at higher temperatures and measured at those temperatures. In other words, it doesn't look like acclimation, more generally, helps reduce the difference in physiological rates, but obviously there is a huge amount of variability among taxa and within these data that need to be explored. 
+
+We can explore this with respect to the original question of comparing Q10 acclimation across the major habitat types. 
+
+```{r}
+  
+  m_acclim_habitat <- rma.mv(yi = lnRRac, V = V_lnRRac, mod = ~ habitat-1, random = list(~ 1 | record_num, ~ 1 | spp_names, ~ 1 | obs), data = data_acclim)
+  summary(m_acclim_habitat)
+
+  est_acclim_habitat <- get_est(m_acclim_habitat, "habitat")
+    
+```
+
+**Interpretation**: We can estimate the acclimation response at higher temperatures (note we lose power as we ignore the lower one, but for now this is ok) for organisms within each of the habitat types (freshwater, marine and terrestrial). So, cold acclimated freshwater species that are measured at higher temperatures have a `r (exp(est_acclim_habitat$estimate[1])-1)*100`% **higher** rate in physiological responses compared to warm acclimated freshwater species measured at the same *higher* temperature. Cold acclimated marine species that are measured at higher temperatures have a `r (exp(est_acclim_habitat$estimate[2])-1)*100`% **higher** rate in physiological responses compared to warm acclimated freshwater species measured at the same *higher* temperature. Lastly, cold acclimated terrestrial species have a `r (1-exp(est_acclim_habitat$estimate[3]))*100`% very slight, non-significant decrease in physiological rates at higher temperatures compared to warm acclimated terrestrial species measured at those same temperatures. 
+
+
+# Information for this session: R
+
+```{r session, include = TRUE, echo = FALSE}
+    sessionInfo()
+```
+
+# References

@@ -1,0 +1,117 @@
+---
+title: "How should we think about changes in the variance of physiological rates?"
+output:
+  html_document:
+    code_folding: hide
+    theme: united
+    toc: yes
+    toc_float: yes
+author:  Daniel Noble, Fonti Kar, Frank Seebacher, Shinichi Nakagawa 
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+bibliography: bib.bib
+---
+
+
+# Changes in Variance of Physiological rates
+
+It it worth us thinking about what the change in variance of physiological rates, in response to acclimation, actually mean. There are a couple of ways we can pitch this. Frank, Shinichi and Dan thought about, and discussed briefly, the possibility of viewing this change as a change in the **Opportunity for Selection**. This makes intuitive sense given that natural selection is predicted to be limited by the total phenotypic variance of a trait. However, lets dissect this argument more. 
+
+First, it is a good idea to go and explore the original formulation of the **Opportunity for Selection** in more detail. The original idea was proposed by Crow [-@crow1958], discussing how to think about selection on human populations. Crow [-@crow1958] defines the *Total Selection Intensity* very clearly as:
+
+> "...total amount of selection is best measured by the ratio of the variance in progeny number [reproductive success] to the square of the mean number. pg. 764"
+
+This definition is as far as I can tell the exact formulation that is currently used in the evolutionary biology literature. This definition really means that, to make use of this term, we really need to know or have traits that are *reproductive success* or very closely related to reproductive success such as mating success, for example. This definition jives well with more recent papers that have discussed and used this term [@Krakauer2011; @janicke2016]. 
+
+# Usefulness of *Opportunity for Selection* in our Context
+
+We can dissect this even more by looking at the definition of responses to selection or adaptive evolutionary change from the breeders equation:
+
+$$
+\Delta{z} = h^2 \beta,
+$$
+
+where, $\Delta{z}$ is simply the change in trait from generation 1 to generation 2, $h^2$ is the heritability of the trait and $\beta$ is the selection gradient on the trait. It's worth parsing this equation down a bit further. 
+
+First, evolutionary biologists always use *relative reproductive success*, which is simply defined as $rw_{i} = w_{i} / \hat{w}$. Here, $w_{i}$ is individual *i*'s reproductive success and $\hat{w}$ is simply the population average reproductive success. 
+
+Additionally, they make use of standardsized traits. So, if trait *x* is of interest we can calculate a standardised trait $x_{std}$ as $x_{std} = x_{i} - \hat{x} / sd_{x}$, which is simply each individuals trait, subtracted from the population mean ($\hat{x}$) and divided by the population standard deviation ($sd_{x}$). 
+
+We also know that the heritability ($h^2$) is defined as $h^2 = V_{A} / V_{P}$, where $V_{A}$ is the additive genetic variance for a trait and $V_{P}$ is the total phenotypic variance. 
+
+The one last piece of information is dissecting down what $\beta$ actually is, now that we know we are working withe relative fitness ($rw_{i}$) and standardized traits ($x_{std}$). 
+
+$$
+\beta = r_{rw,x_{std}} \frac{s_{rw}}{s_{x_{std}}}
+$$
+
+with $r_{rw,x_{std}}$ being the correlation between relative fitness and standardised trait. $s_{rw}/s_{x_{std}}$ is simply the ratio of standard deviations between the two variables. So, we can re-write our breeders equation as follows:
+
+$$
+\Delta{z} = \frac{V_{A}}{V_{P}} r_{rw,x_{std}} \frac{s_{rw}}{s_{x_{std}}},
+$$
+
+But, we can simplify this equation a few more ways. First, remember that $r_{rw,x_{std}}$ is defined as follows:
+
+$$
+r_{rw,x_{std}} = \frac{s_{rw,x_{std}}}{s_{rw}s_{x_{std}}}
+$$
+
+Where $s_{rw,x_{std}}$ is the covariance between relative fitness and trait. Also, remember that, because we have standardsied trait, the standard deviation is now equal to 1. So:
+
+$$
+\Delta{z} = \frac{V_{A}}{V_{P}} \frac{s_{rw,x_{std} }}{s_{rw}1} \frac{s_{rw}}{1}
+$$
+
+And, because $s_{rw}$ is both divided and multiplied, we can get rid of this term to simplify:
+$$
+\Delta{z} = \frac{V_{A}}{V_{P}} s_{rw,x_{std}}
+$$
+
+OK, so this is simple now. We can see the response to selection is dependent on the proportion of the phenotypic variation that is "heritable" in this case due to "genes", and the covariance between relative fitness and variance in a standardised trait. 
+
+From this equation, we can see that predicting the "evolutionary response" or the meaning of the **Opportunity for Selection** in this context is tricky. We can basically get any scenario we want. 
+
+#### Scenario 1: Increased evolutionary response!
+
+We can only really be confident about a single parameter in this equation being changed and that's $V_{P}$ as this is all the information contained within our dataset. So, assume for a second that $V_{A}$ stays the same (pretty questionable, but maybe) and the covariance between fitness and trait also stays the same. If this is the case, because $V_{P}$ is inversely proportional to $\Delta{z}$ this means that decreased is $V_{P}$ actually increases responses to selection. This makes sense because if $V_{A}$ stays the same then when there is less noise (i.e., reduced $V_{P}$) the heritability increases, making responses faster!
+
+In other words, in this scenario, because we observed a decreased variance (relative to the mean, anyway) in terrestrial systems we might expect, if the $V_{A}$ and $s_{rw,x_{std}}$ stays the same, that adaptive evolutionary responses would increase!
+
+#### Scenario 2: No evolutionary response!
+
+Under the assumption that both additive genetic and environmental (P) variance increase, which we actually have some data to support this [@RR2017], this would mean that heritability essentially stays the same, and assuming that selection stays the same it would mean that there would be no real change in the evolutionary response of the population because any increases in additive genetic variance are masked by increases in the non-genetic contributions. However, this is an unlikely scenario in our case because we know that $V_{P}$ is actually decreased. 
+
+#### Scenario 3: Slowed evolutionary response!
+
+Given that we do not actually know what part of $V_{P}$ is decreasing it maybe that $V_{A}$ is actually decreasing at a faster rate as part of $V_{P}$, and as such, this would be expected to slow evolutionary responses if selection remains the same. 
+
+#### But, what about selection?
+
+Up until now we have simply assumed that selection remains constant, but under more stressful conditions we would expect that selection would be stronger. However, things get hairy here because selection is always relative to the average within the population. So, it becomes incredibly hard to predict the strength of selection without also knowing fitness. 
+
+#### Overall Conclusions
+
+I would say, given all of the above, it's a little unsettling to focus too heavily on the "evolutionary" implications because they are varied and we know little about key ingredients such as how traits are related to fitness and how selection operates on the traits. I suppose we could assume (had a nice conversation with Shinichi about this) that we can think of our result of $V_{P}$ as changes in the "capacity for selection on the trait" and also, if we assume a trait is not at all heritable, then a change in $V_{P}$ may still signify a lowered capacity of a population to cope with an changed environment and this make it more prone to population extinction. I would feel safe saying this, but we probably need to couch it better into theoretical terms. See section below. I guess one explanation for our patterns are simply that terrestrial systems physiological rates are reaching their limits, and thus, their overall variance within a population is simply getting squished. May just have consequences for populations and communities (see below). There is no question that terrestrial systems are completely screwed though (see below)!
+
+# Thinking About Consequences of a Variance Change in Physiology **Rates**
+
+One thing we haven't thought much about yet is the implications of the change in variance in **physiological rates**. I think it is really important that we recognize that all the variables we are dealing with are rates of change in physiological rates that have important consequences, not only for individuals, but also populations and communities in a ecological sense. The vast majority, as we know, are metabolic rates (e.g., vol O~2~ / hr). What we are showing is a decrease in variance of these rates with acclimation (controlling for the mean), and that we see a decreased variance in rates in terrestrial systems, a little in marine and nothing in freshwater. Is it worth thinking about what the consequences are of the changes in the variability of these rates within an individual and population? Can we make some sensible conclusions that are maybe more robust to the assumptions we would be making. It basically means that the population can only operate over a more limited range of environments? Would this be true? Maybe we should look a little more carefully at the eco-physiological literature that has really taken the 'functional trait' approach, often quite successfully – especially for plants. Here, we have all functional traits, we have them corrected for some environmental gradient (i.e., temperature) and these are all things that are strongly encouraged from the functional trait community perspective [@McGill2006; @Gomez2018; @Ghedini2018]. In other words, should we think about what a change in variance for physiological rates would mean for energy turnover? Population extinction (another explanation above)?
+
+We could take a functional performance trait perspective. Assume that we have a population and individuals vary in their performance curves:
+
+```{r eval=TRUE}
+	sd_ind = 3
+	 n_ind = 30
+	 y0 = 10
+	 Ek = 0.00006
+	 k = 275:300
+	 T = 34
+	 To = 20
+
+	 # Describe performance with the BA equation. Note that we have NO variation here. 
+	 perf = y0* exp(-(Ek/k)*((1/T) - (1/To)))
+
+
+```
+
+# References

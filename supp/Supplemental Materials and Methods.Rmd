@@ -1,0 +1,673 @@
+---
+title: "Supplemental Materials, Methods and Results"
+author: Daniel W.A. Noble, Fonti Kar, Frank Seebacher & Shinichi Nakagawa
+date: "`r Sys.Date()`"
+bibliography: refs.bib
+csl: science.csl
+output: 
+  bookdown::html_document2:
+    code_folding: hide
+    number_sections: no
+    toc: yes
+    toc_depth: 6
+    toc_float: yes
+    bibliography: refs.bib
+  bookdown::word_document2:
+    toc: no
+    toc_depth: 6
+    number_sections: true
+    reference_docx: template.docx
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, cache = TRUE, message = FALSE, warning = FALSE, tidy = TRUE, fig.width = 10)
+## numbers >= 10^5 will be denoted in scientific notation,		  ## numbers >= 10^5 will be denoted in scientific notation,
+  ## and rounded to 2 digits		  ## and rounded to 2 digits
+  options(digits = 2)
+```
+
+```{r packages_data, results='hide'}
+##################################
+# Clean workspace
+##################################
+    rm(list=ls())
+
+##################################
+# Loading packages & Functions
+##################################
+    pacman::p_load(tidyverse, kableExtra, gridExtra, magrittr, Hmisc, googlesheets4, metafor, stringr, formatR, rmarkdown, kableExtra, flextable, raster, rasterVis, rnoaa, sp, ggmap, patchwork, ggpubr, RColorBrewer, sf, ggtree, ape, phytools, viridis, ncdf4.helpers, ncdf4, PCICt, readr, chron, microclima, NicheMapR, tmap, rgdal, MCMCglmm, brms, latex2exp)
+
+#devtools::install_github(repo = "ErikKusch/KrigR")
+## Function to produce colour palette
+# Note that temp is stored as a factor of 10 C larger, so needs to be divided. Also, we can greate a custom colour palelte function using colorRampPallette
+colfunc <- colorRampPalette(rev(brewer.pal(10,"RdBu")))
+#test colfunc(10) will generate the exact Hex codes for 10 different colours can 10 to 100 and you get 100 colour hex codes. Very useful webpage: https://pjbartlein.github.io/REarthSysSci/rasterVis01.html
+
+    # loading functions
+    source("../R/functions.R")
+    
+     #gs <- gs_title("q10_newdata")
+    #data <- as_tibble(gs_read(ss = gs))
+
+##################################
+# Load Data & Manipulate
+##################################
+
+    #data <- read_sheet(ss = "q10_newdata")
+    data <- read.csv("../../data/CombinedData_wide.csv", stringsAsFactors = FALSE)
+    data$lat <- as.numeric(data$lat)
+    new_papers <- data[-grep("_o", data$record_num),]
+    old_papers <- data[grep("_o", data$record_num),]
+    
+    # Add full species to data
+      data <- data %>%
+        mutate(species_full = paste0(genus, " ",species))
+      
+    # habitat
+      spp_habitat <- data %>%
+                      group_by(habitat) %>%
+                      summarise(spp_n = length(unique(species_full)))
+    
+      # Note that some species need to be replaced
+      data <- data %>%
+              mutate(species_full = ifelse(species_full == "Chinemys reevesii", "Mauremys reevesii", species_full)) %>%
+              mutate(species_full = ifelse(species_full == "Enithares sp", "Enithares ciliata", species_full))  %>%
+              mutate(habitat = ifelse(species_full == "Pungitius pungitius", "m", habitat))  %>% # Fix a few errors in habitat classificaton
+              mutate(habitat = ifelse(species_full == "Danio rerio", "f", habitat)) 
+      
+    # Convert se to SD so it can be used for effect sizes. Drop out the SE columns as these are no longer needed
+      data <- data %>%
+              mutate(r1.1_sd = se_to_sd(r1.1_se, r1.1_N),
+                     r1.2_sd = se_to_sd(r1.2_se, r1.2_N),
+                     r2.1_sd = se_to_sd(r2.1_se, r2.1_N),
+                     r2.2_sd = se_to_sd(r2.2_se, r2.2_N)) %>%
+              dplyr::select(-c(r1.1_se, r1.2_se, r2.1_se, r2.2_se,
+                               r1.1_CV, r1.2_CV, r2.1_CV, r2.2_CV, 
+                               r1.1_logCV, r1.2_logCV, r2.1_logCV, r2.2_logCV))
+##################################
+## Calculate effect sizes
+##################################
+    # Calculate Q10 effect sizes and sampling variances; filter out non-finate values and clean up dataframe a bit
+      
+      data <- data %>%
+             mutate(lnRR_Q10(t2=temp_2, t1=temp_1, r1=r1.1, r2=r1.2, sd1=r1.1_sd, sd2=r1.2_sd, n1=r1.1_N, n2=r1.2_N, 
+                             name = "acute_t1"),
+                    lnRR_Q10(t2=temp_2, t1=temp_1, r1=r2.1, r2=r2.2, sd1=r2.1_sd, sd2=r2.2_sd, n1=r2.1_N, n2=r2.2_N, 
+                             name = "acute_t2"),
+                    lnRR_Q10(t2=temp_2, t1=temp_1, r1=r1.1, r2=r2.2, sd1=r1.1_sd, sd2=r2.2_sd, n1=r1.1_N, n2=r2.2_N, 
+                             name = "acclim"),
+                    lnVR_Q10(t2=temp_2, t1=temp_1, r1=r1.1, r2=r1.2, sd1=r1.1_sd, sd2=r1.2_sd, n1=r1.1_N, n2=r1.2_N, 
+                             name = "acute_t1"),
+                    lnVR_Q10(t2=temp_2, t1=temp_1, r1=r2.1, r2=r2.2, sd1=r2.1_sd, sd2=r2.2_sd, n1=r2.1_N, n2=r2.2_N, 
+                             name = "acute_t2"),
+                    lnVR_Q10(t2=temp_2, t1=temp_1, r1=r1.1, r2=r2.2, sd1=r1.1_sd, sd2=r2.2_sd, n1=r1.1_N, n2=r2.2_N, 
+                             name = "acclim"),
+                    lnCVR_Q10(t2=temp_2, t1=temp_1, r1=r1.1, r2=r1.2, sd1=r1.1_sd, sd2=r1.2_sd, n1=r1.1_N, n2=r1.2_N, 
+                             name = "acute_t1"),
+                    lnCVR_Q10(t2=temp_2, t1=temp_1, r1=r2.1, r2=r2.2, sd1=r2.1_sd, sd2=r2.2_sd, n1=r2.1_N, n2=r2.2_N, 
+                             name = "acute_t2"),
+                    lnCVR_Q10(t2=temp_2, t1=temp_1, r1=r1.1, r2=r2.2, sd1=r1.1_sd, sd2=r2.2_sd, n1=r1.1_N, n2=r2.2_N, 
+                             name = "acclim"),
+                    obs = 1:n()) %>%
+            dplyr::select(-c(data_source, source_page,phylum, class, order, family, genus, species, geo_location, details, notes)) %>%
+                  filter_if(~is.numeric(.), all_vars(!is.infinite(.)))
+      
+    # #******** Problem with effect size calculation. V_lnVR and V_lnCVR are negative for a couple studies, should not be! Hence warning messages NaN in plotting of precision; explored this probalem more. It's actually incorrect data in the old dataset from Frank. Fonti explored the extraction for p088_o and error bars not found, sample sizes not correct. For second study, the N value was incorrect, should have been N = 5 not 0.11. Will exclude p_088_o from the data. Fonti did a check and tried to re-extract but in the end missing error so excluded
+      
+      data <- data %>%
+              filter(!record_num == "p088_o")
+
+      #write.csv(data, file = "./output/data/data_final_wide.csv", row.names = FALSE)
+##################################
+## Re-organise the data frame
+##################################
+      
+      # We want to be able to reorganise the data longitudianlly based on the two acute and acclimation data. Extract the data in chunks
+      
+      data_t1 <- data                                                  %>%
+                 dplyr::select(c(1:26, grep("acute_t1", colnames(.)))) %>%
+                 filter_if(~is.numeric(.), all_vars(!is.na(.)))        %>% # Filter all the na effect sizes 
+                 rename(lnRR_Q10    = lnRR_Q10_acute_t1,       # Rename columns
+                        V_lnRR_Q10  = V_lnRR_Q10_acute_t1,
+                        lnVR_Q10    = lnVR_Q10_acute_t1,
+                        V_lnVR_Q10  = V_lnVR_Q10_acute_t1, 
+                        lnCVR_Q10   = lnCVR_Q10_acute_t1,
+                        V_lnCVR_Q10 = V_lnCVR_Q10_acute_t1,
+                              paper = record_num)            %>%
+                 mutate(type = "acute")
+      
+      dim(data_t1)
+      
+      # Do the same for hot acute
+      data_t2 <- data                                                  %>%
+                 dplyr::select(c(1:26, grep("acute_t2", colnames(.)))) %>%
+                 filter_if(~is.numeric(.), all_vars(!is.na(.)))        %>%  # Filter all the na effect sizes 
+                 rename(lnRR_Q10    = lnRR_Q10_acute_t2,
+                        V_lnRR_Q10  = V_lnRR_Q10_acute_t2,
+                        lnVR_Q10    = lnVR_Q10_acute_t2,
+                        V_lnVR_Q10  = V_lnVR_Q10_acute_t2, 
+                        lnCVR_Q10   = lnCVR_Q10_acute_t2,
+                        V_lnCVR_Q10 = V_lnCVR_Q10_acute_t2,
+                              paper = record_num)            %>%
+                 mutate(type = "acute")
+      dim(data_t2)
+      
+      # Now do for the acclimation
+      data_acclim <- data                                            %>%
+                 dplyr::select(c(1:26, grep("acclim", colnames(.)))) %>%
+                 filter_if(~is.numeric(.), all_vars(!is.na(.)))      %>% # Filter all the na effect sizes 
+                 rename(lnRR_Q10    = lnRR_Q10_acclim,
+                        V_lnRR_Q10  = V_lnRR_Q10_acclim,
+                        lnVR_Q10    = lnVR_Q10_acclim,
+                        V_lnVR_Q10  = V_lnVR_Q10_acclim, 
+                        lnCVR_Q10   = lnCVR_Q10_acclim,
+                        V_lnCVR_Q10 = V_lnCVR_Q10_acclim,
+                              paper = record_num)            %>%
+                 mutate(type = "acclim")
+      dim(data_acclim)
+      
+      # All these data frames are exactly the same excet that the effect sizes. We've removed NA, so lets bind together
+      
+      data_long <- bind_rows(data_t1, data_t2, data_acclim)
+      
+      # Checks:
+      dim(data_long)
+      with(data_long, table(type)) # Acute should be 2x larger
+      with(data_long, table(type, trait_category))
+      #write.csv(data_long, file = "./output/data/data_final_long.csv", row.names = FALSE)
+```
+
+## Materials and Methods
+### *Literature collection*
+We compiled literature on ectothermic animals that measured physiological rates (e.g., metabolic rate) at two or more temperatures after having been acclimated (or acclimatized) at these temperatures. We used data from a previous meta-analysis [@Seebacher2015] and updated Seebacher *et. al.* @Seebacher2015's data by extractng data from suitable studies from our own searches that followed the same search protocol. More specically, we performed a literature search on the 28th of June 2017 using the Web of Science database. We limited our search to articles or proceedings papers published in English from 2013 to 2017 (the date after Seebacher *et. al.* @Seebacher2015 searches were conducted) using the following topic search string: *"(acclimat* AND (therm* OR temp*) NOT (plant* OR tree* OR forest* OR fung* OR mammal* OR marsup* OR bird* OR human OR exercis* OR train* OR hypoxi*))"*. We further limited to the following research areas: Anatomy Morphology; Biodiversity Conservation; Biology; Ecology; Endocrinology Metabolism; Entomology; Evolutionary Biology; Marine Freshwater Biology; Physiology; Respiratory System, Reproductive Biology, Zoology. 
+
+Our search resulted in 1,321 papers for screening in Rayyan [@ouzzani2016]. We also cross checked papers we found in our searches with a recent paper by Havird *et. al.* @Havird2020, which also updates Seebacher *et. al.* @Seebacher2015's dataset. We included any papers that were missed between our searches and those of Havird *et. al.* @Havird2020 from the dates 2013-2017. Havird *et. al.* @Havird2020 added 7 new studies between 2013-2017 (mainly because they were focused on metbolic rates), and our searches differed from theirs by only a single paper [i.e., @Bulgarella2015]. Given the physiological traits we included were broader, we had a substantial increase in additional papers that we added to Seebacher *et. al.* @Seebacher2015's dataset. More specifically, in addition to the `r length(unique(old_papers$record_num))` papers we included from the Seebacher *et. al.* @Seebacher2015 dataset, we extracted data from an extra `r length(unique(new_papers$record_num))` papers (with a total of `r dim(new_papers)[1]` effects) that were published between 2013 - 2017 (a `r  (length(unique(new_papers$record_num)) / length(unique(old_papers$record_num)))*100`% increase in the number of published articles). Note that Seebacher *et. al.* @Seebacher2015 included a total of 205 publications, however, not all these contained the necessary statistics we needed to derive $Q_{10}$ effect sizes and associated sampling variances (see below). While we may have missed papers, our goal was to obtain a large representative (and unbiased) sample of acclimation research rather than a comprehensive dataset. As such, our database represents the most up-to-date dataset used by Seebacher *et. al.* @Seebacher2015 to answer questions on acclimation across ectotherms. 
+
+
+We split the screening of titles and abstracts for the 1,321 papers found in our search among all authors evenly. To ensure consistency among authors in title and abstracts that should be included, prior to  screening all authors went through a randomly sleected set of papers together - agreeing on those that were relevant and those that were not based on our inclusion criteria (see below). Where any authors were uncertain about whether to include a paper in the sub-sample they screened, we conservatively included the paper for full text screening and dicussed uncertain papers among authors to come to a decison on whether to include the paper. After title and abstract screening, we were left with a total of 149 papers for full text screening. Papers were included only if they: 1) measured a physiological rate acutely at two temperatures on a sample of animals chronically exposed to the same two temperatures for at least 1 week; and 2) where physiological rates measured were burst and sustained locomotion, metabolic rates (standard, resting, routine and maximal), heart rates, and/or enzyme activities.  
+
+### *Data Compilation*
+
+We extracted means, standard deviations and sample sizes for physiological rates at the two test tempetatures. If there were more than two test temperatures, we choose only the test temperatures that fell within the most likely natural range of temperatues experienced by the speceis in question. We extracted these data from text, tables or figures of a given paper. Data were extracted from figures using the R package *metaDigitise* [@pick2019]. We also recorded the phylum, class, order, genus and species under study and the latitude and longitude of the population that was being studied. For studies that did not provide latitude and longitude for the population, we searched for similar studies by the lab group to identify where the population was likely to have been sourced or derived from when needed. If the population was derived from the wild, we recorded the nearest latitude and longitude of the population to the field collection site. If the animals had been sourced from a commercial supplier, we took the latitude and longitude of the supplier that the paper identified the animals to have originated from. When it was not possible to find latitude and longitude using these methods, we looked up the distribution of the species in question and took the latitude and longitude of the centroid of the species' distributional range. 
+
+### *Calculating New $Q_{10}$ Based Effect Sizes and Sampling Variances*
+
+To understand changes in physiological rates we often look to comparing $Q_{10}$ values, which describe the multiplicative change in physiological rates across a 10&deg;C temperature change. Higher $Q_{10}$ values indicate stronger changes in physiological rates, and it is expected that acclimation should reduce $Q_{10}$ values [@Seebacher2015]. Currently, however, we do not have effect sizes and associated sampling variances derived for $Q_{10}$ making it challenging to weight effect size estimates by sampling variance as is typical in meta-analysis. While the Delta method can be used to approximate the sampling variance (e.g., see Havird *et. al.* @Havird2020) this assumes  $Q_{10}$ is normally distributed and linear with respect to temperature. Unfortunately, this is not the case for $Q_{10}$, as such, the Delta method is likely a poor approximation to sampling variance. There are easier ways to derive effect sizes and associated samping variance for $Q_{10}$ given that $Q_{10}$ is simply a reformulation of a very commonly used effect size in the meta-analysis literature, the log response ratio (*lnRR*) [@hedges1999meta; @laj2011]. Recognition of the similarity between *lnRR* and $Q_{10}$ means we can derive $Q_{10}$ based effect sizes using the well known mathematical properties of *lnRR*, while also providing easy ways to extend this to effect sizes that compare variances in physiological rates [@nakagawa2015meta] and improve upon our ability to account for sources of non-independence that are typical in meta-analysis [@laj2011; @Noble2017]. As such, here we derive a series of $Q_{10}$ based effect sizes along with their associated sampling variances that allow one to compare both changes in mean and variance of physiological rates. 
+
+#### *Comparing changes in mean physiological rates*
+
+Prior to showing how the relevant $Q_{10}$ effect size can be calculated it can be helpful to understand its similarities to *lnRR*. The *lnRR* described by Hedges *et al.* @hedges1999meta and extended by Lajeunesse @laj2011 and can be calculated as follows:
+
+$$
+\begin{equation} 
+  \begin{aligned}
+  lnRR = ln\left ( \frac{X_{1}}{X_{2}}\right )
+  \end{aligned}
+  (\#eq:lnRR)
+\end{equation} 
+$$
+
+$$
+\begin{equation} 
+  s_{lnRR} = \left ( \frac{SD_{1}^2}{N_{1}X_{1}^2}\right ) + \left ( \frac{SD_{2}^2}{N_{2}X_{2}^2}\right )
+  (\#eq:slnRR)
+\end{equation} 
+$$
+In equation \@ref(eq:lnRR), $X_{1}$ is the mean of group 1, often a control group, where as $X_{2}$ is the mean of group 2 (e.g., a treatment group). The mean of $X_{i}$ for group *i* can be any measurement type (e.g. a physiological rate, mass etc) so long as the measurement variable is ratio scale. Log transformation of this ratio makes the effect size normally distributed. Equation \@ref(eq:slnRR) is the analytical solution for *lnRR*'s sampling variance where, $SD_{1}^2$ and $SD_{2}^2$ is the variance in group 1 and 2, respectively and $N_{1}$ and $N_{2}$ is the sample size in group 1 and 2. 
+
+The equations for *lnRR* and its sampling variance allow us to easily extend this to $Q_{10}$ based effect sizes. Recall that $Q_{10}$ is described as follows:
+
+$$
+\begin{equation} 
+  Q_{10} = \left( \frac{R_{2}}{R_{1}} \right)^{ \left(\ \frac{10^{\circ}C}{T_{2}-T_{1}} \right) }
+  (\#eq:q10)
+\end{equation} 
+$$
+Here, $R_{1}$ and  $R_{2}$ are mean physiological rates and  $T_{1}$ and  $T_{2}$ are the temperatures that these rates are measured. Log transformation of equation \@ref(eq:q10) leads to the following log transformed $Q_{10}$:
+
+$$
+\begin{equation} 
+  lnRR_{Q_{10}} = ln\left( \frac{R_{2}}{R_{1}} \right){ \left(\ \frac{10^{\circ}C}{T_{2}-T_{1}} \right) }
+(\#eq:lnq10)
+\end{equation} 
+$$
+Equation \@ref(eq:lnq10) is essentially a temperature corrected equivalent to lnRR when the numerator and denomenator are measured at different temperatures. This allows one to compare the mean of two temperature treatments directly regardless of the temperatures that these groups have been measured. Here, we will refer to this as the log $Q_{10}$ response ratio, $lnRR_{Q_{10}}$. Recognition of this equivalence means that we can easily calculate the sampling variance for equation \@ref(eq:lnq10) as follows:
+
+$$
+\begin{equation} 
+  s_{lnRR_{Q_{10}}} = \left( \frac{SD_{2}^2}{R^2_{2}N_{2}} + \frac{SD_{1}^2}{R^2_{1}N_{1}} \right){ \left(\ \frac{10^{\circ}C}{T_{2}-T_{1}} \right) }^2
+  (\#eq:Vlnq10)
+\end{equation} 
+$$
+
+#### *Comparing changes in physiological rate variability*
+
+Nakagawa *et al* @nakagawa2015meta recently proposed analogous effect size estimates to *lnRR* that allow for comparisons of changes in variance between two groups, the log variance ratio (*lnVR*) and the log coefficient of variation (*lnCVR*). Like *lnRR*, *lnVR* and *lnCVR* are ratios that describe the relative difference in trait variablity between two groups. We refer readers to Nakagawa *et al* @nakagawa2015meta for the equations describing *lnVR* and *lnCVR*, but these can easily be extended to their $Q_{10}$ analogues (and associated sampling varaince) as follows:
+
+$$
+\begin{equation} 
+lnVR_{Q_{10}} = ln\left( \frac{SD_{2}}{SD_{1}} \right){ \left(\ \frac{10^{\circ}C}{T_{2}-T_{1}} \right) }
+(\#eq:lnq10VR)
+\end{equation} 
+$$
+$$
+\begin{equation} 
+s_{lnVR_{Q_{10}}} = \left( \frac{1}{2\left( N_{2}-1 \right)} + \frac{1}{2\left(N_{1} - 1\right)} \right){ \left(\ \frac{10^{\circ}C}{T_{2}-T_{1}} \right) }^2
+(\#eq:slnq10VR)
+\end{equation} 
+$$
+
+Equations \@ref(eq:lnq10VR) and \@ref(eq:slnq10VR) describe the change in physiological rate variance (eqn \@ref(eq:lnq10VR)) across a 10&deg;C temperature change along with its sampling variance (eqn \@ref(eq:slnq10VR)). While this is a useful metric, as discussed by Nakagawa *et al* @nakagawa2015meta there is often a strong mean-variance relationship that needs to be accounted for in analysing changes in variance. As such, we can calculate the coefficient of variation, which standardises changes in variance for changes in means as follows:
+
+$$
+\begin{equation} 
+lnCVR_{Q_{10}} = ln\left( \frac{\text{CV}_{2}}{\text{CV}_{1}} \right){ \left(\ \frac{10^{\circ}C}{T_{2}-T_{1}} \right) }
+(\#eq:lnq10CVR)
+\end{equation} 
+$$
+$$
+\begin{equation} 
+s_{lnCVR_{Q_{10}}} = \left[ \frac{(\text{SD}_{1})^2}{N_{1}({R}_{1})^2} + \frac{(\text{SD}_{2})^2}{N_{2} ({R}_{2})^2} + \frac{1}{2\left( N_{1}-1 \right)} + \frac{1}{2\left(N_{2} - 1\right)} \right]{ \left(\ \frac{10^{\circ}C}{T_{2}-T_{1}} \right) }^2
+(\#eq:slnq10CVR)
+\end{equation} 
+$$
+
+where $CV$ is the coefficient of variation defined as $SD / R$. 
+
+#### *Calculating acute and acclimation $lnRR_{Q_{10}}$, $lnVR_{Q_{10}}$ and $lnCVR_{Q_{10}}$ estimates*
+Using the mean, standard deviation and sample size for all acute and aclimation treatments of studies in our databases we derived acute and acclimation $lnRR_{Q_{10}}$, $lnVR_{Q_{10}}$ and $lnCVR_{Q_{10}}$ estimates. For all effect sizes the higher acute or acclimation temperture was in the numerator and the lower of the two temperatures in the denominator. As such, positive effect sizes suggest that the mean or variance is larger at the higher of the two temperatures, standardised to 10&deg;C. 
+
+### *Moderator Variables*
+
+We recorded or derived a series of moderator variables from each study that are expected to have an impact on our effect size estimates. These included the duration of acclimation in days and acclimation type ("acclimation" or "acclimitization") given that acclimation responses are expected to depend both on how long chronic temperature exsposure occurs (longer exsposure = better acclimation response) and whether exsposure took place in the wild ("acclimitized") or lab ("acclimated") [@Seebacher2015]. We also recorded if the sample of animals were derived from captive or wild stocks, the life-history stage of the animals used ("adult" or "jeuvenile") and the habitat type ("freshwater", "marine" or "terrestrial") given that Seebacher *et. al.* @Seebacher2015 show that these factors can impact $Q_{10}$ estimates. Physiological rates measures varied widely across the studies but could generally be groups into discrete trait categories @Seebacher2015. As such, using the detailed information on the trait type and its associated units from a given study we categorized each effect size into one of 
+
+### *Meta-Analysis*
+### *Sensitivity Analyses*
+### *Publication Bias*
+
+## Results
+
+```{r datadescrp}
+#####################################
+# Data Descriptions and Exploration
+#####################################
+
+#spp <- data %>% dplyr::distinct(species_full, class, order, family) %>% arrange(species_full)
+
+#####################################
+# Climate data and Mapping
+#####################################
+
+## We can now bring in raster data from WorldClim, which contains a load of different environmental data that can be used, plus we can get very pretty world maps. The world climate datasets are called "bio" followed by a number. Details on what these datasets are exactly and how they can be obtaine can be found here: https://www.gis-blog.com/r-raster-data-acquisition/ & https://www.worldclim.org/data/index.html
+
+####################################
+# Terrestrial data from WorldClim
+####################################
+
+# Now, lets have a look at our data in relation to the climate layers @ 2.5 km resolution
+
+worldclim <- getData("worldclim", var="tmax",res=2.5, path = "./gis_data/") 
+
+        coast <- read_sf("./gis_data/ne_110m_coastline/ne_110m_coastline.shp")
+coast_outline <- as(st_geometry(coast), Class="Spatial")
+
+# Grab the lat and long data from the studies in our data
+coords <- data                     %>%
+          dplyr::select(long, lat) %>%
+          filter(!is.na(lat), !is.na(long))
+
+# Lets have a look at a couple of the layers, seasonality, bio4 or tmax in each months
+
+   seasonalityDec <- worldclim[["tmax12"]] #"bio4"
+ seasonalityApril <- worldclim[["tmax4"]] #"bio4"
+seasonalityAugust <- worldclim[["tmax8"]] #"bio4"
+
+# Using our coordinates, extract the relevant environmental data from the worldclim laters. Remeber that the projections across layers need to match, so we will project worldclim crs
+points <- SpatialPoints(coords, proj4string = worldclim@crs) 
+values <- extract(worldclim, points)
+
+# Create the dataframe 
+env_data <- cbind.data.frame(coordinates(points), values)  
+
+####################################
+## Sea surface data NOAA
+####################################
+
+# There are two files for sea and ice surface temperatures downloaded from NOAA (https://psl.noaa.gov/data/gridded/data.cobe2.html). These should contain monthly mean temperatures. What we want to do here is load these files, project them onto the worldclim temperature data, then, extract the relevant temperature data at the latitudes for the combined terrestrial and aquatic points. The grain of the aquatic data is much more coarse then the terrestrial data. There are a few reasons for this. First, it's hard to get really detailed SST data at fien scales. Second, it's probably not needed given that SST doesn't vary much over large areas. Useful ways to deal with files: https://cran.r-project.org/web/packages/futureheatwaves/vignettes/starting_from_netcdf.html & https://pjbartlein.github.io/REarthSysSci/netCDF.html#map-the-data
+
+# Open the NetCDF data set, and print some basic information.
+SSTdir  = "gis_data/"
+ncname  = "HadISST_sst"
+ncfname = paste0(SSTdir,ncname, ".nc", sep = "")
+dname   = "sst" 
+
+# Open a NetCDF file
+HAD.sst = nc_open(ncfname)
+#print(HAD.sst)
+
+# Get the longtiudes and latitudes as before, using now the ncvar_get() function in ncdf4.
+lon     = ncvar_get(HAD.sst, "longitude")
+lat     = ncvar_get(HAD.sst, "latitude", verbose = F)
+
+# Get the time variable and its attributes using the ncvar_get() and ncatt_get() functions, and also get the number of times using the dim() function.
+t       = ncvar_get(HAD.sst, "time")
+tunits  = ncatt_get(HAD.sst, "time", "units")
+
+# Get the variable and its attributes, and verify the size of the array.
+sst.array = ncvar_get(HAD.sst, dname)
+dlname    = ncatt_get(HAD.sst, dname, "long_name")
+dunits    = ncatt_get(HAD.sst, dname, "units")
+fillvalue = ncatt_get(HAD.sst, dname, "_FillValue")
+dim(sst.array)
+
+# Get the global attributes.
+title       = ncatt_get(HAD.sst, 0, "Title")
+description = ncatt_get(HAD.sst, 0, "description")
+institution = ncatt_get(HAD.sst, 0, "institution")
+datasource  = ncatt_get(HAD.sst, 0, "source")
+references  = ncatt_get(HAD.sst, 0, "reference")
+history     = ncatt_get(HAD.sst, 0, "history")
+Conventions = ncatt_get(HAD.sst, 0, "Conventions")
+
+# Close the NetCDF file using the nc_close() function.
+
+nc_close(HAD.sst)
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
+
+# The time variable, in "time-since" units can be converted into "real" (or more easily readable) 
+# time values by splitting the time tunits$value string into its component parts, and then using 
+# the chron() function to determine the absolute value of each time value from the time origin.
+
+# Split the time units string into fields
+tustr     = strsplit(tunits$value, " ")
+tdstr     = strsplit(unlist(tustr)[3], "-")
+tmonth    = as.integer(unlist(tdstr)[2])
+tday      = as.integer(unlist(tdstr)[3])
+tyear     = as.integer(unlist(tdstr)[1])
+
+times     = chron(t, origin = c(tmonth, tday, tyear))
+times     = as.POSIXct(times, "%d/%m/%y %H:%M:%S")
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
+
+# In NetCDF file, values of a variable that are either missing or simply not available (i.e. ocean grid points in 
+# a terrestrial data set) are flagged using specific "fill values" (_FillValue) or missing values (missing_value), 
+# the values of which are set as attributes of a variable. In R, such unavailable data are indicated using the "NA"
+# value. The following code fragment illustrates how to replace the NetCDF variable's fill values with R NA's .
+
+sst.array[sst.array == fillvalue$value] = NA
+
+# Also values of SST need to be divided by 100
+sst.array = sst.array / 100
+
+sst.slice <- sst.array[,,5]
+
+grid   = expand.grid(lon = lon, lat = lat)
+#cutpts = c(-5, -2, 0, 5, 10, 15, 20, 25, 30, 35)
+levelplot(sst.slice ~ lon * lat, data = grid,  cuts = 11, pretty = TRUE, 
+          col.regions = colfunc(50), ylab = "Latitude", xlab = "Longitude")  +# Have a quick look
+          layer(sp.points(points, pch = 16, col = "black")) + 
+          layer(sp.lines(coast_outline, col="black", lwd=0.5))
+
+# Lets convert this to a dataframe so we can summarise data a bit easier. Remember, we have range of lat, long over a large period of time. So, we can expand upon the three variables.
+#longlat <- as.matrix(expand.grid(lon, lat, time))
+
+# Now we can simply convert to a vector and add to dataframe the raster / grid data
+#sst_tmp <- as.vector(sst)
+
+# Make final dataframe. Note that time is in Julian days or days since "1891-1-1 00:00:00"
+#dat_SST <- data.frame(cbind(longlat, sst_tmp))
+#colnames(dat_SST) <- c("lon", "lat", "time", "temp")
+#dat_SST$date <- chron(dat_SST$time, origin=c(1, 1, 1891), format = c("d/m/y"))
+#dat_SST$year <- year(dat_SST$date)
+#dat_SST$month <- month(dat_SST$date)
+
+
+
+
+
+# Apparently the ERA5 dataset is the top of the line climate data from Europe. It is also both land and SS based temperature data that can be calculated monthly from 1979-2020. It can be downlaoded by requesting access to various data metric here: https://cds.climate.copernicus.eu/cdsapp#!/dataset/reanalysis-era5-single-levels-monthly-means?tab=overview. 
+####################################
+## ERA5 Global Temperature data
+####################################
+        #coast <- read_sf("./gis_data/ne_110m_coastline/ne_110m_coastline.shp")
+#coast_outline <- as(st_geometry(coast), Class="Spatial")
+
+coast <- readOGR("./gis_data/ne_110m_coastline/ne_110m_coastline.shp")
+coast_outline <- recenter(coast)
+
+# Load the data
+ ERA5_SST <- brick("./gis_data/SST_ERA.nc")
+ERA5_land <- brick("./gis_data/2mTemp_ERA.nc")
+
+
+#turn your file into a spatial points data frame
+coords <- data                     %>%
+          dplyr::select(long, lat) %>%
+          filter(!is.na(lat), !is.na(long))
+coords$long[coords$long<0] <- coords$long[coords$long<0] + 360 # Convert longitudes to eastings
+
+    r <- SpatialPoints(coords, proj4string = coast_outline@proj4string)
+
+# Extract to data frame
+ext_SST <-  raster::extract(ERA5_SST, r, cellnumber = TRUE, df = TRUE)
+
+# Try plotting with tmap package...seems great! https://mgimond.github.io/Spatial/mapping-data-in-r.html; https://confluence.ecmwf.int//display/CKB/ERA5%253A+What+is+the+spatial+reference
+p1 <- tm_shape(subset(ERA5_SST, 1)-273.15) + 
+  tm_raster(style = "quantile", n = 10, palette=colfunc(10), 
+            title="1979 SST",
+            legend.hist = TRUE, 
+            showNA = TRUE, colorNA="grey") +
+  tm_legend(outside = TRUE, hist.width = 2) +
+  tm_shape(coast_outline) +
+  tm_lines() +
+  tm_shape(r) + tm_dots(size = 0.1, col = "black")
+  
+p1
+```
+The global distribution of studies / species in our data base was wide, with most research in North America, Europe and Asia (Figure \@ref(fig:FigS1)).
+
+```{r FigS1,fig.height=10, fig.cap="Global distribution of species / studies for terrestrial, freshwater and marine ectotherm acclimation research. Latitudes and longitudes of studies are projected on a global map of maximum surface temperature in A) December, B) April and C) August for world and North America" }
+  
+ p1 <- levelplot(seasonalityDec/10, margin =FALSE, cuts=20, pretty=TRUE, main = "December", col.regions=colfunc(50)) +
+        layer(sp.points(points, pch = 16, col = "black")) +
+        layer(sp.lines(coast_outline, col="black", lwd=0.5)) # Add coastline layer to define boundaries better +
+ p2 <- levelplot(seasonalityApril/10, margin =FALSE, main = "April", cuts=20, pretty=TRUE, col.regions=colfunc(50)) + 
+        layer(sp.points(points, pch = 16, col = "black")) + 
+        layer(sp.lines(coast_outline, col="black", lwd=0.5)) # Add coastline layer to define boundaries better
+ p3 <- levelplot(seasonalityAugust/10, margin =FALSE, main = "August",cuts=20, pretty=TRUE, col.regions=colfunc(50)) +
+        layer(sp.points(points, pch = 16, col = "black")) + 
+        layer(sp.lines(coast_outline, col="black", lwd=0.5)) # Add coastline layer to define boundaries better
+ p4 <- levelplot(seasonalityAugust/10, margin =FALSE, main = "August",cuts=50, pretty=TRUE, 
+                 col.regions=colfunc(100), ylim = c(0,100), xlim = c(-130, -40)) + 
+        layer(sp.points(points, pch = 16, col = "black")) + 
+        layer(sp.lines(coast_outline, col="black", lwd=0.5)) # Add coastline layer to define boundaries better
+ 
+ ggarrange(p1, p2, ggarrange(p3, p4, ncol=2, labels="C)"), labels = c("A)", "B)"), nrow = 3)
+
+```
+
+Overall, we have a total of `r sum(spp_habitat$spp_n)` species in the data. Phylogenetic relationships among taxa and the distribution of effect sizes across traits and taxa across habitats (Figure \@ref(fig:phylogeny))
+
+```{r FigS2, fig.width=10, fig.height=10, results='hide', fig.cap="Phylogeny of taxa in the dataset"}
+
+##################################
+# Phylogenetic tree
+##################################
+
+    ## Tree data; also fix up some errors
+    tree_data <-  data %>%
+                  mutate(species_full = gsub("Chinemys reevesii", "Mauremys reevesii", species_full)) %>% 
+                  mutate(species_full = gsub("Enithares sp", "Enithares ciliata", species_full)) %>%
+                  mutate(habitat = ifelse(species_full == "Pungitius pungitius", "m", habitat))  %>%
+                  mutate(habitat = ifelse(species_full == "Danio rerio", "f", habitat))  %>%
+                  group_by(species_full)%>%
+                  mutate(n = length(habitat)) %>%
+                  dplyr::select(species_full,  habitat, n) %>% 
+                  distinct(species_full, habitat, n) 
+  
+  
+      ## Load the phylogenetic tree
+                tree <- read.tree("../tree/tree_binary_SN_Q10.tre")   
+      tree$tip.label <- gsub("_", " ", tree$tip.label)
+      tree$tip.label <- gsub("Enithares sp", "Enithares ciliata", tree$tip.label)
+      
+      ## Create nodes and add to data so detailed can be mapped
+          tree_data$node <- NA
+                 tipnode <- seq_along(tree$tip.label)
+          names(tipnode) <- tree$tip.label
+          tree_data$node <- tipnode[tree_data$species_full] ## convert the tip label to tip node number
+                       i <- is.na(tree_data$node)
+       tree_data$node[i] <- tree_data$species_full[i] ## fill in internal node number
+          tree_data$node <- as.integer(tree_data$node) 
+          
+      # Do a tree check with original data
+          tree_checks(data, tree, dataCol = "species_full", type = "checks") # Great. Currently species in data and tree match
+  
+##################################
+# Plotting tree data
+##################################
+          
+      # Map data to tree. Just one variable for now
+      d <- ggtree(tree, layout="circular") %<+% tree_data 
+      
+      # Plot the tree
+      scales1 <- c("#053061", "#D1E5F0", "#67001F")
+      scales2 <- c("#053061", "#E7E0DB", "#67001F")
+      p1 <- d + 
+            #geom_tiplab(size=2, offset = 0.5) + 
+            geom_tippoint(aes(color=habitat), size = 2) +
+            labs(color = "Habitat") + 
+            scale_colour_manual(values = scales1)
+      
+      # Create the data matrix that can be used to plot data as a heatmap around the phylogeny
+      matrix_data <- as.data.frame(data %>%
+                  mutate(species_full = gsub("Chinemys reevesii", "Mauremys reevesii", species_full)) %>% 
+                  mutate(species_full = gsub("Enithares sp", "Enithares ciliata", species_full))      %>%
+                  mutate(habitat = ifelse(species_full == "Pungitius pungitius", "m", habitat))       %>%
+                  mutate(habitat = ifelse(species_full == "Danio rerio", "f", habitat))               %>%
+                  mutate(trait_category = ifelse(trait_category %in% 
+                                                   c("ATPase", "mito_leak", "mito_oxidation"), "Mito. Function", trait_category)) %>%
+                  mutate(trait_category = ifelse(trait_category %in% c("endurance", "sprint"), "Performance", trait_category))    %>%
+                  mutate(trait_category = ifelse(trait_category %in% c("muscle", "cardiac"), "Muscle Function", trait_category))  %>%
+                  mutate(trait_category = ifelse(trait_category %in% c("rest_MR", "max_MR"), "Metabolic Rate", trait_category))   %>%
+                  group_by(species_full, trait_category)   %>% 
+                  summarise(n = n())                       %>% 
+                  spread(trait_category, n, fill = 0))
+      
+      row.names(matrix_data) <- matrix_data$species_full
+      matrix_data <- matrix_data[,c(2:8)]
+      
+      colnames(matrix_data)[c(1,3,6)] <- c("Antioxidants", "Metabolic Enzymes", "Other")
+      
+      # Plot a heatmap of N for each trait around the phylogeny.
+      gheatmap(p1, data.matrix(matrix_data), offset = 1,  
+               colnames_position="top", legend_title = "N", 
+               colnames_angle=90, colnames_offset_y = 1, 
+               hjust=0, font.size=2.5) + 
+        scale_fill_viridis(alpha = 0.6) 
+      
+##################################
+# Tree checking and pruning
+##################################
+  # Have a look at species in data and tree. Note that the data2 object excluded all Inf values, which means that species may be lost in the process. So, tree would need to be pruned down
+  tree_checks(data_long, tree, dataCol = "species_full", type = "checks")
+      
+species_drop <- tree_checks(data, tree, dataCol = "species_full", type = "checks")$Species_InTree_But_NotData # Gra list of species in tree misisng from data for pruning
+
+# Prune tree
+tree2 <- drop.tip(tree, species_drop)
+      
+# Check that taxa dropped
+tree_checks(data, tree2, dataCol = "species_full", type = "checks")
+
+##################################
+# Branch lengths and cor matrix
+##################################
+      # Now that we have the tree file, we need to use it to create a phylogenetic correlation matrix using Grafen's method. This assumes Brownian motion and is the best we can do without a molecular phylogeny. The topology of the tree should be fairly good. We will explore a few different options with p to determine the best power function
+      
+        tree_p1 <- compute.brlen(tree, method = "Grafen", power = 1)
+      tree_p0.5 <- compute.brlen(tree, method = "Grafen", power = 0.5)
+        
+     # Create null nodes 
+        tree_p1$node.label <- NULL # We don't use nodes and will cause a warning so create null node names
+      tree_p0.5$node.label <- NULL # We don't use nodes and will cause a warning so create null node names
+      
+     # Now lets create the phylogenetic matrices for analysis
+      invA_1 <-       MCMCglmm::inverseA(tree_p1, nodes = "TIPS")$Ainv  # This in an inverse phylogenetic correlaton matrix, which is what MCMCglmm takes
+         A_1 <- solve(MCMCglmm::inverseA(tree_p1, nodes = "TIPS")$Ainv) # This in a phylogenetic correlaton matrix, which is what brms takes
+    rownames(A_1) <- rownames(invA_1)
+    
+    invA_0.5 <-       MCMCglmm::inverseA(tree_p0.5, nodes = "TIPS")$Ainv  # This in an inverse phylogenetic correlaton matrix, which is what MCMCglmm takes
+       A_0.5 <- solve(MCMCglmm::inverseA(tree_p0.5, nodes = "TIPS")$Ainv) # This in a phylogenetic correlaton matrix, which is what brms takes
+  rownames(A_0.5) <- colnames(A_0.5) <- rownames(invA_0.5)
+  
+
+```
+
+```{r meta-analysis}
+
+# There are a few ways to do this. We could re-organise the dataframe for all effect sizes and run "acute" and "acclim" effects. Alternatively, we can run a multivariate / multi-response model. Problem with this model is that there is quite a bit of missing data for each column of the data. I'm going to have a crack using brms first. Some important thing sto note. First, we don't really have any predcitions about acute hot or cold being different. As such, the acute responses could simply be condensed down. These are samples of independent indiviudals, not the same ones, so we could treat them as independent effect sizes. Acute and acclimation effects can come from the same paper, assuming those papers have done a fully factorial design. As such, we should account for the non-indpendence at the study/ paper level
+
+data_long$obs <- 1:dim(data_long)[1]
+
+rerun1 = FALSE
+if(rerun1){
+  lnRR_Q10_mod1 <- brm(lnRR_Q10 | se(sqrt(V_lnRR_Q10)) ~ type + (1 + type|paper) + (1|species_full) + (1|obs), family = gaussian(), data = data_long, control = list(adapt_delta = 0.95), cores = 4, chains = 4, iter = 4000, warmup = 1000, thin = 5)
+  saveRDS(lnRR_Q10_mod1, "../models/lnRR_Q10_mod1")
+} else{
+lnRR_Q10_mod1 <- readRDS("../models/lnRR_Q10_mod1")  }
+
+# Checks
+ summary(lnRR_Q10_mod1)     # Rhat all 1 = chain convergence
+    plot(lnRR_Q10_mod1)     # Good mixing
+   pairs(lnRR_Q10_mod1)
+bayes_R2(lnRR_Q10_mod1)     # Variance explained by model
+
+fixed_m1 <- posterior_samples(lnRR_Q10_mod1, "^b")
+hyp_m1 <- hypothesis(lnRR_Q10_mod1, "typeacute = 0", class = "b", alpha = 0.05, scope = "standard")
+
+# Build table results
+# Acute mean esatimte and 95% CI
+m1_results <- data.frame("Estimate" = c(mean(rowSums(fixed_m1)), mean(fixed_m1$b_Intercept)), 
+                          "SE" = c(sd(rowSums(fixed_m1)), sd(fixed_m1$b_Intercept)),
+                      "CI " = rbind(quantile(rowSums(fixed_m1), c(0.025, 0.975)), 
+                                   quantile(fixed_m1$b_Intercept, c(0.025,0.975))), 
+                      check.names = FALSE)
+
+rerun2 = FALSE
+if(rerun2){
+  lnRR_Q10_mod2 <- brm(lnRR_Q10 | se(sqrt(V_lnRR_Q10)) ~ type*habitat + (1 + type|paper) + (1|species_full) + (1|obs), family = gaussian(), data = data_long, control = list(adapt_delta = 0.99), cores = 4, chains = 4, iter = 4000, warmup = 1000, thin = 5)
+  saveRDS(lnRR_Q10_mod2, "../models/lnRR_Q10_mod2")
+}else{
+  lnRR_Q10_mod2 <- readRDS("../models/lnRR_Q10_mod2")
+}
+# Checks
+ summary(lnRR_Q10_mod2) # Rhat all 1 = chain convergence
+    plot(lnRR_Q10_mod2) # Good mixing
+   pairs(lnRR_Q10_mod2) # Looks good
+bayes_R2(lnRR_Q10_mod2) # Variance explained by model
+
+
+fixed_m2 <- posterior_samples(lnRR_Q10_mod2, "^b")
+
+```
+
+### *Publication Bias*
+
+```{r, FigS3, fig.width=10, fig.height=5, fig.cap="Funnel plots of precision and effect size for three effect size measures"}
+      # Some plots
+      par(mfrow=c(1,3), pch = 16, lty = 2, cex.lab = 2, las = 1, lwd = 1.5,mar = c(5,8,1,1))
+      plot(1/sqrt(V_lnRR_Q10)  ~ lnRR_Q10, data = data_long, ylab = TeX('Precision  $\\left( \\frac{1}{se} \\right)$'), xlab = TeX('$lnRR_{Q_{10}}$'))
+      abline(v = 0, col = "red")
+      par(mar =c(5,3,1,1))
+      plot(1/sqrt(V_lnVR_Q10)  ~ lnVR_Q10, data = data_long, ylab = "", xlab = TeX('$lnVR_{Q_{10}}$'))
+      abline(v = 0, col = "red")
+      plot(1/sqrt(V_lnCVR_Q10) ~ lnCVR_Q10, data = data_long, ylab = "", xlab = TeX('$lnCVR_{Q_{10}}$'))
+      abline(v = 0, col = "red") 
+      
+```
+## References

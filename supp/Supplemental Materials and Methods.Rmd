@@ -37,7 +37,7 @@ knitr::opts_chunk$set(echo = FALSE, cache = TRUE, message = FALSE, warning = FAL
 ##################################
 # Loading packages & Functions
 ##################################
-    pacman::p_load(tidyverse, kableExtra, gridExtra, magrittr, Hmisc, googlesheets4, metafor, stringr, formatR, rmarkdown, kableExtra, flextable, raster, rasterVis, rnoaa, sp, ggmap, patchwork, ggpubr, RColorBrewer, sf, ggtree, ape, phytools, viridis, ncdf4.helpers, ncdf4, PCICt, readr, chron, microclima, NicheMapR, tmap, rgdal, MCMCglmm, brms, latex2exp)
+    pacman::p_load(tidyverse, kableExtra, gridExtra, magrittr, Hmisc, googlesheets4, metafor, stringr, formatR, rmarkdown, kableExtra, flextable, raster, rasterVis, rnoaa, sp, ggmap, patchwork, ggpubr, RColorBrewer, sf, ggtree, ape, phytools, viridis, ncdf4.helpers, ncdf4, PCICt, readr, chron, tmap, rgdal, MCMCglmm, brms, latex2exp)
 
 #devtools::install_github(repo = "ErikKusch/KrigR")
 ## Function to produce colour palette
@@ -56,7 +56,7 @@ colfunc <- colorRampPalette(rev(brewer.pal(10,"RdBu")))
 ##################################
 
     #data <- read_sheet(ss = "q10_newdata")
-    data <- read.csv("../../data/CombinedData_wide.csv", stringsAsFactors = FALSE)
+    data <- read.csv("../data/CombinedData_wide.csv", stringsAsFactors = FALSE)
     data$lat <- as.numeric(data$lat)
     new_papers <- data[-grep("_o", data$record_num),]
     old_papers <- data[grep("_o", data$record_num),]
@@ -119,7 +119,7 @@ colfunc <- colorRampPalette(rev(brewer.pal(10,"RdBu")))
       data <- data %>%
               filter(!record_num == "p088_o")
 
-      #write.csv(data, file = "./output/data/data_final_wide.csv", row.names = FALSE)
+      write.csv(data, file = "../output/data/data_final_wide.csv", row.names = FALSE)
 ##################################
 ## Re-organise the data frame
 ##################################
@@ -176,7 +176,7 @@ colfunc <- colorRampPalette(rev(brewer.pal(10,"RdBu")))
       dim(data_long)
       with(data_long, table(type)) # Acute should be 2x larger
       with(data_long, table(type, trait_category))
-      #write.csv(data_long, file = "./output/data/data_final_long.csv", row.names = FALSE)
+      write.csv(data_long, file = "../output/data/data_final_long.csv", row.names = FALSE)
 ```
 
 ## Materials and Methods
@@ -409,8 +409,8 @@ grid   = expand.grid(lon = lon, lat = lat)
 #cutpts = c(-5, -2, 0, 5, 10, 15, 20, 25, 30, 35)
 levelplot(sst.slice ~ lon * lat, data = grid,  cuts = 11, pretty = TRUE, 
           col.regions = colfunc(50), ylab = "Latitude", xlab = "Longitude")  +# Have a quick look
-          layer(sp.points(points, pch = 16, col = "black")) + 
-          layer(sp.lines(coast_outline, col="black", lwd=0.5))
+          latticeExtra::layer(sp.points(points, pch = 16, col = "black")) + 
+          latticeExtra::layer(sp.lines(coast_outline, col="black", lwd=0.5))
 
 # Lets convert this to a dataframe so we can summarise data a bit easier. Remember, we have range of lat, long over a large period of time. So, we can expand upon the three variables.
 #longlat <- as.matrix(expand.grid(lon, lat, time))
@@ -473,18 +473,18 @@ The global distribution of studies / species in our data base was wide, with mos
 ```{r FigS1,fig.height=10, fig.cap="Global distribution of species / studies for terrestrial, freshwater and marine ectotherm acclimation research. Latitudes and longitudes of studies are projected on a global map of maximum surface temperature in A) December, B) April and C) August for world and North America" }
   
  p1 <- levelplot(seasonalityDec/10, margin =FALSE, cuts=20, pretty=TRUE, main = "December", col.regions=colfunc(50)) +
-        layer(sp.points(points, pch = 16, col = "black")) +
-        layer(sp.lines(coast_outline, col="black", lwd=0.5)) # Add coastline layer to define boundaries better +
+        latticeExtra::layer(sp.points(points, pch = 16, col = "black")) +
+        latticeExtra::layer(sp.lines(coast_outline, col="black", lwd=0.5)) # Add coastline layer to define boundaries better +
  p2 <- levelplot(seasonalityApril/10, margin =FALSE, main = "April", cuts=20, pretty=TRUE, col.regions=colfunc(50)) + 
-        layer(sp.points(points, pch = 16, col = "black")) + 
-        layer(sp.lines(coast_outline, col="black", lwd=0.5)) # Add coastline layer to define boundaries better
+        latticeExtra::layer(sp.points(points, pch = 16, col = "black")) + 
+        latticeExtra::layer(sp.lines(coast_outline, col="black", lwd=0.5)) # Add coastline layer to define boundaries better
  p3 <- levelplot(seasonalityAugust/10, margin =FALSE, main = "August",cuts=20, pretty=TRUE, col.regions=colfunc(50)) +
-        layer(sp.points(points, pch = 16, col = "black")) + 
-        layer(sp.lines(coast_outline, col="black", lwd=0.5)) # Add coastline layer to define boundaries better
+        latticeExtra::layer(sp.points(points, pch = 16, col = "black")) + 
+        latticeExtra::layer(sp.lines(coast_outline, col="black", lwd=0.5)) # Add coastline layer to define boundaries better
  p4 <- levelplot(seasonalityAugust/10, margin =FALSE, main = "August",cuts=50, pretty=TRUE, 
                  col.regions=colfunc(100), ylim = c(0,100), xlim = c(-130, -40)) + 
-        layer(sp.points(points, pch = 16, col = "black")) + 
-        layer(sp.lines(coast_outline, col="black", lwd=0.5)) # Add coastline layer to define boundaries better
+        latticeExtra::layer(sp.points(points, pch = 16, col = "black")) + 
+        latticeExtra::layer(sp.lines(coast_outline, col="black", lwd=0.5)) # Add coastline layer to define boundaries better
  
  ggarrange(p1, p2, ggarrange(p3, p4, ncol=2, labels="C)"), labels = c("A)", "B)"), nrow = 3)
 
@@ -617,9 +617,9 @@ data_long$obs <- 1:dim(data_long)[1]
 rerun1 = FALSE
 if(rerun1){
   lnRR_Q10_mod1 <- brm(lnRR_Q10 | se(sqrt(V_lnRR_Q10)) ~ type + (1 + type|paper) + (1|species_full) + (1|obs), family = gaussian(), data = data_long, control = list(adapt_delta = 0.95), cores = 4, chains = 4, iter = 4000, warmup = 1000, thin = 5)
-  saveRDS(lnRR_Q10_mod1, "../models/lnRR_Q10_mod1")
+  saveRDS(lnRR_Q10_mod1, "../output/models/lnRR_Q10_mod1")
 } else{
-lnRR_Q10_mod1 <- readRDS("../models/lnRR_Q10_mod1")  }
+lnRR_Q10_mod1 <- readRDS("../output/models/lnRR_Q10_mod1")  }
 
 # Checks
  summary(lnRR_Q10_mod1)     # Rhat all 1 = chain convergence
@@ -641,9 +641,9 @@ m1_results <- data.frame("Estimate" = c(mean(rowSums(fixed_m1)), mean(fixed_m1$b
 rerun2 = FALSE
 if(rerun2){
   lnRR_Q10_mod2 <- brm(lnRR_Q10 | se(sqrt(V_lnRR_Q10)) ~ type*habitat + (1 + type|paper) + (1|species_full) + (1|obs), family = gaussian(), data = data_long, control = list(adapt_delta = 0.99), cores = 4, chains = 4, iter = 4000, warmup = 1000, thin = 5)
-  saveRDS(lnRR_Q10_mod2, "../models/lnRR_Q10_mod2")
+  saveRDS(lnRR_Q10_mod2, "../output/models/lnRR_Q10_mod2")
 }else{
-  lnRR_Q10_mod2 <- readRDS("../models/lnRR_Q10_mod2")
+  lnRR_Q10_mod2 <- readRDS("../output/models/lnRR_Q10_mod2")
 }
 # Checks
  summary(lnRR_Q10_mod2) # Rhat all 1 = chain convergence

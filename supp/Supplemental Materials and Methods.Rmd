@@ -47,23 +47,19 @@ colfunc <- colorRampPalette(rev(brewer.pal(10,"RdBu")))
 
     # loading functions
     source("../R/functions.R")
-    
-     #gs <- gs_title("q10_newdata")
-    #data <- as_tibble(gs_read(ss = gs))
 
 ##################################
 # Load Data & Manipulate
 ##################################
 
-    #data <- read_sheet(ss = "q10_newdata")
-    data <- read.csv("../data/CombinedData_wide.csv", stringsAsFactors = FALSE)
-    data$lat <- as.numeric(data$lat)
+          data <- read.csv("../data/CombinedData_wide.csv", stringsAsFactors = FALSE)
+      data$lat <- as.numeric(data$lat)
     new_papers <- data[-grep("_o", data$record_num),]
     old_papers <- data[grep("_o", data$record_num),]
     
     # Add full species to data
       data <- data %>%
-        mutate(species_full = paste0(genus, " ",species))
+              mutate(species_full = paste0(genus, " ",species))
       
     # habitat
       spp_habitat <- data %>%

@@ -68,8 +68,10 @@ colfunc <- colorRampPalette(rev(brewer.pal(10,"RdBu")))
     
       # Note that some species need to be replaced
       data <- data %>%
-              mutate(species_full = ifelse(species_full == "Chinemys reevesii", "Mauremys reevesii", species_full)) %>%
-              mutate(species_full = ifelse(species_full == "Enithares sp", "Enithares ciliata", species_full))  %>%
+              mutate(species_full = ifelse(species_full == "Chinemys reevesii", 
+                                           "Mauremys reevesii", species_full)) %>%
+              mutate(species_full = ifelse(species_full == "Enithares sp", 
+                                           "Enithares ciliata", species_full))  %>%
               mutate(habitat = ifelse(species_full == "Pungitius pungitius", "m", habitat))  %>% # Fix a few errors in habitat classificaton
               mutate(habitat = ifelse(species_full == "Danio rerio", "f", habitat)) 
       

@@ -12,8 +12,8 @@ library(ncdf4)
 #library(sf)
 #library(raster)
 
-if(!file.exists("Data/GBIF/Terrestrial_GBIF_occurrences_plus_habitat_and_NCEP_rowcol.csv")){
-  gbif     = read.csv("Data/GBIF/Terrestrial_GBIF_occurrences_plus_habitat.csv")
+if(!file.exists("./output/data/climate_data/GBIF/Terrestrial_GBIF_occurrences_plus_habitat_and_NCEP_rowcol.csv")){
+  gbif     = read.csv("./data/climate_data/Terrestrial_GBIF_occurrences_plus_habitat.csv")
   gbif$Fid = 1:nrow(gbif)
   #gbif_shp = st_as_sf(gbif, coords = c("longitude", "latitude"), crs = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs")
   
@@ -25,7 +25,7 @@ if(!file.exists("Data/GBIF/Terrestrial_GBIF_occurrences_plus_habitat_and_NCEP_ro
   gbif$NCEPcol[gbif$NCEPcol<0] = (180-abs(gbif$NCEPcol[gbif$NCEPcol<0]))+180
   gbif$NCEPcol = as.numeric(cut(gbif$longitude, seq(0,360,2.5), labels=c(1:144)))
   
-  ncfname   = "E:/NCEP_Reanalysis 1/air.sig995.1960.nc"
+  ncfname   = "./data/climate_data/NCEP_Reanalysis 1/air.sig995.1960.nc"
   NCEP.air  = nc_open(ncfname)
   print(NCEP.air)
   dname     = "air"
@@ -58,11 +58,11 @@ if(!file.exists("Data/GBIF/Terrestrial_GBIF_occurrences_plus_habitat_and_NCEP_ro
                                count= c(1,1,nt) )
   plot(point.timeseries ~c(1:nt), type="l")
   
-  write.csv(gbif, "Data/GBIF/Terrestrial_GBIF_occurrences_plus_habitat_and_NCEP_rowcol.csv")
+  write.csv(gbif, "data/climate_data/Terrestrial_GBIF_occurrences_plus_habitat_and_NCEP_rowcol.csv")
   
 } else {
   
-  gbif = read.csv("Data/GBIF/Terrestrial_GBIF_occurrences_plus_habitat_and_NCEP_rowcol.csv")
+  gbif = read.csv("data/climate_data/Terrestrial_GBIF_occurrences_plus_habitat_and_NCEP_rowcol.csv")
   
   spp  = unique(gbif$Species)
   
@@ -77,7 +77,7 @@ if(!file.exists("Data/GBIF/Terrestrial_GBIF_occurrences_plus_habitat_and_NCEP_ro
       
       # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
       # Open NETCDF file
-      ncfname   = paste0("E:/NCEP_Reanalysis 1/air.sig995.",j,".nc")
+      ncfname   = paste0("./data/climate_data/NCEP_Reanalysis 1/air.sig995.",j,".nc")
       NCEP.air  = nc_open(ncfname)
       dname     = "air"
       lon       = ncvar_get(NCEP.air, "lon")
@@ -123,7 +123,7 @@ if(!file.exists("Data/GBIF/Terrestrial_GBIF_occurrences_plus_habitat_and_NCEP_ro
     
     # Save file of temperatures for each species
     rownames(Tdat) = sdat$Fid
-    write.csv(Tdat, paste0("Output/ERA5/",sp,"_temperature_history.csv"))
+    write.csv(Tdat, paste0("./output/climate_data/ERA5/",sp,"_temperature_history.csv"))
     
   } #  End of species loop
   

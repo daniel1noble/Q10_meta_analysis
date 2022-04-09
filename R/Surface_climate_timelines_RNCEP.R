@@ -13,13 +13,13 @@ rm(list=ls())
 library(raster)
 library(RNCEP)
 
-gbif = read.csv("Data/GBIF/Terrestrial_GBIF_occurrences_plus_habitat.csv")
+gbif = read.csv("data/climate_data/Terrestrial_GBIF_occurrences_plus_habitat.csv")
 
 # Work through species
 for(spp in unique(gbif$Species)){
   
-  if(file.exists(paste0("Output/RNCEP/",spp,"_clim_stats.RData"))){
-    load(paste0("Data/Land/",spp,"_clim_stats.RData"))
+  if(file.exists(paste0("output/climate_data/RNCEP/",spp,"_clim_stats.RData"))){
+    load(paste0("output/climate_data/RNCEP/land/",spp,"_clim_stats.RData")) 
     sites               = gbif_microclimate[[2]]
     annual.thermal.data = gbif_microclimate[[3]]
     s2                  = gbif_microclimate[[4]]
@@ -110,7 +110,7 @@ for(spp in unique(gbif$Species)){
     
     # Save
     gbif_microclimate = list("Species"=spp,"XY"=sites.xy, "Site_order"=sites,"Microclimate"=annual.thermal.data,"Time_taken"=s2)
-    save(gbif_microclimate, file=paste0("Data/Land/",spp,"_microclimate_stats.RData"))
+    save(gbif_microclimate, file=paste0("output/climate_data/RNCEP/land/",spp,"_microclimate_stats.RData"))
     
   } # Site loop
   

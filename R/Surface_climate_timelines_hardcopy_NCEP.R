@@ -62,7 +62,7 @@ if(!file.exists("./output/data/climate_data/GBIF/Terrestrial_GBIF_occurrences_pl
   
 } else {
   
-  gbif = read.csv("data/climate_data/Terrestrial_GBIF_occurrences_plus_habitat_and_NCEP_rowcol.csv")
+  gbif = read.csv("./data/climate_data/Terrestrial_GBIF_occurrences_plus_habitat_and_ERA5_rowcol.csv")
   
   spp  = unique(gbif$Species)
   
@@ -77,7 +77,7 @@ if(!file.exists("./output/data/climate_data/GBIF/Terrestrial_GBIF_occurrences_pl
       
       # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
       # Open NETCDF file
-      ncfname   = paste0("./data/climate_data/NCEP_Reanalysis 1/air.sig995.",j,".nc")
+      ncfname   = paste0("./data/climate_data/NCEP_Reanalysis_1/air.sig995.",j,".nc")
       NCEP.air  = nc_open(ncfname)
       dname     = "air"
       lon       = ncvar_get(NCEP.air, "lon")

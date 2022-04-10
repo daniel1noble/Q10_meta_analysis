@@ -24,8 +24,8 @@ library(ncdf4)
 #library(sf)
 #library(raster)
 
-if(!file.exists("./data/climate_data/Terrestrial_GBIF_occurrences_plus_habitat_and_ERA5_rowcol.csv")){
-  gbif     = read.csv("./data/climate_data/Terrestrial_GBIF_occurrences_plus_habitat.csv")
+if(!file.exists("Data/GBIF/Terrestrial_GBIF_occurrences_plus_habitat_and_ERA5_rowcol.csv")){
+  gbif     = read.csv("Data/GBIF/Terrestrial_GBIF_occurrences_plus_habitat.csv")
   gbif$Fid = 1:nrow(gbif)
   #gbif_shp = st_as_sf(gbif, coords = c("longitude", "latitude"), crs = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs")
   
@@ -37,8 +37,8 @@ if(!file.exists("./data/climate_data/Terrestrial_GBIF_occurrences_plus_habitat_a
   gbif$ERA5col[gbif$ERA5col<0] = (180-abs(gbif$ERA5col[gbif$ERA5col<0]))+180
   gbif$ERA5col = as.numeric(cut(gbif$longitude, seq(0,360,0.25), labels=c(1:1440)))
   
-  ncfname   = "./data/climate_data/ERA5/ERA5_LST_and_SST_1979-present.nc"
-  ERA5.air  = nc_open(ncfname) ## Fails here, why?
+  ncfname   = "E:/ERA5/ERA5_LST_and_SST_1979-present.nc"
+  ERA5.air  = nc_open(ncfname)
   print(ERA5.air)
   dname     = "t2m"
   lon       = ncvar_get(ERA5.air, "longitude")
@@ -75,11 +75,11 @@ if(!file.exists("./data/climate_data/Terrestrial_GBIF_occurrences_plus_habitat_a
   
   rm(map, point.timeseries)
   
-  write.csv(gbif, ".data/climate_data/Terrestrial_GBIF_occurrences_plus_habitat_and_ERA5_rowcol.csv")
+  write.csv(gbif, "Data/GBIF/Terrestrial_GBIF_occurrences_plus_habitat_and_ERA5_rowcol.csv")
   
 } else {
   
-  gbif = read.csv("./data/climate_data/Terrestrial_GBIF_occurrences_plus_habitat_and_ERA5_rowcol.csv")
+  gbif = read.csv("Data/GBIF/Terrestrial_GBIF_occurrences_plus_habitat_and_ERA5_rowcol.csv")
   
   spp  = unique(gbif$Species)
   
@@ -91,17 +91,17 @@ if(!file.exists("./data/climate_data/Terrestrial_GBIF_occurrences_plus_habitat_a
     
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
     # Open NETCDF file
-    ncfname   = paste0("E:/ERA5_Reanalysis 1/air.sig995.",j,".nc")
+    ncfname   = paste0("C:/Users/pickl/OneDrive - Lancaster University/Projects/Active/Noble_physiological_rates/Data/ERA5/ERA5_LST_and_SST_1979-present.nc")
     ERA5.air  = nc_open(ncfname)
     dname     = "t2m"
-    lon       = ncvar_get(ERA5.air, "lon")
+    lon       = ncvar_get(ERA5.air, "longitude") # ncvar_get(ERA5.air, "lon")
     nlon      = length(lon) # number of columns
-    lat       = ncvar_get(ERA5.air, "lat", verbose = F)
+    lat       = ncvar_get(ERA5.air, "latitude") # ncvar_get(ERA5.air, "lat", verbose = F)
     nlat      = length(lat) # number of rows
     t         = ncvar_get(ERA5.air, "time")                 # units: hours since 1900-01-01 00:00:00.0
     nt        = dim(t)                  # monthly averages
     # Create a copy of the data as an array in R (which unlike the netcdf, makes
-    # it possile to index multiple locations at once)
+    # it possible to index multiple locations at once)
     X         = ncvar_get(ERA5.air, dname, start= c(1,1,1,1), count= c(nlon,nlat,1,nt) )
     nc_close(ERA5.air)
     

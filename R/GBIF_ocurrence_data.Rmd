@@ -1,0 +1,219 @@
+---
+title: "GBIF occurrences"
+author: "Alex Bush"
+date: "17/05/2021"
+output: html_document
+---
+
+# Species Data
+
+```{r}
+rm(list=ls())
+
+spp.list = read.csv("../q10_meta-master/data/species_list_Q10.csv")
+spp      = unique(spp.list$species_full)
+
+spp[71]  = "Enithares"                 # Switch 'Enithares sp' to whole genus
+spp[73]  = "Euchemotrema leaii"        # Synonym: Euchemotrema leai
+spp[133] = "Merlangius merlangus"      # Synonym: Merlanguis merlangus
+spp[175] = "Pinctada mazatlanica"      # Synonym: Pinctada mazatlantica
+spp[202] = "Hoplobatrachus tigerinus"  # Synonym: Rana tigrina
+spp[203] = "Lithobates virgatipes"     # Synonym: Rana vergatipes
+spp[239] = "Zoarces viviparus"         # Synonym: Zoarces viviparous
+
+# Note:
+# > Halozetes fulvus is a species of mite endemic to Marion Island, hence no records in GBIF
+
+```
+
+
+# DOWNLOAD DATA FROM GBIF
+
+```{r }
+library(rgbif)
+library(scrubr)
+library(maps)
+
+for(i in 1:length(spp)){
+  if( !file.exists(paste0("../Data/GBIF/",gsub(" ","_",spp[i]),"_occurrences.RData")) ){
+    # Download GBIF occurrence data for this taxon
+    gbif_data = occ_data(scientificName = spp[i], hasCoordinate = TRUE, limit = 20000)
+    # Save
+    save(gbif_data, file=paste0("../Data/GBIF/",gsub(" ","_",spp[i]),"_occurrences.RData"))
+    # No of records available:
+    print(paste0(spp[i],": ",gbif_data$meta$count))
+    # If "Records found" is larger than "Records returned", need to increase the 'limit' argument above
+    # See help(occ_data) for options and limitations
+    rm(gbif_data)
+  }
+}
+
+# Quite a few have more than 20k records so need to update the download:
+xspp = c("Alligator mississippiensis","Amphiura filiformis","Anolis carolinensis","Asterias rubens","Barbus barbus","Bithynia tentaculata","Boreogadus saida","Carassius auratus","Carassius carassius","Caretta caretta","Chrysemys picta","Crocodylus porosus","Cyprinus carpio","Gadus macrocephalus","Gadus morhua","Gambusia holbrooki","Gasterosteus aculeatus","Lepomis cyanellus","Lepomis macrochirus","Lepomis megalotis","Limax maximus","Limecola balthica","Limnodynastes peronii","Lithobates clamitans","Micropterus salmoides","Myoxocephalus scorpius","Mytilus edulis","Notophthalmus viridescens","Oncorhynchus mykiss","Oncorhynchus tshawytscha","Ophiothrix fragilis","Osmerus mordax","Perca flavescens","Perca fluviatilis","Pimephales promelas","Pomoxis nigromaculatus","Porcellio scaber","Pseudopleuronectes americanus","Pungitius pungitius","Rhinella marina","Rutilus rutilus","Salmo trutta","Salvelinus fontinalis","Salvelinus namaycush","Scomber japonicus","Trachemys scripta","Vipera berus","Zoarces viviparus")
+
+for(i in match(xspp,spp)){
+  # Download GBIF occurrence data for this taxon (hard limit is 100000)
+  gbif_data = occ_data(scientificName = spp[i], hasCoordinate = TRUE, limit = 100000)
+  # Save
+  save(gbif_data, file=paste0("../Data/GBIF/",gsub(" ","_",spp[i]),"_occurrences.RData"))
+  # No of records available:
+  print(paste0(spp[i],": ",gbif_data$meta$count," == ",nrow(gbif_data$data)))
+  # If "Records found" is larger than "Records returned", need to increase the 'limit' argument above
+  # See help(occ_data) for options and limitations
+  rm(gbif_data)
+}
+  
+
+```
+
+
+# CLEAN RECORDS
+
+```{r }
+doi.list = list()
+
+for(i in 1:length(spp)){
+  # Load GBI occurrence file
+  load(paste0("../Data/GBIF/",gsub(" ","_",spp[i]),"_occurrences.RData"))
+  
+  # get the columns that matter for mapping and cleaning the occurrence data:
+  xcols = c("decimalLongitude","decimalLatitude",
+            "individualCount","occurrenceStatus",
+            "coordinateUncertaintyInMeters",
+            "institutionCode") #"references"
+  coords = gbif_data$data[,names(gbif_data$data)%in%xcols] 
+  coords = data.frame("Species" = spp[i], coords)
+  #head(coords)
+
+  # Map the occurrence data:
+  map("world", 
+      xlim = range(coords$decimalLongitude), 
+      ylim = range(coords$decimalLatitude))  
+  points(coords[ , c("decimalLongitude", "decimalLatitude")],pch=16, col="red", cex=0.5)
+  
+  
+  # Remove records of absence or zero-abundance (if any)
+  if( c("individualCount") %in% names(gbif_data$data)  ){
+    #sort(unique(coords$individualCount))   # notice if some points correspond to zero abundance
+    if( any(coords$individualCount==0 & !is.na(coords$individualCount)) ){
+      coords = coords[!which(coords$individualCount==0 & !is.na(coords$individualCount)),]
+    }
+  }
+  
+  # Check for different indications of "absent", which could be in different languages! and remember that R is case-sensitive
+  if( (c("individualCount") %in% names(gbif_data$data)) & c("occurrenceStatus") %in% names(gbif_data$data)  ){
+    #sort(unique(coords$occurrenceStatus))
+    absence_rows = which(coords$individualCount==0 | 
+                           coords$occurrenceStatus %in% c("absent","Absent","ABSENT","ausente","Ausente","AUSENTE"))
+    if(length(absence_rows) > 0){ coords = coords[-absence_rows, ] ; print(paste0("Removing ",length(absence_rows)," rows of 'absence' data.")) }
+  }
+  
+  # Functions from the 'scrubr' package identify records with lat/long issues
+  if( c("coordinateUncertaintyInMeters") %in% names(gbif_data$data)  ){
+    #nrow(coords)
+    coords      = coord_incomplete(coord_imprecise(coord_impossible(coord_unlikely(coords))))
+    #nrow(coords)
+  }
+  
+  # Eliminate presences with reported coordinate uncertainty (location error, 
+  # spatial resolution) larger than 1 km (as this will be the grain of 
+  # observation for the climate data later):
+  if( c("coordinateUncertaintyInMeters") %in% names(gbif_data$data)  ){
+    coords = coord_uncertain(coords, coorduncertainityLimit = 1000)
+    #nrow(coords)
+  }
+  
+  # Add DOIs to list for eventual citation for all species:
+  doi.list = c(doi.list, gbif_citation(gbif_data))
+  
+  # Save
+  save(gbif_data, file=paste0("../Data/GBIF/",gsub(" ","_",spp[i]),"_occurrences.RData"))
+  
+  rm(gbif_data)
+  print(i)
+}
+
+
+# Keep only unique DOI's
+doi.list = unique(doi.list)
+# Save DOIs
+save(doi.list, file="../Data/GBIF/List_of_GBIF_data_DOIs.RData")
+
+```
+
+
+****
+
+```{r}
+gbif = data.frame("Species"          = NA,
+                  "decimalLongitude" = NA,
+                  "decimalLatitude"  = NA)
+
+for(i in c(1:length(spp))[-95] ){
+  load(paste0("../Data/GBIF/",gsub(" ","_",spp[i]),"_occurrences.RData"))
+  gbif = rbind(gbif, data.frame("Species"=spp[i],gbif_data$data[,c("decimalLongitude","decimalLatitude")]))
+  print(paste0(spp[i],"   :::    ",nrow(gbif_data$data)))
+  
+}
+gbif         = gbif[-1,]
+gbif         = gbif[!duplicated(gbif),]
+gbif$Species = gsub(" ","_",gbif$Species)
+
+# Save
+write.csv(gbif, paste0("../Data/GEE/All_GBIF_occurrences.csv"), row.names = F)
+
+#map("world")
+#points(gbif[ ,c("decimalLongitude","decimalLatitude")],pch=16, col="red", cex=0.5)
+
+
+
+
+```
+
+```{r}
+rm(list=ls())
+
+gbif = read.csv(paste0("../Data/GBIF/All_GBIF_occurrences.csv"))
+names(gbif)[2:3] = c("longitude","latitude")
+
+spp.list = read.csv("../q10_meta-master/data/species_list_Q10.csv")
+spp      = spp.list$species_full
+spp[71]  = "Enithares"                 # Switch 'Enithares sp' to whole genus
+spp[73]  = "Euchemotrema leaii"        # Synonym: Euchemotrema leai
+spp[133] = "Merlangius merlangus"      # Synonym: Merlanguis merlangus
+spp[175] = "Pinctada mazatlanica"      # Synonym: Pinctada mazatlantica
+spp[202] = "Hoplobatrachus tigerinus"  # Synonym: Rana tigrina
+spp[203] = "Lithobates virgatipes"     # Synonym: Rana vergatipes
+spp[239] = "Zoarces viviparus"         # Synonym: Zoarces viviparous
+
+widedat  = read.csv("../q10_meta-master/data/CombinedData_wide.csv")
+widedat$spp_names = paste(widedat$genus,widedat$species)
+habitat  = widedat$habitat[match(spp.list$species_full, gsub("_"," ",widedat$spp_names))]
+# Change habitat of Shortnose Sturgeon (Acipenser brevirostrum) to freshwater
+habitat[4] = "f"
+
+gbif             = read.csv(paste0("../Data/GEE/All_GBIF_occurrences.csv"))
+names(gbif)[2:3] = c("longitude","latitude")
+gbif$habitat     = habitat[match(gbif$Species, gsub(" ","_",spp))]
+
+# Subsets
+gbif_terr        = gbif[gbif$habitat=="t",1:3] # Take terrestrial subset for MODIS LCM extraction
+gbif_fresh       = gbif[gbif$habitat=="f",1:3] # Take freshwater subset (also for MODIS LCM extraction)
+gbif_mar         = gbif[gbif$habitat=="m",1:3] # Take marine subset to extract NOAA SST data
+
+gbif_terr$Fid    = c(1:nrow(gbif_terr))
+gbif_fresh$Fid   = c(1:nrow(gbif_fresh))
+gbif_mar$Fid     = c(1:nrow(gbif_mar))
+
+
+write.csv(gbif_terr,  paste0("../Data/GBIF/Terrestrial_GBIF_occurrences.csv"), row.names = F)
+write.csv(gbif_fresh, paste0("../Data/GBIF/Freshwater_GBIF_occurrences.csv"), row.names = F)
+write.csv(gbif_mar,   paste0("../Data/GBIF/Marine_GBIF_occurrences.csv"), row.names = F)
+
+
+```
+
+
+
+
+

@@ -62,7 +62,7 @@ if(!file.exists("./output/data/climate_data/GBIF/Terrestrial_GBIF_occurrences_pl
   
 } else {
   
-  gbif = read.csv("./data/climate_data/Terrestrial_GBIF_occurrences_plus_habitat_and_ERA5_rowcol.csv")
+  gbif = read.csv("./data/climate_data/Terrestrial_GBIF_occurrences_plus_habitat_and_NCEP_rowcol.csv")
   
   spp  = unique(gbif$Species)
   
@@ -123,7 +123,7 @@ if(!file.exists("./output/data/climate_data/GBIF/Terrestrial_GBIF_occurrences_pl
     
     # Save file of temperatures for each species
     rownames(Tdat) = sdat$Fid
-    write.csv(Tdat, paste0("./output/climate_data/ERA5/",sp,"_temperature_history.csv"))
+    write.csv(Tdat, paste0("./output/climate_data/NCEP/",sp,"_temperature_history.csv"))
     
   } #  End of species loop
   

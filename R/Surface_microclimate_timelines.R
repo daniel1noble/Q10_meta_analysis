@@ -158,7 +158,7 @@ apply(spp.lcm>0, 1, sum)
 
 write.csv(gbif_terr,  "Data/GBIF/Terrestrial_GBIF_occurrences_plus_habitat.csv", row.names = F)
 
-
+###################### START CODE HERE FOR MICROCLIMATE PROJECTIONS###########
 ###################################################################################
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
 #                         MICROCLIMATE CALCULATION

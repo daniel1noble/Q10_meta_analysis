@@ -26,9 +26,7 @@ knitr::opts_chunk$set(echo = FALSE, cache = TRUE, message = FALSE, warning = FAL
 ## numbers >= 10^5 will be denoted in scientific notation,		  ## numbers >= 10^5 will be denoted in scientific notation,
   ## and rounded to 2 digits		  ## and rounded to 2 digits
   options(digits = 2)
-```
 
-```{r packages_data, results='hide'}
 ##################################
 # Clean workspace
 ##################################
@@ -47,7 +45,9 @@ colfunc <- colorRampPalette(rev(brewer.pal(10,"RdBu")))
 
     # loading functions
     source("../R/functions.R")
+```
 
+```{r packages_data, results='hide', eval = FALSE}
 ##################################
 # Load Data & Manipulate
 ##################################
@@ -291,6 +291,8 @@ We recorded or derived a series of moderator variables from each study that are 
 #####################################
 # Data Descriptions and Exploration
 #####################################
+data_long <- read.csv("../output/data/data_final_long.csv")
+data_wide <- read.csv("../output/data/data_final_wide.csv")
 
 #spp <- data %>% dplyr::distinct(species_full, class, order, family) %>% arrange(species_full)
 
@@ -497,7 +499,7 @@ Overall, we have a total of `r sum(spp_habitat$spp_n)` species in the data. Phyl
 ##################################
 
     ## Tree data; also fix up some errors
-    tree_data <-  data %>%
+    tree_data <-  data_long %>%
                   mutate(species_full = gsub("Chinemys reevesii", "Mauremys reevesii", species_full)) %>% 
                   mutate(species_full = gsub("Enithares sp", "Enithares ciliata", species_full)) %>%
                   mutate(habitat = ifelse(species_full == "Pungitius pungitius", "m", habitat))  %>%
@@ -507,6 +509,17 @@ Overall, we have a total of `r sum(spp_habitat$spp_n)` species in the data. Phyl
                   dplyr::select(species_full,  habitat, n) %>% 
                   distinct(species_full, habitat, n) 
   
+    # Get the unique species lat and long data which will be used to extract climate data for each ppulation / species for wild derived sources.
+    climate_data <-  data_long %>%
+                  mutate(species_full = gsub("Chinemys reevesii", "Mauremys reevesii", species_full)) %>% 
+                  mutate(species_full = gsub("Enithares sp", "Enithares ciliata", species_full)) %>%
+                  mutate(habitat = ifelse(species_full == "Pungitius pungitius", "m", habitat))  %>%
+                  mutate(habitat = ifelse(species_full == "Danio rerio", "f", habitat))  %>%
+                  group_by(species_full)%>%
+                  mutate(n = length(habitat)) %>%
+                  dplyr::select(species_full,  habitat, source, n, lat, long) %>% 
+                  distinct(species_full, habitat, n, source, lat, long) 
+      write.csv(climate_data, file = "../data/climate_data/Species_LatLong_plusHabitat.csv", row.names=FALSE)
   
       ## Load the phylogenetic tree
                 tree <- read.tree("../tree/tree_binary_SN_Q10.tre")   

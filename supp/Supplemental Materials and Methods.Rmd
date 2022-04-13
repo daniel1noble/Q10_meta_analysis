@@ -510,17 +510,17 @@ Overall, we have a total of `r sum(spp_habitat$spp_n)` species in the data. Phyl
                   distinct(species_full, habitat, n) 
   
     # Get the unique species lat and long data which will be used to extract climate data for each ppulation / species for wild derived sources.
-    climate_data <-  data_long %>%
+    climate_data <-  data_wide %>%
                   mutate(species_full = gsub("Chinemys reevesii", "Mauremys reevesii", species_full)) %>% 
                   mutate(species_full = gsub("Enithares sp", "Enithares ciliata", species_full)) %>%
                   mutate(habitat = ifelse(species_full == "Pungitius pungitius", "m", habitat))  %>%
                   mutate(habitat = ifelse(species_full == "Danio rerio", "f", habitat))  %>%
-                  group_by(species_full)%>%
-                  mutate(n = length(habitat)) %>%
-                  dplyr::select(species_full,  habitat, source, n, lat, long) %>% 
-                  distinct(species_full, habitat, n, source, lat, long) 
+                  dplyr::select(species_full,  habitat, source, lat, long) %>% 
+                  distinct(species_full, habitat, source, lat, long) 
       write.csv(climate_data, file = "../data/climate_data/Species_LatLong_plusHabitat.csv", row.names=FALSE)
   
+    
+
       ## Load the phylogenetic tree
                 tree <- read.tree("../tree/tree_binary_SN_Q10.tre")   
       tree$tip.label <- gsub("_", " ", tree$tip.label)

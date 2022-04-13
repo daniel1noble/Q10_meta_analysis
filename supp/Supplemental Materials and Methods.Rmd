@@ -516,7 +516,8 @@ Overall, we have a total of `r sum(spp_habitat$spp_n)` species in the data. Phyl
                   mutate(habitat = ifelse(species_full == "Pungitius pungitius", "m", habitat))  %>%
                   mutate(habitat = ifelse(species_full == "Danio rerio", "f", habitat))  %>%
                   dplyr::select(species_full,  habitat, source, lat, long) %>% 
-                  distinct(species_full, habitat, source, lat, long) 
+                  distinct(species_full, habitat, source, lat, long) %>%
+                  arrange(species_full)
       write.csv(climate_data, file = "../data/climate_data/Species_LatLong_plusHabitat.csv", row.names=FALSE)
   
     

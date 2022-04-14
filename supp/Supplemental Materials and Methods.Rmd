@@ -121,6 +121,10 @@ colfunc <- colorRampPalette(rev(brewer.pal(10,"RdBu")))
 ##################################
 ## Re-organise the data frame
 ##################################
+        ################ THIS SHOULD FIX THE DATA_LONG problems
+      data_long_t <- data_wide %>%
+                    pivot_longer(cols = c(27, 29, 31, 33, 35, 37, 39, 41, 43)) %>% data.frame()
+
       
       # We want to be able to reorganise the data longitudianlly based on the two acute and acclimation data. Extract the data in chunks
       

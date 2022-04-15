@@ -1,0 +1,29 @@
+---
+author: Daniel W.A. Noble, Fonti Kar, Frank Seebacher Alex Bush, & Shinichi Nakagawa
+date: "`r Sys.Date()`"
+bibliography: refs.bib
+csl: science.csl
+output: 
+  bookdown::html_document2:
+    code_folding: hide
+    number_sections: no
+    toc: yes
+    toc_depth: 6
+    toc_float: yes
+    bibliography: refs.bib
+  bookdown::word_document2:
+    toc: no
+    toc_depth: 6
+    number_sections: true
+    reference_docx: template.docx
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, cache = TRUE, message = FALSE, warning = FALSE, tidy = TRUE, fig.width = 10)
+## numbers >= 10^5 will be denoted in scientific notation,		  ## numbers >= 10^5 will be denoted in scientific notation,
+  ## and rounded to 2 digits		  ## and rounded to 2 digits
+  options(digits = 2)
+```
+

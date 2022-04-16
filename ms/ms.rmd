@@ -25,5 +25,25 @@ knitr::opts_chunk$set(echo = FALSE, cache = TRUE, message = FALSE, warning = FAL
 ## numbers >= 10^5 will be denoted in scientific notation,		  ## numbers >= 10^5 will be denoted in scientific notation,
   ## and rounded to 2 digits		  ## and rounded to 2 digits
   options(digits = 2)
+
+##################################
+# Clean workspace
+##################################
+    rm(list=ls())
+
+##################################
+# Loading packages & Functions
+##################################
+    pacman::p_load(tidyverse, kableExtra, gridExtra, magrittr, Hmisc, googlesheets4, metafor, stringr, formatR, rmarkdown, kableExtra, flextable, raster, rasterVis, rnoaa, sp, ggmap, patchwork, ggpubr, RColorBrewer, sf, ggtree, ape, phytools, viridis, ncdf4.helpers, ncdf4, PCICt, readr, chron, tmap, rgdal, MCMCglmm, brms, latex2exp)
+
+#devtools::install_github(repo = "ErikKusch/KrigR")
+## Function to produce colour palette
+# Note that temp is stored as a factor of 10 C larger, so needs to be divided. Also, we can greate a custom colour palelte function using colorRampPallette
+colfunc <- colorRampPalette(rev(brewer.pal(10,"RdBu")))
+#test colfunc(10) will generate the exact Hex codes for 10 different colours can 10 to 100 and you get 100 colour hex codes. Very useful webpage: https://pjbartlein.github.io/REarthSysSci/rasterVis01.html
+
+    # loading functions
+    source("../R/functions.R")
+
 ```
 

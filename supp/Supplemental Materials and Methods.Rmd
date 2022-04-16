@@ -52,22 +52,22 @@ colfunc <- colorRampPalette(rev(brewer.pal(10,"RdBu")))
 # Load Data & Manipulate
 ##################################
 
-          data <- read.csv("../data/CombinedData_wide.csv", stringsAsFactors = FALSE)
-      data$lat <- as.numeric(data$lat)
-    new_papers <- data[-grep("_o", data$record_num),]
-    old_papers <- data[grep("_o", data$record_num),]
+          data_wide <- read.csv("../data/CombinedData_wide.csv", stringsAsFactors = FALSE)
+      data_wide$lat <- as.numeric(data_wide$lat)
+    new_papers <- data_wide[-grep("_o", data_wide$record_num),]
+    old_papers <- data_wide[grep("_o", data_wide$record_num),]
     
     # Add full species to data
-      data <- data %>%
+      data_wide <- data_wide %>%
               mutate(species_full = paste0(genus, " ",species))
       
     # habitat
-      spp_habitat <- data %>%
+      spp_habitat <- data_wide %>%
                       group_by(habitat) %>%
                       summarise(spp_n = length(unique(species_full)))
     
       # Note that some species need to be replaced
-      data <- data %>%
+      data_wide <- data_wide %>%
               mutate(species_full = ifelse(species_full == "Chinemys reevesii", 
                                            "Mauremys reevesii", species_full)) %>%
               mutate(species_full = ifelse(species_full == "Enithares sp", 
@@ -76,7 +76,7 @@ colfunc <- colorRampPalette(rev(brewer.pal(10,"RdBu")))
               mutate(habitat = ifelse(species_full == "Danio rerio", "f", habitat)) 
       
     # Convert se to SD so it can be used for effect sizes. Drop out the SE columns as these are no longer needed
-      data <- data %>%
+      data_wide <- data_wide %>%
               mutate(r1.1_sd = se_to_sd(r1.1_se, r1.1_N),
                      r1.2_sd = se_to_sd(r1.2_se, r1.2_N),
                      r2.1_sd = se_to_sd(r2.1_se, r2.1_N),
@@ -89,7 +89,7 @@ colfunc <- colorRampPalette(rev(brewer.pal(10,"RdBu")))
 ##################################
     # Calculate Q10 effect sizes and sampling variances; filter out non-finate values and clean up dataframe a bit
       
-      data <- data %>%
+      data_wide <- data_wide %>%
              mutate(lnRR_Q10(t2=temp_2, t1=temp_1, r1=r1.1, r2=r1.2, sd1=r1.1_sd, sd2=r1.2_sd, n1=r1.1_N, n2=r1.2_N, 
                              name = "acute_t1"),
                     lnRR_Q10(t2=temp_2, t1=temp_1, r1=r2.1, r2=r2.2, sd1=r2.1_sd, sd2=r2.2_sd, n1=r2.1_N, n2=r2.2_N, 
@@ -114,10 +114,10 @@ colfunc <- colorRampPalette(rev(brewer.pal(10,"RdBu")))
       
     # #******** Problem with effect size calculation. V_lnVR and V_lnCVR are negative for a couple studies, should not be! Hence warning messages NaN in plotting of precision; explored this probalem more. It's actually incorrect data in the old dataset from Frank. Fonti explored the extraction for p088_o and error bars not found, sample sizes not correct. For second study, the N value was incorrect, should have been N = 5 not 0.11. Will exclude p_088_o from the data. Fonti did a check and tried to re-extract but in the end missing error so excluded
       
-      data <- data %>%
+      data_wide <- data_wide %>%
               filter(!record_num == "p088_o")
 
-      write.csv(data, file = "../output/data/data_final_wide.csv", row.names = FALSE)
+      write.csv(data_wide, file = "../output/data/data_final_wide.csv", row.names = FALSE)
 ##################################
 ## Re-organise the data frame
 ##################################

@@ -121,59 +121,13 @@ colfunc <- colorRampPalette(rev(brewer.pal(10,"RdBu")))
 ##################################
 ## Re-organise the data frame
 ##################################
+
+  # We want to be able to reorganise the data longitudianlly based on the two acute and acclimation data. Extract the data in chunks
+        
         ################ THIS SHOULD FIX THE DATA_LONG problems
-      data_long_t <- data_wide %>%
+      data_long <- data_wide %>%
                     pivot_longer(cols = c(27, 29, 31, 33, 35, 37, 39, 41, 43)) %>% 
                     mutate(type = ifelse(grepl("acute", name), "acute", "acclim")) %>% data.frame()
-
-      
-      # We want to be able to reorganise the data longitudianlly based on the two acute and acclimation data. Extract the data in chunks
-      
-      data_t1 <- data                                                  %>%
-                 dplyr::select(c(1:26, grep("acute_t1", colnames(.)))) %>%
-                 filter_if(~is.numeric(.), all_vars(!is.na(.)))        %>% # Filter all the na effect sizes 
-                 rename(lnRR_Q10    = lnRR_Q10_acute_t1,       # Rename columns
-                        V_lnRR_Q10  = V_lnRR_Q10_acute_t1,
-                        lnVR_Q10    = lnVR_Q10_acute_t1,
-                        V_lnVR_Q10  = V_lnVR_Q10_acute_t1, 
-                        lnCVR_Q10   = lnCVR_Q10_acute_t1,
-                        V_lnCVR_Q10 = V_lnCVR_Q10_acute_t1,
-                              paper = record_num)            %>%
-                 mutate(type = "acute")
-      
-      dim(data_t1)
-      
-      # Do the same for hot acute
-      data_t2 <- data                                                  %>%
-                 dplyr::select(c(1:26, grep("acute_t2", colnames(.)))) %>%
-                 filter_if(~is.numeric(.), all_vars(!is.na(.)))        %>%  # Filter all the na effect sizes 
-                 rename(lnRR_Q10    = lnRR_Q10_acute_t2,
-                        V_lnRR_Q10  = V_lnRR_Q10_acute_t2,
-                        lnVR_Q10    = lnVR_Q10_acute_t2,
-                        V_lnVR_Q10  = V_lnVR_Q10_acute_t2, 
-                        lnCVR_Q10   = lnCVR_Q10_acute_t2,
-                        V_lnCVR_Q10 = V_lnCVR_Q10_acute_t2,
-                              paper = record_num)            %>%
-                 mutate(type = "acute")
-      dim(data_t2)
-      
-      # Now do for the acclimation
-      data_acclim <- data                                            %>%
-                 dplyr::select(c(1:26, grep("acclim", colnames(.)))) %>%
-                 filter_if(~is.numeric(.), all_vars(!is.na(.)))      %>% # Filter all the na effect sizes 
-                 rename(lnRR_Q10    = lnRR_Q10_acclim,
-                        V_lnRR_Q10  = V_lnRR_Q10_acclim,
-                        lnVR_Q10    = lnVR_Q10_acclim,
-                        V_lnVR_Q10  = V_lnVR_Q10_acclim, 
-                        lnCVR_Q10   = lnCVR_Q10_acclim,
-                        V_lnCVR_Q10 = V_lnCVR_Q10_acclim,
-                              paper = record_num)            %>%
-                 mutate(type = "acclim")
-      dim(data_acclim)
-      
-      # All these data frames are exactly the same excet that the effect sizes. We've removed NA, so lets bind together
-      
-      data_long <- bind_rows(data_t1, data_t2, data_acclim)
       
       # Checks:
       dim(data_long)

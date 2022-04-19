@@ -47,3 +47,27 @@ colfunc <- colorRampPalette(rev(brewer.pal(10,"RdBu")))
 
 ```
 
+
+```{r data_summary, echo = FALSE, results="hide"}
+
+##########################
+## Load processed datasets
+##########################
+data_wide <- read.csv("../output/data/data_final_wide.csv")
+data_long <- read.csv("../output/data/data_final_long.csv")
+
+##########################
+## Summarise data
+ data_wide$lat <- as.numeric(data_wide$lat)
+    new_papers <- data_wide[-grep("_o", data_wide$record_num),]
+    old_papers <- data_wide[grep("_o", data_wide$record_num),]
+  
+    
+    # habitat
+      spp_habitat <- data_wide %>%
+                      group_by(habitat) %>%
+                      summarise(spp_n = length(unique(species_full)))
+      tot_spp <- sum(spp_habitat[,2])
+
+
+```

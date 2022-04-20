@@ -48,7 +48,7 @@ colfunc <- colorRampPalette(rev(brewer.pal(10,"RdBu")))
 ```
 
 
-```{r data_setup, echo = FALSE, results="hide"}
+```{r data_setup_summary, echo = FALSE, results="hide"}
 
 ##########################
 ## Load processed datasets
@@ -100,8 +100,33 @@ data_long <- read.csv("../output/data/data_final_long.csv")
           tree_data$node <- as.integer(tree_data$node) 
           
       # Do a tree check with original data
-          tree_checks(data, tree, dataCol = "species_full", type = "checks") # Great. Currently species in data and tree match
+          tree_checks(data_long, tree, dataCol = "species_full", type = "checks") 
 
+##################################
+# Tree checking and pruning
+##################################
+  # Have a look at species in data and tree. Note that the data2 object excluded all Inf values, which means that species may be lost in the process. So, tree would need to be pruned down
+  tree_checks(data_long, tree, dataCol = "species_full", type = "checks")
+      
+species_drop <- tree_checks(data_long, tree, dataCol = "species_full", type = "checks")$Species_InTree_But_NotData # Gra list of species in tree misisng from data for pruning
+
+# Prune tree
+tree2 <- drop.tip(tree, species_drop)
+      
+# Check that taxa dropped
+tree_checks(data_long, tree2, dataCol = "species_full", type = "checks")
+
+##################################
+# Branch lengths and cor matrix
+##################################
+      # Now that we have the tree file, we need to use it to create a phylogenetic correlation matrix using Grafen's method. This assumes Brownian motion and is the best we can do without a molecular phylogeny. The topology of the tree should be fairly good. We will explore a few different options with p to determine the best power function
+      
+        tree_p1 <- compute.brlen(tree2, method = "Grafen", power = 1)
+      tree_p0.5 <- compute.brlen(tree2, method = "Grafen", power = 0.5)
+        
+     # Create null nodes 
+        tree_p1$node.label <- NULL # We don't use nodes and will cause a warning so create null node names
+      tree_p0.5$node.label <- NULL # We don't use nodes and will cause a warning so create null node names
 ```
 
 ## Materials and Methods

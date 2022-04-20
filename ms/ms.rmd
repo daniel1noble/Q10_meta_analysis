@@ -1,5 +1,5 @@
 ---
-author: Daniel W.A. Noble, Fonti Kar, Frank Seebacher Alex Bush, & Shinichi Nakagawa
+author: Daniel W.A. Noble, Fonti Kar, Frank Seebacher, Alex Bush, & Shinichi Nakagawa
 date: "`r Sys.Date()`"
 bibliography: refs.bib
 csl: science.csl
@@ -48,7 +48,7 @@ colfunc <- colorRampPalette(rev(brewer.pal(10,"RdBu")))
 ```
 
 
-```{r data_summary, echo = FALSE, results="hide"}
+```{r data_setup, echo = FALSE, results="hide"}
 
 ##########################
 ## Load processed datasets
@@ -57,7 +57,9 @@ data_wide <- read.csv("../output/data/data_final_wide.csv")
 data_long <- read.csv("../output/data/data_final_long.csv")
 
 ##########################
-## Summarise data
+## Summarize data
+##########################
+
  data_wide$lat <- as.numeric(data_wide$lat)
     new_papers <- data_wide[-grep("_o", data_wide$record_num),]
     old_papers <- data_wide[grep("_o", data_wide$record_num),]
@@ -69,6 +71,36 @@ data_long <- read.csv("../output/data/data_final_long.csv")
                       summarise(spp_n = length(unique(species_full)))
       tot_spp <- sum(spp_habitat[,2])
 
+#########################
+## Phylogeny
+#########################
+ ## Tree data; also fix up some errors
+    tree_data <-  data_long %>%
+                  mutate(species_full = gsub("Chinemys reevesii", "Mauremys reevesii", species_full)) %>% 
+                  mutate(species_full = gsub("Enithares sp", "Enithares ciliata", species_full)) %>%
+                  mutate(habitat = ifelse(species_full == "Pungitius pungitius", "m", habitat))  %>%
+                  mutate(habitat = ifelse(species_full == "Danio rerio", "f", habitat))  %>%
+                  group_by(species_full)                                                 %>%
+                  mutate(n = length(habitat))                                            %>%
+                  dplyr::select(species_full,  habitat, n)                               %>% 
+                  distinct(species_full, habitat, n) 
+
+ ## Load the phylogenetic tree
+                tree <- read.tree("../tree/tree_binary_SN_Q10.tre")   
+      tree$tip.label <- gsub("_", " ", tree$tip.label)
+      tree$tip.label <- gsub("Enithares sp", "Enithares ciliata", tree$tip.label)
+      
+      ## Create nodes and add to data so detailed can be mapped
+          tree_data$node <- NA
+                 tipnode <- seq_along(tree$tip.label)
+          names(tipnode) <- tree$tip.label
+          tree_data$node <- tipnode[tree_data$species_full] ## convert the tip label to tip node number
+                       i <- is.na(tree_data$node)
+       tree_data$node[i] <- tree_data$species_full[i] ## fill in internal node number
+          tree_data$node <- as.integer(tree_data$node) 
+          
+      # Do a tree check with original data
+          tree_checks(data, tree, dataCol = "species_full", type = "checks") # Great. Currently species in data and tree match
 
 ```
 

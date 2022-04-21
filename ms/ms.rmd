@@ -2,7 +2,7 @@
 author: Daniel W.A. Noble, Fonti Kar, Frank Seebacher, Alex Bush, & Shinichi Nakagawa
 date: "`r Sys.Date()`"
 bibliography: refs.bib
-csl: science.csl
+csl: ecology-letters.csl
 output: 
   bookdown::html_document2:
     code_folding: hide
@@ -21,7 +21,7 @@ editor_options:
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE, cache = TRUE, message = FALSE, warning = FALSE, tidy = TRUE, fig.width = 10)
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE, tidy = TRUE, fig.width = 10)
 ## numbers >= 10^5 will be denoted in scientific notation,		  ## numbers >= 10^5 will be denoted in scientific notation,
   ## and rounded to 2 digits		  ## and rounded to 2 digits
   options(digits = 2)

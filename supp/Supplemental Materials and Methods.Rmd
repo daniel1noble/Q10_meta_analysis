@@ -127,7 +127,16 @@ colfunc <- colorRampPalette(rev(brewer.pal(10,"RdBu")))
         ################ THIS SHOULD FIX THE DATA_LONG problems
       data_long <- data_wide %>%
                     pivot_longer(cols = c(27, 29, 31, 33, 35, 37, 39, 41, 43), values_to = "effect_size", values_drop_na = FALSE) %>% 
-                    mutate(type = ifelse(grepl("acute", name), "acute", "acclim")) %>% data.frame()
+                    mutate(V = ifelse(name == "lnRR_Q10_acute_t1", V_lnRR_Q10_acute_t1, 
+                                  ifelse(name == "lnRR_Q10_acute_t2", V_lnRR_Q10_acute_t2, 
+                                  ifelse(name == "lnRR_Q10_acclim", V_lnRR_Q10_acclim, 
+                                  ifelse(name == "lnVR_Q10_acute_t1", V_lnVR_Q10_acute_t1, 
+                                  ifelse(name == "lnVR_Q10_acute_t2", V_lnVR_Q10_acute_t1, 
+                                  ifelse(name == "lnVR_Q10_acclim", V_lnVR_Q10_acclim, 
+                                  ifelse(name == "lnCVR_Q10_acute_t1", V_lnCVR_Q10_acute_t1, 
+                                  ifelse(name == "lnCVR_Q10_acute_t2", V_lnCVR_Q10_acute_t2,V_lnCVR_Q10_acclim)))))))),
+                           type = ifelse(grepl("acute", name), "acute", "acclim"),
+                           obs = 1:n()) %>% dplyr::select(!grep("V_", colnames(.))) %>% data.frame()
       
       # Checks:
       dim(data_long)

@@ -126,7 +126,7 @@ colfunc <- colorRampPalette(rev(brewer.pal(10,"RdBu")))
         
         ################ THIS SHOULD FIX THE DATA_LONG problems
       data_long <- data_wide %>%
-                    pivot_longer(cols = c(27, 29, 31, 33, 35, 37, 39, 41, 43)) %>% 
+                    pivot_longer(cols = c(27, 29, 31, 33, 35, 37, 39, 41, 43), values_to = "effect_size", values_drop_na = FALSE) %>% 
                     mutate(type = ifelse(grepl("acute", name), "acute", "acclim")) %>% data.frame()
       
       # Checks:

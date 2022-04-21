@@ -74,12 +74,8 @@ data_long <- read.csv("../output/data/data_final_long.csv")
 #########################
 ## Phylogeny
 #########################
- ## Tree data; also fix up some errors
+ ## Tree data
     tree_data <-  data_long %>%
-                  mutate(species_full = gsub("Chinemys reevesii", "Mauremys reevesii", species_full)) %>% 
-                  mutate(species_full = gsub("Enithares sp", "Enithares ciliata", species_full)) %>%
-                  mutate(habitat = ifelse(species_full == "Pungitius pungitius", "m", habitat))  %>%
-                  mutate(habitat = ifelse(species_full == "Danio rerio", "f", habitat))  %>%
                   group_by(species_full)                                                 %>%
                   mutate(n = length(habitat))                                            %>%
                   dplyr::select(species_full,  habitat, n)                               %>% 

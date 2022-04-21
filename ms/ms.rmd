@@ -137,11 +137,35 @@ We split the screening of titles and abstracts for the 1,321 papers found in our
 
 We extracted means, standard deviations and sample sizes for physiological rates at the two test tempetatures. If there were more than two test temperatures, we choose only the test temperatures that fell within the most likely natural range of temperatues experienced by the speceis in question. We extracted these data from text, tables or figures of a given paper. Data were extracted from figures using the R package *metaDigitise* [@pick2019]. We also recorded the phylum, class, order, genus and species under study and the latitude and longitude of the population that was being studied. For studies that did not provide latitude and longitude for the population, we searched for similar studies by the lab group to identify where the population was likely to have been sourced or derived from when needed. If the population was derived from the wild, we recorded the nearest latitude and longitude of the population to the field collection site. If the animals had been sourced from a commercial supplier, we took the latitude and longitude of the supplier that the paper identified the animals to have originated from. When it was not possible to find latitude and longitude using these methods, we looked up the distribution of the species in question and took the latitude and longitude of the centroid of the species' distributional range. 
 
-### *Calculating New $Q_{10}$ Based Effect Sizes and Sampling Variances*
+### *$Q_{10}$ Based Effect Sizes and Sampling Variances for Means and Variances*
 
-Following @Noble2022 we calculated a series of temperature corrected effect sizes that compared mean physiological rates ($lnRR_{Q_{10}}$) as well as the variability in physiological rates ($lnVR_{Q_{10}}$ and $lnCVR_{Q_{10}}$). These effect sizes are essentially similar to the traditional $Q_{10}$,
+Following @Noble2022 we calculated a series of temperature corrected effect sizes that compared mean physiological rates ($lnRR_{Q_{10}}$) as well as the variability in physiological rates ($lnVR_{Q_{10}}$ and $lnCVR_{Q_{10}}$). These effect sizes are essentially similar to the traditional temperature coeffiecint ($Q_{10}$), but with formal analytical approximations for their sampling variances, allowing us to make use of powerful meta-analytic modelling approaches. 
 
 #### *Comparing changes in mean physiological rates*
+
+To compare mean physiological rates we calculated the log $Q_{10}$ response ratio, $lnRR_{Q_{10}}$ [@Noble2022] as follows:
+
+$$
+\begin{equation} 
+  lnRR_{Q_{10}} = ln\left( \frac{R_{2}}{R_{1}} \right){ \left(\ \frac{10^{\circ}C}{T_{2}-T_{1}} \right) }
+(\#eq:lnq10)
+\end{equation} 
+$$
+
+
+Where, $R_{1}$ is the mean physiological rate of group 1, often a control group, where as $R_{2}$ is the mean physiological rate of group 2 (e.g., a treatment group). Log transformation of this ratio makes the effect size normally distributed. Equation \@ref(eq:lnq10) is essentially a temperature corrected equivalent to the log response ratio (lnRR) [@hedges1999meta; @laj2011] when the numerator and denomenator are measured at different temperatures. This allows one to compare the mean of two temperature treatments directly regardless of the temperatures that these groups have been measured. The sampling variance for equation \@ref(eq:lnq10) can be computed as follows (as described in @Noble2022):
+
+$$
+\begin{equation} 
+  s_{lnRR_{Q_{10}}} = \left( \frac{SD_{2}^2}{R^2_{2}N_{2}} + \frac{SD_{1}^2}{R^2_{1}N_{1}} \right){ \left(\ \frac{10^{\circ}C}{T_{2}-T_{1}} \right) }^2
+  (\#eq:Vlnq10)
+\end{equation} 
+$$
+
+
+################ OLDER STUFF BELOW
+
+
 
 Prior to showing how the relevant $Q_{10}$ effect size can be calculated it can be helpful to understand its similarities to *lnRR*. The *lnRR* described by Hedges *et al.* @hedges1999meta and extended by Lajeunesse @laj2011 and can be calculated as follows:
 

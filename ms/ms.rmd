@@ -65,7 +65,6 @@ data_long <- read.csv("../output/data/data_final_long.csv")
     new_papers <- data_wide[-grep("_o", data_wide$record_num),]
     old_papers <- data_wide[grep("_o", data_wide$record_num),]
   
-    
     # habitat
       spp_habitat <- data_wide %>%
                       group_by(habitat) %>%
@@ -102,24 +101,19 @@ data_long <- read.csv("../output/data/data_final_long.csv")
 ##################################
 # Tree checking and pruning
 ##################################
-  # Have a look at species in data and tree. Note that the data2 object excluded all Inf values, which means that species may be lost in the process. So, tree would need to be pruned down
-  tree_checks(data_long, tree, dataCol = "species_full", type = "checks")
-      
-species_drop <- tree_checks(data_long, tree, dataCol = "species_full", type = "checks")$Species_InTree_But_NotData # Gra list of species in tree misisng from data for pruning
-
-# Prune tree
-tree2 <- drop.tip(tree, species_drop)
+  # Have a look at species in data and tree. 
+  tree <- tree_checks(data_long, tree, dataCol = "species_full", type = "prune")
       
 # Check that taxa dropped
-tree_checks(data_long, tree2, dataCol = "species_full", type = "checks")
+  tree_checks(data_long, tree, dataCol = "species_full", type = "checks")
 
 ##################################
 # Branch lengths and cor matrix
 ##################################
       # Now that we have the tree file, we need to use it to create a phylogenetic correlation matrix using Grafen's method. This assumes Brownian motion and is the best we can do without a molecular phylogeny. The topology of the tree should be fairly good. We will explore a few different options with p to determine the best power function
       
-        tree_p1 <- compute.brlen(tree2, method = "Grafen", power = 1)
-      tree_p0.5 <- compute.brlen(tree2, method = "Grafen", power = 0.5)
+        tree_p1 <- compute.brlen(tree, method = "Grafen", power = 1)
+      tree_p0.5 <- compute.brlen(tree, method = "Grafen", power = 0.5)
         
      # Create null nodes 
         tree_p1$node.label <- NULL # We don't use nodes and will cause a warning so create null node names
@@ -210,3 +204,44 @@ We recorded or derived a series of moderator variables from each study that are 
 ### *Publication Bias*
 
 ## Results
+
+```{r phylogeny, fig.cap="Phylogenetic tree"}
+ # Map data to tree. Just one variable for now
+      d <- ggtree(tree, layout="circular") %<+% tree_data 
+      
+      # Plot the tree
+      scales1 <- c("#053061", "#D1E5F0", "#67001F")
+      scales2 <- c("#053061", "#E7E0DB", "#67001F")
+      p1 <- d + 
+            #geom_tiplab(size=2, offset = 0.5) + 
+            geom_tippoint(aes(color=habitat), size = 2) +
+            labs(color = "Habitat") + 
+            scale_colour_manual(values = scales1)
+      
+      # Create the data matrix that can be used to plot data as a heatmap around the phylogeny
+      matrix_data <- as.data.frame(data_wide %>%
+                  mutate(species_full = gsub("Chinemys reevesii", "Mauremys reevesii", species_full)) %>% 
+                  mutate(species_full = gsub("Enithares sp", "Enithares ciliata", species_full))      %>%
+                  mutate(habitat = ifelse(species_full == "Pungitius pungitius", "m", habitat))       %>%
+                  mutate(habitat = ifelse(species_full == "Danio rerio", "f", habitat))               %>%
+                  mutate(trait_category = ifelse(trait_category %in% 
+                                                   c("ATPase", "mito_leak", "mito_oxidation"), "Mito. Function", trait_category)) %>%
+                  mutate(trait_category = ifelse(trait_category %in% c("endurance", "sprint"), "Performance", trait_category))    %>%
+                  mutate(trait_category = ifelse(trait_category %in% c("muscle", "cardiac"), "Muscle Function", trait_category))  %>%
+                  mutate(trait_category = ifelse(trait_category %in% c("rest_MR", "max_MR"), "Metabolic Rate", trait_category))   %>%
+                  group_by(species_full, trait_category)   %>% 
+                  summarise(n = n())                       %>% 
+                  spread(trait_category, n, fill = 0))
+      
+      row.names(matrix_data) <- matrix_data$species_full
+      matrix_data <- matrix_data[,c(2:8)]
+      
+      colnames(matrix_data)[c(1,3,6)] <- c("Antioxidants", "Metabolic Enzymes", "Other")
+      
+      # Plot a heatmap of N for each trait around the phylogeny.
+      gheatmap(p1, data.matrix(matrix_data), offset = 1,  
+               colnames_position="top", legend_title = "N", 
+               colnames_angle=90, colnames_offset_y = 1, 
+               hjust=0, font.size=2.5) + 
+        scale_fill_viridis(alpha = 0.6) 
+``` 

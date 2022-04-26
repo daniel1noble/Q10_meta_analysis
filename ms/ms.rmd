@@ -35,7 +35,7 @@ knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE, tidy = TRU
 ##################################
 # Loading packages & Functions
 ##################################
-    pacman::p_load(tidyverse, kableExtra, gridExtra, magrittr, Hmisc, googlesheets4, metafor, stringr, formatR, rmarkdown, kableExtra, flextable, raster, rasterVis, rnoaa, sp, ggmap, patchwork, ggpubr, RColorBrewer, sf, ggtree, ape, phytools, viridis, ncdf4.helpers, ncdf4, PCICt, readr, chron, tmap, rgdal, MCMCglmm, brms, latex2exp)
+    pacman::p_load(tidyverse, kableExtra, gridExtra, magrittr, Hmisc, googlesheets4, metafor, stringr, formatR, rmarkdown, kableExtra, flextable, raster, rasterVis, rnoaa, sp, ggmap, patchwork, ggpubr, RColorBrewer, sf, ggtree, ape, phytools, viridis, ncdf4.helpers, ncdf4, PCICt, readr, chron, tmap, rgdal, MCMCglmm, brms, latex2exp, rlang)
 
 #devtools::install_github(repo = "ErikKusch/KrigR")
 ## Function to produce colour palette

@@ -240,8 +240,8 @@ We recorded or derived a series of moderator variables from each study that are 
       
       # Plot a heatmap of N for each trait around the phylogeny.
       gheatmap(p1, data.matrix(matrix_data), offset = 1,  
-               colnames_position="top", legend_title = "N", 
-               colnames_angle=90, colnames_offset_y = 1, 
-               hjust=0, font.size=2.5) + 
-        scale_fill_viridis(alpha = 0.6) 
+               colnames_position="bottom", legend_title = "N", 
+               colnames_angle=90, colnames_offset_y = 2, 
+               hjust=0, font.size=2.5, width = 0.25, colnames = FALSE) + 
+        scale_fill_viridis(alpha = 0.6) + labs(fill="# of Effects")
 ``` 

@@ -1,9 +1,15 @@
 ---
+title: ""
 author: Daniel W.A. Noble, Fonti Kar, Frank Seebacher, Alex Bush, & Shinichi Nakagawa
 date: "`r Sys.Date()`"
 bibliography: refs.bib
 csl: ecology-letters.csl
 output: 
+  bookdown::word_document2:
+    toc: no
+    toc_depth: 6
+    number_sections: false
+    reference_docx: template.docx
   bookdown::html_document2:
     code_folding: hide
     number_sections: no
@@ -11,11 +17,6 @@ output:
     toc_depth: 6
     toc_float: yes
     bibliography: refs.bib
-  bookdown::word_document2:
-    toc: no
-    toc_depth: 6
-    number_sections: true
-    reference_docx: template.docx
 editor_options: 
   chunk_output_type: console
 ---
@@ -127,9 +128,9 @@ tree_checks(data_long, tree2, dataCol = "species_full", type = "checks")
 
 ## Materials and Methods
 ### *Literature collection*
-We compiled literature on ectothermic animals that measured physiological rates (e.g., metabolic rate) at two or more temperatures after having been acclimated (or acclimatized) at these temperatures. We used data from a previous meta-analysis [@Seebacher2015] and updated Seebacher *et. al.* @Seebacher2015's data by extracting data from suitable studies from our own searches that followed the same search protocol. More specifically, we performed a literature search on the 28th of June 2017 using the Web of Science database. We limited our search to articles or proceedings papers published in English from 2013 to 2017 (the date after Seebacher *et. al.* @Seebacher2015 searches were conducted) using the following topic search string: *"(acclimat* AND (therm* OR temp*) NOT (plant* OR tree* OR forest* OR fung* OR mammal* OR marsup* OR bird* OR human OR exercis* OR train* OR hypoxi*))"*. We further limited to the following research areas: Anatomy Morphology; Biodiversity Conservation; Biology; Ecology; Endocrinology Metabolism; Entomology; Evolutionary Biology; Marine Freshwater Biology; Physiology; Respiratory System, Reproductive Biology, Zoology. 
+We compiled literature on ectothermic animals that measured physiological rates (e.g., metabolic rate) at two or more temperatures after having been acclimated (or acclimatized) at these temperatures. We used data from a previous meta-analysis [@Seebacher2015] and updated @Seebacher2015's data by extracting data from suitable studies from our own searches that followed the same search protocol. More specifically, we performed a literature search on the 28th of June 2017 using the Web of Science database. We limited our search to articles or proceedings papers published in English from 2013 to 2017 [the date after @Seebacher2015 searches were conducted] using the following topic search string: *"(acclimat* AND (therm* OR temp*) NOT (plant* OR tree* OR forest* OR fung* OR mammal* OR marsup* OR bird* OR human OR exercis* OR train* OR hypoxi*))"*. We further limited to the following research areas: Anatomy Morphology; Biodiversity Conservation; Biology; Ecology; Endocrinology Metabolism; Entomology; Evolutionary Biology; Marine Freshwater Biology; Physiology; Respiratory System, Reproductive Biology, Zoology. 
 
-Our search resulted in 1,321 papers for screening in Rayyan [@ouzzani2016]. We also cross checked papers we found in our searches with a recent paper by Havird *et. al.* @Havird2020, which also updates Seebacher *et. al.* @Seebacher2015's dataset. We included any papers that were missed between our searches and those of Havird *et. al.* @Havird2020 from the dates 2013-2017. Havird *et. al.* @Havird2020 added 7 new studies between 2013-2017 (mainly because they were focused on metabolic rates), and our searches differed from theirs by only a single paper [i.e., @Bulgarella2015]. Given the physiological traits we included were broader, we had a substantial increase in additional papers that we added to Seebacher *et. al.* @Seebacher2015's dataset. More specifically, in addition to the `r length(unique(old_papers$record_num))` papers we included from the Seebacher *et. al.* @Seebacher2015 dataset, we extracted data from an extra `r length(unique(new_papers$record_num))` papers (with a total of `r dim(new_papers)[1]` effects) that were published between 2013 - 2017 (a `r  (length(unique(new_papers$record_num)) / length(unique(old_papers$record_num)))*100`% increase in the number of published articles). Note that Seebacher *et. al.* @Seebacher2015 included a total of 205 publications, however, not all these contained the necessary statistics we needed to derive $Q_{10}$ effect sizes and associated sampling variances (see below). While we may have missed papers, our goal was to obtain a large representative (and unbiased) sample of acclimation research rather than a comprehensive dataset. As such, our database represents the most up-to-date dataset used by Seebacher *et. al.* @Seebacher2015 to answer questions on acclimation across ectotherms. 
+Our search resulted in 1,321 papers for screening in Rayyan [@ouzzani2016]. We also cross checked papers we found in our searches with a recent paper by @Havird2020, which also updates  @Seebacher2015's dataset. We included any papers that were missed between our searches and those of @Havird2020 from the dates 2013-2017. @Havird2020 added 7 new studies between 2013-2017 (mainly because they were focused on metabolic rates), and our searches differed from theirs by only a single paper [i.e., @Bulgarella2015]. Given the physiological traits we included were broader, we had a substantial increase in additional papers that we added to @Seebacher2015's dataset. More specifically, in addition to the `r length(unique(old_papers$record_num))` papers we included from the @Seebacher2015 dataset, we extracted data from an extra `r length(unique(new_papers$record_num))` papers (with a total of `r dim(new_papers)[1]` effects) that were published between 2013 - 2017 (a `r  (length(unique(new_papers$record_num)) / length(unique(old_papers$record_num)))*100`% increase in the number of published articles). Note that @Seebacher2015 included a total of 205 publications, however, not all these contained the necessary statistics we needed to derive $Q_{10}$ effect sizes and associated sampling variances (see below). While we may have missed papers, our goal was to obtain a large representative (and unbiased) sample of acclimation research rather than a comprehensive dataset. As such, our database represents the most up-to-date dataset used by @Seebacher2015 to answer questions on acclimation across ectotherms. 
 
 We split the screening of titles and abstracts for the 1,321 papers found in our search among all authors evenly. To ensure consistency among authors in title and abstracts that should be included, prior to  screening all authors went through a randomly selected set of papers together - agreeing on those that were relevant and those that were not based on our inclusion criteria (see below). Where any authors were uncertain about whether to include a paper in the sub-sample they screened, we conservatively included the paper for full text screening and discussed uncertain papers among authors to come to a decision on whether to include the paper. After title and abstract screening, we were left with a total of 149 papers for full text screening. Papers were included only if they: 1) measured a physiological rate acutely at two temperatures on a sample of animals chronically exposed to the same two temperatures for at least 1 week; and 2) where physiological rates measured were burst and sustained locomotion, metabolic rates (standard, resting, routine and maximal), heart rates, and/or enzyme activities. 
 
@@ -153,7 +154,7 @@ $$
 $$
 
 
-Where, $R_{1}$ is the mean physiological rate of group 1, often a control group, where as $R_{2}$ is the mean physiological rate of group 2 (e.g., a treatment group). Log transformation of this ratio makes the effect size normally distributed. Equation \@ref(eq:lnq10) is essentially a temperature corrected equivalent to the log response ratio (lnRR) [@hedges1999meta; @laj2011] when the numerator and denominator are measured at different temperatures. This allows one to compare the mean of two temperature treatments directly regardless of the temperatures that these groups have been measured. The sampling variance for equation \@ref(eq:lnq10) can be computed as follows (as described in @Noble2022):
+Where, $R_{1}$ and  $R_{2}$ are mean physiological rates and  $T_{1}$ and  $T_{2}$ are the temperatures that these rates are measured. Log transformation of this ratio makes the effect size normally distributed. Equation \@ref(eq:lnq10) is essentially a temperature corrected equivalent to the log response ratio (lnRR) [@hedges1999meta; @laj2011] when the numerator and denominator are measured at different temperatures. This allows one to compare the mean of two temperature treatments directly regardless of the temperatures that these groups have been measured. The sampling variance for equation \@ref(eq:lnq10) can be computed as follows (as described in @Noble2022):
 
 $$
 \begin{equation} 
@@ -162,58 +163,10 @@ $$
 \end{equation} 
 $$
 
+Here, $SD_{1}^2$ and $SD_{2}^2$ are the standard deviations and $N_{1}$ and $N_{2}$ are the sample sizes in group 1 and 2, respectively.
 
-################ OLDER STUFF BELOW
-
-
-
-Prior to showing how the relevant $Q_{10}$ effect size can be calculated it can be helpful to understand its similarities to *lnRR*. The *lnRR* described by Hedges *et al.* @hedges1999meta and extended by Lajeunesse @laj2011 and can be calculated as follows:
-
-$$
-\begin{equation} 
-  \begin{aligned}
-  lnRR = ln\left ( \frac{X_{1}}{X_{2}}\right )
-  \end{aligned}
-  (\#eq:lnRR)
-\end{equation} 
-$$
-
-$$
-\begin{equation} 
-  s_{lnRR} = \left ( \frac{SD_{1}^2}{N_{1}X_{1}^2}\right ) + \left ( \frac{SD_{2}^2}{N_{2}X_{2}^2}\right )
-  (\#eq:slnRR)
-\end{equation} 
-$$
-In equation \@ref(eq:lnRR), $X_{1}$ is the mean of group 1, often a control group, where as $X_{2}$ is the mean of group 2 (e.g., a treatment group). The mean of $X_{i}$ for group *i* can be any measurement type (e.g. a physiological rate, mass etc) so long as the measurement variable is ratio scale. Log transformation of this ratio makes the effect size normally distributed. Equation \@ref(eq:slnRR) is the analytical solution for *lnRR*'s sampling variance where, $SD_{1}^2$ and $SD_{2}^2$ is the variance in group 1 and 2, respectively and $N_{1}$ and $N_{2}$ is the sample size in group 1 and 2. 
-
-The equations for *lnRR* and its sampling variance allow us to easily extend this to $Q_{10}$ based effect sizes. Recall that $Q_{10}$ is described as follows:
-
-$$
-\begin{equation} 
-  Q_{10} = \left( \frac{R_{2}}{R_{1}} \right)^{ \left(\ \frac{10^{\circ}C}{T_{2}-T_{1}} \right) }
-  (\#eq:q10)
-\end{equation} 
-$$
-Here, $R_{1}$ and  $R_{2}$ are mean physiological rates and  $T_{1}$ and  $T_{2}$ are the temperatures that these rates are measured. Log transformation of equation \@ref(eq:q10) leads to the following log transformed $Q_{10}$:
-
-$$
-\begin{equation} 
-  lnRR_{Q_{10}} = ln\left( \frac{R_{2}}{R_{1}} \right){ \left(\ \frac{10^{\circ}C}{T_{2}-T_{1}} \right) }
-(\#eq:lnq10)
-\end{equation} 
-$$
-Equation \@ref(eq:lnq10) is essentially a temperature corrected equivalent to lnRR when the numerator and denominator are measured at different temperatures. This allows one to compare the mean of two temperature treatments directly regardless of the temperatures that these groups have been measured. Here, we will refer to this as the log $Q_{10}$ response ratio, $lnRR_{Q_{10}}$. Recognition of this equivalence means that we can easily calculate the sampling variance for equation \@ref(eq:lnq10) as follows:
-
-$$
-\begin{equation} 
-  s_{lnRR_{Q_{10}}} = \left( \frac{SD_{2}^2}{R^2_{2}N_{2}} + \frac{SD_{1}^2}{R^2_{1}N_{1}} \right){ \left(\ \frac{10^{\circ}C}{T_{2}-T_{1}} \right) }^2
-  (\#eq:Vlnq10)
-\end{equation} 
-$$
-
-#### *Comparing changes in physiological rate variability*
-
-Nakagawa *et al* @nakagawa2015meta recently proposed analogous effect size estimates to *lnRR* that allow for comparisons of changes in variance between two groups, the log variance ratio (*lnVR*) and the log coefficient of variation (*lnCVR*). Like *lnRR*, *lnVR* and *lnCVR* are ratios that describe the relative difference in trait variability between two groups. We refer readers to Nakagawa *et al* @nakagawa2015meta for the equations describing *lnVR* and *lnCVR*, but these can easily be extended to their $Q_{10}$ analogues (and associated sampling variance) as follows:
+#### *Comparing variance physiological rates*
+ @nakagawa2015meta recently proposed analogous effect size estimates to *lnRR* that allow for comparisons of changes in variance between two groups, the log variance ratio (*lnVR*) and the log coefficient of variation (*lnCVR*). *lnVR* and *lnCVR* are ratios that describe the relative difference in trait variability between two groups. We refer readers to @nakagawa2015meta for the equations describing *lnVR* and *lnCVR*, but these can easily be extended to their $Q_{10}$ analogues (and associated sampling variance) as follows:
 
 $$
 \begin{equation} 
@@ -228,7 +181,7 @@ s_{lnVR_{Q_{10}}} = \left( \frac{1}{2\left( N_{2}-1 \right)} + \frac{1}{2\left(N
 \end{equation} 
 $$
 
-Equations \@ref(eq:lnq10VR) and \@ref(eq:slnq10VR) describe the change in physiological rate variance (eqn \@ref(eq:lnq10VR)) across a 10&deg;C temperature change along with its sampling variance (eqn \@ref(eq:slnq10VR)). While this is a useful metric, as discussed by Nakagawa *et al* @nakagawa2015meta there is often a strong mean-variance relationship that needs to be accounted for in analysing changes in variance. As such, we can calculate the coefficient of variation, which standardizes changes in variance for changes in means as follows:
+Equations \@ref(eq:lnq10VR) and \@ref(eq:slnq10VR) describe the change in physiological rate variance (eqn \@ref(eq:lnq10VR)) across a 10&deg;C temperature change along with its sampling variance (eqn \@ref(eq:slnq10VR)). While this is a useful metric, as discussed by @nakagawa2015meta there is often a strong mean-variance relationship that needs to be accounted for in analysing changes in variance. As such, we calculated the coefficient of variation, which standardizes changes in variance for changes in means as follows:
 
 $$
 \begin{equation} 
@@ -250,7 +203,7 @@ Using the mean, standard deviation and sample size for all acute and aclimation 
 
 ### *Moderator Variables*
 
-We recorded or derived a series of moderator variables from each study that are expected to have an impact on our effect size estimates. These included the duration of acclimation in days and acclimation type ("acclimation" or "acclimitization") given that acclimation responses are expected to depend both on how long chronic temperature exposure occurs (longer exposure = better acclimation response) and whether exposure took place in the wild ("acclimatized") or lab ("acclimated") [@Seebacher2015]. We also recorded if the sample of animals were derived from captive or wild stocks, the life-history stage of the animals used ("adult" or "juvenile") and the habitat type ("freshwater", "marine" or "terrestrial") given that Seebacher *et. al.* @Seebacher2015 show that these factors can impact $Q_{10}$ estimates. Physiological rates measures varied widely across the studies but could generally be groups into discrete trait categories @Seebacher2015. As such, using the detailed information on the trait type and its associated units from a given study we categorized each effect size into one of 
+We recorded or derived a series of moderator variables from each study that are expected to have an impact on our effect size estimates. These included the duration of acclimation in days and acclimation type ("acclimation" or "acclimitization") given that acclimation responses are expected to depend both on how long chronic temperature exposure occurs (longer exposure = better acclimation response) and whether exposure took place in the wild ("acclimatized") or lab ("acclimated") [@Seebacher2015]. We also recorded if the sample of animals were derived from captive or wild stocks, the life-history stage of the animals used ("adult" or "juvenile") and the habitat type ("freshwater", "marine" or "terrestrial") given that @Seebacher2015 show that these factors can impact $Q_{10}$ estimates. Physiological rates measures varied widely across the studies but could generally be groups into discrete trait categories [@Seebacher2015]. As such, using the detailed information on the trait type and its associated units from a given study we categorized each effect size into one of 
 
 ### *Meta-Analysis*
 ### *Sensitivity Analyses*

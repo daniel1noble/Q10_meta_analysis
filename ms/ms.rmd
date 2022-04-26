@@ -245,3 +245,5 @@ We recorded or derived a series of moderator variables from each study that are 
                hjust=0, font.size=2.5, width = 0.25, colnames = FALSE) + 
         scale_fill_viridis(alpha = 0.6) + labs(fill="# of Effects")
 ``` 
+
+## References

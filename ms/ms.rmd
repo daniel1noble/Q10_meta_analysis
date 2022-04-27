@@ -220,10 +220,6 @@ We recorded or derived a series of moderator variables from each study that are 
       
       # Create the data matrix that can be used to plot data as a heatmap around the phylogeny
       matrix_data <- as.data.frame(data_wide %>%
-                  mutate(species_full = gsub("Chinemys reevesii", "Mauremys reevesii", species_full)) %>% 
-                  mutate(species_full = gsub("Enithares sp", "Enithares ciliata", species_full))      %>%
-                  mutate(habitat = ifelse(species_full == "Pungitius pungitius", "m", habitat))       %>%
-                  mutate(habitat = ifelse(species_full == "Danio rerio", "f", habitat))               %>%
                   mutate(trait_category = ifelse(trait_category %in% 
                                                    c("ATPase", "mito_leak", "mito_oxidation"), "Mito. Function", trait_category)) %>%
                   mutate(trait_category = ifelse(trait_category %in% c("endurance", "sprint"), "Performance", trait_category))    %>%
@@ -255,11 +251,12 @@ We recorded or derived a series of moderator variables from each study that are 
       
       
       # Plot a heatmap of N for each trait around the phylogeny.
-      gheatmap(p1, data.matrix(matrix_data2), offset = 1,  
+   phylo <-   gheatmap(p1, data.matrix(matrix_data2), offset = 1,  
                colnames_position="bottom", legend_title = "N", 
-               colnames_angle=45, colnames_offset_y = 0, 
-               hjust=0, font.size=2.5, width = 0.35) + 
+               colnames_angle=-45, colnames_offset_y = 1,  colnames_offset_x = -0.5,
+               hjust=0, font.size=3, width = 0.35) + 
         scale_fill_viridis(alpha = 0.6) + labs(fill="# of Effects")
+   phylo
 ``` 
 
 ## References

@@ -238,11 +238,27 @@ We recorded or derived a series of moderator variables from each study that are 
       
       colnames(matrix_data)[c(1,3,6)] <- c("Antioxidants", "Metabolic Enzymes", "Other")
       
+      # Alternatively, summarise total effect sizes per species for acute and acclimation
+      matrix_data2 <- data_long %>% filter(grepl("lnRR_Q10", name)) %>% 
+                    mutate(species_full = gsub("Chinemys reevesii", "Mauremys reevesii", species_full)) %>% 
+                  mutate(species_full = gsub("Enithares sp", "Enithares ciliata", species_full))      %>%
+                  mutate(habitat = ifelse(species_full == "Pungitius pungitius", "m", habitat))       %>%
+                  mutate(habitat = ifelse(species_full == "Danio rerio", "f", habitat))               %>%
+                      group_by(species_full, type) %>% 
+                      summarise(n = n()) %>% 
+                      spread(type, n, fill = 0) %>% data.frame()
+                     # mutate(acclim = as.character(cut(acclim, breaks = c(0,15, 20, 25, 30, 40, 50))),
+                      #        acute = as.character(cut(acute, breaks = c(0,15, 20, 25, 30, 40, 50)))) 
+                      
+      row.names(matrix_data2) <- matrix_data2$species_full
+      matrix_data2 <- matrix_data2[,2:3]
+      
+      
       # Plot a heatmap of N for each trait around the phylogeny.
-      gheatmap(p1, data.matrix(matrix_data), offset = 1,  
+      gheatmap(p1, data.matrix(matrix_data2), offset = 1,  
                colnames_position="bottom", legend_title = "N", 
-               colnames_angle=90, colnames_offset_y = 2, 
-               hjust=0, font.size=2.5, width = 0.25, colnames = FALSE) + 
+               colnames_angle=45, colnames_offset_y = 0, 
+               hjust=0, font.size=2.5, width = 0.35) + 
         scale_fill_viridis(alpha = 0.6) + labs(fill="# of Effects")
 ``` 
 

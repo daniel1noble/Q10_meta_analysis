@@ -195,12 +195,13 @@ We recorded or derived a series of moderator variables from each study that are 
 ### *Meta-Analysis*
 
 @Guangchuang2017
+\
 ### *Sensitivity Analyses*
 ### *Publication Bias*
 
 ## Results
 
-```{r phylogeny, fig.cap="Phylogenetic tree"}
+```{r phylogeny, fig.wdith = 10, fig.height=9, fig.cap="Phylogenetic tree"}
  # Map data to tree. Just one variable for now
       d <- ggtree(tree, layout="circular") %<+% tree_data 
 
@@ -247,8 +248,9 @@ We recorded or derived a series of moderator variables from each study that are 
                colnames_angle=360, colnames_offset_y = 0, colnames_offset_x = -1.5, 
                hjust=0, font.size=3, width = 0.35) + 
                 scale_fill_viridis(alpha = 0.6) + labs(fill="# of Effects")
+   
    phylo
-
+ggsave(filename = "fig1.png", path = "../output/figures/", phylo, device = "png", width = 10, height = 9, units = "in")
 ``` 
 
 ## References

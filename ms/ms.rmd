@@ -87,16 +87,7 @@ data_long <- read.csv("../output/data/data_final_long.csv")
                 tree <- read.tree("../tree/tree_binary_SN_Q10.tre")   
       tree$tip.label <- gsub("_", " ", tree$tip.label)
       tree$tip.label <- gsub("Enithares sp", "Enithares ciliata", tree$tip.label)
-      
-      ## Create nodes and add to data so detailed can be mapped
-          tree_data$node <- NA
-                 tipnode <- seq_along(tree$tip.label)
-          names(tipnode) <- tree$tip.label
-          tree_data$node <- tipnode[tree_data$species_full] ## convert the tip label to tip node number
-                       i <- is.na(tree_data$node)
-       tree_data$node[i] <- tree_data$species_full[i] ## fill in internal node number
-          tree_data$node <- as.integer(tree_data$node) 
-          
+  
       # Do a tree check with original data
           tree_checks(data_long, tree, dataCol = "species_full", type = "checks") 
 

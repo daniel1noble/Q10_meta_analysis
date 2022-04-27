@@ -208,7 +208,7 @@ We recorded or derived a series of moderator variables from each study that are 
       scales1 <- c("#053061", "#D1E5F0", "#67001F")
       scales2 <- c("#053061", "#E7E0DB", "#67001F")
       p1 <- d + 
-            #geom_tiplab(size=2, offset = 0.5) + 
+            geom_tiplab(size=2, offset = 10) + 
             geom_tippoint(aes(color=habitat), size = 2) +
             labs(color = "Habitat") + 
             scale_colour_manual(values = scales1)
@@ -242,9 +242,9 @@ We recorded or derived a series of moderator variables from each study that are 
       
       
       # Plot a heatmap of N for each trait around the phylogeny.
-   phylo <-   gheatmap(p1, data.matrix(matrix_data2), offset = 1,  
+   phylo <-   gheatmap(p1, data.matrix(matrix_data2), offset = 0,  
                colnames_position="bottom", legend_title = "N", 
-               colnames_angle=-45, colnames_offset_y = 1,  colnames_offset_x = -0.5,
+               colnames_angle=360, colnames_offset_y = 0, colnames_offset_x = -1.5, 
                hjust=0, font.size=3, width = 0.35) + 
                 scale_fill_viridis(alpha = 0.6) + labs(fill="# of Effects")
    phylo

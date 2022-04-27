@@ -35,7 +35,7 @@ knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE, tidy = TRU
 ##################################
 # Loading packages & Functions
 ##################################
-    pacman::p_load(tidyverse, kableExtra, gridExtra, magrittr, Hmisc, googlesheets4, metafor, stringr, formatR, rmarkdown, kableExtra, flextable, raster, rasterVis, rnoaa, sp, ggmap, patchwork, ggpubr, RColorBrewer, sf, ggtree, ape, phytools, viridis, ncdf4.helpers, ncdf4, PCICt, readr, chron, tmap, rgdal, MCMCglmm, brms, latex2exp, rlang)
+    pacman::p_load(tidyverse, kableExtra, gridExtra, magrittr, Hmisc, googlesheets4, metafor, stringr, formatR, rmarkdown, kableExtra, flextable, raster, rasterVis, rnoaa, sp, ggmap, patchwork, ggpubr, RColorBrewer, sf, ggtree, ape, phytools, viridis, ncdf4.helpers, ncdf4, PCICt, readr, chron, tmap, rgdal, MCMCglmm, brms, latex2exp, rlang, ggnewscale)
 
 #devtools::install_github(repo = "ErikKusch/KrigR")
 ## Function to produce colour palette
@@ -79,8 +79,10 @@ data_long <- read.csv("../output/data/data_final_long.csv")
                   group_by(species_full)                                                 %>%
                   mutate(n = length(habitat))                                            %>%
                   dplyr::select(species_full,  habitat, n)                               %>% 
-                  distinct(species_full, habitat, n) 
-
+                  distinct(species_full, habitat, n)
+    #rownames(tree_data) <- tree_data$species_full
+    #tree_data <- tree_data[,2:3]
+    
  ## Load the phylogenetic tree
                 tree <- read.tree("../tree/tree_binary_SN_Q10.tre")   
       tree$tip.label <- gsub("_", " ", tree$tip.label)
@@ -200,6 +202,8 @@ Using the mean, standard deviation and sample size for all acute and aclimation 
 We recorded or derived a series of moderator variables from each study that are expected to have an impact on our effect size estimates. These included the duration of acclimation in days and acclimation type ("acclimation" or "acclimitization") given that acclimation responses are expected to depend both on how long chronic temperature exposure occurs (longer exposure = better acclimation response) and whether exposure took place in the wild ("acclimatized") or lab ("acclimated") [@Seebacher2015]. We also recorded if the sample of animals were derived from captive or wild stocks, the life-history stage of the animals used ("adult" or "juvenile") and the habitat type ("freshwater", "marine" or "terrestrial") given that @Seebacher2015 show that these factors can impact $Q_{10}$ estimates. Physiological rates measures varied widely across the studies but could generally be groups into discrete trait categories [@Seebacher2015]. As such, using the detailed information on the trait type and its associated units from a given study we categorized each effect size into one of 
 
 ### *Meta-Analysis*
+
+@Guangchuang2017
 ### *Sensitivity Analyses*
 ### *Publication Bias*
 
@@ -208,7 +212,7 @@ We recorded or derived a series of moderator variables from each study that are 
 ```{r phylogeny, fig.cap="Phylogenetic tree"}
  # Map data to tree. Just one variable for now
       d <- ggtree(tree, layout="circular") %<+% tree_data 
-      
+
       # Plot the tree
       scales1 <- c("#053061", "#D1E5F0", "#67001F")
       scales2 <- c("#053061", "#E7E0DB", "#67001F")
@@ -236,10 +240,6 @@ We recorded or derived a series of moderator variables from each study that are 
       
       # Alternatively, summarise total effect sizes per species for acute and acclimation
       matrix_data2 <- data_long %>% filter(grepl("lnRR_Q10", name)) %>% 
-                    mutate(species_full = gsub("Chinemys reevesii", "Mauremys reevesii", species_full)) %>% 
-                  mutate(species_full = gsub("Enithares sp", "Enithares ciliata", species_full))      %>%
-                  mutate(habitat = ifelse(species_full == "Pungitius pungitius", "m", habitat))       %>%
-                  mutate(habitat = ifelse(species_full == "Danio rerio", "f", habitat))               %>%
                       group_by(species_full, type) %>% 
                       summarise(n = n()) %>% 
                       spread(type, n, fill = 0) %>% data.frame()
@@ -255,8 +255,9 @@ We recorded or derived a series of moderator variables from each study that are 
                colnames_position="bottom", legend_title = "N", 
                colnames_angle=-45, colnames_offset_y = 1,  colnames_offset_x = -0.5,
                hjust=0, font.size=3, width = 0.35) + 
-        scale_fill_viridis(alpha = 0.6) + labs(fill="# of Effects")
+                scale_fill_viridis(alpha = 0.6) + labs(fill="# of Effects")
    phylo
+
 ``` 
 
 ## References

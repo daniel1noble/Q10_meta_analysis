@@ -51,6 +51,11 @@ for(i in 1:nrow(geo_data)){
   
   monthly.temp.data = matrix(NA, nrow=nt, ncol=nrow(geo_data),
                              dimnames=list(c(1:nt)))
+  # This is now an array that is formatted as: X[longitude, latitude, temp in Kelvin]
+  t <- with(na.omit(geo_data), X[long, lat, ])
+  
+  
+  
   for(j in 1:nt){ monthly.temp.data[j,] = X[,,j][spXY] }
   
   # Annual mean and SD

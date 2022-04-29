@@ -14,3 +14,4 @@ nclimate_original_data/
 species_list_Q10.csv
 coord.csv
 readme.txt
+data/climate_data/ERA5/ERA5_LST_and_SST_1979-present.nc

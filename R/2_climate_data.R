@@ -72,12 +72,18 @@ for(i in 1:nrow(geo_data)){
   geo_data <- geo_data %>% dplyr::filter(!is.na(lat) & !is.na(long))
   
 # Now we need the elevation at the point. Which we get using a loop because it can only take a single lat long coord at a time.
+run = FALSE
+if(run){
   lat <- c()
   for(i in 1:dim(geo_data)[1]){
     elevation = microclima::get_dem(lat  = geo_data$lat[i], long = geo_data$long[i], resolution = 30, xdims = 50, ydims = 50)
     lat <- c(elevation, lat)
   }
   
+saveRDS(lat, "./output/climate_data/elevation")
+} else{
+  elev <- readRDS("./output/climate_data/elevation")
+}
 # plot(r)
 
 s1 = Sys.time()
@@ -85,7 +91,7 @@ s1 = Sys.time()
 # And... we'll cycle through microclimate generation one year at a time between 1981 and 2020
 for(Y in c(1981:2022)){
   
-  temps = microclima::runauto(lat, dstart = paste0("01/01/",Y,")"),  # start date
+  temps = microclima::runauto(elev, dstart = paste0("01/01/",Y,")"),  # start date
                               dfinish   = paste0("31/12/",Y,")"),  # end date
                               hgt = 0.1, l = NA, x = NA,
                               habitat = as.character(habitats$descriptor[gbif$Habitat[S]]),

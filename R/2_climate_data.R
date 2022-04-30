@@ -53,26 +53,59 @@ for(i in 1:nrow(geo_data)){
                              dimnames=list(c(1:nt)))
   # This is now an array that is formatted as: X[longitude, latitude, temp in Kelvin]
   t <- with(na.omit(geo_data), X[long, lat, ])
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
+#         Microclimate
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
+
+# Microclimate paper:
+# Kearney et al. 2019 "A method for computing hourly, historical, terrain-corrected microclimate anywhere on earth"
+# https://doi.org/10.1111/2041-210X.13330
+
+  devtools::install_github("ilyamaclean/microclima")  
   
+# N.B. The function automatically assumes the raster should be 200 cells by 200 cells,
+#      so for a 30m resolution grid this is 6km across.
+#      I've reduced this to 50 cells across (1.5km x 1.5km) to make it faster
+
+# First remove missing lat and long
+  geo_data <- geo_data %>% dplyr::filter(!is.na(lat) & !is.na(long))
   
+# Now we need the elevation at the point. Which we get using a loop because it can only take a single lat long coord at a time.
+  lat <- c()
+  for(i in 1:dim(geo_data)[1]){
+    elevation = microclima::get_dem(lat  = geo_data$lat[i], long = geo_data$long[i], resolution = 30, xdims = 50, ydims = 50)
+    lat <- c(elevation, lat)
+  }
   
-  for(j in 1:nt){ monthly.temp.data[j,] = X[,,j][spXY] }
+# plot(r)
+
+s1 = Sys.time()
+
+# And... we'll cycle through microclimate generation one year at a time between 1981 and 2020
+for(Y in c(1981:2020)){
   
-  # Annual mean and SD
-  annual.temp.means = aggregate(monthly.temp.data, by=list(format(t.Date,"%Y")),mean,na.rm=T)
-  annual.temp.sd    = aggregate(monthly.temp.data, by=list(format(t.Date,"%Y")),sd,na.rm=T)
+  temps = microclima::runauto(r, dstart = paste0("01/01/",Y,")"),  # start date
+                              dfinish   = paste0("31/12/",Y,")"),  # end date
+                              hgt = 0.1, l = NA, x = NA,
+                              habitat = as.character(habitats$descriptor[gbif$Habitat[S]]),
+                              plot.progress = FALSE)
   
+  # Annual and monthly means of DEM 'r'
+  r.means = mean(apply(temps$temps[,,], 3, mean,na.rm=T))  # Start with annual
+  for(j in unique(months(temps$tme)) ){ r.means = c(r.means, mean(apply(temps$temps[,,months(temps$tme)==j],3,mean,na.rm=T)) )  }
   
-  # AT THIS POINT YOU CAN SUMMARISE ACROSS ALL COLUMNS TO GET VALUES FOR 
-  # ALL LOCATIONS AND HENCE THE SPECIES AS A WHOLE
+  # Annual and monthly SDs of mean temp of DEM 'r'
+  r.sd = sd(apply(temps$temps[,,], 3, mean,na.rm=T))       # Note the SD is after we have averaged across the 5x5 cells.
+  for(j in unique(months(temps$tme)) ){ r.sd = c(r.sd, sd(apply(temps$temps[,,months(temps$tme)==j],3,mean,na.rm=T)) )  }
   
+  # Add to matrix
+  annual.thermal.data = rbind(annual.thermal.data, 
+                              c(gbif$Fid[S],gbif$latitude[S], gbif$longitude[S], 
+                                Y, r.means, r.sd) )
   
-  ## Save file for each species
-  # write.csv(Tdat, paste0("Output/ERA5/",sp,"_temperature_history.csv"))
+  rm(temps, r.means, r.sd)
+  dev.off()
+  print(Y)
   
-  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
-  
-  rm(X, monthly.temp.data, annual.temp.means, annual.temp.sd, sdat, SspXY, 
-     t.Date)
-  
-} #  End of species loop
+}

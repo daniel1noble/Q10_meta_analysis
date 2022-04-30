@@ -83,9 +83,9 @@ for(i in 1:nrow(geo_data)){
 s1 = Sys.time()
 
 # And... we'll cycle through microclimate generation one year at a time between 1981 and 2020
-for(Y in c(1981:2020)){
+for(Y in c(1981:2022)){
   
-  temps = microclima::runauto(r, dstart = paste0("01/01/",Y,")"),  # start date
+  temps = microclima::runauto(lat, dstart = paste0("01/01/",Y,")"),  # start date
                               dfinish   = paste0("31/12/",Y,")"),  # end date
                               hgt = 0.1, l = NA, x = NA,
                               habitat = as.character(habitats$descriptor[gbif$Habitat[S]]),

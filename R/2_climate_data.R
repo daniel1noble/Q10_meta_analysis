@@ -24,31 +24,83 @@ library(ncdf4)
 
 geo_data = read.csv("./data/climate_data/Species_LatLong_plusHabitat.csv")
 
+# First remove missing lat and long
+geo_data <- geo_data %>% dplyr::filter(!is.na(lat) & !is.na(long))
+
+# Identify which coarse ERA5 cell these lat/longs fall within:
+geo_data$ERA5col                    = geo_data$long
+geo_data$ERA5col[geo_data$ERA5col<0]= (180-abs(geo_data$ERA5col[geo_data$ERA5col<0]))+180   # Longitude is stored only as positive degrees east, no negatives for west.
+geo_data$ERA5col                    = as.numeric(cut(geo_data$long, seq(0,360,0.25), labels=c(1:1440)))
+
+geo_data$ERA5row                    = geo_data$lat                                          # Curiously latitude does have negatives
+geo_data$ERA5row                    = as.numeric(cut(geo_data$lat, seq(-90,90,0.25), labels=c(1:720)))
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
+# Open NETCDF file
+ncfname   = paste0("./data/climate_data/ERA5/ERA5_LST_and_SST_1979-present.nc")
+ERA5      = nc_open(ncfname)
+dname     = "t2m"
+lon       = ncvar_get(ERA5, "longitude") # ncvar_get(ERA5.air, "lon")
+nlon      = length(lon) # number of columns
+lat       = ncvar_get(ERA5, "latitude") # ncvar_get(ERA5.air, "lat", verbose = F)
+nlat      = length(lat) # number of rows
+t         = ncvar_get(ERA5, "time")                 # units: hours since 1900-01-01 00:00:00.0
+nt        = dim(t)                                  # monthly averages
+
+# Multiply 't' by 3600 so it becomes seconds since 1900 instead of hours.
+t.Date    = as.POSIXct(as.numeric(t)*3600, origin="1900-01-01 00:00:00") 
+
+# Full layer, at first time step
+map = ncvar_get(ERA5, dname, 
+                start= c(1,1,1,1),       # 4 dimensions: longitude, latitude, 'expver' (variable), time
+                count= c(nlon,nlat,1,1) )
+image(map)                               # Its both, upside down, back to front, and centered on 180' west...
+
+# Note in the SST version the land is masked out, but air temperature is global.
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
+
 spp  = unique(geo_data$species_full)
 
-for(i in 1:nrow(geo_data)){
+for(i in which(complete.cases(geo_data[,c("lat","long")])) ){
   
-  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
-  # Open NETCDF file
-  ncfname   = paste0("./data/climate_data/ERA5/ERA5_LST_and_SST_1979-present.nc")
-  ERA5      = nc_open(ncfname)
-  dname     = "t2m"
-  lon       = ncvar_get(ERA5, "longitude") # ncvar_get(ERA5.air, "lon")
-  nlon      = length(lon) # number of columns
-  lat       = ncvar_get(ERA5, "latitude") # ncvar_get(ERA5.air, "lat", verbose = F)
-  nlat      = length(lat) # number of rows
-  t         = ncvar_get(ERA5, "time")                 # units: hours since 1900-01-01 00:00:00.0
-  nt        = dim(t)                  # monthly averages
-  # Create a copy of the data as an array in R (which unlike the netcdf, makes
-  # it possible to index multiple locations at once)
-  X         = ncvar_get(ERA5, dname, start= c(1,1,1,1), count= c(nlon,nlat,1,nt) )
-  nc_close(ERA5)
-  
-  # Multiply 't' by 3600 so it becomes seconds since 1900 instead of hours.
-  t.Date    = as.POSIXct(as.numeric(t)*3600, origin="1900-01-01 00:00:00") 
+  # Annual time series in one cell:
+  point.timeseries = ncvar_get(ERA5, dname, 
+                               start= c(geo_data$ERA5col[i],geo_data$ERA5row[i],1,1),
+                               count= c(1,1,1,nt) )
+  plot(point.timeseries ~ t.Date, type="l")   # point.timeseries ~ c(1:nt)
   
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
   
+  ## Create a copy of the data as an array in R (which unlike the netcdf, makes
+  ## it possible to index multiple locations at once)
+  #X         = ncvar_get(ERA5, dname, start= c(1,1,1,1), count= c(nlon,nlat,1,nt) )
+  #nc_close(ERA5)
+  #
+  #monthly.temp.data = matrix(NA, nrow=nt, ncol=nrow(geo_data),
+  #                           dimnames=list(c(1:nt)))
+  #for(j in 1:nt){ monthly.temp.data[j,] = X[,,j][spXY] }
+  #
+  ## Annual mean and SD
+  #annual.temp.means = aggregate(monthly.temp.data, by=list(format(t.Date,"%Y")),mean,na.rm=T)
+  #annual.temp.sd    = aggregate(monthly.temp.data, by=list(format(t.Date,"%Y")),sd,na.rm=T)
+  
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
+  
+  # AT THIS POINT YOU CAN SUMMARISE HOWEVER YOU NEED
+  # The 't.Date' object will classify by different units of time if needed.
+  
+  
+  
+  ## Save file for each species
+  # write.csv(Tdat, paste0("Output/ERA5/",sp,"_temperature_history.csv"))
+  
+  
+} #  End of species loop
+
+
+
+
+
   monthly.temp.data = matrix(NA, nrow=nt, ncol=nrow(geo_data),
                              dimnames=list(c(1:nt)))
   # This is now an array that is formatted as: X[longitude, latitude, temp in Kelvin]
@@ -68,8 +120,7 @@ for(i in 1:nrow(geo_data)){
 #      so for a 30m resolution grid this is 6km across.
 #      I've reduced this to 50 cells across (1.5km x 1.5km) to make it faster
 
-# First remove missing lat and long
-  geo_data <- geo_data %>% dplyr::filter(!is.na(lat) & !is.na(long))
+
   
 # Now we need the elevation at the point. Which we get using a loop because it can only take a single lat long coord at a time.
 run = FALSE

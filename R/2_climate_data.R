@@ -79,7 +79,7 @@ if(run){
     elevation = microclima::get_dem(lat  = geo_data$lat[i], long = geo_data$long[i], resolution = 30, xdims = 50, ydims = 50)
     lat <- c(elevation, lat)
   }
-  
+  names(lat) <- paste0(1:nrow(geo_data), "_", geo_data$species_full)
 saveRDS(lat, "./output/climate_data/elevation")
 } else{
   elev <- readRDS("./output/climate_data/elevation")

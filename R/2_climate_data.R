@@ -28,12 +28,13 @@ geo_data = read.csv("./data/climate_data/Species_LatLong_plusHabitat.csv")
 geo_data <- geo_data %>% dplyr::filter(!is.na(lat) & !is.na(long))
 
 # Identify which coarse ERA5 cell these lat/longs fall within:
-geo_data$ERA5col                    = geo_data$long
-geo_data$ERA5col[geo_data$ERA5col<0]= (180-abs(geo_data$ERA5col[geo_data$ERA5col<0]))+180   # Longitude is stored only as positive degrees east, no negatives for west.
-geo_data$ERA5col                    = as.numeric(cut(geo_data$long, seq(0,360,0.25), labels=c(1:1440)))
+geo_data$ERA5col     = geo_data$long
+xid                  = which((!is.na(geo_data$ERA5col)) & (geo_data$ERA5col<0) )
+geo_data$ERA5col[xid]= (180-abs(geo_data$ERA5col[xid]))+180   # Longitude is stored only as positive degrees east, no negatives for west.
+geo_data$ERA5col     = cut(geo_data$ERA5col, seq(0,360,0.25), labels=c(1:1440))
 
-geo_data$ERA5row                    = geo_data$lat                                          # Curiously latitude does have negatives
-geo_data$ERA5row                    = as.numeric(cut(geo_data$lat, seq(-90,90,0.25), labels=c(1:720)))
+geo_data$ERA5row     = geo_data$lat                                          # Curiously latitude does have negatives
+geo_data$ERA5row     = as.numeric(cut(geo_data$ERA5row, seq(-90,90,0.25), labels=c(1:720)))
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
 # Open NETCDF file
@@ -55,6 +56,14 @@ map = ncvar_get(ERA5, dname,
                 start= c(1,1,1,1),       # 4 dimensions: longitude, latitude, 'expver' (variable), time
                 count= c(nlon,nlat,1,1) )
 image(map)                               # Its both, upside down, back to front, and centered on 180' west...
+
+# Convert to raster for somewhat easier plotting
+library(raster)
+map2 = t(map)
+# Suffle the "WEST" to the left
+map2 = cbind(map2[,721:1440],map2[,1:720])
+map.raster = raster(map2, xmn=-180, xmx=180, ymn=-90, ymx=90, crs=4326)
+plot(map.raster)
 
 # Note in the SST version the land is masked out, but air temperature is global.
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #

@@ -66,9 +66,7 @@ map.raster = raster(map2, xmn=-180, xmx=180, ymn=-90, ymx=90, crs=4326)
 plot(map.raster)
 
 # Note in the SST version the land is masked out, but air temperature is global.
-  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
-
-spp  = unique(geo_data$species_full)
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 
 geo_data <- na.omit(geo_data)
 
@@ -76,7 +74,7 @@ geo_data <- na.omit(geo_data)
 geo_data$row <- paste0(geo_data$species_full, "_",geo_data$lat, ",", geo_data$long)
 clim_data_matrix <- data.frame(matrix(NA, nrow = dim(geo_data)[1], ncol = 522))
 names <- gsub("* [10][10].+", "", t.Date)
-colnames(clim_data_matrix) <- c("species", "lat", "log", names)
+colnames(clim_data_matrix) <- c("species", "lat", "long", names)
 
 for(i in 1:nrow(geo_data)){
   
@@ -92,6 +90,15 @@ for(i in 1:nrow(geo_data)){
 }
 
 write.csv(clim_data_matrix, "./output/climate_data/temp_timeseries.csv")
+
+# Now we can do some simple summaries, like CV
+cv <- function(x){
+  sd(x, na.rm = TRUE) / mean(x, na.rm = TRUE)
+}
+clim_data_matrix$cv <- apply(clim_data_matrix[,4:522], 1, function(x) cv(x)) # Coefficient of variation
+clim_data_matrix$sd <- apply(clim_data_matrix[,4:522], 1, function(x) sd(x, na.rm = TRUE)) # sd
+clim_data_matrix$mean <- apply(clim_data_matrix[,4:522], 1, function(x) mean(x, na.rm = TRUE)) # mean
+
 ################################# OLDER STUFF BELOW
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
   

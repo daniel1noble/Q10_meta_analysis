@@ -70,14 +70,26 @@ plot(map.raster)
 
 spp  = unique(geo_data$species_full)
 
-for(i in which(complete.cases(geo_data[,c("lat","long")])) ){
+geo_data <- na.omit(geo_data)
+
+# Create unique col that will take rowname because of repeat species
+geo_data$row <- paste0(geo_data$species_full, "_",geo_data$lat, ",", geo_data$long)
+clim_data_matrix <- data.frame(matrix(NA, nrow = dim(geo_data)[1], ncol = 519))
+colnames(clim_data_matrix) <- t.Date
+
+for(i in 1:nrow(geo_data)){
   
   # Annual time series in one cell:
   point.timeseries = ncvar_get(ERA5, dname, 
                                start= c(geo_data$ERA5col[i],geo_data$ERA5row[i],1,1),
                                count= c(1,1,1,nt) )
+  clim_data_matrix[i,] <- point.timeseries
+  row.names(clim_data_matrix)[i] <- geo_data$row[i]
   plot(point.timeseries ~ t.Date, type="l")   # point.timeseries ~ c(1:nt)
-  
+}
+
+write.csv(clim_data_matrix, "./output/climate_data/temp_timeseries.csv")
+################################# OLDER STUFF BELOW
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
   
   ## Create a copy of the data as an array in R (which unlike the netcdf, makes
@@ -104,7 +116,7 @@ for(i in which(complete.cases(geo_data[,c("lat","long")])) ){
   # write.csv(Tdat, paste0("Output/ERA5/",sp,"_temperature_history.csv"))
   
   
-} #  End of species loop
+ #  End of species loop
 
 
 

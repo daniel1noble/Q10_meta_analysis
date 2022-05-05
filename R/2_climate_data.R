@@ -74,8 +74,9 @@ geo_data <- na.omit(geo_data)
 
 # Create unique col that will take rowname because of repeat species
 geo_data$row <- paste0(geo_data$species_full, "_",geo_data$lat, ",", geo_data$long)
-clim_data_matrix <- data.frame(matrix(NA, nrow = dim(geo_data)[1], ncol = 519))
-colnames(clim_data_matrix) <- t.Date
+clim_data_matrix <- data.frame(matrix(NA, nrow = dim(geo_data)[1], ncol = 522))
+names <- gsub("* [10][10].+", "", t.Date)
+colnames(clim_data_matrix) <- c("species", "lat", "log", names)
 
 for(i in 1:nrow(geo_data)){
   
@@ -83,8 +84,10 @@ for(i in 1:nrow(geo_data)){
   point.timeseries = ncvar_get(ERA5, dname, 
                                start= c(geo_data$ERA5col[i],geo_data$ERA5row[i],1,1),
                                count= c(1,1,1,nt) )
-  clim_data_matrix[i,] <- point.timeseries
-  row.names(clim_data_matrix)[i] <- geo_data$row[i]
+  clim_data_matrix[i,1] <- geo_data$species_full[i]
+  clim_data_matrix[i,2] <- geo_data$lat[i]
+  clim_data_matrix[i,3] <- geo_data$long[i]
+  clim_data_matrix[i,c(4:522)] <- point.timeseries
   plot(point.timeseries ~ t.Date, type="l")   # point.timeseries ~ c(1:nt)
 }
 

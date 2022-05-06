@@ -89,8 +89,6 @@ for(i in 1:nrow(geo_data)){
   plot(point.timeseries ~ t.Date, type="l")   # point.timeseries ~ c(1:nt)
 }
 
-write.csv(clim_data_matrix, "./output/climate_data/temp_timeseries.csv")
-
 # Now we can do some simple summaries, like CV
 cv <- function(x){
   sd(x, na.rm = TRUE) / mean(x, na.rm = TRUE)
@@ -100,6 +98,8 @@ clim_data_matrix$sd <- apply(clim_data_matrix[,4:522], 1, function(x) sd(x, na.r
 clim_data_matrix$mean <- apply(clim_data_matrix[,4:522], 1, function(x) mean(x, na.rm = TRUE)) # mean
 clim_data_matrix$acf_lag1 <- apply(clim_data_matrix[,4:522], 1, function(x) acf(as.numeric(x), lag.max = 1, plot = FALSE, na.action = na.pass)$acf[2,1,1]) # autocorrelation for lag w
 clim_data_matrix$acf_all <- apply(clim_data_matrix[,4:522], 1, function(x) sd(acf(as.numeric(x), plot = FALSE, na.action = na.pass)$acf)) # deviation in autocorrelation values...this is probably not that useful
+
+write.csv(clim_data_matrix, "./output/climate_data/temp_timeseries.csv")
 
 r1 <- acf(as.numeric(clim_data_matrix[1,4:522]), lag.max = 522 - 4, plot = FALSE, na.action = na.pass)$acf[-1]
 lag <- c(1:518)

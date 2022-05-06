@@ -98,8 +98,12 @@ cv <- function(x){
 clim_data_matrix$cv <- apply(clim_data_matrix[,4:522], 1, function(x) cv(x)) # Coefficient of variation
 clim_data_matrix$sd <- apply(clim_data_matrix[,4:522], 1, function(x) sd(x, na.rm = TRUE)) # sd
 clim_data_matrix$mean <- apply(clim_data_matrix[,4:522], 1, function(x) mean(x, na.rm = TRUE)) # mean
+clim_data_matrix$acf_lag1 <- apply(clim_data_matrix[,4:522], 1, function(x) acf(as.numeric(x), lag.max = 1, plot = FALSE, na.action = na.pass)$acf[2,1,1]) # autocorrelation for lag w
+clim_data_matrix$acf_all <- apply(clim_data_matrix[,4:522], 1, function(x) sd(acf(as.numeric(x), plot = FALSE, na.action = na.pass)$acf)) # deviation in autocorrelation values...this is probably not that useful
 
-
+r1 <- acf(as.numeric(clim_data_matrix[1,4:522]), lag.max = 522 - 4, plot = FALSE, na.action = na.pass)$acf[-1]
+lag <- c(1:518)
+plot(r1 ~ lag)
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
 #         Microclimate
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #

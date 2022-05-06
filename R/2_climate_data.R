@@ -99,43 +99,6 @@ clim_data_matrix$cv <- apply(clim_data_matrix[,4:522], 1, function(x) cv(x)) # C
 clim_data_matrix$sd <- apply(clim_data_matrix[,4:522], 1, function(x) sd(x, na.rm = TRUE)) # sd
 clim_data_matrix$mean <- apply(clim_data_matrix[,4:522], 1, function(x) mean(x, na.rm = TRUE)) # mean
 
-################################# OLDER STUFF BELOW
-  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
-  
-  ## Create a copy of the data as an array in R (which unlike the netcdf, makes
-  ## it possible to index multiple locations at once)
-  #X         = ncvar_get(ERA5, dname, start= c(1,1,1,1), count= c(nlon,nlat,1,nt) )
-  #nc_close(ERA5)
-  #
-  #monthly.temp.data = matrix(NA, nrow=nt, ncol=nrow(geo_data),
-  #                           dimnames=list(c(1:nt)))
-  #for(j in 1:nt){ monthly.temp.data[j,] = X[,,j][spXY] }
-  #
-  ## Annual mean and SD
-  #annual.temp.means = aggregate(monthly.temp.data, by=list(format(t.Date,"%Y")),mean,na.rm=T)
-  #annual.temp.sd    = aggregate(monthly.temp.data, by=list(format(t.Date,"%Y")),sd,na.rm=T)
-  
-  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
-  
-  # AT THIS POINT YOU CAN SUMMARISE HOWEVER YOU NEED
-  # The 't.Date' object will classify by different units of time if needed.
-  
-  
-  
-  ## Save file for each species
-  # write.csv(Tdat, paste0("Output/ERA5/",sp,"_temperature_history.csv"))
-  
-  
- #  End of species loop
-
-
-
-
-
-  monthly.temp.data = matrix(NA, nrow=nt, ncol=nrow(geo_data),
-                             dimnames=list(c(1:nt)))
-  # This is now an array that is formatted as: X[longitude, latitude, temp in Kelvin]
-  t <- with(na.omit(geo_data), X[long, lat, ])
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
 #         Microclimate

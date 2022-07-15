@@ -205,7 +205,13 @@ We analysed our data using Bayesian multilevel meta-analytic and meta-regression
 ### *Sensitivity Analyses*
 ### *Publication Bias*
 
-## Results
+## *Results*
+
+### *Do terrestrial and aquatic ectotherms differ in their capacity to acclimate?*
+### *Does climate variability predict acclimation capacity among aquatic and terrestrial ectotherms?*
+### *Does between-individual variation in acclimation capacities differ across terrestrial and aquatic ectotherms?*
+
+
 
 ```{r phylogeny, fig.wdith = 10, fig.height=9, fig.cap="Phylogenetic tree"}
  # Map data to tree. Just one variable for now

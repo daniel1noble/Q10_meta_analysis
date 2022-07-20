@@ -106,11 +106,11 @@ data_long <- read.csv("../output/data/data_final_long.csv")
       # Now that we have the tree file, we need to use it to create a phylogenetic correlation matrix using Grafen's method. This assumes Brownian motion and is the best we can do without a molecular phylogeny. The topology of the tree should be fairly good. We will explore a few different options with p to determine the best power function
       
         tree_p1 <- compute.brlen(tree, method = "Grafen", power = 1)
-      tree_p0.5 <- compute.brlen(tree, method = "Grafen", power = 0.5)
+      tree_p0.7 <- compute.brlen(tree, method = "Grafen", power = 0.7) # Probably most sensible power
         
      # Create null nodes 
         tree_p1$node.label <- NULL # We don't use nodes and will cause a warning so create null node names
-      tree_p0.5$node.label <- NULL # We don't use nodes and will cause a warning so create null node names
+      tree_p0.7$node.label <- NULL # We don't use nodes and will cause a warning so create null node names
 ```
 
 ## Materials and Methods

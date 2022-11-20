@@ -222,17 +222,52 @@ phylo_cor <- vcv(tree_p0.7, cor = TRUE)
 #############
 
 # Subset the data
-lnRRQ10_data <- data_long %>% filter(grepl("lnRR", name) & !is.na(effect_size) & !is.na(V) & !V == 0) %>% mutate(spp = species_full)
+lnRRQ10_data <- data_long %>% filter(grepl("lnRR", name) & !is.na(effect_size) & !is.na(V) & !V == 0) %>% 
+                              mutate(spp = species_full, c_accl_time = acclim_period - mean(acclim_period, na.rm = TRUE))
+
+# Found some other data entry problems from old dataset. Sample sizes are decimals. That's not correct. It has to be an integer. Need to check. These are not the new data that we entered. 
+hist(lnRRQ10_data$V)
+
+# Studies with big V, why? Check N
+lnRRQ10_data %>% filter(V >= 2)
 
 # Intercept only model. 
-model1.1 <- metafor::rma.mv(effect_size ~ type, V = V, 
+model1.1 <- metafor::rma.mv(effect_size ~ c_accl_time + type, V = V, 
                             random = list(~1 + type | record_num,
                                             ~1 | species_full,
                                             ~1 | spp,
                                             ~1 | obs),
                             R = list(species_full = phylo_cor), dfs = "contain", test = "t", data = lnRRQ10_data)
 model1.1_rob <- robust(model1.1, cluster = lnRRQ10_data$record_num)
-orchaRd::orchard_plot(model1.1, mod = "type", group  = "record_num", data = lnRRQ10_data, xlab = "lnRRQ10")
+
+p1.1 <- orchaRd::orchard_plot(model1.1, mod = "type", group  = "record_num", data = lnRRQ10_data, 
+                              xlab = TeX("$lnRR_{Q_{10}}$"), angle = 45)
+
+# Save model1.1
+saveRDS(model1.1, file = "./output/models/lnRRQ10_1.1")
+
+model1.2 <- metafor::rma.mv(effect_size ~  c_accl_time + type + habitat + type:habitat, V = V, 
+                            random = list(~1 + type | record_num,
+                                            ~1 | species_full,
+                                            ~1 | spp,
+                                            ~1 | obs),
+                            R = list(species_full = phylo_cor), dfs = "contain", test = "t", data = lnRRQ10_data)
+model1.2_rob <- robust(model1.2, cluster = lnRRQ10_data$record_num)
+
+# Save model1.2
+saveRDS(model1.2, file = "./output/models/lnRRQ10_1.2")
+
+p1.2 <- orchaRd::orchard_plot(model1.2, mod = "habitat", group  = "record_num", at = list(type = c("acute", "acclim")), by = "type", weights = "prop", data = lnRRQ10_data, xlab = TeX("$lnRR_{Q_{10}}$"), angle = 45, legend.pos = "top.left") + scale_x_discrete(labels = c("T" = "Terrestrial","M" = "Marine" ,"F" = "Freshwater")) +
+  theme(legend.direction = "vertical")
+
+p1.2 <- p1.2 + geom_segment(aes(x = 2.92, y = 2, xend = 3.07, yend = 2), 
+                            arrow = arrow(angle = 90, ends = "both", length = unit(0.01, "npc"))) +
+                geom_segment(aes(x = 1.92, y = 2, xend = 2.07, yend = 2), 
+                            arrow = arrow(angle = 90, ends = "both", length = unit(0.01, "npc"))) +
+               geom_segment(aes(x = 0.92, y = 2, xend = 1.07, yend = 2), 
+                            arrow = arrow(angle = 90, ends = "both", length = unit(0.01, "npc"))) +
+                   annotate("text", x = 1, y = 2.50, 
+                            label =TeX(paste0("$\\beta = $", round(model1.2$b[3], 2), " [", round(model1.2$ci.lb[3], 2)," - ", round(model1.2$ci.ub[3], 2), "] ", round((model1.2$b[3] / model1.2$b[1]*100), 2), "%")), hjust = 0)
 
 ```
 

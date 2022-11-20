@@ -210,6 +210,25 @@ We analysed our data using Bayesian multilevel meta-analytic (MLMA) and meta-reg
 ## *Results*
 
 ### *Do terrestrial and aquatic ectotherms differ in their capacity to acclimate?*
+
+```{r acclimation_cap}
+########################
+### Differences in acclimation capacity between terrestrial, aquatic and marine
+########################
+phylo_cor <- vcv(tree_p0.7, cor = TRUE)
+## lnRR first
+lnRRQ10_data <- data_long %>% filter(grepl("lnRR", name)) %>% mutate(spp = species_full)
+
+model1.1 <- metafor::rma.mv(effect_size, V = V, 
+                            random = list(~1 + type | record_num,
+                                            ~1 | species_full,
+                                            ~1 | spp,
+                                            ~1 | obs),
+                            R = list(species_full = phylo_cor), dfs = "contain", test = "t", data = lnRRQ10_data)
+
+```
+
+
 ### *Does climate variability predict acclimation capacity among aquatic and terrestrial ectotherms?*
 ### *Does between-individual variation in acclimation capacities differ across terrestrial and aquatic ectotherms?*
 

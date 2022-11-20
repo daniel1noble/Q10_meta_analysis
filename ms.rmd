@@ -35,7 +35,7 @@ knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE, tidy = TRU
 ##################################
 # Loading packages & Functions
 ##################################
-    pacman::p_load(tidyverse,  metafor, flextable, raster, rasterVis,  patchwork, RColorBrewer, ggtree, ape, phytools, viridis, MCMCglmm, brms, latex2exp)
+    pacman::p_load(tidyverse,  metafor, flextable, raster, rasterVis,  patchwork, RColorBrewer, ggtree, ape, phytools, viridis, MCMCglmm, brms, latex2exp, orchaRd)
 
 #devtools::install_github(repo = "ErikKusch/KrigR")
 ## Function to produce colour palette
@@ -231,6 +231,8 @@ model1.1 <- metafor::rma.mv(effect_size ~ type, V = V,
                                             ~1 | spp,
                                             ~1 | obs),
                             R = list(species_full = phylo_cor), dfs = "contain", test = "t", data = lnRRQ10_data)
+model1.1_rob <- robust(model1.1, cluster = lnRRQ10_data$record_num)
+orchaRd::orchard_plot(model1.1, mod = "type", group  = "record_num", data = lnRRQ10_data, xlab = "lnRRQ10")
 
 ```
 

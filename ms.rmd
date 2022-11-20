@@ -2,14 +2,14 @@
 title: ""
 author: Daniel W.A. Noble, Fonti Kar, Frank Seebacher, Alex Bush, & Shinichi Nakagawa
 date: "`r Sys.Date()`"
-bibliography: refs.bib
-csl: ecology-letters.csl
+bibliography: ./bib/refs.bib
+csl: ./bib/ecology-letters.csl
 output: 
   bookdown::word_document2:
     toc: no
     toc_depth: 6
     number_sections: false
-    reference_docx: template.docx
+    reference_docx: ./bib/template.docx
   bookdown::html_document2:
     code_folding: hide
     number_sections: no
@@ -35,7 +35,7 @@ knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE, tidy = TRU
 ##################################
 # Loading packages & Functions
 ##################################
-    pacman::p_load(tidyverse, kableExtra, gridExtra, magrittr, Hmisc, googlesheets4, metafor, stringr, formatR, rmarkdown, kableExtra, flextable, raster, rasterVis, rnoaa, sp, ggmap, patchwork, ggpubr, RColorBrewer, sf, ggtree, ape, phytools, viridis, ncdf4.helpers, ncdf4, PCICt, readr, chron, tmap, rgdal, MCMCglmm, brms, latex2exp, rlang, ggnewscale)
+    pacman::p_load(tidyverse,  metafor, flextable, raster, rasterVis,  patchwork, RColorBrewer, ggtree, ape, phytools, viridis, MCMCglmm, brms, latex2exp)
 
 #devtools::install_github(repo = "ErikKusch/KrigR")
 ## Function to produce colour palette
@@ -44,7 +44,7 @@ colfunc <- colorRampPalette(rev(brewer.pal(10,"RdBu")))
 #test colfunc(10) will generate the exact Hex codes for 10 different colours can 10 to 100 and you get 100 colour hex codes. Very useful webpage: https://pjbartlein.github.io/REarthSysSci/rasterVis01.html
 
     # loading functions
-    source("../R/functions.R")
+    source("./R/functions.R")
 
 ```
 
@@ -54,8 +54,8 @@ colfunc <- colorRampPalette(rev(brewer.pal(10,"RdBu")))
 ##########################
 ## Load processed datasets
 ##########################
-data_wide <- read.csv("../output/data/data_final_wide.csv")
-data_long <- read.csv("../output/data/data_final_long.csv")
+data_wide <- read.csv("./output/data/data_final_wide.csv")
+data_long <- read.csv("./output/data/data_final_long.csv")
 
 ##########################
 ## Summarize data
@@ -84,7 +84,7 @@ data_long <- read.csv("../output/data/data_final_long.csv")
     #tree_data <- tree_data[,2:3]
     
  ## Load the phylogenetic tree
-                tree <- read.tree("../tree/tree_binary_SN_Q10.tre")   
+                tree <- read.tree("./tree/tree_binary_SN_Q10.tre")   
       tree$tip.label <- gsub("_", " ", tree$tip.label)
       tree$tip.label <- gsub("Enithares sp", "Enithares ciliata", tree$tip.label)
   

@@ -216,10 +216,16 @@ We analysed our data using Bayesian multilevel meta-analytic (MLMA) and meta-reg
 ### Differences in acclimation capacity between terrestrial, aquatic and marine
 ########################
 phylo_cor <- vcv(tree_p0.7, cor = TRUE)
-## lnRR first
-lnRRQ10_data <- data_long %>% filter(grepl("lnRR", name)) %>% mutate(spp = species_full)
 
-model1.1 <- metafor::rma.mv(effect_size, V = V, 
+#############
+## lnRRQ10
+#############
+
+# Subset the data
+lnRRQ10_data <- data_long %>% filter(grepl("lnRR", name) & !is.na(effect_size) & !is.na(V) & !V == 0) %>% mutate(spp = species_full)
+
+# Intercept only model. 
+model1.1 <- metafor::rma.mv(effect_size ~ type, V = V, 
                             random = list(~1 + type | record_num,
                                             ~1 | species_full,
                                             ~1 | spp,

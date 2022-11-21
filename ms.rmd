@@ -279,6 +279,11 @@ if(rerun){
 # Robust variance
 model1.2_rob <- robust(model1.2, cluster = lnRRQ10_data$record_num)
 
+## Contrasts
+posteriors_1.2 <- posterior_samples(model1.2_bayes, pars = "^b")
+f_acute  <- posteriors_1.2[,"b_Intercept"] 
+f_acclim <- posteriors_1.2[,"b_Intercept"] + posteriors_1.2[,"b_typeacclim"]
+
 # Orchard plot
 p1.2 <- orchaRd::orchard_plot(model1.2, mod = "habitat", group  = "record_num", at = list(type = c("acute", "acclim")), by = "type", weights = "prop", data = lnRRQ10_data, xlab = TeX("$lnRR_{Q_{10}}$"), angle = 45, legend.pos = "top.left") + 
   scale_x_discrete(labels = c("T" = "Terrestrial","M" = "Marine" ,"F" = "Freshwater")) +

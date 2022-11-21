@@ -232,35 +232,49 @@ hist(lnRRQ10_data$V)
 lnRRQ10_data %>% filter(V >= 2)
 
 # Intercept only model. 
-model1.1 <- metafor::rma.mv(effect_size ~ c_accl_time + type, V = V, 
-                            random = list(~1 + type | record_num,
-                                            ~1 | species_full,
-                                            ~1 | spp,
-                                            ~1 | obs),
-                            R = list(species_full = phylo_cor), dfs = "contain", test = "t", data = lnRRQ10_data)
+rerun = FALSE
+if(rerun){
+  model1.1 <- metafor::rma.mv(effect_size ~ c_accl_time + type, V = V, 
+                              random = list(~1 | record_num,
+                                              ~1 | species_full,
+                                              ~1 | spp,
+                                              ~1 | obs),
+                              R = list(species_full = phylo_cor), dfs = "contain", 
+                              test = "t", data = lnRRQ10_data) 
+  # Save model1.1
+  saveRDS(model1.1, file = "./output/models/lnRRQ10_1.1")
+} else{ model1.1 <- readRDS("./output/models/lnRRQ10_1.1")}
+
+# Robust variance estimation
 model1.1_rob <- robust(model1.1, cluster = lnRRQ10_data$record_num)
 
+# OrchaRd plot of model 1.1
 p1.1 <- orchaRd::orchard_plot(model1.1, mod = "type", group  = "record_num", data = lnRRQ10_data, 
                               xlab = TeX("$lnRR_{Q_{10}}$"), angle = 45)
 
-# Save model1.1
-saveRDS(model1.1, file = "./output/models/lnRRQ10_1.1")
+if(rerun){
+  # More realistic model with 
+  model1.2 <- metafor::rma.mv(effect_size ~  c_accl_time + type + habitat + type:habitat, V = V, 
+                              random = list(~1 + type | record_num,
+                                              ~1 | species_full,
+                                              ~1 | spp,
+                                              ~1 | obs),
+                              R = list(species_full = phylo_cor), dfs = "contain", 
+                              test = "t", data = lnRRQ10_data)
+  
+  # Save model1.2
+  saveRDS(model1.2, file = "./output/models/lnRRQ10_1.2")
+} else{
+  model1.2 <- readRDS("./output/models/lnRRQ10_1.2")
+}
 
-model1.2 <- metafor::rma.mv(effect_size ~  c_accl_time + type + habitat + type:habitat, V = V, 
-                            random = list(~1 + type | record_num,
-                                            ~1 | species_full,
-                                            ~1 | spp,
-                                            ~1 | obs),
-                            R = list(species_full = phylo_cor), dfs = "contain", test = "t", data = lnRRQ10_data)
+# Robust variance
 model1.2_rob <- robust(model1.2, cluster = lnRRQ10_data$record_num)
 
-# Save model1.2
-saveRDS(model1.2, file = "./output/models/lnRRQ10_1.2")
-
+# Orchard plot
 p1.2 <- orchaRd::orchard_plot(model1.2, mod = "habitat", group  = "record_num", at = list(type = c("acute", "acclim")), by = "type", weights = "prop", data = lnRRQ10_data, xlab = TeX("$lnRR_{Q_{10}}$"), angle = 45, legend.pos = "top.left") + scale_x_discrete(labels = c("T" = "Terrestrial","M" = "Marine" ,"F" = "Freshwater")) +
-  theme(legend.direction = "vertical")
-
-p1.2 <- p1.2 + geom_segment(aes(x = 2.92, y = 2, xend = 3.07, yend = 2), 
+  theme(legend.direction = "vertical") + 
+  geom_segment(aes(x = 2.92, y = 2, xend = 3.07, yend = 2), 
                             arrow = arrow(angle = 90, ends = "both", length = unit(0.01, "npc"))) +
                 geom_segment(aes(x = 1.92, y = 2, xend = 2.07, yend = 2), 
                             arrow = arrow(angle = 90, ends = "both", length = unit(0.01, "npc"))) +

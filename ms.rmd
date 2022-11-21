@@ -35,7 +35,7 @@ knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE, tidy = TRU
 ##################################
 # Loading packages & Functions
 ##################################
-    pacman::p_load(tidyverse,  metafor, flextable, raster, rasterVis,  patchwork, RColorBrewer, ggtree, ape, phytools, viridis, MCMCglmm, brms, latex2exp, orchaRd)
+    pacman::p_load(tidyverse,  metafor, flextable, raster, rasterVis,  patchwork, RColorBrewer, ggtree, ape, phytools, viridis, MCMCglmm, brms, latex2exp, orchaRd, multcomp)
 
 #devtools::install_github(repo = "ErikKusch/KrigR")
 ## Function to produce colour palette
@@ -56,6 +56,8 @@ colfunc <- colorRampPalette(rev(brewer.pal(10,"RdBu")))
 ##########################
 data_wide <- read.csv("./output/data/data_final_wide.csv")
 data_long <- read.csv("./output/data/data_final_long.csv")
+
+data_long2 <- data_long %>% mutate(type = factor(type, levels = c("acute", "acclim")))
 
 ##########################
 ## Summarize data
@@ -216,13 +218,14 @@ We analysed our data using Bayesian multilevel meta-analytic (MLMA) and meta-reg
 ### Differences in acclimation capacity between terrestrial, aquatic and marine
 ########################
 phylo_cor <- vcv(tree_p0.7, cor = TRUE)
+A <- vcv(tree_p0.7, cor = FALSE) # For bayes
 
 #############
 ## lnRRQ10
 #############
 
 # Subset the data
-lnRRQ10_data <- data_long %>% filter(grepl("lnRR", name) & !is.na(effect_size) & !is.na(V) & !V == 0) %>% 
+lnRRQ10_data <- data_long2 %>% filter(grepl("lnRR", name) & !is.na(effect_size) & !is.na(V) & !V == 0) %>% 
                               mutate(spp = species_full, c_accl_time = acclim_period - mean(acclim_period, na.rm = TRUE))
 
 # Found some other data entry problems from old dataset. Sample sizes are decimals. That's not correct. It has to be an integer. Need to check. These are not the new data that we entered. 
@@ -236,9 +239,9 @@ rerun = TRUE
 if(rerun){
   model1.1 <- metafor::rma.mv(effect_size ~ c_accl_time + type, V = V, 
                               random = list(~1 | record_num,
-                                              ~1 | species_full,
-                                              ~1 | spp,
-                                              ~1 | obs),
+                                            ~1 | species_full,
+                                            ~1 | spp,
+                                            ~1 | obs),
                               R = list(species_full = phylo_cor), dfs = "contain", 
                               test = "t", data = lnRRQ10_data) 
   # Save model1.1
@@ -255,21 +258,29 @@ p1.1 <- orchaRd::orchard_plot(model1.1, mod = "type", group  = "record_num", dat
 if(rerun){
   # More realistic model with 
   model1.2 <- metafor::rma.mv(effect_size ~  c_accl_time + type + habitat + type:habitat, V = V, 
-                              random = list(~1 + type | record_num,
-                                              ~1 | species_full,
-                                              ~1 | spp,
-                                              ~1 | obs),
+                              random = list(~1 | record_num,
+                                            ~1 | species_full,
+                                            ~1 | spp,
+                                            ~1 | obs),
                               R = list(species_full = phylo_cor), dfs = "contain", 
                               test = "t", data = lnRRQ10_data)
   
+   model1.2_bayes <- brms::brm(effect_size | se(sqrt(V)) ~  c_accl_time + type + habitat + type:habitat + (~1 | record_num) + (1 | gr(species_full, cov = A)) + (1 | spp) + (1|obs), data2 = list(A=A), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.95), chains = 4, iter = 2000, warmup = 1000, cores = 5, data = lnRRQ10_data)
+                                  
   # Save model1.2
   saveRDS(model1.2, file = "./output/models/lnRRQ10_1.2")
-} else{
+  saveRDS(model1.2_bayes, file = "./output/models/lnRRQ10_1.2_bayes")
+
+  } else{
   model1.2 <- readRDS("./output/models/lnRRQ10_1.2")
 }
 
 # Robust variance
 model1.2_rob <- robust(model1.2, cluster = lnRRQ10_data$record_num)
+
+summary(glht(model1.2, linfct=rbind(c(-1,0,1,0,0,0,0), c(1,0,1,-1,0,1,0)), test=adjusted("none")))
+
+
 
 # Orchard plot
 p1.2 <- orchaRd::orchard_plot(model1.2, mod = "habitat", group  = "record_num", at = list(type = c("acute", "acclim")), by = "type", weights = "prop", data = lnRRQ10_data, xlab = TeX("$lnRR_{Q_{10}}$"), angle = 45, legend.pos = "top.left") + scale_x_discrete(labels = c("T" = "Terrestrial","M" = "Marine" ,"F" = "Freshwater")) +
@@ -280,8 +291,16 @@ p1.2 <- orchaRd::orchard_plot(model1.2, mod = "habitat", group  = "record_num", 
                             arrow = arrow(angle = 90, ends = "both", length = unit(0.01, "npc"))) +
                geom_segment(aes(x = 0.92, y = 2, xend = 1.07, yend = 2), 
                             arrow = arrow(angle = 90, ends = "both", length = unit(0.01, "npc"))) +
-                   annotate("text", x = 1, y = 2.50, 
-                            label =TeX(paste0("$\\beta = $", round(model1.2$b[3], 2), " [", round(model1.2$ci.lb[3], 2)," - ", round(model1.2$ci.ub[3], 2), "] ", round((model1.2$b[3] / model1.2$b[1]*100), 2), "%")), hjust = 0)
+                   annotate("text", x = 1, y = 2.10, 
+                            label =TeX(paste0("$\\beta = $", round(model1.2$b[3], 2), "[", round(model1.2$ci.lb[3], 2)," to ", round(model1.2$ci.ub[3], 2), "] ")), hjust = 0) + 
+                   annotate("text", x = 1.01, y = 4.60, 
+                            label =paste0(round((model1.2$b[3] / model1.2$b[1]*100), 2), "%"), hjust = 0) + labs(shape = "Type") +
+   geom_segment(aes(x = 0.92, y = 5.6, xend = 1.07, yend = 5.6), 
+                            arrow = arrow(angle = 45, ends = "first", length = unit(0.01, "npc"))) +
+      annotate("text", x = 0.85, y = 3, label = "P < 0.001", hjust = 0)
+  
+  
+   
 
 ```
 

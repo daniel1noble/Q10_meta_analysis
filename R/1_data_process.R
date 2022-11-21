@@ -91,4 +91,4 @@ data_long <- data_wide %>%
 dim(data_long)
 with(data_long, table(type)) # Acute should be 2x larger
 with(data_long, table(type, trait_category))
-write.csv(data_long, file = "../output/data/data_final_long.csv", row.names = FALSE)
+write.csv(data_long, file = "./output/data/data_final_long.csv", row.names = FALSE)

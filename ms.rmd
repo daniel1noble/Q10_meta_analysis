@@ -232,7 +232,7 @@ hist(lnRRQ10_data$V)
 lnRRQ10_data %>% filter(V >= 2)
 
 # Intercept only model. 
-rerun = FALSE
+rerun = TRUE
 if(rerun){
   model1.1 <- metafor::rma.mv(effect_size ~ c_accl_time + type, V = V, 
                               random = list(~1 | record_num,

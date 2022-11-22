@@ -217,8 +217,6 @@ We analysed our data using Bayesian multilevel meta-analytic (MLMA) and meta-reg
 ########################
 ### Differences in acclimation capacity between terrestrial, aquatic and marine
 ########################
-phylo_cor <- vcv(tree_p0.7, cor = TRUE)
-A <- vcv(tree_p0.7, cor = FALSE) # For bayes
 
 #############
 ## lnRRQ10
@@ -228,6 +226,14 @@ A <- vcv(tree_p0.7, cor = FALSE) # For bayes
 lnRRQ10_data <- data_long2 %>% filter(grepl("lnRR", name) & !is.na(effect_size) & !is.na(V) & !V == 0) %>% 
                               mutate(spp = species_full, c_accl_time = acclim_period - mean(acclim_period, na.rm = TRUE))
 
+# Check and prune tree
+tree_lnrr <- tree_checks(data = lnRRQ10_data, tree = tree_p0.7, dataCol = "species_full", type = "prune")
+tree_checks(data = lnRRQ10_data, tree = tree_lnrr, dataCol = "species_full", type = "check") # Good
+
+# Create the phylo correlation matrix
+phylo_cor <- vcv(tree_lnrr, cor = TRUE)
+        A <- vcv(tree_lnrr, cor = FALSE) # For bayes, need cov matrix
+
 # Found some other data entry problems from old dataset. Sample sizes are decimals. That's not correct. It has to be an integer. Need to check. These are not the new data that we entered. 
 hist(lnRRQ10_data$V)
 
@@ -235,7 +241,7 @@ hist(lnRRQ10_data$V)
 lnRRQ10_data %>% filter(V >= 2)
 
 # Intercept only model. 
-rerun = TRUE
+rerun = FALSE
 if(rerun){
   model1.1 <- metafor::rma.mv(effect_size ~ c_accl_time + type, V = V, 
                               random = list(~1 | record_num,
@@ -282,9 +288,20 @@ model1.2_rob <- robust(model1.2, cluster = lnRRQ10_data$record_num)
 ## Contrasts
 posteriors_1.2 <- posterior_samples(model1.2_bayes, pars = "^b")
 f_acute  <- posteriors_1.2[,"b_Intercept"] 
+pmcmc(f_acute)
 f_acclim <- posteriors_1.2[,"b_Intercept"] + posteriors_1.2[,"b_typeacclim"]
+m_acute  <- posteriors_1.2[,"b_Intercept"] + posteriors_1.2[,"b_habitatm"]
+m_acclim <- posteriors_1.2[,"b_Intercept"] + posteriors_1.2[,"b_habitatm"] + posteriors_1.2[,"b_typeacclim"] + posteriors_1.2[,"b_typeacclim:habitatm"]
+t_acute  <- posteriors_1.2[,"b_Intercept"] + posteriors_1.2[,"b_habitatt"]
+t_acclim <- posteriors_1.2[,"b_Intercept"] + posteriors_1.2[,"b_habitatt"] + posteriors_1.2[,"b_typeacclim"] + posteriors_1.2[,"b_typeacclim:habitatt"]
+
+# R2
+fix <- var(predict(model1.2_bayes)[,"Estimate"])
+r2_ml(model1.2)
 
 # Orchard plot
+results1.2 <- mod_results(model1.2, mod = "habitat", group  = "record_num", at = list(type = c("acute", "acclim")), by = "type", weights = "prop", data = lnRRQ10_data)
+
 p1.2 <- orchaRd::orchard_plot(model1.2, mod = "habitat", group  = "record_num", at = list(type = c("acute", "acclim")), by = "type", weights = "prop", data = lnRRQ10_data, xlab = TeX("$lnRR_{Q_{10}}$"), angle = 45, legend.pos = "top.left") + 
   scale_x_discrete(labels = c("T" = "Terrestrial","M" = "Marine" ,"F" = "Freshwater")) +
   theme(legend.direction = "vertical") + 
@@ -303,7 +320,27 @@ annotate("text", x = 1.01, y = 4.60,
   annotate("text", x = 0.85, y = 3, label = "P < 0.001", hjust = 0)
   
   
-   
+ if(rerun){
+  # More realistic model with 
+  model1.3 <- metafor::rma.mv(effect_size ~  c_accl_time + type + trait_category + habitat + type:habitat + trait_category:habitat:type + trait_category, V = V, 
+                              random = list(~1 | record_num,
+                                            ~1 | species_full,
+                                            ~1 | spp,
+                                            ~1 | obs),
+                              R = list(species_full = phylo_cor), dfs = "contain", 
+                              test = "t", data = lnRRQ10_data)
+  
+   model1.3_bayes <- brms::brm(effect_size | se(sqrt(V)) ~  c_accl_time + type + habitat + type:habitat + (~1 | record_num) + (1 | gr(species_full, cov = A)) + (1 | spp) + (1|obs), data2 = list(A=A), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 4, data = lnRRQ10_data)
+                                  
+  # Save model1.2
+  saveRDS(model1.3, file = "./output/models/lnRRQ10_1.3")
+  saveRDS(model1.3_bayes, file = "./output/models/lnRRQ10_1.3_bayes")
+
+  } else{
+  model1.3 <- readRDS("./output/models/lnRRQ10_1.3")
+  model1.3_bayes <- readRDS("./output/models/lnRRQ10_1.3_bayes")
+}
+  
 
 ```
 

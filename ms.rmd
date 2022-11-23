@@ -340,8 +340,10 @@ annotate("text", x = 1.01, y = 4.60,
   model1.3 <- readRDS("./output/models/lnRRQ10_1.3")
   model1.3_bayes <- readRDS("./output/models/lnRRQ10_1.3_bayes")
 }
-  
 
+orchard_plot(model1.3, mod = "trait_category",  group = "record_num",  data = lnRRQ10_data) 
+
+orchard_plot(model1.3, mod = "trait_category", at = list(type = c("acute", "acclim"), c_accl_time = 0, habitat = "m"), by = "type",  group = "record_num", weights = "prop", data = lnRRQ10_data) 
 ```
 
 

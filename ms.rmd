@@ -330,7 +330,7 @@ annotate("text", x = 1.01, y = 4.60,
                               R = list(species_full = phylo_cor), dfs = "contain", 
                               test = "t", data = lnRRQ10_data)
   
-   model1.3_bayes <- brms::brm(effect_size | se(sqrt(V)) ~  c_accl_time + type + habitat + type:habitat + (~1 | record_num) + (1 | gr(species_full, cov = A)) + (1 | spp) + (1|obs), data2 = list(A=A), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 4, data = lnRRQ10_data)
+   model1.3_bayes <- brms::brm(effect_size | se(sqrt(V)) ~  c_accl_time + type + trait_category + habitat + type:habitat + trait_category:habitat:type + trait_category + (~1 | record_num) + (1 | gr(species_full, cov = A)) + (1 | spp) + (1|obs), data2 = list(A=A), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 4, data = lnRRQ10_data)
                                   
   # Save model1.2
   saveRDS(model1.3, file = "./output/models/lnRRQ10_1.3")

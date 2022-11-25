@@ -327,29 +327,67 @@ results1.2 <- mod_results(model1.2, mod = "habitat", group  = "record_num", at =
    tree_f <- tree_checks(lnRRQ10_data_f, tree = tree_lnrr, dataCol = "species_full", type = "prune")
    tree_t <- tree_checks(lnRRQ10_data_t, tree = tree_lnrr, dataCol = "species_full", type = "prune")
    
-   # More realistic model with 
+   # cor matrices
+   m_phylo <- vcv(tree_m, corr = TRUE)
+       A_m <- vcv(tree_m, corr = FALSE)
+   f_phylo <- vcv(tree_f, corr = TRUE)
+       A_f <- vcv(tree_f, corr = FALSE)
+   t_phylo <- vcv(tree_t, corr = TRUE)
+       A_t <- vcv(tree_t, corr = FALSE)
+   
+   # More realistic model with traits in marine species
   model1.3_m <- metafor::rma.mv(effect_size ~  c_accl_time + type + trait_category + type:trait_category, V = V, 
                               random = list(~1 | record_num,
                                             ~1 | species_full,
                                             ~1 | spp,
                                             ~1 | obs),
-                              R = list(species_full = phylo_cor), dfs = "contain", 
+                              R = list(species_full = m_phylo), dfs = "contain", 
                               test = "t", data = lnRRQ10_data_m)
   
-   model1.3_bayes <- brms::brm(effect_size | se(sqrt(V)) ~  c_accl_time + type + trait_category + habitat + type:habitat + trait_category:habitat:type + trait_category + (~1 | record_num) + (1 | gr(species_full, cov = A)) + (1 | spp) + (1|obs), data2 = list(A=A), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 4, data = lnRRQ10_data)
-                                  
-  # Save model1.2
-  saveRDS(model1.3, file = "./output/models/lnRRQ10_1.3")
-  saveRDS(model1.3_bayes, file = "./output/models/lnRRQ10_1.3_bayes")
+   model1.3_m_bayes <- brms::brm(effect_size | se(sqrt(V)) ~  c_accl_time + type + trait_category + type:trait_category + (~1 | record_num) + (1 | gr(species_full, cov = A_m)) + (1 | spp) + (1|obs), data2 = list(A_m=A_m), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 4, data = lnRRQ10_data_m)
+  
+    # More realistic model with traits in freshwater species
+  model1.3_f <- metafor::rma.mv(effect_size ~  c_accl_time + type + trait_category + type:trait_category, V = V, 
+                              random = list(~1 | record_num,
+                                            ~1 | species_full,
+                                            ~1 | spp,
+                                            ~1 | obs),
+                              R = list(species_full =f_phylo), dfs = "contain", 
+                              test = "t", data = lnRRQ10_data_f)
+  
+   model1.3_f_bayes <- brms::brm(effect_size | se(sqrt(V)) ~  c_accl_time + type + trait_category + type:trait_category + (~1 | record_num) + (1 | gr(species_full, cov = A_f)) + (1 | spp) + (1|obs), data2 = list(A_f=A_f), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 4, data = lnRRQ10_data_f)
+   
+    # More realistic model with traits in terrestrial species
+  model1.3_t <- metafor::rma.mv(effect_size ~  c_accl_time + type + trait_category + type:trait_category, V = V, 
+                              random = list(~1 | record_num,
+                                            ~1 | species_full,
+                                            ~1 | spp,
+                                            ~1 | obs),
+                              R = list(species_full =t_phylo), dfs = "contain", 
+                              test = "t", data = lnRRQ10_data_t)
+  
+   model1.3_t_bayes <- brms::brm(effect_size | se(sqrt(V)) ~  c_accl_time + type + trait_category + type:trait_category + (~1 | record_num) + (1 | gr(species_full, cov = A_t)) + (1 | spp) + (1|obs), data2 = list(A_t=A_t), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 4, data = lnRRQ10_data_t)
+                      
+  # Save models
+  saveRDS(model1.3_m, file = "./output/models/lnRRQ10_1.3m")
+  saveRDS(model1.3_m_bayes, file = "./output/models/lnRRQ10_1.3_bayes_m")
+  saveRDS(model1.3_f, file = "./output/models/lnRRQ10_1.3f")
+  saveRDS(model1.3_f_bayes, file = "./output/models/lnRRQ10_1.3_bayes_f")
+  saveRDS(model1.3_t, file = "./output/models/lnRRQ10_1.3t")
+  saveRDS(model1.3_t_bayes, file = "./output/models/lnRRQ10_1.3_bayes_t")
 
   } else{
-  model1.3 <- readRDS("./output/models/lnRRQ10_1.3")
-  model1.3_bayes <- readRDS("./output/models/lnRRQ10_1.3_bayes")
+        model1.3_m <- readRDS("./output/models/lnRRQ10_1.3m")
+  model1.3_m_bayes <- readRDS("./output/models/lnRRQ10_1.3_bayes_m")
+        model1.3_f <- readRDS("./output/models/lnRRQ10_1.3f")
+  model1.3_f_bayes <- readRDS("./output/models/lnRRQ10_1.3_bayes_f")
+        model1.3_t <- readRDS("./output/models/lnRRQ10_1.3t")
+  model1.3_t_bayes <- readRDS("./output/models/lnRRQ10_1.3_bayes_t")
 }
 
 orchard_plot(model1.3, mod = "trait_category",  group = "record_num",  data = lnRRQ10_data) 
 
-orchard_plot(model1.3, mod = "trait_category", at = list(type = c("acute", "acclim"), habitat = c("m")),  group = "record_num", weights = "prop", data = lnRRQ10_data, xlab = "lnRRQ10") 
+orchard_plot(model1.3_m, mod = "trait_category", at = list(type = c("acute", "acclim")), by = "type", group = "record_num", weights = "prop", data = lnRRQ10_data_m, xlab = "lnRRQ10", angle = 45) 
 
 lnRRQ10_data %>% group_by(habitat, type, trait_category) %>% summarise(n = n()) %>% data.frame()
 ```

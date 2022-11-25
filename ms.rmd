@@ -222,6 +222,10 @@ We analysed our data using Bayesian multilevel meta-analytic (MLMA) and meta-reg
 ## lnRRQ10
 #############
 
+
+###################################
+# Organise the data and prune tree
+###################################
 # Subset the data
 lnRRQ10_data <- data_long2 %>% filter(grepl("lnRR", name) & !is.na(effect_size) & !is.na(V) & !V == 0) %>% 
                               mutate(spp = species_full, c_accl_time = acclim_period - mean(acclim_period, na.rm = TRUE))
@@ -240,7 +244,9 @@ hist(lnRRQ10_data$V)
 # Studies with big V, why? Check N
 lnRRQ10_data %>% filter(V >= 2)
 
+#############################
 # Intercept only model. 
+#############################
 rerun = FALSE
 if(rerun){
   model1.1 <- metafor::rma.mv(effect_size ~ c_accl_time + type, V = V, 
@@ -260,6 +266,12 @@ model1.1_rob <- robust(model1.1, cluster = lnRRQ10_data$record_num)
 # OrchaRd plot of model 1.1
 p1.1 <- orchaRd::orchard_plot(model1.1, mod = "type", group  = "record_num", data = lnRRQ10_data, 
                               xlab = TeX("$lnRR_{Q_{10}}$"), angle = 45)
+
+
+#################################################
+# Model controlling for acclimation time, 
+# type and habitat assuming type can vary by habitat
+#################################################
 
 if(rerun){
   # More realistic model with 
@@ -319,16 +331,29 @@ annotate("text", x = 1.01, y = 4.60,
                             arrow = arrow(angle = 45, ends = "first", length = unit(0.01, "npc"))) +
   annotate("text", x = 0.85, y = 3, label = "P < 0.001", hjust = 0)
   
-  
+####################################################
+# Model 1.3's: Trait type varied by acclimation type
+# but data is seperated by habitat to simplify
+####################################################
  if(rerun){
-  # More realistic model with 
-  model1.3 <- metafor::rma.mv(effect_size ~  c_accl_time + type + trait_category + habitat + type:habitat + trait_category:habitat:type + trait_category, V = V, 
+  # Filter to different habitats
+   lnRRQ10_data_m <- lnRRQ10_data %>% filter(habitat == "m")
+   lnRRQ10_data_f <- lnRRQ10_data %>% filter(habitat == "f")
+   lnRRQ10_data_t <- lnRRQ10_data %>% filter(habitat == "t")
+  
+   # Prune tree
+   tree_m <- tree_checks(lnRRQ10_data_m, tree = tree_lnrr, dataCol = "species_full", type = "prune")
+   tree_f <- tree_checks(lnRRQ10_data_f, tree = tree_lnrr, dataCol = "species_full", type = "prune")
+   tree_t <- tree_checks(lnRRQ10_data_t, tree = tree_lnrr, dataCol = "species_full", type = "prune")
+   
+   # More realistic model with 
+  model1.3_m <- metafor::rma.mv(effect_size ~  c_accl_time + type + trait_category + type:trait_category, V = V, 
                               random = list(~1 | record_num,
                                             ~1 | species_full,
                                             ~1 | spp,
                                             ~1 | obs),
                               R = list(species_full = phylo_cor), dfs = "contain", 
-                              test = "t", data = lnRRQ10_data)
+                              test = "t", data = lnRRQ10_data_m)
   
    model1.3_bayes <- brms::brm(effect_size | se(sqrt(V)) ~  c_accl_time + type + trait_category + habitat + type:habitat + trait_category:habitat:type + trait_category + (~1 | record_num) + (1 | gr(species_full, cov = A)) + (1 | spp) + (1|obs), data2 = list(A=A), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 4, data = lnRRQ10_data)
                                   
@@ -343,7 +368,9 @@ annotate("text", x = 1.01, y = 4.60,
 
 orchard_plot(model1.3, mod = "trait_category",  group = "record_num",  data = lnRRQ10_data) 
 
-orchard_plot(model1.3, mod = "trait_category", at = list(type = c("acute", "acclim"), c_accl_time = 0, habitat = "m"), by = "type",  group = "record_num", weights = "prop", data = lnRRQ10_data, xlab = "lnRRQ10") 
+orchard_plot(model1.3, mod = "trait_category", at = list(type = c("acute", "acclim"), habitat = c("m")),  group = "record_num", weights = "prop", data = lnRRQ10_data, xlab = "lnRRQ10") 
+
+lnRRQ10_data %>% group_by(habitat, type, trait_category) %>% summarise(n = n()) %>% data.frame()
 ```
 
 

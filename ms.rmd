@@ -385,11 +385,8 @@ results1.2 <- mod_results(model1.2, mod = "habitat", group  = "record_num", at =
   model1.3_t_bayes <- readRDS("./output/models/lnRRQ10_1.3_bayes_t")
 }
 
-orchard_plot(model1.3, mod = "trait_category",  group = "record_num",  data = lnRRQ10_data) 
 
-orchard_plot(model1.3_m, mod = "trait_category", at = list(type = c("acute", "acclim")), by = "type", group = "record_num", weights = "prop", data = lnRRQ10_data_m, xlab = "lnRRQ10", angle = 45) 
 
-lnRRQ10_data %>% group_by(habitat, type, trait_category) %>% summarise(n = n()) %>% data.frame()
 ```
 
 
@@ -414,6 +411,15 @@ annotate("text", x = 1.01, y = 4.60,
   p1
 ```
 
+```{r, fig2, fig.align='center', fig.cap="Acute and Acclimation lnRR q10 across traits for A) marine, B) freshwater and C) terrestrial systems"}
+
+orchard_plot(model1.3, mod = "trait_category",  group = "record_num",  data = lnRRQ10_data) 
+
+orchard_plot(model1.3_m, mod = "trait_category", at = list(type = c("acute", "acclim")), by = "type", group = "record_num", weights = "prop", data = lnRRQ10_data_m, xlab = "lnRRQ10", angle = 45) 
+
+lnRRQ10_data %>% group_by(habitat, type, trait_category) %>% summarise(n = n()) %>% data.frame()
+
+```
 
 ### *Does climate variability predict acclimation capacity among aquatic and terrestrial ectotherms?*
 ### *Does between-individual variation in acclimation capacities differ across terrestrial and aquatic ectotherms?*

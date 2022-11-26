@@ -221,8 +221,6 @@ We analysed our data using Bayesian multilevel meta-analytic (MLMA) and meta-reg
 #############
 ## lnRRQ10
 #############
-
-
 ###################################
 # Organise the data and prune tree
 ###################################

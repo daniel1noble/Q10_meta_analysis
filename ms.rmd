@@ -303,6 +303,11 @@ m_acclim <- posteriors_1.2[,"b_Intercept"] + posteriors_1.2[,"b_habitatm"] + pos
 t_acute  <- posteriors_1.2[,"b_Intercept"] + posteriors_1.2[,"b_habitatt"]
 t_acclim <- posteriors_1.2[,"b_Intercept"] + posteriors_1.2[,"b_habitatt"] + posteriors_1.2[,"b_typeacclim"] + posteriors_1.2[,"b_typeacclim:habitatt"]
 
+# % change in acclimation
+p_change_f <- ((f_acclim - f_acute) / f_acute); quantile(p_change_f, c(0.025, 0.975))
+p_change_m <- ((m_acclim - m_acute) / m_acute); quantile(p_change_m, c(0.025, 0.975))
+p_change_t <- ((t_acclim - t_acute) / t_acute); quantile(p_change_t, c(0.025, 0.975))
+
 # R2
 fix <- var(predict(model1.2_bayes)[,"Estimate"])
 r2_ml(model1.2)
@@ -405,8 +410,26 @@ annotate("text", x = 1.01, y = 4.60,
          label =paste0(round((model1.2$b[3] / model1.2$b[1]*100), 2), "%"), hjust = 0) + labs(shape = "Type") +
   geom_segment(aes(x = 0.92, y = 5.6, xend = 1.07, yend = 5.6), 
                             arrow = arrow(angle = 45, ends = "first", length = unit(0.01, "npc"))) +
-  annotate("text", x = 0.85, y = 3, label = "P < 0.001", hjust = 0)
-  p1
+  annotate("text", x = 0.85, y = 3, label = "P < 0.001", hjust = 0) + 
+  
+  
+  annotate("text", x = 2, y = 2.10, 
+         label =TeX(paste0("$\\beta = $", round(mean(m_acclim - m_acute), 2), "[", round(quantile(m_acclim - m_acute, 0.025), 2)," to ", round(quantile(m_acclim - m_acute, 0.975),2), "] ")), hjust = 0) + 
+annotate("text", x = 2.01, y = 4.60, 
+         label =paste0(round(mean(p_change_m)*100, 2), "%"), hjust = 0) + labs(shape = "Type") +
+  geom_segment(aes(x = 1.92, y = 5.6, xend = 2.07, yend = 5.6), 
+                            arrow = arrow(angle = 45, ends = "first", length = unit(0.01, "npc"))) +
+  annotate("text", x = 1.85, y = 3, label = "P = 0.01", hjust = 0) +
+  
+  annotate("text", x = 3, y = 2.10, 
+         label =TeX(paste0("$\\beta = $", round(mean(t_acclim - t_acute), 2), "[", round(quantile(t_acclim - t_acute, 0.025), 2)," to ", round(quantile(t_acclim - t_acute, 0.975),2), "] ")), hjust = 0) + 
+annotate("text", x = 3.01, y = 4.60, 
+         label =paste0(round(mean(p_change_t)*100, 2), "%"), hjust = 0) + labs(shape = "Type") +
+  geom_segment(aes(x = 2.92, y = 5.6, xend = 3.07, yend = 5.6), 
+                            arrow = arrow(angle = 45, ends = "last", length = unit(0.01, "npc"))) +
+  annotate("text", x = 2.85, y = 3, label = "P = 0.36", hjust = 0)
+  
+  p1.2
 ```
 
 ```{r, fig2, fig.align='center', fig.cap="Acute and Acclimation lnRR q10 across traits for A) marine, B) freshwater and C) terrestrial systems"}

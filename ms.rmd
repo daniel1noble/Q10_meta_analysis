@@ -308,6 +308,11 @@ p_change_f <- ((f_acclim - f_acute) / f_acute); quantile(p_change_f, c(0.025, 0.
 p_change_m <- ((m_acclim - m_acute) / m_acute); quantile(p_change_m, c(0.025, 0.975))
 p_change_t <- ((t_acclim - t_acute) / t_acute); quantile(p_change_t, c(0.025, 0.975))
 
+# But this is the % change on the log scale. We can also see what the Q10 change is..NEED TO BE CHECKED CAREFULLY
+f_q10 <-exp((f_acclim - f_acute)-1); mean(f_q10); quantile(f_q10, c(0.025, 0.975))
+m_q10 <-exp((m_acclim - m_acute)-1); mean(m_q10); quantile(m_q10, c(0.025, 0.975))
+t_q10 <-exp((t_acclim - t_acute)-1); mean(t_q10); quantile(t_q10, c(0.025, 0.975))
+
 # R2
 fix <- var(predict(model1.2_bayes)[,"Estimate"])
 r2_ml(model1.2)

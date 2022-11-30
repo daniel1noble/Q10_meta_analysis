@@ -214,10 +214,6 @@ We analysed our data using Bayesian multilevel meta-analytic (MLMA) and meta-reg
 ### *Do terrestrial and aquatic ectotherms differ in their capacity to acclimate?*
 
 ```{r acclimation_cap}
-########################
-### Differences in acclimation capacity between terrestrial, aquatic and marine
-########################
-
 #############
 ## lnRRQ10
 #############
@@ -396,6 +392,51 @@ results1.2 <- mod_results(model1.2, mod = "habitat", group  = "record_num", at =
 
 
 ```
+
+
+
+```{r}
+#############
+## lnCVRQ10
+#############
+  lnCVRQ10_data <- data_long2 %>% filter(grepl("lnCVR", name) & !is.na(effect_size) & !is.na(V) & !V == 0) %>% 
+                              mutate(spp = species_full, c_accl_time = acclim_period - mean(acclim_period, na.rm = TRUE))
+
+# Check and prune tree
+  tree_lncvr <- tree_checks(data = lnCVRQ10_data, tree = tree_p0.7, dataCol = "species_full", type = "prune")
+  tree_checks(data = lnCVRQ10_data, tree = tree_lncvr, dataCol = "species_full", type = "check") # Good
+
+# Create the phylo correlation matrix
+  phylo_cor_CVR <- vcv(tree_lncvr, cor = TRUE)
+          A_CVR <- vcv(tree_lncvr, cor = FALSE) # For bayes, need cov matrix
+
+# Found some other data entry problems from old dataset. Sample sizes are decimals. That's not correct. It has to be an integer. Need to check. These are not the new data that we entered. 
+  hist(lnCVRQ10_data$V)
+
+# Studies with big V, why? Check N
+  lnCVRQ10_data %>% filter(V >= 2)
+
+##################################
+# Model 2.1: Intercept only model.
+# Used for heterogeneity analysis
+##################################
+rerun = TRUE
+if(rerun){
+  model2.1 <- metafor::rma.mv(effect_size ~ 1, V = V, 
+                              random = list(~1 | record_num,
+                                            ~1 | species_full,
+                                            ~1 | spp,
+                                            ~1 | obs),
+                              R = list(species_full = phylo_cor_CVR), dfs = "contain", 
+                              test = "t", data = lnCVRQ10_data) 
+  # Save model1.1
+  saveRDS(model2.1, file = "./output/models/lnCVRQ10_2.1")
+} else{ model2.1 <- readRDS("./output/models/lnCVRQ10_2.1")}
+
+
+
+```
+
 
 
 ```{r, fig1, fig.align='center', fig.cap= "Acute and Acclimation lnRR Q10 across marine, freshwater and terrestrial environments"}

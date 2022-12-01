@@ -213,7 +213,7 @@ We analysed our data using Bayesian multilevel meta-analytic (MLMA) and meta-reg
 
 ### *Do terrestrial and aquatic ectotherms differ in their capacity to acclimate?*
 
-```{r acclimation_cap}
+```{r lnrrq10}
 #############
 ## lnRRQ10 ##
 #############
@@ -241,7 +241,7 @@ lnRRQ10_data %>% filter(V >= 2)
 ##################################################
 # Model 1.1: Intercept only model. 
 ##################################################
-rerun = TRUE
+rerun = FALSE
 if(rerun){
   model1.1 <- metafor::rma.mv(effect_size ~ 1, V = V, 
                               random = list(~1 | record_num,
@@ -313,8 +313,7 @@ t_q10 <-exp((t_acclim - t_acute)-1); mean(t_q10); quantile(t_q10, c(0.025, 0.975
 # Model 1.3's: Trait type varied by acclimation type
 # but data is separated by habitat to simplify
 ####################################################
- if(rerun){
-  # Filter to different habitats
+# Filter to different habitats
    lnRRQ10_data_m <- lnRRQ10_data %>% filter(habitat == "m")
    lnRRQ10_data_f <- lnRRQ10_data %>% filter(habitat == "f")
    lnRRQ10_data_t <- lnRRQ10_data %>% filter(habitat == "t")
@@ -331,7 +330,8 @@ t_q10 <-exp((t_acclim - t_acute)-1); mean(t_q10); quantile(t_q10, c(0.025, 0.975
        A_f <- vcv(tree_f, corr = FALSE)
    t_phylo <- vcv(tree_t, corr = TRUE)
        A_t <- vcv(tree_t, corr = FALSE)
-   
+    
+if(rerun){
    # More realistic model with traits in marine species
   model1.3_m <- metafor::rma.mv(effect_size ~  c_accl_time + type + trait_category + type:trait_category, V = V, 
                               random = list(~1 | record_num,
@@ -389,7 +389,7 @@ t_q10 <-exp((t_acclim - t_acute)-1); mean(t_q10); quantile(t_q10, c(0.025, 0.975
 
 
 
-```{r}
+```{r, lncvrq10}
 #############
 ## lnCVRQ10
 #############
@@ -417,7 +417,7 @@ t_q10 <-exp((t_acclim - t_acute)-1); mean(t_q10); quantile(t_q10, c(0.025, 0.975
 # Model 2.1: Intercept only model.
 # Used for heterogeneity analysis
 ###################################################
-rerun = TRUE
+rerun = FALSE
 if(rerun){
   model2.1 <- metafor::rma.mv(effect_size ~ 1, V = V, 
                               random = list(~1 | record_num,

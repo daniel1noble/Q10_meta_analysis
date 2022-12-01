@@ -246,19 +246,20 @@ if(rerun){
   model1.1 <- metafor::rma.mv(effect_size ~ 1, V = V, 
                               random = list(~1 | record_num,
                                             ~1 | species_full,
+                                            ~1 | trait,
                                             ~1 | spp,
                                             ~1 | obs),
                               R = list(species_full = phylo_cor), dfs = "contain", 
                               test = "t", data = lnRRQ10_data) 
   
-  model1.1_bayes <- brms::brm(effect_size | se(sqrt(V)) ~  1 + (~1 | record_num) + (1 | gr(species_full, cov = A)) + (1 | spp) + (1|obs), data2 = list(A=A), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 4, data = lnRRQ10_data)
+  model1.1_bayes <- brms::brm(effect_size | se(sqrt(V)) ~  1 + (~1 | record_num) + (1 | gr(species_full, cov = A)) + (1 | spp) + (1|trait) + (1|obs), data2 = list(A=A), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 4, data = lnRRQ10_data)
   
   # Save model1.1
   saveRDS(model1.1, file = "./output/models/lnRRQ10_1.1")
   saveRDS(model1.1_bayes, file = "./output/models/lnRRQ10_1.1_bayes")
 } else{ 
-  model1.1 <- readRDS("./output/models/lnRRQ10_1.1")}
-model1.1_bayes <- readRDS("./output/models/lnRRQ10_1.1_bayes")
+  model1.1 <- readRDS("./output/models/lnRRQ10_1.1")
+model1.1_bayes <- readRDS("./output/models/lnRRQ10_1.1_bayes")}
 
 ###################################################
 # Model 1.2: Model controlling for acclimation time, 
@@ -270,12 +271,13 @@ if(rerun){
   model1.2 <- metafor::rma.mv(effect_size ~  c_accl_time + type + habitat + type:habitat, V = V, 
                               random = list(~1 | record_num,
                                             ~1 | species_full,
+                                            ~1 | trait,
                                             ~1 | spp,
                                             ~1 | obs),
                               R = list(species_full = phylo_cor), dfs = "contain", 
                               test = "t", data = lnRRQ10_data)
   
-   model1.2_bayes <- brms::brm(effect_size | se(sqrt(V)) ~  c_accl_time + type + habitat + type:habitat + (~1 | record_num) + (1 | gr(species_full, cov = A)) + (1 | spp) + (1|obs), data2 = list(A=A), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 4, data = lnRRQ10_data)
+   model1.2_bayes <- brms::brm(effect_size | se(sqrt(V)) ~  c_accl_time + type + habitat + type:habitat + (~1 | record_num) + (1 | gr(species_full, cov = A)) + (1 | spp) + (1|trait) + (1|obs), data2 = list(A=A), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 4, data = lnRRQ10_data)
                                   
   # Save model1.2
   saveRDS(model1.2, file = "./output/models/lnRRQ10_1.2")
@@ -307,16 +309,9 @@ f_q10 <-exp((f_acclim - f_acute)-1); mean(f_q10); quantile(f_q10, c(0.025, 0.975
 m_q10 <-exp((m_acclim - m_acute)-1); mean(m_q10); quantile(m_q10, c(0.025, 0.975))
 t_q10 <-exp((t_acclim - t_acute)-1); mean(t_q10); quantile(t_q10, c(0.025, 0.975))
 
-# R2
-fix <- var(predict(model1.2_bayes)[,"Estimate"])
-r2_ml(model1.2)
-
-# Orchard plot
-results1.2 <- mod_results(model1.2, mod = "habitat", group  = "record_num", at = list(type = c("acute", "acclim")), by = "type", weights = "prop", data = lnRRQ10_data)
-
 ####################################################
 # Model 1.3's: Trait type varied by acclimation type
-# but data is seperated by habitat to simplify
+# but data is separated by habitat to simplify
 ####################################################
  if(rerun){
   # Filter to different habitats
@@ -342,33 +337,36 @@ results1.2 <- mod_results(model1.2, mod = "habitat", group  = "record_num", at =
                               random = list(~1 | record_num,
                                             ~1 | species_full,
                                             ~1 | spp,
+                                            ~1 | trait,
                                             ~1 | obs),
                               R = list(species_full = m_phylo), dfs = "contain", 
                               test = "t", data = lnRRQ10_data_m)
   
-   model1.3_m_bayes <- brms::brm(effect_size | se(sqrt(V)) ~  c_accl_time + type + trait_category + type:trait_category + (~1 | record_num) + (1 | gr(species_full, cov = A_m)) + (1 | spp) + (1|obs), data2 = list(A_m=A_m), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 4, data = lnRRQ10_data_m)
+   model1.3_m_bayes <- brms::brm(effect_size | se(sqrt(V)) ~  c_accl_time + type + trait_category + type:trait_category + (~1 | record_num) + (1 | gr(species_full, cov = A_m)) + (1 | spp) +(1|trait) + (1|obs), data2 = list(A_m=A_m), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 4, data = lnRRQ10_data_m)
   
     # More realistic model with traits in freshwater species
   model1.3_f <- metafor::rma.mv(effect_size ~  c_accl_time + type + trait_category + type:trait_category, V = V, 
                               random = list(~1 | record_num,
                                             ~1 | species_full,
                                             ~1 | spp,
+                                            ~1 | trait,
                                             ~1 | obs),
                               R = list(species_full =f_phylo), dfs = "contain", 
                               test = "t", data = lnRRQ10_data_f)
   
-   model1.3_f_bayes <- brms::brm(effect_size | se(sqrt(V)) ~  c_accl_time + type + trait_category + type:trait_category + (~1 | record_num) + (1 | gr(species_full, cov = A_f)) + (1 | spp) + (1|obs), data2 = list(A_f=A_f), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 4, data = lnRRQ10_data_f)
+   model1.3_f_bayes <- brms::brm(effect_size | se(sqrt(V)) ~  c_accl_time + type + trait_category + type:trait_category + (~1 | record_num) + (1 | gr(species_full, cov = A_f)) + (1 | spp) + (1|trait) + (1|obs), data2 = list(A_f=A_f), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 4, data = lnRRQ10_data_f)
    
     # More realistic model with traits in terrestrial species
   model1.3_t <- metafor::rma.mv(effect_size ~  c_accl_time + type + trait_category + type:trait_category, V = V, 
                               random = list(~1 | record_num,
                                             ~1 | species_full,
                                             ~1 | spp,
+                                            ~1 | trait,
                                             ~1 | obs),
                               R = list(species_full =t_phylo), dfs = "contain", 
                               test = "t", data = lnRRQ10_data_t)
   
-   model1.3_t_bayes <- brms::brm(effect_size | se(sqrt(V)) ~  c_accl_time + type + trait_category + type:trait_category + (~1 | record_num) + (1 | gr(species_full, cov = A_t)) + (1 | spp) + (1|obs), data2 = list(A_t=A_t), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 4, data = lnRRQ10_data_t)
+   model1.3_t_bayes <- brms::brm(effect_size | se(sqrt(V)) ~  c_accl_time + type + trait_category + type:trait_category + (~1 | record_num) + (1 | gr(species_full, cov = A_t)) + (1 | spp) + (1 | trait) + (1|obs), data2 = list(A_t=A_t), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 4, data = lnRRQ10_data_t)
                       
   # Save models
   saveRDS(model1.3_m, file = "./output/models/lnRRQ10_1.3m")
@@ -386,8 +384,6 @@ results1.2 <- mod_results(model1.2, mod = "habitat", group  = "record_num", at =
         model1.3_t <- readRDS("./output/models/lnRRQ10_1.3t")
   model1.3_t_bayes <- readRDS("./output/models/lnRRQ10_1.3_bayes_t")
 }
-
-
 
 ```
 
@@ -427,11 +423,12 @@ if(rerun){
                               random = list(~1 | record_num,
                                             ~1 | species_full,
                                             ~1 | spp,
+                                            ~1 | trait,
                                             ~1 | obs),
                               R = list(species_full = phylo_cor_CVR), dfs = "contain", 
                               test = "t", data = lnCVRQ10_data) 
   
-  model2.1_bayes <- brms::brm(effect_size | se(sqrt(V)) ~  1 + (~1 | record_num) + (1 | gr(species_full, cov = A_CVR)) + (1 | spp) + (1|obs), data2 = list(A_CVR=A_CVR), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 4, data = lnCVRQ10_data)
+  model2.1_bayes <- brms::brm(effect_size | se(sqrt(V)) ~  1 + (~1 | record_num) + (1 | gr(species_full, cov = A_CVR)) + (1 | spp) + (1|trait) + (1|obs), data2 = list(A_CVR=A_CVR), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 4, data = lnCVRQ10_data)
   
   # Save model1.1
   saveRDS(model2.1, file = "./output/models/lnCVRQ10_2.1")
@@ -452,11 +449,12 @@ if(rerun){
                               random = list(~1 | record_num,
                                             ~1 | species_full,
                                             ~1 | spp,
+                                            ~1 | trait,
                                             ~1 | obs),
                               R = list(species_full = phylo_cor_CVR), dfs = "contain", 
                               test = "t", data = lnCVRQ10_data)
   
-   model2.2_bayes <- brms::brm(effect_size | se(sqrt(V)) ~  c_accl_time + type + habitat + type:habitat + (~1 | record_num) + (1 | gr(species_full, cov = A_CVR)) + (1 | spp) + (1|obs), data2 = list(A=A_CVR), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 4, data = lnCVRQ10_data)
+   model2.2_bayes <- brms::brm(effect_size | se(sqrt(V)) ~  c_accl_time + type + habitat + type:habitat + (~1 | record_num) + (1 | gr(species_full, cov = A_CVR)) + (1 | spp) + (1|trait) + (1|obs), data2 = list(A=A_CVR), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 4, data = lnCVRQ10_data)
                                   
   # Save model1.2
   saveRDS(model2.2, file = "./output/models/lnCVRQ10_2.2")

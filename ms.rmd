@@ -250,10 +250,15 @@ if(rerun){
                                             ~1 | obs),
                               R = list(species_full = phylo_cor), dfs = "contain", 
                               test = "t", data = lnRRQ10_data) 
+  
+  model1.1_bayes <- brms::brm(effect_size | se(sqrt(V)) ~  1 + (~1 | record_num) + (1 | gr(species_full, cov = A)) + (1 | spp) + (1|obs), data2 = list(A=A), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 4, data = lnRRQ10_data)
+  
   # Save model1.1
   saveRDS(model1.1, file = "./output/models/lnRRQ10_1.1")
-} else{ model1.1 <- readRDS("./output/models/lnRRQ10_1.1")}
-
+  saveRDS(model1.1_bayes, file = "./output/models/lnRRQ10_1.1_bayes")
+} else{ 
+  model1.1 <- readRDS("./output/models/lnRRQ10_1.1")}
+model1.1_bayes <- readRDS("./output/models/lnRRQ10_1.1_bayes")
 
 ###################################################
 # Model 1.2: Model controlling for acclimation time, 
@@ -426,7 +431,7 @@ if(rerun){
                               R = list(species_full = phylo_cor_CVR), dfs = "contain", 
                               test = "t", data = lnCVRQ10_data) 
   
-  model2.1_bayes <- brms::brm(effect_size | se(sqrt(V)) ~  1 + (~1 | record_num) + (1 | gr(species_full, cov = A_CVR)) + (1 | spp) + (1|obs), data2 = list(A=A_CVR), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 4, data = lnCVRQ10_data)
+  model2.1_bayes <- brms::brm(effect_size | se(sqrt(V)) ~  1 + (~1 | record_num) + (1 | gr(species_full, cov = A_CVR)) + (1 | spp) + (1|obs), data2 = list(A_CVR=A_CVR), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 4, data = lnCVRQ10_data)
   
   # Save model1.1
   saveRDS(model2.1, file = "./output/models/lnCVRQ10_2.1")

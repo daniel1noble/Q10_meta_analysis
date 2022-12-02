@@ -261,6 +261,38 @@ if(rerun){
   model1.1 <- readRDS("./output/models/lnRRQ10_1.1")
 model1.1_bayes <- readRDS("./output/models/lnRRQ10_1.1_bayes")}
 
+# Heterogeneity analysis
+   w <- with(lnRRQ10_data, 1/V) # weights
+  sv <- sum(w*(length(lnRRQ10_data)-1)) / (sum(w)^2 + sum(w^2))
+
+# extract posterior sds, but square them to turn to variance
+  posteriors_1.1 <- posterior_samples(model1.1_bayes, pars = "^sd")^2
+  colnames(posteriors_1.1) <- gsub("__Intercept", "", colnames(posteriors_1.1))
+  colnames(posteriors_1.1) <- gsub("sd_", "", colnames(posteriors_1.1))
+  
+    res <- posteriors_1.1[,"obs"]
+   stdy <- posteriors_1.1[,"record_num"]
+  phylo <- posteriors_1.1[,"species_full"]
+    spp <- posteriors_1.1[,"spp"]
+  trait <- posteriors_1.1[,"trait"]
+  total <- phylo + spp + res + sv + stdy + trait
+ 
+  # Calculate I2
+     tot_i2 <- (sv / total)*100    ; mean(tot_i2)  ; quantile(tot_i2, c(0.025, 0.975))
+   phylo_i2 <- (phylo / total)*100 ; mean(phylo_i2); quantile(phylo_i2, c(0.025, 0.975))
+     spp_i2 <- (spp / total)*100   ; mean(spp_i2)  ; quantile(spp_i2, c(0.025, 0.975))
+    stdy_i2 <- (stdy / total)*100  ; mean(stdy_i2) ; quantile(stdy_i2, c(0.025, 0.975))
+   trait_i2 <- (trait / total)*100 ; mean(trait_i2); quantile(trait_i2, c(0.025, 0.975))
+     res_i2 <- (res / total)*100   ; mean(res_i2)  ; quantile(res_i2, c(0.025, 0.975))
+  
+  # Table
+     i2_lnrr <- data.frame(name = c("Phylogeny", "Species", "Study", "Trait"),
+                           est = c(mean(phylo_i2),mean(spp_i2), mean(stdy_i2), mean(trait_i2)),
+                           lci = c(quantile(phylo_i2, c(0.025, 0.975))[1], quantile(spp_i2, c(0.025, 0.975))[1],
+                                   quantile(stdy_i2, c(0.025, 0.975))[1], quantile(trait_i2, c(0.025, 0.975))[1]),
+                           uci = c(quantile(phylo_i2, c(0.025, 0.975))[2], quantile(spp_i2, c(0.025, 0.975))[2],
+                                   quantile(stdy_i2, c(0.025, 0.975))[2], quantile(trait_i2, c(0.025, 0.975))[2]))
+     
 ###################################################
 # Model 1.2: Model controlling for acclimation time, 
 # type and habitat assuming type can vary by habitat
@@ -308,9 +340,9 @@ if(rerun){
   t_acclim_Q10 <- exp(t_acclim); mean(t_acclim_Q10)
 
 # % change in acclimation on log scale
-  p_change_f <- ((f_acclim - f_acute) / f_acute); quantile(p_change_f, c(0.025, 0.975))
-  p_change_m <- ((m_acclim - m_acute) / m_acute); quantile(p_change_m, c(0.025, 0.975))
-  p_change_t <- ((t_acclim - t_acute) / t_acute); quantile(p_change_t, c(0.025, 0.975))
+  change_f <- abs(f_acclim - f_acute)*100; quantile(change_f, c(0.025, 0.975))
+  change_m <- abs(m_acclim - m_acute)*100; quantile(change_m, c(0.025, 0.975))
+  change_t <- abs(t_acclim - t_acute)*100; quantile(change_t, c(0.025, 0.975))
 
 # % change on Q10 scale
   p_change_f_q10 <- exp(f_acclim - f_acute)-1; quantile(p_change_f_q10, c(0.025, 0.975))
@@ -462,7 +494,7 @@ if(rerun){
                               R = list(species_full = phylo_cor_CVR), dfs = "contain", 
                               test = "t", data = lnCVRQ10_data)
   
-   model2.2_bayes <- brms::brm(effect_size | se(sqrt(V)) ~  c_accl_time + type + habitat + type:habitat + (~1 | record_num) + (1 | gr(species_full, cov = A_CVR)) + (1 | spp) + (1|trait) + (1|obs), data2 = list(A=A_CVR), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 4, data = lnCVRQ10_data)
+   model2.2_bayes <- brms::brm(effect_size | se(sqrt(V)) ~  c_accl_time + type + habitat + type:habitat + (~1 | record_num) + (1 | gr(species_full, cov = A_CVR)) + (1 | spp) + (1|trait) + (1|obs), data2 = list(A_CVR=A_CVR), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 4, data = lnCVRQ10_data)
                                   
   # Save model1.2
   saveRDS(model2.2, file = "./output/models/lnCVRQ10_2.2")
@@ -492,7 +524,7 @@ p1.2 <- orchaRd::orchard_plot(model1.2, mod = "habitat", group  = "record_num", 
 annotate("text", x = 1, y = 2.10, 
          label =TeX(paste0("$\\beta = $", round(model1.2$b[3], 2), "[", round(model1.2$ci.lb[3], 2)," to ", round(model1.2$ci.ub[3], 2), "] ")), hjust = 0) + 
 annotate("text", x = 1.01, y = 4.60, 
-         label =paste0(round((model1.2$b[3] / model1.2$b[1]*100), 2), "%"), hjust = 0) + labs(shape = "Type") +
+         label =paste0(round(mean(change_f), 2), "%"), hjust = 0) + labs(shape = "Type") +
   geom_segment(aes(x = 0.92, y = 5.6, xend = 1.07, yend = 5.6), 
                             arrow = arrow(angle = 45, ends = "first", length = unit(0.01, "npc"))) +
   annotate("text", x = 0.85, y = 3, label = "P < 0.001", hjust = 0) + 
@@ -501,7 +533,7 @@ annotate("text", x = 1.01, y = 4.60,
   annotate("text", x = 2, y = 2.10, 
          label =TeX(paste0("$\\beta = $", round(mean(m_acclim - m_acute), 2), "[", round(quantile(m_acclim - m_acute, 0.025), 2)," to ", round(quantile(m_acclim - m_acute, 0.975),2), "] ")), hjust = 0) + 
 annotate("text", x = 2.01, y = 4.60, 
-         label =paste0(round(mean(p_change_m)*100, 2), "%"), hjust = 0) + labs(shape = "Type") +
+         label =paste0(round(mean(change_m), 2), "%"), hjust = 0) + labs(shape = "Type") +
   geom_segment(aes(x = 1.92, y = 5.6, xend = 2.07, yend = 5.6), 
                             arrow = arrow(angle = 45, ends = "first", length = unit(0.01, "npc"))) +
   annotate("text", x = 1.85, y = 3, label = "P = 0.01", hjust = 0) +
@@ -509,13 +541,13 @@ annotate("text", x = 2.01, y = 4.60,
   annotate("text", x = 3, y = 2.10, 
          label =TeX(paste0("$\\beta = $", round(mean(t_acclim - t_acute), 2), "[", round(quantile(t_acclim - t_acute, 0.025), 2)," to ", round(quantile(t_acclim - t_acute, 0.975),2), "] ")), hjust = 0) + 
 annotate("text", x = 3.01, y = 4.60, 
-         label =paste0(round(mean(p_change_t)*100, 2), "%"), hjust = 0) + labs(shape = "Type") +
+         label =paste0(round(mean(change_t), 2), "%"), hjust = 0) + labs(shape = "Type") +
   geom_segment(aes(x = 2.92, y = 5.6, xend = 3.07, yend = 5.6), 
                             arrow = arrow(angle = 45, ends = "last", length = unit(0.01, "npc"))) +
   annotate("text", x = 2.85, y = 3, label = "P = 0.36", hjust = 0)
   
   p1.2
-  ggsave(p1.2, filename = "./output/figures/fig1.png", )
+  ggsave(p1.2, filename = "./output/figures/fig1.png")
 ```
 
 ```{r, fig2, fig.align='center', fig.cap="Acute and Acclimation lnRR q10 across traits for A) marine, B) freshwater and C) terrestrial systems"}

@@ -506,6 +506,21 @@ if(rerun){
 }
 
 
+  
+######################################################
+# Bayesian Contrasts
+######################################################
+
+  posteriors_2.2 <- posterior_samples(model2.2_bayes, pars = "^b")
+  f_acute_cvr  <- posteriors_2.2[,"b_Intercept"]; pmcmc(f_acute)
+  f_acclim_cvr <- posteriors_2.2[,"b_Intercept"] + posteriors_2.2[,"b_typeacclim"]
+  m_acute_cvr  <- posteriors_2.2[,"b_Intercept"] + posteriors_2.2[,"b_habitatm"]
+  m_acclim_cvr <- posteriors_2.2[,"b_Intercept"] + posteriors_2.2[,"b_habitatm"] + posteriors_2.2[,"b_typeacclim"] + posteriors_2.2[,"b_typeacclim:habitatm"]
+  t_acute_cvr  <- posteriors_2.2[,"b_Intercept"] + posteriors_2.2[,"b_habitatt"]
+  t_acclim_cvr <- posteriors_2.2[,"b_Intercept"] + posteriors_2.2[,"b_habitatt"] + posteriors_2.2[,"b_typeacclim"] + posteriors_2.2[,"b_typeacclim:habitatt"]
+
+
+  
 ```
 
 
@@ -552,11 +567,29 @@ annotate("text", x = 3.01, y = 4.60,
 
 ```{r}
 
-# Clear from the model that there really is no difference between the change in variance for acute or acclimation CVR. But, there is a clear reduction in between individual variance for terrestrial species. As temperature get hotter then the variance in physiological rates decreases. This is not true of aqautic systems. 
+# Clear from the model that there really is no difference between the change in variance for acute or acclimation CVR. But, there is a clear reduction in between individual variance for terrestrial species. As temperature get hotter then the variance in physiological rates decreases. This is not true of aquatic systems. 
 orchard_plot(model2.2, xlab = TeX("$lnCVR_{Q_{10}}$"), mod = "habitat", group  = "record_num", 
              weights = "prop", data = lnCVRQ10_data, angle = 45, legend.pos = "top.left") +
             scale_x_discrete(labels = c("T" = "Terrestrial","M" = "Marine" ,"F" = "Freshwater")) +
-            theme(legend.direction = "vertical")
+            theme(legend.direction = "vertical") + #+ ylim(c(-1, 1)) 
+ annotate("text", x = 2, y = 2.10, 
+         label =TeX(paste0("$\\beta = $", round(mean(m_acclim - m_acute), 2), "[", round(quantile(m_acclim - m_acute, 0.025), 2)," to ", round(quantile(m_acclim - m_acute, 0.975),2), "] ")), hjust = 0) + 
+annotate("text", x = 2.01, y = 4.60, 
+         label =paste0(round(mean(change_m), 2), "%"), hjust = 0) + labs(shape = "Type") +
+  geom_segment(aes(x = 1.92, y = 5.6, xend = 2.07, yend = 5.6), 
+                            arrow = arrow(angle = 45, ends = "first", length = unit(0.01, "npc"))) +
+  annotate("text", x = 1.85, y = 3, label = "P = 0.01", hjust = 0) +
+  
+  annotate("text", x = 3, y = 2.10, 
+         label =TeX(paste0("$\\beta = $", round(mean(t_acclim - t_acute), 2), "[", round(quantile(t_acclim - t_acute, 0.025), 2)," to ", round(quantile(t_acclim - t_acute, 0.975),2), "] ")), hjust = 0) + 
+annotate("text", x = 3.01, y = 4.60, 
+         label =paste0(round(mean(change_t), 2), "%"), hjust = 0) + labs(shape = "Type") +
+  geom_segment(aes(x = 2.92, y = 5.6, xend = 3.07, yend = 5.6), 
+                            arrow = arrow(angle = 45, ends = "last", length = unit(0.01, "npc"))) +
+  annotate("text", x = 2.85, y = 3, label = "P = 0.36", hjust = 0)
+  
+  p1.2
+  ggsave(p1.2, filename = "./output/figures/fig1.png")
 ```
 
 

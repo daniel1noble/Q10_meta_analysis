@@ -291,23 +291,31 @@ if(rerun){
 ####################################################
 ## Model 1.2: Bayesian Contrasts
 ###################################################
-posteriors_1.2 <- posterior_samples(model1.2_bayes, pars = "^b")
-f_acute  <- posteriors_1.2[,"b_Intercept"]; pmcmc(f_acute)
-f_acclim <- posteriors_1.2[,"b_Intercept"] + posteriors_1.2[,"b_typeacclim"]
-m_acute  <- posteriors_1.2[,"b_Intercept"] + posteriors_1.2[,"b_habitatm"]
-m_acclim <- posteriors_1.2[,"b_Intercept"] + posteriors_1.2[,"b_habitatm"] + posteriors_1.2[,"b_typeacclim"] + posteriors_1.2[,"b_typeacclim:habitatm"]
-t_acute  <- posteriors_1.2[,"b_Intercept"] + posteriors_1.2[,"b_habitatt"]
-t_acclim <- posteriors_1.2[,"b_Intercept"] + posteriors_1.2[,"b_habitatt"] + posteriors_1.2[,"b_typeacclim"] + posteriors_1.2[,"b_typeacclim:habitatt"]
+  posteriors_1.2 <- posterior_samples(model1.2_bayes, pars = "^b")
+  f_acute  <- posteriors_1.2[,"b_Intercept"]; pmcmc(f_acute)
+  f_acclim <- posteriors_1.2[,"b_Intercept"] + posteriors_1.2[,"b_typeacclim"]
+  m_acute  <- posteriors_1.2[,"b_Intercept"] + posteriors_1.2[,"b_habitatm"]
+  m_acclim <- posteriors_1.2[,"b_Intercept"] + posteriors_1.2[,"b_habitatm"] + posteriors_1.2[,"b_typeacclim"] + posteriors_1.2[,"b_typeacclim:habitatm"]
+  t_acute  <- posteriors_1.2[,"b_Intercept"] + posteriors_1.2[,"b_habitatt"]
+  t_acclim <- posteriors_1.2[,"b_Intercept"] + posteriors_1.2[,"b_habitatt"] + posteriors_1.2[,"b_typeacclim"] + posteriors_1.2[,"b_typeacclim:habitatt"]
 
-# % change in acclimation
-p_change_f <- ((f_acclim - f_acute) / f_acute); quantile(p_change_f, c(0.025, 0.975))
-p_change_m <- ((m_acclim - m_acute) / m_acute); quantile(p_change_m, c(0.025, 0.975))
-p_change_t <- ((t_acclim - t_acute) / t_acute); quantile(p_change_t, c(0.025, 0.975))
+# Q10 values for each category. Effect sizes are quite small really
+   f_acute_Q10 <- exp(f_acute) ; mean(f_acute_Q10)
+  f_acclim_Q10 <- exp(f_acclim); mean(f_acclim_Q10)
+   m_acute_Q10 <- exp(m_acute) ; mean(f_acute_Q10)
+  m_acclim_Q10 <- exp(m_acclim); mean(f_acclim_Q10)
+   t_acute_Q10 <- exp(t_acute) ; mean(t_acute_Q10)
+  t_acclim_Q10 <- exp(t_acclim); mean(t_acclim_Q10)
 
-# But this is the % change on the log scale. We can also see what the Q10 change is..NEED TO BE CHECKED CAREFULLY
-f_q10 <-exp((f_acclim - f_acute)-1); mean(f_q10); quantile(f_q10, c(0.025, 0.975))
-m_q10 <-exp((m_acclim - m_acute)-1); mean(m_q10); quantile(m_q10, c(0.025, 0.975))
-t_q10 <-exp((t_acclim - t_acute)-1); mean(t_q10); quantile(t_q10, c(0.025, 0.975))
+# % change in acclimation on log scale
+  p_change_f <- ((f_acclim - f_acute) / f_acute); quantile(p_change_f, c(0.025, 0.975))
+  p_change_m <- ((m_acclim - m_acute) / m_acute); quantile(p_change_m, c(0.025, 0.975))
+  p_change_t <- ((t_acclim - t_acute) / t_acute); quantile(p_change_t, c(0.025, 0.975))
+
+# % change on Q10 scale
+  p_change_f_q10 <- exp(f_acclim - f_acute)-1; quantile(p_change_f_q10, c(0.025, 0.975))
+  p_change_m_q10 <- exp(m_acclim - m_acute)-1; quantile(p_change_m_q10, c(0.025, 0.975))
+  p_change_t_q10 <- exp(t_acclim - t_acute)-1; quantile(p_change_t_q10, c(0.025, 0.975))
 
 ####################################################
 # Model 1.3's: Trait type varied by acclimation type
@@ -507,13 +515,21 @@ annotate("text", x = 3.01, y = 4.60,
   annotate("text", x = 2.85, y = 3, label = "P = 0.36", hjust = 0)
   
   p1.2
+  ggsave(p1.2, filename = "./output/figures/fig1.png", )
 ```
 
 ```{r, fig2, fig.align='center', fig.cap="Acute and Acclimation lnRR q10 across traits for A) marine, B) freshwater and C) terrestrial systems"}
 
 orchard_plot(model1.3, mod = "trait_category",  group = "record_num",  data = lnRRQ10_data) 
 
-orchard_plot(model1.3_m, mod = "trait_category", at = list(type = c("acute", "acclim")), by = "type", group = "record_num", weights = "prop", data = lnRRQ10_data_m, xlab = "lnRRQ10", angle = 45) 
+ptm <- orchard_plot(model1.3_m, mod = "trait_category", at = list(type = c("acute", "acclim")), by = "type", group = "record_num", weights = "prop", data = lnRRQ10_data_m, xlab = TeX("$lnRR_{Q_{10}}$"), angle = 0) +
+  scale_x_discrete(labels = c("Mito_leak" = "Proton Leak",
+                              "Metabolic_enzyme" = "Metabolic Enzymes",
+                              "Rest_MR" = "Resting Metabolic Rate",
+                              "Max_MR" = "Maximum Metabolic Rate",
+                              "Mito_oxidation" = "OXPHOS"))
+ptm$layers[[1]] <- NULL # Lets just remove the data point geom layer as it's too busy
+
 
 lnRRQ10_data %>% group_by(habitat, type, trait_category) %>% summarise(n = n()) %>% data.frame()
 
@@ -521,8 +537,6 @@ lnRRQ10_data %>% group_by(habitat, type, trait_category) %>% summarise(n = n()) 
 
 ### *Does climate variability predict acclimation capacity among aquatic and terrestrial ectotherms?*
 ### *Does between-individual variation in acclimation capacities differ across terrestrial and aquatic ectotherms?*
-
-
 
 ```{r phylogeny, fig.wdith = 10, fig.height=9, fig.cap="Phylogenetic tree"}
  # Map data to tree. Just one variable for now
@@ -573,7 +587,7 @@ lnRRQ10_data %>% group_by(habitat, type, trait_category) %>% summarise(n = n()) 
                 scale_fill_viridis(alpha = 0.6) + labs(fill="# of Effects")
    
    phylo
-ggsave(filename = "fig1.png", path = "../output/figures/", phylo, device = "png", width = 10, height = 9, units = "in")
+ggsave(filename = "fig3.png", path = "./output/figures/", phylo, device = "png", width = 10, height = 9, units = "in")
 ``` 
 
 ## References

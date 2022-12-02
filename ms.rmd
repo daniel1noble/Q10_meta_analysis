@@ -550,6 +550,17 @@ annotate("text", x = 3.01, y = 4.60,
   ggsave(p1.2, filename = "./output/figures/fig1.png")
 ```
 
+```{r}
+
+# Clear from the model that there really is no difference between the change in variance for acute or acclimation CVR. But, there is a clear reduction in between individual variance for terrestrial species. As temperature get hotter then the variance in physiological rates decreases. This is not true of aqautic systems. 
+orchard_plot(model2.2, xlab = TeX("$lnCVR_{Q_{10}}$"), mod = "habitat", group  = "record_num", 
+             weights = "prop", data = lnCVRQ10_data, angle = 45, legend.pos = "top.left") +
+            scale_x_discrete(labels = c("T" = "Terrestrial","M" = "Marine" ,"F" = "Freshwater")) +
+            theme(legend.direction = "vertical")
+```
+
+
+
 ```{r, fig2, fig.align='center', fig.cap="Acute and Acclimation lnRR q10 across traits for A) marine, B) freshwater and C) terrestrial systems"}
 
 orchard_plot(model1.3, mod = "trait_category",  group = "record_num",  data = lnRRQ10_data) 

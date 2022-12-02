@@ -213,7 +213,7 @@ We analysed our data using Bayesian multilevel meta-analytic (MLMA) and meta-reg
 
 ### *Do terrestrial and aquatic ectotherms differ in their capacity to acclimate?*
 
-```{r lnrrq10}
+```{r lnrrq10, echo = FALSE, message=FALSE, warning=FALSE, results='hide'}
 #############
 ## lnRRQ10 ##
 #############
@@ -427,9 +427,7 @@ if(rerun){
 
 ```
 
-
-
-```{r, lncvrq10}
+```{r, lncvrq10, echo = FALSE, message=FALSE, warning=FALSE, results='hide'}
 #############
 ## lnCVRQ10
 #############
@@ -619,6 +617,17 @@ ptm$layers[[1]] <- NULL # Lets just remove the data point geom layer as it's too
 lnRRQ10_data %>% group_by(habitat, type, trait_category) %>% summarise(n = n()) %>% data.frame()
 
 ```
+
+```{r, fig4, fig.align='center', fig.cap= "I2 estimates"}
+
+
+p4 <- ggplot(i2_lnrr, aes(x = est, y = name)) + xlim(0, 50) + geom_point(size = 5) + geom_errorbar(aes(xmin = lci, xmax = uci), width = 0.15) + theme_bw() + labs(x = "Percentage of Variation (%)") + theme(axis.title.y = element_blank(), axis.text = element_text(size = 20), axis.title = element_text(size = 24)) + geom_text(aes(label = paste0(round(est, 2), "% ", "[", round(lci, 2), " - ", round(uci, 2), "%]")), position = position_nudge(x = 5, y = 0.2)) + annotate("text", x = 30, y = 1.5, label = TeX(paste0("$I^2_{sv}$ = ", round(mean(tot_i2)*100, 2), "%")), size = 12)
+
+p4
+ggsave(p4, filename = "./output/figures/fig4.png")
+
+```
+
 
 ### *Does climate variability predict acclimation capacity among aquatic and terrestrial ectotherms?*
 ### *Does between-individual variation in acclimation capacities differ across terrestrial and aquatic ectotherms?*

@@ -565,7 +565,7 @@ phylo_cor_wild <- vcv(tree_lnrr_wild, cor = TRUE)
 rerun = TRUE
 if(rerun){
   # More realistic model with 
-  model3.1          <- metafor::rma.mv(effect_size ~ c_accl_time + type + habitat + type:habitat, V = V,
+  model3.2          <- metafor::rma.mv(effect_size ~ c_accl_time + type + habitat + type:habitat, V = V,
                                        random = list(~1 | record_num,
                                             ~1 | species_full,
                                             ~1 | trait,

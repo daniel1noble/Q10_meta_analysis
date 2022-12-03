@@ -530,7 +530,7 @@ if(rerun){
 
 ```{r, fig1, fig.align='center', fig.cap= "Acute and Acclimation lnRR Q10 across marine, freshwater and terrestrial environments"}
 
-p1.2 <- orchaRd::orchard_plot(model1.2, mod = "habitat", group  = "record_num", at = list(type = c("acute", "acclim")), by = "type", weights = "prop", data = lnRRQ10_data, xlab = TeX("$lnRR_{Q_{10}}$"), angle = 45, legend.pos = "top.left") + 
+p1.2 <- orchaRd::orchard_plot(model1.2, mod = "habitat", group  = "record_num", at = list(type = c("acute", "acclim")), by = "type", weights = "prop", data = lnRRQ10_data, xlab = TeX("$lnRR_{Q_{10}}$"), angle = 45, legend.pos = "top.left", trunk.size = 4) + 
   scale_x_discrete(labels = c("T" = "Terrestrial","M" = "Marine" ,"F" = "Freshwater")) +
   theme(legend.direction = "vertical") + 
   geom_segment(aes(x = 2.92, y = 2, xend = 3.07, yend = 2), 

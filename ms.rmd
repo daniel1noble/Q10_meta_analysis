@@ -537,9 +537,18 @@ if(rerun){
 # Organise the data and prune tree
 ##################################################
 
+# Bring in Climate data
+climate <- read.csv("./output/climate_data/temp_timeseries.csv")
+
+# Create a match column.
+climate2 <- climate %>% mutate(match = interaction(species, lat, long)) %>% dplyr::select(-c(5:523))
+
 # Subset the data
 lnRRQ10_data_wild <- data_long2 %>% filter(grepl("lnRR", name) & !is.na(effect_size) & !is.na(V) & !V == 0 & source == "w") %>% 
-                              mutate(spp = species_full, c_accl_time = acclim_period - mean(acclim_period, na.rm = TRUE))
+                              mutate(spp = species_full, c_accl_time = acclim_period - mean(acclim_period, na.rm = TRUE), match = interaction(spp, lat, long))
+
+# Now, join climate data to full data. This will give us all the climate variability data for each site across time
+lnRRQ10_data_wild <- left_join(lnRRQ10_data_wild, climate2, by = "match")
 
 # Check and prune tree
 tree_lnrr_wild <- tree_checks(data = lnRRQ10_data_wild, tree = tree_p0.7, dataCol = "species_full", type = "prune")
@@ -553,10 +562,11 @@ phylo_cor_wild <- vcv(tree_lnrr_wild, cor = TRUE)
 # Model 3.2: Model controlling for acclimation time, 
 # type and habitat assuming type can vary by habitat
 ###################################################
-
+rerun = TRUE
 if(rerun){
   # More realistic model with 
-  model3.1          <- metafor::rma.mv(effect_size ~ 1, V = V,random = list(~1 | record_num,
+  model3.1          <- metafor::rma.mv(effect_size ~ c_accl_time + type + habitat + type:habitat, V = V,
+                                       random = list(~1 | record_num,
                                             ~1 | species_full,
                                             ~1 | trait,
                                             ~1 | spp,

@@ -610,10 +610,35 @@ if(rerun){
   change_t_wild <- abs(t_acclim_wild - t_acute_wild)*100; quantile(change_t_wild, c(0.025, 0.975))
 
 # % change on Q10 scale
-  p_change_f_q10_wild <- exp(f_acclim_wild - f_acute_wild)-1; quantile(p_change_f_q10_wild, c(0.025, 0.975))
-  p_change_m_q10_wild <- exp(m_acclim_wild - m_acute_wild)-1; quantile(p_change_m_q10_wild, c(0.025, 0.975))
-  p_change_t_q10_wild <- exp(t_acclim_wild - t_acute_wild)-1; quantile(p_change_t_q10_wild, c(0.025, 0.975))
+  p_change_f_q10_wild <- (exp(f_acclim_wild - f_acute_wild)-1)*100; quantile(p_change_f_q10_wild, c(0.025, 0.975))
+  p_change_m_q10_wild <- (exp(m_acclim_wild - m_acute_wild)-1)*100; quantile(p_change_m_q10_wild, c(0.025, 0.975))
+  p_change_t_q10_wild <- (exp(t_acclim_wild - t_acute_wild)-1)*100; quantile(p_change_t_q10_wild, c(0.025, 0.975))
 
+####################################################
+# Model 3.3: Model environmental variability 
+####################################################
+  rerun = TRUE
+if(rerun){
+  # More realistic model with 
+  model3.3          <- metafor::rma.mv(effect_size ~ c_accl_time + cv + type + type:cv, V = V,
+                                       random = list(~1 | record_num,
+                                            ~1 | species_full,
+                                            ~1 | trait,
+                                            ~1 | spp,
+                                            ~1 | obs),
+                              R = list(species_full = phylo_cor_wild), dfs = "contain", 
+                              test = "t", data = lnRRQ10_data_wild)
+  
+   model3.3_bayes <- brms::brm(effect_size | se(sqrt(V)) ~  c_accl_time + cv + type + type:cv + (~1 | record_num) + (1 | gr(species_full, cov = A_wild)) + (1 | spp) + (1|trait) + (1|obs), data2 = list(A_wild=A_wild), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 4, data = lnRRQ10_data_wild)
+                                  
+  # Save model3.3
+  saveRDS(model3.3, file = "./output/models/lnRRQ10_3.3")
+  saveRDS(model3.3_bayes, file = "./output/models/lnRRQ10_3.3_bayes")
+
+  } else{
+        model3.3 <- readRDS("./output/models/lnRRQ10_3.3")
+  model3.3_bayes <- readRDS("./output/models/lnRRQ10_3.3_bayes")
+}
 ```
 
 

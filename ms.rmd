@@ -528,6 +528,87 @@ if(rerun){
     
 ```
 
+
+```{r, wildlnRR10}
+#######################################
+## lnRRQ10 from Wild Populations ##
+#######################################
+##################################################
+# Organise the data and prune tree
+##################################################
+
+# Subset the data
+lnRRQ10_data_wild <- data_long2 %>% filter(grepl("lnRR", name) & !is.na(effect_size) & !is.na(V) & !V == 0 & source == "w") %>% 
+                              mutate(spp = species_full, c_accl_time = acclim_period - mean(acclim_period, na.rm = TRUE))
+
+# Check and prune tree
+tree_lnrr_wild <- tree_checks(data = lnRRQ10_data_wild, tree = tree_p0.7, dataCol = "species_full", type = "prune")
+tree_checks(data = lnRRQ10_data_wild, tree = tree_lnrr, dataCol = "species_full", type = "check") # Good
+
+# Create the phylo correlation matrix
+phylo_cor_wild <- vcv(tree_lnrr_wild, cor = TRUE)
+        A_wild <- vcv(tree_lnrr_wild, cor = FALSE) # For bayes, need cov matrix
+
+###################################################
+# Model 3.2: Model controlling for acclimation time, 
+# type and habitat assuming type can vary by habitat
+###################################################
+
+if(rerun){
+  # More realistic model with 
+  model3.1          <- metafor::rma.mv(effect_size ~ 1, V = V,random = list(~1 | record_num,
+                                            ~1 | species_full,
+                                            ~1 | trait,
+                                            ~1 | spp,
+                                            ~1 | obs),
+                              R = list(species_full = phylo_cor_wild), dfs = "contain", 
+                              test = "t", data = lnRRQ10_data_wild)
+  
+   model3.2_bayes <- brms::brm(effect_size | se(sqrt(V)) ~  c_accl_time + type + habitat + type:habitat + (~1 | record_num) + (1 | gr(species_full, cov = A_wild)) + (1 | spp) + (1|trait) + (1|obs), data2 = list(A_wild=A_wild), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 4, data = lnRRQ10_data_wild)
+                                  
+  # Save model3.2
+  saveRDS(model3.2, file = "./output/models/lnRRQ10_3.2")
+  saveRDS(model3.2_bayes, file = "./output/models/lnRRQ10_3.2_bayes")
+
+  } else{
+        model3.2 <- readRDS("./output/models/lnRRQ10_3.2")
+  model3.2_bayes <- readRDS("./output/models/lnRRQ10_3.2_bayes")
+}
+
+####################################################
+## Model 3.2: Bayesian Contrasts
+###################################################
+  posteriors_3.2 <- posterior_samples(model3.2_bayes, pars = "^b")
+  f_acute_wild  <- posteriors_3.2[,"b_Intercept"]
+  f_acclim_wild <- posteriors_3.2[,"b_Intercept"] + posteriors_3.2[,"b_typeacclim"]
+  m_acute_wild  <- posteriors_3.2[,"b_Intercept"] + posteriors_3.2[,"b_habitatm"]
+  m_acclim_wild <- posteriors_3.2[,"b_Intercept"] + posteriors_3.2[,"b_habitatm"] + posteriors_3.2[,"b_typeacclim"] + posteriors_3.2[,"b_typeacclim:habitatm"]
+  t_acute_wild  <- posteriors_3.2[,"b_Intercept"] + posteriors_3.2[,"b_habitatt"]
+  t_acclim_wild <- posteriors_3.2[,"b_Intercept"] + posteriors_3.2[,"b_habitatt"] + posteriors_3.2[,"b_typeacclim"] + posteriors_3.2[,"b_typeacclim:habitatt"]
+
+# Q10 values for each category. Effect sizes are quite small really
+   f_acute_Q10_wild <- exp(f_acute_wild) ; mean(f_acute_Q10_wild)
+  f_acclim_Q10_wild <- exp(f_acclim_wild); mean(f_acclim_Q10_wild)
+   m_acute_Q10_wild <- exp(m_acute_wild) ; mean(f_acute_Q10_wild)
+  m_acclim_Q10_wild <- exp(m_acclim_wild); mean(f_acclim_Q10_wild)
+   t_acute_Q10_wild <- exp(t_acute_wild) ; mean(t_acute_Q10_wild)
+  t_acclim_Q10_wild <- exp(t_acclim_wild); mean(t_acclim_Q10_wild)
+
+# % change in acclimation on log scale
+  change_f_wild <- abs(f_acclim_wild - f_acute_wild)*100; quantile(change_f_wild, c(0.025, 0.975))
+  change_m_wild <- abs(m_acclim_wild - m_acute_wild)*100; quantile(change_m_wild, c(0.025, 0.975))
+  change_t_wild <- abs(t_acclim_wild - t_acute_wild)*100; quantile(change_t_wild, c(0.025, 0.975))
+
+# % change on Q10 scale
+  p_change_f_q10_wild <- exp(f_acclim_wild - f_acute_wild)-1; quantile(p_change_f_q10_wild, c(0.025, 0.975))
+  p_change_m_q10_wild <- exp(m_acclim_wild - m_acute_wild)-1; quantile(p_change_m_q10_wild, c(0.025, 0.975))
+  p_change_t_q10_wild <- exp(t_acclim_wild - t_acute_wild)-1; quantile(p_change_t_q10_wild, c(0.025, 0.975))
+
+```
+
+
+
+
 ```{r, fig1, fig.align='center', fig.cap= "Acute and Acclimation lnRR Q10 across marine, freshwater and terrestrial environments"}
 
 p1.2 <- orchaRd::orchard_plot(model1.2, mod = "habitat", group  = "record_num", at = list(type = c("acute", "acclim")), by = "type", weights = "prop", data = lnRRQ10_data, xlab = TeX("$lnRR_{Q_{10}}$"), angle = 45, legend.pos = "top.left", trunk.size = 4) + 

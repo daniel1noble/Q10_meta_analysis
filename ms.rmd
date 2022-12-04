@@ -707,9 +707,237 @@ if(rerun){
   } else{
         model3.6 <- readRDS("./output/models/lnRRQ10_3.6")
   model3.6_bayes <- readRDS("./output/models/lnRRQ10_3.6_bayes")
+  }
+  
+  
+  if(rerun){
+  # More realistic model with 
+  model3.7          <- metafor::rma.mv(effect_size ~ c_accl_time + scale(acf_all) + scale(cv) + type, V = V,
+                                       random = list(~1 | record_num,
+                                            ~1 | species_full,
+                                            ~1 | trait,
+                                            ~1 | spp,
+                                            ~1 | obs),
+                              R = list(species_full = phylo_cor_wild), dfs = "contain", 
+                              test = "t", data = lnRRQ10_data_wild)
+  
+   model3.7_bayes <- brms::brm(effect_size | se(sqrt(V)) ~  c_accl_time + scale(acf_all) + scale(cv) + type + (~1 | record_num) + (1 | gr(species_full, cov = A_wild)) + (1 | spp) + (1|trait) + (1|obs), data2 = list(A_wild=A_wild), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 4, data = lnRRQ10_data_wild)
+                                  
+  # Save model3.7
+  saveRDS(model3.7, file = "./output/models/lnRRQ10_3.7")
+  saveRDS(model3.7_bayes, file = "./output/models/lnRRQ10_3.7_bayes")
+
+  } else{
+        model3.7 <- readRDS("./output/models/lnRRQ10_3.7")
+  model3.7_bayes <- readRDS("./output/models/lnRRQ10_3.7_bayes")
 }
 ```
 
+```{r wildlncvr}
+#######################################
+## lnCVRQ10 from Wild Populations ##
+#######################################
+##################################################
+# Organise the data and prune tree
+##################################################
+
+# Bring in Climate data
+climate <- read.csv("./output/climate_data/temp_timeseries.csv")
+
+# Create a match column.
+climate2 <- climate %>% mutate(match = interaction(species, lat, long)) %>% dplyr::select(-c(5:523))
+
+# Subset the data
+lnCVRQ10_data_wild <- data_long2 %>% filter(grepl("lnCVR", name) & !is.na(effect_size) & !is.na(V) & !V == 0 & source == "w") %>% 
+                              mutate(spp = species_full, 
+                                     c_accl_time = acclim_period - mean(acclim_period, na.rm = TRUE), 
+                                     match = interaction(spp, lat, long))
+
+# Now, join climate data to full data. This will give us all the climate variability data for each site across time
+lnCVRQ10_data_wild <- left_join(lnCVRQ10_data_wild, climate2, by = "match")
+
+# Check and prune tree
+tree_lncvr_wild <- tree_checks(data = lnCVRQ10_data_wild, tree = tree_p0.7, dataCol = "species_full", type = "prune")
+tree_checks(data = lnCVRQ10_data_wild, tree = tree_lncvr_wild, dataCol = "species_full", type = "check") # Good
+
+# Create the phylo correlation matrix
+phylo_cor_wild_cvr <- vcv(tree_lncvr_wild, cor = TRUE)
+        A_wild_cvr <- vcv(tree_lncvr_wild, cor = FALSE) # For bayes, need cov matrix
+
+###################################################
+# Model 4.2: Model controlling for acclimation time, 
+# type and habitat assuming type can vary by habitat
+###################################################
+rerun = TRUE
+if(rerun){
+  # More realistic model with 
+  model4.2          <- metafor::rma.mv(effect_size ~ c_accl_time + type + habitat + type:habitat, V = V,
+                              random = list(~1 | record_num,
+                                            ~1 | species_full,
+                                            ~1 | trait,
+                                            ~1 | spp,
+                                            ~1 | obs),
+                              R = list(species_full = phylo_cor_wild_cvr), dfs = "contain", 
+                              test = "t", data = lnCVRQ10_data_wild)
+  
+   model4.2_bayes <- brms::brm(effect_size | se(sqrt(V)) ~  c_accl_time + type + habitat + type:habitat + (~1 | record_num) + (1 | gr(species_full, cov = A_wild_cvr)) + (1 | spp) + (1|trait) + (1|obs), data2 = list(A_wild_cvr=A_wild_cvr), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 4, data = lnCVRQ10_data_wild)
+                                  
+  # Save model3.2
+  saveRDS(model4.2, file = "./output/models/lnCVRQ10_4.2")
+  saveRDS(model4.2_bayes, file = "./output/models/lnCVRQ10_4.2_bayes")
+
+  } else{
+        model4.2 <- readRDS("./output/models/lnCVRQ10_4.2")
+  model4.2_bayes <- readRDS("./output/models/lnCVRQ10_4.2_bayes")
+}
+
+####################################################
+## Model 4.2: Bayesian Contrasts
+###################################################
+  posteriors_4.2 <- posterior_samples(model4.2_bayes, pars = "^b")
+  f_acute_wild_cvr  <- posteriors_4.2[,"b_Intercept"]
+  f_acclim_wild_cvr <- posteriors_4.2[,"b_Intercept"] + posteriors_4.2[,"b_typeacclim"]
+  m_acute_wild_cvr  <- posteriors_4.2[,"b_Intercept"] + posteriors_4.2[,"b_habitatm"]
+  m_acclim_wild_cvr <- posteriors_4.2[,"b_Intercept"] + posteriors_4.2[,"b_habitatm"] + posteriors_4.2[,"b_typeacclim"] + posteriors_3.2[,"b_typeacclim:habitatm"]
+  t_acute_wild_cvr  <- posteriors_4.2[,"b_Intercept"] + posteriors_4.2[,"b_habitatt"]
+  t_acclim_wild_cvr <- posteriors_4.2[,"b_Intercept"] + posteriors_4.2[,"b_habitatt"] + posteriors_4.2[,"b_typeacclim"] + posteriors_4.2[,"b_typeacclim:habitatt"]
+
+# CVRQ10 values for each category.
+   f_acute_Q10_wild_cvr <- exp(f_acute_wild_cvr) ; mean(f_acute_Q10_wild_cvr)
+  f_acclim_Q10_wild_cvr <- exp(f_acclim_wild_cvr); mean(f_acclim_Q10_wild_cvr)
+   m_acute_Q10_wild_cvr <- exp(m_acute_wild_cvr) ; mean(f_acute_Q10_wild_cvr)
+  m_acclim_Q10_wild_cvr <- exp(m_acclim_wild_cvr); mean(f_acclim_Q10_wild_cvr)
+   t_acute_Q10_wild_cvr <- exp(t_acute_wild_cvr) ; mean(t_acute_Q10_wild_cvr)
+  t_acclim_Q10_wild_cvr <- exp(t_acclim_wild_cvr); mean(t_acclim_Q10_wild_cvr)
+
+# % change in acclimation on log scale
+  change_f_wild_cvr <- abs(f_acclim_wild_cvr - f_acute_wild_cvr)*100; quantile(change_f_wild_cvr, c(0.025, 0.975))
+  change_m_wild_cvr <- abs(m_acclim_wild_cvr - m_acute_wild_cvr)*100; quantile(change_m_wild_cvr, c(0.025, 0.975))
+  change_t_wild_cvr <- abs(t_acclim_wild_cvr - t_acute_wild_cvr)*100; quantile(change_t_wild_cvr, c(0.025, 0.975))
+
+# % change on Q10 scale
+  p_change_f_q10_wild_cvr <- (exp(f_acclim_wild_cvr - f_acute_wild_cvr)-1)*100; quantile(p_change_f_q10_wild_cvr, c(0.025, 0.975))
+  p_change_m_q10_wild_cvr <- (exp(m_acclim_wild_cvr - m_acute_wild_cvr)-1)*100; quantile(p_change_m_q10_wild_cvr, c(0.025, 0.975))
+  p_change_t_q10_wild_cvr <- (exp(t_acclim_wild_cvr - t_acute_wild_cvr)-1)*100; quantile(p_change_t_q10_wild_cvr, c(0.025, 0.975))
+
+####################################################
+# Model 4.3-4.7: Model environmental variability 
+####################################################
+  rerun = TRUE
+if(rerun){
+  # More realistic model with 
+  model4.3          <- metafor::rma.mv(effect_size ~ c_accl_time + scale(cv) + type + type:scale(cv), V = V,
+                                       random = list(~1 | record_num,
+                                            ~1 | species_full,
+                                            ~1 | trait,
+                                            ~1 | spp,
+                                            ~1 | obs),
+                              R = list(species_full = phylo_cor_wild_cvr), dfs = "contain", 
+                              test = "t", data = lnCVRQ10_data_wild)
+  
+   model4.3_bayes <- brms::brm(effect_size | se(sqrt(V)) ~  c_accl_time + scale(cv) + type + type:scale(cv) + (~1 | record_num) + (1 | gr(species_full, cov = A_wild_cvr)) + (1 | spp) + (1|trait) + (1|obs), data2 = list(A_wild_cvr=A_wild_cvr), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 4, data = lnCVRQ10_data_wild)
+                                  
+  # Save model4.3
+  saveRDS(model4.3, file = "./output/models/lnCVRQ10_4.3")
+  saveRDS(model4.3_bayes, file = "./output/models/lnCVRQ10_4.3_bayes")
+
+  } else{
+        model4.3 <- readRDS("./output/models/lnCVRQ10_4.3")
+  model4.3_bayes <- readRDS("./output/models/lnCVRQ10_4.3_bayes")
+  }
+  
+  
+  if(rerun){
+  # More realistic model with 
+  model4.4          <- metafor::rma.mv(effect_size ~ c_accl_time + scale(acf_all) + type + type:scale(acf_all), V = V,
+                                       random = list(~1 | record_num,
+                                            ~1 | species_full,
+                                            ~1 | trait,
+                                            ~1 | spp,
+                                            ~1 | obs),
+                              R = list(species_full = phylo_cor_wild_cvr), dfs = "contain", 
+                              test = "t", data = lnCVRQ10_data_wild)
+  
+   model4.4_bayes <- brms::brm(effect_size | se(sqrt(V)) ~  c_accl_time + scale(acf_all) + type + type:scale(acf_all) + (~1 | record_num) + (1 | gr(species_full, cov = A_wild_cvr)) + (1 | spp) + (1|trait) + (1|obs), data2 = list(A_wild_cvr=A_wild_cvr), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 4, data = lnCVRQ10_data_wild)
+                                  
+  # Save model3.3
+  saveRDS(model4.4, file = "./output/models/lnCVRQ10_4.4")
+  saveRDS(model4.4_bayes, file = "./output/models/lnCVRQ10_4.4_bayes")
+
+  } else{
+        model4.4 <- readRDS("./output/models/lnCVRQ10_4.4")
+  model4.4_bayes <- readRDS("./output/models/lnCVRQ10_4.4_bayes")
+  }
+  
+  
+if(rerun){
+  # More realistic model with 
+  model4.5          <- metafor::rma.mv(effect_size ~ c_accl_time + scale(cv) + type, V = V,
+                                       random = list(~1 | record_num,
+                                            ~1 | species_full,
+                                            ~1 | trait,
+                                            ~1 | spp,
+                                            ~1 | obs),
+                              R = list(species_full = phylo_cor_wild_cvr), dfs = "contain", 
+                              test = "t", data = lnCVRQ10_data_wild)
+  
+   model4.5_bayes <- brms::brm(effect_size | se(sqrt(V)) ~  c_accl_time + scale(cv) + type + (~1 | record_num) + (1 | gr(species_full, cov = A_wild_cvr)) + (1 | spp) + (1|trait) + (1|obs), data2 = list(A_wild_cvr=A_wild_cvr), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 4, data = lnCVRQ10_data_wild)
+                                  
+  # Save model4.5
+  saveRDS(model4.5, file = "./output/models/lnCVRQ10_4.5")
+  saveRDS(model4.5_bayes, file = "./output/models/lnCVRQ10_4.5_bayes")
+
+  } else{
+        model4.5 <- readRDS("./output/models/lnCVRQ10_4.5")
+  model4.5_bayes <- readRDS("./output/models/lnCVRQ10_4.5_bayes")
+  }
+  
+  
+  if(rerun){
+  # More realistic model with 
+  model4.6          <- metafor::rma.mv(effect_size ~ c_accl_time + scale(acf_all) + type, V = V,
+                                       random = list(~1 | record_num,
+                                            ~1 | species_full,
+                                            ~1 | trait,
+                                            ~1 | spp,
+                                            ~1 | obs),
+                              R = list(species_full = phylo_cor_wild_cvr), dfs = "contain", 
+                              test = "t", data = lnCVRQ10_data_wild)
+  
+   model4.6_bayes <- brms::brm(effect_size | se(sqrt(V)) ~  c_accl_time + scale(acf_all) + type + (~1 | record_num) + (1 | gr(species_full, cov = A_wild_cvr)) + (1 | spp) + (1|trait) + (1|obs), data2 = list(A_wild_cvr=A_wild_cvr), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 4, data = lnCVRQ10_data_wild)
+                                  
+  # Save model4.6
+  saveRDS(model4.6, file = "./output/models/lnCVRQ10_4.6")
+  saveRDS(model4.6_bayes, file = "./output/models/lnCVRQ10_4.6_bayes")
+
+  } else{
+        model4.6 <- readRDS("./output/models/lnCVRQ10_4.6")
+  model4.6_bayes <- readRDS("./output/models/lnCVRQ10_4.6_bayes")
+  }
+  
+  
+ if(rerun){
+  # More realistic model with 
+  model4.7          <- metafor::rma.mv(effect_size ~ c_accl_time + scale(acf_all) + scale(cv) + type, V = V,
+                                       random = list(~1 | record_num,
+                                            ~1 | species_full,
+                                            ~1 | trait,
+                                            ~1 | spp,
+                                            ~1 | obs),
+                              R = list(species_full = phylo_cor_wild_cvr), dfs = "contain", 
+                              test = "t", data = lnCVRQ10_data_wild)
+  
+   model3.7_bayes <- brms::brm(effect_size | se(sqrt(V)) ~  c_accl_time + scale(acf_all) + scale(cv) + type + (~1 | record_num) + (1 | gr(species_full, cov = A_wild_cvr)) + (1 | spp) + (1|trait) + (1|obs), data2 = list(A_wild_cvr=A_wild_cvr), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 4, data = lnCVRQ10_data_wild)
+                                  
+  # Save model4.7
+  saveRDS(model4.7, file = "./output/models/lnCVRQ10_4.7")
+  saveRDS(model4.7_bayes, file = "./output/models/lnCVRQ10_4.7_bayes")
+
+  } else{
+        model4.7 <- readRDS("./output/models/lnCVRQ10_4.7")
+  model4.7_bayes <- readRDS("./output/models/lnCVRQ10_4.7_bayes")
+}
+```
 
 
 

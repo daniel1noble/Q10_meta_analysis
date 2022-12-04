@@ -620,7 +620,7 @@ if(rerun){
   rerun = TRUE
 if(rerun){
   # More realistic model with 
-  model3.3          <- metafor::rma.mv(effect_size ~ c_accl_time + cv + type + type:cv, V = V,
+  model3.3          <- metafor::rma.mv(effect_size ~ c_accl_time + scale(cv) + type + type:scale(cv), V = V,
                                        random = list(~1 | record_num,
                                             ~1 | species_full,
                                             ~1 | trait,
@@ -629,7 +629,7 @@ if(rerun){
                               R = list(species_full = phylo_cor_wild), dfs = "contain", 
                               test = "t", data = lnRRQ10_data_wild)
   
-   model3.3_bayes <- brms::brm(effect_size | se(sqrt(V)) ~  c_accl_time + cv + type + type:cv + (~1 | record_num) + (1 | gr(species_full, cov = A_wild)) + (1 | spp) + (1|trait) + (1|obs), data2 = list(A_wild=A_wild), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 4, data = lnRRQ10_data_wild)
+   model3.3_bayes <- brms::brm(effect_size | se(sqrt(V)) ~  c_accl_time + scale(cv) + type + type:scale(cv) + (~1 | record_num) + (1 | gr(species_full, cov = A_wild)) + (1 | spp) + (1|trait) + (1|obs), data2 = list(A_wild=A_wild), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 4, data = lnRRQ10_data_wild)
                                   
   # Save model3.3
   saveRDS(model3.3, file = "./output/models/lnRRQ10_3.3")
@@ -638,6 +638,29 @@ if(rerun){
   } else{
         model3.3 <- readRDS("./output/models/lnRRQ10_3.3")
   model3.3_bayes <- readRDS("./output/models/lnRRQ10_3.3_bayes")
+  }
+  
+  
+  if(rerun){
+  # More realistic model with 
+  model3.4          <- metafor::rma.mv(effect_size ~ c_accl_time + scale(acf_all) + type + type:scale(acf_all), V = V,
+                                       random = list(~1 | record_num,
+                                            ~1 | species_full,
+                                            ~1 | trait,
+                                            ~1 | spp,
+                                            ~1 | obs),
+                              R = list(species_full = phylo_cor_wild), dfs = "contain", 
+                              test = "t", data = lnRRQ10_data_wild)
+  
+   model3.4_bayes <- brms::brm(effect_size | se(sqrt(V)) ~  c_accl_time + scale(acf_all) + type + type:scale(acf_all) + (~1 | record_num) + (1 | gr(species_full, cov = A_wild)) + (1 | spp) + (1|trait) + (1|obs), data2 = list(A_wild=A_wild), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 4, data = lnRRQ10_data_wild)
+                                  
+  # Save model3.3
+  saveRDS(model3.4, file = "./output/models/lnRRQ10_3.4")
+  saveRDS(model3.4_bayes, file = "./output/models/lnRRQ10_3.4_bayes")
+
+  } else{
+        model3.4 <- readRDS("./output/models/lnRRQ10_3.4")
+  model3.4_bayes <- readRDS("./output/models/lnRRQ10_3.4_bayes")
 }
 ```
 

@@ -263,7 +263,7 @@ model1.1_bayes <- readRDS("./output/models/lnRRQ10_1.1_bayes")}
 
 # Heterogeneity analysis
    w <- with(lnRRQ10_data, 1/V) # weights
-  sv <- sum(w*(length(lnRRQ10_data)-1)) / (sum(w)^2 + sum(w^2))
+  sv <- sum(w*(dim(lnRRQ10_data)[1]-1)) / (sum(w)^2 + sum(w^2))
 
 # extract posterior sds, but square them to turn to variance
   posteriors_1.1 <- posterior_samples(model1.1_bayes, pars = "^sd")^2
@@ -429,10 +429,10 @@ if(rerun){
 
 ```{r, lncvrq10, echo = FALSE, message=FALSE, warning=FALSE, results='hide'}
 #############
-## lnCVRQ10
+  ## lnCVRQ10
 #############
 ##################################################
-# Organise the data and prune tree
+  # Organise the data and prune tree
 #################################################
   lnCVRQ10_data <- data_long2 %>% filter(grepl("lnCVR", name) & !is.na(effect_size) & !is.na(V) & !V == 0) %>% 
                               mutate(spp = species_full, c_accl_time = acclim_period - mean(acclim_period, na.rm = TRUE))
@@ -452,8 +452,8 @@ if(rerun){
   lnCVRQ10_data %>% filter(V >= 2)
 
 ###################################################
-# Model 2.1: Intercept only model.
-# Used for heterogeneity analysis
+  # Model 2.1: Intercept only model.
+  # Used for heterogeneity analysis
 ###################################################
 rerun = FALSE
 if(rerun){
@@ -476,9 +476,41 @@ if(rerun){
   model2.1_bayes <- readRDS("./output/models/lnCVRQ10_2.1_bayes")
   }
 
+# Heterogeneity analysis
+   w_cvr <- with(lnCVRQ10_data, 1/V) # weights
+  sv_cvr <- sum(w_cvr*(dim(lnCVRQ10_data)[1]-1)) / (sum(w_cvr)^2 + sum(w_cvr^2))
+
+# extract posterior sds, but square them to turn to variance
+  posteriors_2.1 <- posterior_samples(model2.1_bayes, pars = "^sd")^2
+  colnames(posteriors_2.1) <- gsub("__Intercept", "", colnames(posteriors_2.1))
+  colnames(posteriors_2.1) <- gsub("sd_", "", colnames(posteriors_2.1))
+  
+    res_cvr <- posteriors_2.1[,"obs"]
+   stdy_cvr <- posteriors_2.1[,"record_num"]
+  phylo_cvr <- posteriors_2.1[,"species_full"]
+    spp_cvr <- posteriors_2.1[,"spp"]
+  trait_cvr <- posteriors_2.1[,"trait"]
+  total_cvr <- phylo_cvr + spp_cvr + res_cvr + sv_cvr + stdy_cvr + trait_cvr
+ 
+  # Calculate I2
+     tot_i2_cvr <- (sv_cvr / total_cvr)*100    ; mean(tot_i2_cvr)  ; quantile(tot_i2_cvr, c(0.025, 0.975))
+   phylo_i2_cvr <- (phylo_cvr / total_cvr)*100 ; mean(phylo_i2_cvr); quantile(phylo_i2_cvr, c(0.025, 0.975))
+     spp_i2_cvr <- (spp_cvr / total_cvr)*100   ; mean(spp_i2_cvr)  ; quantile(spp_i2_cvr, c(0.025, 0.975))
+    stdy_i2_cvr <- (stdy_cvr / total_cvr)*100  ; mean(stdy_i2_cvr) ; quantile(stdy_i2_cvr, c(0.025, 0.975))
+   trait_i2_cvr <- (trait_cvr / total_cvr)*100 ; mean(trait_i2_cvr); quantile(trait_i2_cvr, c(0.025, 0.975))
+     res_i2_cvr <- (res_cvr / total_cvr)*100   ; mean(res_i2_cvr)  ; quantile(res_i2_cvr, c(0.025, 0.975))
+  
+  # Table
+     i2_lncvr <- data.frame(name = c("Phylogeny", "Species", "Study", "Trait"),
+                           est = c(mean(phylo_i2_cvr),mean(spp_i2_cvr), mean(stdy_i2_cvr), mean(trait_i2_cvr)),
+                           lci = c(quantile(phylo_i2_cvr, c(0.025, 0.975))[1], quantile(spp_i2_cvr, c(0.025, 0.975))[1],
+                                   quantile(stdy_i2_cvr, c(0.025, 0.975))[1], quantile(trait_i2_cvr, c(0.025, 0.975))[1]),
+                           uci = c(quantile(phylo_i2_cvr, c(0.025, 0.975))[2], quantile(spp_i2_cvr, c(0.025, 0.975))[2],
+                                   quantile(stdy_i2_cvr, c(0.025, 0.975))[2], quantile(trait_i2_cvr, c(0.025, 0.975))[2]))  
+  
 ###################################################
-# Model 2.2: Model controlling for acclimation time, 
-# type and habitat assuming type can vary by habitat
+  # Model 2.2: Model controlling for acclimation time, 
+  # type and habitat assuming type can vary by habitat
 ###################################################
 
 if(rerun){
@@ -503,10 +535,8 @@ if(rerun){
   model2.2_bayes <- readRDS("./output/models/lnCVRQ10_2.2_bayes")
 }
 
-
-  
 ######################################################
-# Bayesian Contrasts
+  # Bayesian Contrasts
 ######################################################
 
   posteriors_2.2 <- posterior_samples(model2.2_bayes, pars = "^b")
@@ -528,13 +558,12 @@ if(rerun){
     
 ```
 
-
 ```{r, wildlnRR10}
 #######################################
-## lnRRQ10 from Wild Populations ##
+  ## lnRRQ10 from Wild Populations ##
 #######################################
 ##################################################
-# Organise the data and prune tree
+  # Organise the data and prune tree
 ##################################################
 
 # Bring in Climate data
@@ -559,8 +588,8 @@ phylo_cor_wild <- vcv(tree_lnrr_wild, cor = TRUE)
         A_wild <- vcv(tree_lnrr_wild, cor = FALSE) # For bayes, need cov matrix
 
 ###################################################
-# Model 3.2: Model controlling for acclimation time, 
-# type and habitat assuming type can vary by habitat
+  # Model 3.2: Model controlling for acclimation time, 
+  # type and habitat assuming type can vary by habitat
 ###################################################
 rerun = TRUE
 if(rerun){
@@ -586,7 +615,7 @@ if(rerun){
 }
 
 ####################################################
-## Model 3.2: Bayesian Contrasts
+  ## Model 3.2: Bayesian Contrasts
 ###################################################
   posteriors_3.2 <- posterior_samples(model3.2_bayes, pars = "^b")
   f_acute_wild  <- posteriors_3.2[,"b_Intercept"]
@@ -615,7 +644,8 @@ if(rerun){
   p_change_t_q10_wild <- (exp(t_acclim_wild - t_acute_wild)-1)*100; quantile(p_change_t_q10_wild, c(0.025, 0.975))
 
 ####################################################
-# Model 3.3: Model environmental variability 
+  # Model 3.3: Model environmental variability by acute 
+  #  acclim 
 ####################################################
   rerun = TRUE
 if(rerun){
@@ -640,7 +670,9 @@ if(rerun){
   model3.3_bayes <- readRDS("./output/models/lnRRQ10_3.3_bayes")
   }
   
-  
+################################################################
+  # Model 3.7: Environmental autocorrelation model by acute/acclim
+################################################################
   if(rerun){
   # More realistic model with 
   model3.4          <- metafor::rma.mv(effect_size ~ c_accl_time + scale(acf_all) + type + type:scale(acf_all), V = V,
@@ -663,8 +695,10 @@ if(rerun){
   model3.4_bayes <- readRDS("./output/models/lnRRQ10_3.4_bayes")
   }
   
-  
-if(rerun){
+################################################################
+  # Model 3.5: Environmental variability  model
+################################################################
+  if(rerun){
   # More realistic model with 
   model3.5          <- metafor::rma.mv(effect_size ~ c_accl_time + scale(cv) + type, V = V,
                                        random = list(~1 | record_num,
@@ -687,6 +721,9 @@ if(rerun){
   }
   
   
+################################################################
+  # Model 3.6: Environmental autocorrelation model
+################################################################
   if(rerun){
   # More realistic model with 
   model3.6          <- metafor::rma.mv(effect_size ~ c_accl_time + scale(acf_all) + type, V = V,
@@ -709,6 +746,9 @@ if(rerun){
   model3.6_bayes <- readRDS("./output/models/lnRRQ10_3.6_bayes")
   }
   
+################################################################
+  # Model 3.7: Environmental variability and autocorrelation model
+################################################################
   
   if(rerun){
   # More realistic model with 
@@ -735,10 +775,10 @@ if(rerun){
 
 ```{r wildlncvr}
 #######################################
-## lnCVRQ10 from Wild Populations ##
+  ## lnCVRQ10 from Wild Populations ##
 #######################################
 ##################################################
-# Organise the data and prune tree
+  # Organise the data and prune tree
 ##################################################
 
 # Bring in Climate data
@@ -765,10 +805,10 @@ phylo_cor_wild_cvr <- vcv(tree_lncvr_wild, cor = TRUE)
         A_wild_cvr <- vcv(tree_lncvr_wild, cor = FALSE) # For bayes, need cov matrix
 
 ###################################################
-# Model 4.2: Model controlling for acclimation time, 
-# type and habitat assuming type can vary by habitat
+  # Model 4.2: Model controlling for acclimation time, 
+  # type and habitat assuming type can vary by habitat
 ###################################################
-rerun = TRUE
+rerun = FALSE
 if(rerun){
   # More realistic model with 
   model4.2          <- metafor::rma.mv(effect_size ~ c_accl_time + type + habitat + type:habitat, V = V,
@@ -792,7 +832,7 @@ if(rerun){
 }
 
 ####################################################
-## Model 4.2: Bayesian Contrasts
+  ## Model 4.2: Bayesian Contrasts
 ###################################################
   posteriors_4.2 <- posterior_samples(model4.2_bayes, pars = "^b")
   f_acute_wild_cvr  <- posteriors_4.2[,"b_Intercept"]
@@ -821,9 +861,9 @@ if(rerun){
   p_change_t_q10_wild_cvr <- (exp(t_acclim_wild_cvr - t_acute_wild_cvr)-1)*100; quantile(p_change_t_q10_wild_cvr, c(0.025, 0.975))
 
 ####################################################
-# Model 4.3-4.7: Model environmental variability 
+  # Model 4.3: Model environmental variability by acute/acclim
 ####################################################
-  rerun = TRUE
+  rerun = FALSE
 if(rerun){
   # More realistic model with 
   model4.3          <- metafor::rma.mv(effect_size ~ c_accl_time + scale(cv) + type + type:scale(cv), V = V,
@@ -846,7 +886,9 @@ if(rerun){
   model4.3_bayes <- readRDS("./output/models/lnCVRQ10_4.3_bayes")
   }
   
-  
+################################################################
+  # Model 4.4: Environmental autocorrelation model by acute/acclim
+################################################################
   if(rerun){
   # More realistic model with 
   model4.4          <- metafor::rma.mv(effect_size ~ c_accl_time + scale(acf_all) + type + type:scale(acf_all), V = V,
@@ -869,7 +911,9 @@ if(rerun){
   model4.4_bayes <- readRDS("./output/models/lnCVRQ10_4.4_bayes")
   }
   
-  
+################################################################
+  # Model 4.5: Environmental variability
+################################################################
 if(rerun){
   # More realistic model with 
   model4.5          <- metafor::rma.mv(effect_size ~ c_accl_time + scale(cv) + type, V = V,
@@ -892,7 +936,9 @@ if(rerun){
   model4.5_bayes <- readRDS("./output/models/lnCVRQ10_4.5_bayes")
   }
   
-  
+################################################################
+  # Model 4.6: Environmental autocorrelation model 
+################################################################
   if(rerun){
   # More realistic model with 
   model4.6          <- metafor::rma.mv(effect_size ~ c_accl_time + scale(acf_all) + type, V = V,
@@ -915,7 +961,9 @@ if(rerun){
   model4.6_bayes <- readRDS("./output/models/lnCVRQ10_4.6_bayes")
   }
   
-  
+################################################################
+  # Model 4.7: Environmental autocorrelation and variability
+################################################################
  if(rerun){
   # More realistic model with 
   model4.7          <- metafor::rma.mv(effect_size ~ c_accl_time + scale(acf_all) + scale(cv) + type, V = V,
@@ -1013,7 +1061,9 @@ annotate("text", x = 3.15, y = -5,
   theme(axis.title  = element_text(size = 24),
         axis.text = element_text(size = 15)) 
   p2
+   p2.2 <- p2 + ylim(c(-0.5,0.10)) + theme(legend.position = 'none')
   ggsave(p2, filename = "./output/figures/fig2.png")
+  ggsave(p2.2, filename = "./output/figures/fig2.2.png")
 ```
 
 ```{r, fig3, fig.align='center', fig.cap="Acute and Acclimation lnRR q10 across traits for A) marine, B) freshwater and C) terrestrial systems"}
@@ -1036,11 +1086,18 @@ lnRRQ10_data %>% group_by(habitat, type, trait_category) %>% summarise(n = n()) 
 ```{r, fig4, fig.align='center', fig.cap= "I2 estimates"}
 
 
-p4 <- ggplot(i2_lnrr, aes(x = est, y = name)) + xlim(0, 50) + geom_point(size = 5) + geom_errorbar(aes(xmin = lci, xmax = uci), width = 0.15) + theme_bw() + labs(x = "Percentage of Variation (%)") + theme(axis.title.y = element_blank(), axis.text = element_text(size = 20), axis.title = element_text(size = 24)) + geom_text(aes(label = paste0(round(est, 2), "% ", "[", round(lci, 2), " - ", round(uci, 2), "%]")), position = position_nudge(x = 5, y = 0.2)) + annotate("text", x = 30, y = 1.5, label = TeX(paste0("$I^2_{sv}$ = ", round(mean(tot_i2)*100, 2), "%")), size = 12)
+p4 <- ggplot(i2_lnrr, aes(x = est, y = name)) + xlim(0, 50) + geom_point(size = 5) + geom_errorbar(aes(xmin = lci, xmax = uci), width = 0.15) + theme_bw() + labs(x = "Percentage of Variation (%)") + theme(axis.title.y = element_blank(), axis.text = element_text(size = 20), axis.title = element_text(size = 24)) + geom_text(aes(label = paste0(round(est, 2), "% ", "[", round(lci, 2), " - ", round(uci, 2), "%]")), position = position_nudge(x = 5, y = 0.2)) + annotate("text", x = 30, y = 1.5, label = TeX(paste0("$I^2_{sv}$ = ", round(mean(tot_i2), 2), "%")), size = 12)
 
 p4
 ggsave(p4, filename = "./output/figures/fig4.png")
 
+```
+
+```{r, fig5, fig.align='center', fig.cap= "I2 estimates lnCVR"}
+p5 <- ggplot(i2_lncvr, aes(x = est, y = name)) + xlim(0, 50) + geom_point(size = 5) + geom_errorbar(aes(xmin = lci, xmax = uci), width = 0.15) + theme_bw() + labs(x = "Percentage of Variation (%)") + theme(axis.title.y = element_blank(), axis.text = element_text(size = 20), axis.title = element_text(size = 24)) + geom_text(aes(label = paste0(round(est, 2), "% ", "[", round(lci, 2), " - ", round(uci, 2), "%]")), position = position_nudge(x = 5, y = 0.2)) + annotate("text", x = 30, y = 1.5, label = TeX(paste0("$I^2_{sv}$ = ", round(mean(tot_i2_cvr), 2), "%")), size = 12)
+
+p5
+ggsave(p5, filename = "./output/figures/fig5.png")
 ```
 
 

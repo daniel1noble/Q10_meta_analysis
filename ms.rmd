@@ -35,7 +35,7 @@ knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE, tidy = TRU
 ##################################
 # Loading packages & Functions
 ##################################
-    pacman::p_load(tidyverse,  metafor, flextable, raster, rasterVis,  patchwork, RColorBrewer, ggtree, ape, phytools, viridis, MCMCglmm, brms, latex2exp, orchaRd, multcomp)
+    pacman::p_load(tidyverse,  metafor, flextable, raster, rasterVis,  patchwork, RColorBrewer, ggtree, ape, phytools, viridis, MCMCglmm, brms, latex2exp, orchaRd, multcomp, ggbeeswarm)
 
 #devtools::install_github(repo = "ErikKusch/KrigR")
 ## Function to produce colour palette
@@ -846,7 +846,7 @@ if(rerun){
   f_acute_wild_cvr  <- posteriors_4.2[,"b_Intercept"]
   f_acclim_wild_cvr <- posteriors_4.2[,"b_Intercept"] + posteriors_4.2[,"b_typeacclim"]
   m_acute_wild_cvr  <- posteriors_4.2[,"b_Intercept"] + posteriors_4.2[,"b_habitatm"]
-  m_acclim_wild_cvr <- posteriors_4.2[,"b_Intercept"] + posteriors_4.2[,"b_habitatm"] + posteriors_4.2[,"b_typeacclim"] + posteriors_3.2[,"b_typeacclim:habitatm"]
+  m_acclim_wild_cvr <- posteriors_4.2[,"b_Intercept"] + posteriors_4.2[,"b_habitatm"] + posteriors_4.2[,"b_typeacclim"] + posteriors_4.2[,"b_typeacclim:habitatm"]
   t_acute_wild_cvr  <- posteriors_4.2[,"b_Intercept"] + posteriors_4.2[,"b_habitatt"]
   t_acclim_wild_cvr <- posteriors_4.2[,"b_Intercept"] + posteriors_4.2[,"b_habitatt"] + posteriors_4.2[,"b_typeacclim"] + posteriors_4.2[,"b_typeacclim:habitatt"]
 
@@ -871,7 +871,7 @@ if(rerun){
 ####################################################
   # Model 4.3: Model environmental variability by acute/acclim
 ####################################################
-  rerun = FALSE
+  rerun = TRUE
 if(rerun){
   # More realistic model with 
   model4.3          <- metafor::rma.mv(effect_size ~ c_accl_time + cv_c + type + type:cv_c, V = V,
@@ -999,9 +999,8 @@ if(rerun){
 
 ```{r, fig1, fig.align='center', fig.cap= "Acute and Acclimation lnRR Q10 across marine, freshwater and terrestrial environments"}
 
-p1.2 <- orchaRd::orchard_plot(model1.2, mod = "habitat", group  = "record_num", at = list(type = c("acute", "acclim")), by = "type", weights = "prop", data = lnRRQ10_data, xlab = TeX("$lnRR_{Q_{10}}$"), angle = 45, legend.pos = "top.left", trunk.size = 4) + 
-  scale_x_discrete(labels = c("T" = "Terrestrial","M" = "Marine" ,"F" = "Freshwater")) +
-  theme(legend.direction = "vertical") + 
+p1.2 <- orchaRd::orchard_plot(model1.2, mod = "habitat", group  = "record_num", at = list(type = c("acute", "acclim")), by = "type", weights = "prop", data = lnRRQ10_data, xlab = TeX("$lnRR_{Q_{10}}$"), angle = 45, legend.pos = "top.left", trunk.size = 5) + scale_x_discrete(labels = c("T" = "Terrestrial","M" = "Marine" ,"F" = "Freshwater")) +
+  theme(legend.direction = "vertical") +
   geom_segment(aes(x = 2.92, y = 2, xend = 3.07, yend = 2), 
                             arrow = arrow(angle = 90, ends = "both", length = unit(0.01, "npc"))) +
   geom_segment(aes(x = 1.92, y = 2, xend = 2.07, yend = 2), 
@@ -1009,33 +1008,44 @@ p1.2 <- orchaRd::orchard_plot(model1.2, mod = "habitat", group  = "record_num", 
   geom_segment(aes(x = 0.92, y = 2, xend = 1.07, yend = 2), 
                             arrow = arrow(angle = 90, ends = "both", length = unit(0.01, "npc"))) +
 annotate("text", x = 1, y = 2.10, 
-         label =TeX(paste0("$\\beta = $", round(model1.2$b[3], 2), "[", round(model1.2$ci.lb[3], 2)," to ", round(model1.2$ci.ub[3], 2), "] ")), hjust = 0) + 
+         label =TeX(paste0("$\\beta = $", round(model1.2$b[3], 2), "[", round(model1.2$ci.lb[3], 2)," to ", round(model1.2$ci.ub[3], 2), "] ")), hjust = 0, size = 6) + 
 annotate("text", x = 1.01, y = 4.60, 
-         label =paste0(round(mean(change_f), 2), "%"), hjust = 0) + labs(shape = "Type") +
+         label =paste0(round(mean(change_f), 2), "%"), hjust = 0, size = 6) + labs(shape = "Type") +
   geom_segment(aes(x = 0.92, y = 5.6, xend = 1.07, yend = 5.6), 
                             arrow = arrow(angle = 45, ends = "first", length = unit(0.01, "npc"))) +
-  annotate("text", x = 0.85, y = 3, label = "P < 0.001", hjust = 0) + 
+  annotate("text", x = 0.85, y = 3, label = "P < 0.001", hjust = 0, size = 6) + 
   
   
   annotate("text", x = 2, y = 2.10, 
-         label =TeX(paste0("$\\beta = $", round(mean(m_acclim - m_acute), 2), "[", round(quantile(m_acclim - m_acute, 0.025), 2)," to ", round(quantile(m_acclim - m_acute, 0.975),2), "] ")), hjust = 0) + 
+         label =TeX(paste0("$\\beta = $", round(mean(m_acclim - m_acute), 2), "[", round(quantile(m_acclim - m_acute, 0.025), 2)," to ", round(quantile(m_acclim - m_acute, 0.975),2), "] ")), hjust = 0, size = 6) + 
 annotate("text", x = 2.01, y = 4.60, 
-         label =paste0(round(mean(change_m), 2), "%"), hjust = 0) + labs(shape = "Type") +
+         label =paste0(round(mean(change_m), 2), "%"), hjust = 0, size = 6) +
   geom_segment(aes(x = 1.92, y = 5.6, xend = 2.07, yend = 5.6), 
                             arrow = arrow(angle = 45, ends = "first", length = unit(0.01, "npc"))) +
-  annotate("text", x = 1.85, y = 3, label = "P = 0.01", hjust = 0) +
+  annotate("text", x = 1.85, y = 3, label = "P = 0.01", hjust = 0, size = 6) +
   
   annotate("text", x = 3, y = 2.10, 
-         label =TeX(paste0("$\\beta = $", round(mean(t_acclim - t_acute), 2), "[", round(quantile(t_acclim - t_acute, 0.025), 2)," to ", round(quantile(t_acclim - t_acute, 0.975),2), "] ")), hjust = 0) + 
+         label =TeX(paste0("$\\beta = $", round(mean(t_acclim - t_acute), 2), "[", round(quantile(t_acclim - t_acute, 0.025), 2)," to ", round(quantile(t_acclim - t_acute, 0.975),2), "] ")), hjust = 0, size = 6) + 
 annotate("text", x = 3.01, y = 4.60, 
-         label =paste0(round(mean(change_t), 2), "%"), hjust = 0) + labs(shape = "Type") +
+         label =paste0(round(mean(change_t), 2), "%"), hjust = 0, size = 6) +
   geom_segment(aes(x = 2.92, y = 5.6, xend = 3.07, yend = 5.6), 
                             arrow = arrow(angle = 45, ends = "last", length = unit(0.01, "npc"))) +
-  annotate("text", x = 2.85, y = 3, label = "P = 0.36", hjust = 0) +
-    theme(axis.title  = element_text(size = 24),
+  annotate("text", x = 2.85, y = 3, label = "P = 0.36", hjust = 0, size = 6, parse = TRUE)
+    
+  
+  p1.2 + theme_classic() + theme(axis.title  = element_text(size = 24),
         axis.text = element_text(size = 15))
   
-  p1.2
+  
+   res <- mod_results(model1.2, mod = "habitat", group  = "record_num", at = list(type = c("acute", "acclim")), by = "type", weights = "prop", data = lnRRQ10_data)
+ 
+    ggplot(lnRRQ10_data) + ggbeeswarm::geom_quasirandom(aes(y = effect_size, x = habitat, shape = type, colour = type, size = 1/sqrt(V)), alpha = 0.7)+ coord_flip() + theme_classic() + scale_x_discrete(labels = c("t" = "Terrestrial","m" = "Marine" ,"f" = "Freshwater")) + theme(axis.title.y = element_blank()) + labs(y = TeX("$lnRR_{Q_{10}}$"), size = "Precision (1/SE)",colour = "Type", shape = "Type")
+    
+    
+    geom_quasirandomgeom_point(position = position_beeswarm(dodge.width = 0.2, groupOnX = TRUE), alpha = 0.7) 
+  
+  
+  
   p1.2.2 <- p1.2 + ylim(c(0,1)) + theme(legend.position = 'none')
   ggsave(p1.2, filename = "./output/figures/fig1.png")
   ggsave(p1.2.2, filename = "./output/figures/fig1.1.png")
@@ -1108,16 +1118,27 @@ p5
 ggsave(p5, filename = "./output/figures/fig5.png")
 ```
 
+```{r, fig6, fig.align='center', fig.cap= "Bubble plot environment lnRR"}
+p6 <- bubble_plot(model3.5, mod = "cv_c", group  = "record_num", data = lnRRQ10_data_wild, ylab = TeX("$lnRR_{Q_{10}}$"), xlab = "Thermal Coefficient of Variation (CV)") +annotate("text", x = 1, y = 3, label = TeX(paste0("$\\beta = $", round(model3.5$b[3], 3), ", 95%CI: ", round(model3.5$ci.lb[3],3), " to ", round(model3.5$ci.ub[3], 3), " P = ", round(model3.5$pval[3],3))))
 
-```{r, fig6, fig.align='center', fig.cap= "I2 estimates lnCVR"}
-p6 <- bubble_plot(model3.5, mod = "cv", group  = "record_num", data = lnRRQ10_data_wild, ylab = TeX("$lnRR_{Q_{10}}$"), xlab = "Thermal Coefficient of Variation (CV)")
-
-p7 <- bubble_plot(model3.6, mod = "acf_all", group  = "record_num", data = lnRRQ10_data_wild, ylab = TeX("$lnRR_{Q_{10}}$"), xlab = "Thermal Autocorrelation") + theme(axis.title.y = element_blank())
+p7 <- bubble_plot(model3.6, mod = "acf_all_c", group  = "record_num", data = lnRRQ10_data_wild, ylab = TeX("$lnRR_{Q_{10}}$"), xlab = "Thermal Autocorrelation") + theme(axis.title.y = element_blank()) +annotate("text", x = -3, y = 3, label = TeX(paste0("$\\beta = $", round(model3.6$b[3], 3), ", 95%CI: ", round(model3.6$ci.lb[3],3), " to ", round(model3.6$ci.ub[3], 3), " P = ", round(model3.6$pval[3],3))))
   
 p67 <- (p6 | p7) + plot_annotation(tag_levels = "A")
   
-ggsave(p67, filename = "./output/figures/fig6.png")
+ggsave(p67, filename = "./output/figures/fig6.png", height = 10, width = 25, units = "cm")
 ```
+
+```{r, fig7, fig.align='center', fig.cap= "Bubble plot environment lnCVR"}
+p8 <- bubble_plot(model4.5, mod = "cv_c", group  = "record_num", data = lnRRQ10_data_wild, ylab = TeX("$lnCVR_{Q_{10}}$"), xlab = "Thermal Coefficient of Variation (CV)") +annotate("text", x = 1, y = 3, label = TeX(paste0("$\\beta = $", round(model4.5$b[3], 3), ", 95%CI: ", round(model4.5$ci.lb[3],3), " to ", round(model4.5$ci.ub[3], 3), " P = ", round(model4.5$pval[3],3))))
+
+p8 <- bubble_plot(model3.6, mod = "acf_all_c", group  = "record_num", data = lnRRQ10_data_wild, ylab = TeX("$lnCVR_{Q_{10}}$"), xlab = "Thermal Autocorrelation") + theme(axis.title.y = element_blank()) +annotate("text", x = -3, y = 3, label = TeX(paste0("$\\beta = $", round(model4.6$b[3], 3), ", 95%CI: ", round(model4.6$ci.lb[3],3), " to ", round(model4.6$ci.ub[3], 3), " P = ", round(model4.6$pval[3],3))))
+  
+p89 <- (p8 | p9) + plot_annotation(tag_levels = "A")
+  
+ggsave(p89, filename = "./output/figures/fig7.png", height = 10, width = 25, units = "cm")
+```
+
+
 
 ### *Does climate variability predict acclimation capacity among aquatic and terrestrial ectotherms?*
 ### *Does between-individual variation in acclimation capacities differ across terrestrial and aquatic ectotherms?*

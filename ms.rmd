@@ -1117,23 +1117,23 @@ ggsave(p5, filename = "./output/figures/fig5.png")
 ```
 
 ```{r, fig6, fig.align='center', fig.cap= "Bubble plot environment lnRR"}
-p6 <- bubble_plot(model3.5, mod = "cv_c", group  = "record_num", data = lnRRQ10_data_wild, ylab = TeX("$lnRR_{Q_{10}}$"), xlab = "Thermal Coefficient of Variation (CV)") +annotate("text", x = 1, y = 3, label = TeX(paste0("$\\beta = $", round(model3.5$b[3], 3), ", 95%CI: ", round(model3.5$ci.lb[3],3), " to ", round(model3.5$ci.ub[3], 3), " P = ", round(model3.5$pval[3],3))))
+p6 <- bubble_plot(model3.5, mod = "cv_c", group  = "record_num", data = lnRRQ10_data_wild, ylab = TeX("$lnRR_{Q_{10}}$"), xlab = "Thermal Coefficient of Variation (CV)") +annotate("text", x = 1, y = 3, label = TeX(paste0("$\\beta = $", round(model3.5$b[3], 3), ", 95%CI: ", round(model3.5$ci.lb[3],3), " to ", round(model3.5$ci.ub[3], 3), "; P = ", round(model3.5$pval[3],3)))) + theme_classic() + theme(legend.position = "none", axis.text = element_text(size = 12), axis.title = element_text(size = 18))
 
-p7 <- bubble_plot(model3.6, mod = "acf_all_c", group  = "record_num", data = lnRRQ10_data_wild, ylab = TeX("$lnRR_{Q_{10}}$"), xlab = "Thermal Autocorrelation") + theme(axis.title.y = element_blank()) +annotate("text", x = -3, y = 3, label = TeX(paste0("$\\beta = $", round(model3.6$b[3], 3), ", 95%CI: ", round(model3.6$ci.lb[3],3), " to ", round(model3.6$ci.ub[3], 3), " P = ", round(model3.6$pval[3],3))))
+p7 <- bubble_plot(model3.6, mod = "acf_all_c", group  = "record_num", data = lnRRQ10_data_wild, ylab = TeX("$lnRR_{Q_{10}}$"), xlab = "Thermal Predictability") + theme(axis.title.y = element_blank()) +annotate("text", x = -3, y = 3, label = TeX(paste0("$\\beta = $", round(model3.6$b[3], 3), ", 95%CI: ", round(model3.6$ci.lb[3],3), " to ", round(model3.6$ci.ub[3], 3), "; P = ", round(model3.6$pval[3],3)))) + theme_classic() + theme(axis.text = element_text(size = 12), axis.title = element_text(size = 18))
   
 p67 <- (p6 | p7) + plot_annotation(tag_levels = "A")
   
-ggsave(p67, filename = "./output/figures/fig6.png", height = 10, width = 25, units = "cm")
+ggsave(p67, filename = "./output/figures/fig6.png", height = 10, width = 30, units = "cm")
 ```
 
 ```{r, fig7, fig.align='center', fig.cap= "Bubble plot environment lnCVR"}
-p8 <- bubble_plot(model4.5, mod = "cv_c", group  = "record_num", data = lnRRQ10_data_wild, ylab = TeX("$lnCVR_{Q_{10}}$"), xlab = "Thermal Coefficient of Variation (CV)") +annotate("text", x = 1, y = 3, label = TeX(paste0("$\\beta = $", round(model4.5$b[3], 3), ", 95%CI: ", round(model4.5$ci.lb[3],3), " to ", round(model4.5$ci.ub[3], 3), " P = ", round(model4.5$pval[3],3))))
+p8 <- bubble_plot(model4.5, mod = "cv_c", group  = "record_num", data = lnCVRQ10_data_wild, ylab = TeX("$lnCVR_{Q_{10}}$"), xlab = "Thermal Coefficient of Variation (CV)", k = FALSE) +annotate("text", x = 1, y = -5, label = TeX(paste0("$\\beta = $", round(model4.5$b[3], 3), ", 95%CI: ", round(model4.5$ci.lb[3],3), " to ", round(model4.5$ci.ub[3], 3), " P = ", round(model4.5$pval[3],3)))) + theme_classic() + theme(legend.position = "none", axis.text = element_text(size = 12), axis.title = element_text(size = 18)) + ylim(c(-6, 3))
 
-p8 <- bubble_plot(model3.6, mod = "acf_all_c", group  = "record_num", data = lnRRQ10_data_wild, ylab = TeX("$lnCVR_{Q_{10}}$"), xlab = "Thermal Autocorrelation") + theme(axis.title.y = element_blank()) +annotate("text", x = -3, y = 3, label = TeX(paste0("$\\beta = $", round(model4.6$b[3], 3), ", 95%CI: ", round(model4.6$ci.lb[3],3), " to ", round(model4.6$ci.ub[3], 3), " P = ", round(model4.6$pval[3],3))))
+p9 <- bubble_plot(model4.6, mod = "acf_all_c", group  = "record_num", data = lnCVRQ10_data_wild, ylab = TeX("$lnCVR_{Q_{10}}$"), xlab = "Thermal Predictability", k = FALSE) + theme(axis.title.y = element_blank()) +annotate("text", x = -3, y = -5, label = TeX(paste0("$\\beta = $", round(model4.6$b[3], 3), ", 95%CI: ", round(model4.6$ci.lb[3],3), " to ", round(model4.6$ci.ub[3], 3), " P = ", round(model4.6$pval[3],3)))) + theme_classic() + theme(axis.text = element_text(size = 12), axis.title = element_text(size = 18)) + ylim(c(-6, 3))
   
 p89 <- (p8 | p9) + plot_annotation(tag_levels = "A")
   
-ggsave(p89, filename = "./output/figures/fig7.png", height = 10, width = 25, units = "cm")
+ggsave(p89, filename = "./output/figures/fig7.png", height = 10, width = 30, units = "cm")
 ```
 
 

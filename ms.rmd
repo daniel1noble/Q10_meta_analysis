@@ -1083,6 +1083,18 @@ ptm <- orchard_plot(model1.3_m, mod = "trait_category", at = list(type = c("acut
 ptm$layers[[1]] <- NULL # Lets just remove the data point geom layer as it's too busy
 
 
+ptf <- orchard_plot(model1.3_f, mod = "trait_category", at = list(type = c("acute", "acclim")), by = "type", group = "record_num", weights = "prop", data = lnRRQ10_data_f, xlab = TeX("$lnRR_{Q_{10}}$"), angle = 0) +
+  scale_x_discrete(labels = c("Mito_leak" = "Proton Leak",
+                              "Metabolic_enzyme" = "Metabolic Enzymes",
+                              "Rest_MR" = "Resting Metabolic Rate",
+                              "Max_MR" = "Maximum Metabolic Rate",
+                              "Mito_oxidation" = "OXPHOS"))
+ptf$layers[[1]] <- NULL # Lets just remove the data point geom layer as it's too busy
+
+
+ptt <- orchard_plot(model1.3_t, mod = "trait_category", at = list(type = c("acute", "acclim")), by = "type", group = "record_num", weights = "prop", data = lnRRQ10_data_t, xlab = TeX("$lnRR_{Q_{10}}$"), angle = 0)
+ptt$layers[[1]] <- NULL # Lets just remove the data point geom layer as it's too busy
+
 lnRRQ10_data %>% group_by(habitat, type, trait_category) %>% summarise(n = n()) %>% data.frame()
 
 ```

@@ -1131,7 +1131,7 @@ if(rerun){
 
 
 ```{r, fig1, fig.align='center', fig.cap= "Acute and Acclimation lnRR Q10 across marine, freshwater and terrestrial environments"}
-
+ col <- c("#0871B9", "#F3B40D", "#1BB908")
 p1.2 <- orchaRd::orchard_plot(model1.2, mod = "habitat", group  = "record_num", at = list(type = c("acute", "acclim")), by = "type", weights = "prop", data = lnRRQ10_data, xlab = TeX("$lnRR_{Q_{10}}$"), angle = 45, legend.pos = "top.left", trunk.size = 5) + scale_x_discrete(labels = c("T" = "Terrestrial","M" = "Marine" ,"F" = "Freshwater")) +
   theme(legend.direction = "vertical") +
   geom_segment(aes(x = 2.92, y = 2, xend = 3.07, yend = 2), 
@@ -1163,7 +1163,7 @@ annotate("text", x = 3.01, y = 4.60,
          label =paste0(round(mean(change_t), 2), "%"), hjust = 0, size = 6) +
   geom_segment(aes(x = 2.92, y = 5.6, xend = 3.07, yend = 5.6), 
                             arrow = arrow(angle = 45, ends = "last", length = unit(0.01, "npc"))) +
-  annotate("text", x = 2.85, y = 3, label = "P = 0.36", hjust = 0, size = 6)
+  annotate("text", x = 2.85, y = 3, label = "P = 0.36", hjust = 0, size = 6) + scale_fill_manual(values = c(col))
     
   
   p1.2 <- p1.2 + theme_classic() + theme(axis.title  = element_text(size = 24),
@@ -1192,7 +1192,7 @@ annotate("text", x = 2.15, y = -5,
          label =TeX(paste0("$\\mu = $", round(mean(t_cvr_mean), 2), "[", round(quantile(t_cvr_mean, 0.025), 2)," to ", round(quantile(t_cvr_mean, 0.975),2), "] ")), hjust = 0, size = 6) + 
 annotate("text", x = 3.15, y = -5, 
          label =paste0(round(mean(exp(t_cvr_mean)-1)*100, 2), "%"), hjust = 0, size = 6) + labs(shape = "Type") +
-  annotate("text", x = 3.15, y = -3.7, label = paste0("P = ", round(pmcmc(t_cvr_mean), digit = 3)), hjust = 0, size = 6)
+  annotate("text", x = 3.15, y = -3.7, label = paste0("P = ", round(pmcmc(t_cvr_mean), digit = 3)), hjust = 0, size = 6) + scale_fill_manual(values = c(col))
  
   
 p2 <- p2 + theme_classic() + theme(axis.title  = element_text(size = 24),
@@ -1270,7 +1270,14 @@ ggsave(p89, filename = "./output/figures/fig7.png", height = 10, width = 30, uni
 ```
 
 ```{r, fig8, fig.align='center', fig.cap= "Bubble plot environment lnRR for wild populations"}
-bubble_plot(model3.9, mod = "cv_c", group = "record_num", by = "habitat", data = lnRRQ10_data_wild_acclim, ylab = TeX("$lnRR_{Q_{10}}$"), xlab = "Thermal Coefficient of Variation (CV)", condition.nrow = 1) + theme(legend.position = "bottom")
+
+ col <- c("#0871B9", "#F3B40D", "#1BB908")
+p8.1 <- bubble_plot(model3.9, mod = "cv_c", group = "record_num", by = "habitat", data = lnRRQ10_data_wild_acclim, ylab = TeX("$lnRR_{Q_{10}}$"), xlab = "Thermal Coefficient of Variation (CV)", condition.nrow = 1) + theme_classic() + theme(legend.position = "none", strip.background = element_blank())  + scale_fill_manual(values = c(col))
+
+p8.2 <- bubble_plot(model3.8, mod = "acf_all_c", group = "record_num", by = "habitat", data = lnRRQ10_data_wild_acclim, ylab = TeX("$lnRR_{Q_{10}}$"), xlab = "Thermal Predictability", condition.nrow = 1) + theme_classic() + theme(legend.position = "bottom", strip.background = element_blank(), strip.text = element_blank())+ scale_fill_manual(values = c(col))
+
+p8.1 / p8.2
+
 ```
 
 

@@ -814,7 +814,16 @@ phylo_cor_wild_acclim <- vcv(tree_lnrr_wild_acclim, cor = TRUE)
         model3.8 <- readRDS("./output/models/lnRRQ10_3.8")
   model3.8_bayes <- readRDS("./output/models/lnRRQ10_3.8_bayes")
 }
-  
+
+#################################################
+### Bayesian Slopes from Model 3.8
+#################################################
+ posteriors3.8 <- posterior_samples(model3.8_bayes, "^b") 
+        
+    slope_f_3.8 <- posteriors3.8[,"b_acf_all_c"]; pmcmc(slope_f_3.8); quantile(slope_f_3.8, c(0.025, 0.975))
+    slope_m_3.8 <- posteriors3.8[,"b_acf_all_c"] + posteriors3.8[,"b_acf_all_c:habitatm"]; pmcmc(slope_m_3.8); quantile(slope_m_3.8, c(0.025, 0.975))
+    slope_t_3.8 <- posteriors3.8[,"b_acf_all_c"] + posteriors3.8[,"b_acf_all_c:habitatt"]; pmcmc(slope_t_3.8); quantile(slope_t_3.8, c(0.025, 0.975))
+    
 ############################################################################################
 # Model 3.9: Acclimatization lnRRQ10 only. Test if environmental variance explains 
 # differently in each habitat
@@ -841,7 +850,16 @@ if(rerun){
         model3.9 <- readRDS("./output/models/lnRRQ10_3.9")
   model3.9_bayes <- readRDS("./output/models/lnRRQ10_3.9_bayes")
 }
-               
+
+#################################################
+### Bayesian Slopes from Model 3.9
+#################################################
+ posteriors <- posterior_samples(model3.9_bayes, "^b") 
+        
+    slope_f <-     posteriors[,"b_cv_c"]; pmcmc(slope_f); quantile(slope_f, c(0.025, 0.975))
+    slope_m <-     posteriors[,"b_cv_c"] + posteriors[,"b_cv_c:habitatm"]; pmcmc(slope_m); quantile(slope_m, c(0.025, 0.975))
+    slope_t <-     posteriors[,"b_cv_c"] + posteriors[,"b_cv_c:habitatt"]; pmcmc(slope_t); quantile(slope_t, c(0.025, 0.975))
+        
 ```
 
 ```{r wildlncvr}
@@ -1099,6 +1117,16 @@ phylo_cor_wild_acclim <- vcv(tree_lncvr_wild_acclim, cor = TRUE)
   model4.8_bayes <- readRDS("./output/models/lnRRQ10_4.8_bayes")
 }
   
+        
+#################################################
+### Bayesian Slopes from Model 4.8
+#################################################
+ posteriors4.8 <- posterior_samples(model4.8_bayes, "^b") 
+        
+    slope_f_4.8 <- posteriors4.8[,"b_acf_all_c"]; mean(slope_f_4.8); pmcmc(slope_f_4.8); quantile(slope_f_4.8, c(0.025, 0.975))
+    slope_m_4.8 <- posteriors4.8[,"b_acf_all_c"] + posteriors4.8[,"b_acf_all_c:habitatm"]; mean(slope_m_4.8); pmcmc(slope_m_4.8); quantile(slope_m_4.8, c(0.025, 0.975))
+    slope_t_4.8 <- posteriors4.8[,"b_acf_all_c"] + posteriors4.8[,"b_acf_all_c:habitatt"]; mean(slope_t_4.8); pmcmc(slope_t_4.8); quantile(slope_t_4.8, c(0.025, 0.975))
+    
 ############################################################################################
 # Model 4.9: Acclimatization lnCVRQ10 only. Test if environmental variance explains 
 # differently in each habitat

@@ -862,12 +862,14 @@ if(rerun){
 
     
 ##################################################
-    # Model 3.9, but terrestrial only
+    # Model 3.8, 3.9 and 3.10 - Habitat subset
 ##################################################
+    # Subset data to habitat
     lnRRQ10_data_wild_acclim_t <- lnRRQ10_data_wild_acclim %>% filter(habitat == "t")
     lnRRQ10_data_wild_acclim_f <- lnRRQ10_data_wild_acclim %>% filter(habitat == "f")
     lnRRQ10_data_wild_acclim_m <- lnRRQ10_data_wild_acclim %>% filter(habitat == "m")
-    
+
+    # Terrestrial Models
     model3.8_t  <- metafor::rma.mv(effect_size ~ c_accl_time + acf_all_c, V = V,
                                        random = list(~1 | record_num,
                                             ~1 | species_full,
@@ -894,7 +896,7 @@ if(rerun){
                                             ~1 | obs),
                               R = list(species_full = phylo_cor_wild_acclim), dfs = "contain", 
                               test = "t", data = lnRRQ10_data_wild_acclim_t)
-    
+    # Freshwater Models
     model3.8_f  <- metafor::rma.mv(effect_size ~ c_accl_time + acf_all_c, V = V,
                                        random = list(~1 | record_num,
                                             ~1 | species_full,
@@ -922,7 +924,8 @@ if(rerun){
                               R = list(species_full = phylo_cor_wild_acclim), dfs = "contain", 
                               test = "t", data = lnRRQ10_data_wild_acclim_f)
     
-     model3.8_m  <- metafor::rma.mv(effect_size ~ c_accl_time + acf_all_c, V = V,
+    # Marine Models
+      model3.8_m  <- metafor::rma.mv(effect_size ~ c_accl_time + acf_all_c, V = V,
                                        random = list(~1 | record_num,
                                             ~1 | species_full,
                                             ~1 | trait,

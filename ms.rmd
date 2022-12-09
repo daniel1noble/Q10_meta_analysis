@@ -1154,6 +1154,15 @@ if(rerun){
   model4.9_bayes <- readRDS("./output/models/lnRRQ10_4.9_bayes")
 }
                
+    
+#################################################
+### Bayesian Slopes from Model 4.9
+#################################################
+ posteriors4.9 <- posterior_samples(model4.9_bayes, "^b") 
+        
+    slope_f_4.9 <- posteriors4.9[,"b_cv_c"]; mean(slope_f_4.9); pmcmc(slope_f_4.9); quantile(slope_f_4.9, c(0.025, 0.975))
+    slope_m_4.9 <- posteriors4.9[,"b_cv_c"] + posteriors4.9[,"b_cv_c:habitatm"]; mean(slope_m_4.9); pmcmc(slope_m_4.9); quantile(slope_m_4.9, c(0.025, 0.975))
+    slope_t_4.9 <- posteriors4.9[,"b_cv_c"] + posteriors4.9[,"b_cv_c:habitatt"]; mean(slope_t_4.9); pmcmc(slope_t_4.9); quantile(slope_t_4.9, c(0.025, 0.975))
 ```
 
 

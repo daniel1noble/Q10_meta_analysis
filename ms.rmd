@@ -859,7 +859,67 @@ if(rerun){
     slope_f <-     posteriors[,"b_cv_c"]; pmcmc(slope_f); quantile(slope_f, c(0.025, 0.975))
     slope_m <-     posteriors[,"b_cv_c"] + posteriors[,"b_cv_c:habitatm"]; pmcmc(slope_m); quantile(slope_m, c(0.025, 0.975))
     slope_t <-     posteriors[,"b_cv_c"] + posteriors[,"b_cv_c:habitatt"]; pmcmc(slope_t); quantile(slope_t, c(0.025, 0.975))
-        
+
+    
+##################################################
+    # Model 3.9, but terrestrial only
+##################################################
+    lnRRQ10_data_wild_acclim_t <- lnRRQ10_data_wild_acclim %>% filter(habitat == "t")
+    lnRRQ10_data_wild_acclim_f <- lnRRQ10_data_wild_acclim %>% filter(habitat == "f")
+    lnRRQ10_data_wild_acclim_m <- lnRRQ10_data_wild_acclim %>% filter(habitat == "m")
+    
+    model3.8_t  <- metafor::rma.mv(effect_size ~ c_accl_time + acf_all_c, V = V,
+                                       random = list(~1 | record_num,
+                                            ~1 | species_full,
+                                            ~1 | trait,
+                                            ~1 | spp,
+                                            ~1 | obs),
+                              R = list(species_full = phylo_cor_wild_acclim), dfs = "contain", 
+                              test = "t", data = lnRRQ10_data_wild_acclim_t)
+    
+    model3.9_t  <- metafor::rma.mv(effect_size ~ c_accl_time + cv_c, V = V,
+                                       random = list(~1 | record_num,
+                                            ~1 | species_full,
+                                            ~1 | trait,
+                                            ~1 | spp,
+                                            ~1 | obs),
+                              R = list(species_full = phylo_cor_wild_acclim), dfs = "contain", 
+                              test = "t", data = lnRRQ10_data_wild_acclim_t)
+    
+    model3.8_f  <- metafor::rma.mv(effect_size ~ c_accl_time + acf_all_c, V = V,
+                                       random = list(~1 | record_num,
+                                            ~1 | species_full,
+                                            ~1 | trait,
+                                            ~1 | spp,
+                                            ~1 | obs),
+                              R = list(species_full = phylo_cor_wild_acclim), dfs = "contain", 
+                              test = "t", data = lnRRQ10_data_wild_acclim_f)
+    
+    model3.9_f  <- metafor::rma.mv(effect_size ~ c_accl_time + cv_c, V = V,
+                                       random = list(~1 | record_num,
+                                            ~1 | species_full,
+                                            ~1 | trait,
+                                            ~1 | spp,
+                                            ~1 | obs),
+                              R = list(species_full = phylo_cor_wild_acclim), dfs = "contain", 
+                              test = "t", data = lnRRQ10_data_wild_acclim_f)
+     model3.8_m  <- metafor::rma.mv(effect_size ~ c_accl_time + acf_all_c, V = V,
+                                       random = list(~1 | record_num,
+                                            ~1 | species_full,
+                                            ~1 | trait,
+                                            ~1 | spp,
+                                            ~1 | obs),
+                              R = list(species_full = phylo_cor_wild_acclim), dfs = "contain", 
+                              test = "t", data = lnRRQ10_data_wild_acclim_m)
+    
+    model3.9_m  <- metafor::rma.mv(effect_size ~ c_accl_time + cv_c, V = V,
+                                       random = list(~1 | record_num,
+                                            ~1 | species_full,
+                                            ~1 | trait,
+                                            ~1 | spp,
+                                            ~1 | obs),
+                              R = list(species_full = phylo_cor_wild_acclim), dfs = "contain", 
+                              test = "t", data = lnRRQ10_data_wild_acclim_m)
 ```
 
 ```{r wildlncvr}

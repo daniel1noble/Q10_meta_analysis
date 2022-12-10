@@ -915,6 +915,7 @@ if(rerun){
                               R = list(species_full = phylo_cor_wild_acclim), dfs = "contain", 
                               test = "t", data = lnRRQ10_data_wild_acclim_f)
        # Model just quickly tests if we are missing an important interaction. It may not necessarily be just about the variability. We could have variable sites, but a variance site that has some predictability vs a variable site without predictability are two different things. We want predictability AND variance 
+    
      model3.10_f  <- metafor::rma.mv(effect_size ~ c_accl_time + cv_c + acf_all_c + acf_all_c:cv_c, V = V,
                                        random = list(~1 | record_num,
                                             ~1 | species_full,
@@ -943,6 +944,7 @@ if(rerun){
                               R = list(species_full = phylo_cor_wild_acclim), dfs = "contain", 
                               test = "t", data = lnRRQ10_data_wild_acclim_m)
     # Model just quickly tests if we are missing an important interaction. It may not necessarily be just about the variability. We could have variable sites, but a variance site that has some predictability vs a variable site without predictability are two different things. We want predictability AND variance
+    
     model3.10_m  <- metafor::rma.mv(effect_size ~ c_accl_time + cv_c + acf_all_c + acf_all_c:cv_c, V = V,
                                        random = list(~1 | record_num,
                                             ~1 | species_full,

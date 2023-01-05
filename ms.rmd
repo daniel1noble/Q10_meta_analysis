@@ -1333,8 +1333,10 @@ annotate("text", x = 3.01, y = 4.60,
   p1.2 <- p1.2 + theme_classic() + theme(axis.title  = element_text(size = 24),
         axis.text = element_text(size = 15))
   
-  
+  p1.2
    p1.2.2 <- p1.2 + ylim(c(0,1)) + theme(legend.position = 'none')
+   
+   p1.2.2
   ggsave(p1.2, filename = "./output/figures/fig1.png", width = 11.5, height = 8)
   ggsave(p1.2.2, filename = "./output/figures/fig1.1.png")
 ```
@@ -1362,14 +1364,13 @@ annotate("text", x = 3.15, y = -5,
 p2 <- p2 + theme_classic() + theme(axis.title  = element_text(size = 24),
         axis.text = element_text(size = 15))
    p2.2 <- p2 + ylim(c(-0.5,0.10)) + theme(legend.position = 'none')
-  
+  p2
+  p2.2
    ggsave(p2, filename = "./output/figures/fig2.png", width = 11.5, height = 8)
   ggsave(p2.2, filename = "./output/figures/fig2.2.png")
 ```
 
-```{r, fig3, fig.align='center', fig.cap="Acute and Acclimation lnRR q10 across traits for A) marine, B) freshwater and C) terrestrial systems"}
-
-orchard_plot(model1.3, mod = "trait_category",  group = "record_num",  data = lnRRQ10_data) 
+```{r, fig3, fig.align='center', eval = FALSE, fig.cap="Acute and Acclimation lnRR q10 across traits for A) marine, B) freshwater and C) terrestrial systems"}
 
 ptm <- orchard_plot(model1.3_m, mod = "trait_category", at = list(type = c("acute", "acclim")), by = "type", group = "record_num", weights = "prop", data = lnRRQ10_data_m, xlab = TeX("$lnRR_{Q_{10}}$"), angle = 0) +
   scale_x_discrete(labels = c("Mito_leak" = "Proton Leak",

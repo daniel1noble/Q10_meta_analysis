@@ -206,7 +206,7 @@ We analysed our data using multilevel meta-analytic (MLMA) and meta-regression (
 #### *Multi-level Meta-analysis (MLMA) Models*
 We first fit multi-level meta-analysis (MLMA) models (i.e., intercept only models) for both $lnRR_{Q_{10}}$ and $lnCVR_{Q_{10}}$, that included study, species and phylogeny as random effects to account for non-independence. We also included trait as a random effect to account for trait variation within the data. Our MLMA models allowed us to partition the variation in $lnRR_{Q_{10}}$ and $lnCVR_{Q_{10}}$ among these key sources while accounting for total sampling variance in each. This allowed us to calculate total heterogeneity [i.e., $I_{total}^2$; *sensu* @NakaSantos2012; @Noble2022] along with various $I^2$ metrics describing the proportion of variance explained by each random effect level [@NakaSantos2012]. 
 
-A phylogenetic tree was created using the Open Tree of Life (OTL) with the *rotl* package in R [vers. `r utils::packageVersion("rotl")`, ]. Branch lengths were computed using Gafen's method []
+A phylogenetic tree was created using the Open Tree of Life (OTL) with the *rotl* package in R [vers. `r utils::packageVersion("rotl")`, ]. We resolved all polytomies in the tree and replaced any missing taxa with closely related species. Branch lengths were computed using Gafen's method []
 
 
 @Guangchuang2017
@@ -591,7 +591,7 @@ if(rerun){
     
 ```
 
-```{r, wildlnRR10}
+```{r, wildlnRR10, echo = FALSE, message=FALSE, warning=FALSE, results='hide'}
 #######################################
   ## lnRRQ10 from Wild Populations ##
 #######################################
@@ -989,7 +989,7 @@ if(rerun){
   
 ```
 
-```{r wildlncvr}
+```{r wildlncvr, echo = FALSE, message=FALSE, warning=FALSE, results='hide'}
 #######################################
   ## lnCVRQ10 from Wild Populations ##
 #######################################

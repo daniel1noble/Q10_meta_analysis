@@ -33,7 +33,7 @@ knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE, tidy = TRU
 ##################################
 # Loading packages & Functions
 ##################################
-    pacman::p_load(tidyverse,  metafor, flextable, raster, rasterVis,  patchwork, RColorBrewer, ggtree, ape, phytools, viridis, MCMCglmm, brms, latex2exp, orchaRd, multcomp, ggbeeswarm)
+    pacman::p_load(tidyverse,  metafor, flextable, raster, rasterVis,  patchwork, RColorBrewer, ggtree, ape, phytools, viridis, MCMCglmm, brms, latex2exp, orchaRd, multcomp, ggbeeswarm, magick, ggimage)
 
 #devtools::install_github(repo = "ErikKusch/KrigR")
 ## Function to produce colour palette
@@ -113,7 +113,7 @@ data_long2 <- data_long %>% mutate(type = factor(type, levels = c("acute", "accl
       tree_p0.7$node.label <- NULL # We don't use nodes and will cause a warning so create null node names
 ```
 
-Daniel W.A. Noble^1, Fonti Kar^2, Frank Seebacher^3, Alex Bush^4, & Shinichi Nakagawa^2
+Daniel W.A. Noble$^1$, Fonti Kar$^2$, Frank Seebacher$^3$, Alex Bush$^4$, & Shinichi Nakagawa$^2$
 
 #### Affliations:
 $^1$ Division of Ecology and Evolution, Research School of Biology, The Australian National University, Canberra, ACT 2600, Australia
@@ -127,9 +127,8 @@ $^4$ Department of Biology, Lancaster University, Liverpool, UK
 
 Variable thermal environments are expected to result in strong selection pressures that result in adaptation or the evolution of phenotypic plasticity. Plasticity and adaptation are considered critical for population resilience to human-induced climate change. 
 
-Applying new effect sizes that allow us to make use of powerful meta-analytic models we: 1) quantify the degree
+Applying new effect sizes that allow us to make use of powerful meta-analytic models we: 1) quantify the degree to which aquatic and terrestrial ectotherms are capable of physiological plasticity; 2) test whether the opportunity for selection on physiological traits changes as temperatures rise and 3) test whether climate variability and predictability explain a populations capacity to respond plastically.  
 
-ectotherms are capable of physiological plasticity in rates: 1) 
 
 ## **Materials and Methods**
 ### *Literature collection*
@@ -1354,8 +1353,8 @@ annotate("text", x = 3.01, y = 4.60,
 
    p1.2.2 <- p1.2 + ylim(c(0,1)) + theme(legend.position = 'none')
 
-  #ggsave(p1.2, filename = "./output/figures/fig1.png", width = 11.5, height = 8)
-  #ggsave(p1.2.2, filename = "./output/figures/fig1.1.png")
+  ggsave(p1.2, filename = "./output/figures/fig1.pdf", width = 11.5, height = 8)
+  ggsave(p1.2.2, filename = "./output/figures/fig1.1.pdf")
   
   
   
@@ -1376,16 +1375,17 @@ annotate("text", x = 3.15, y = -5,
          label =paste0(round(mean(exp(t_cvr_mean)-1)*100, 2), "%"), hjust = 0, size = 6) + labs(shape = "Type") +
   annotate("text", x = 3.15, y = -3.7, label = paste0("P = ", round(pmcmc(t_cvr_mean), digit = 3)), hjust = 0, size = 6) + scale_fill_manual(values = c(col))
  
-  
+
 p2 <- p2 + theme_classic() + theme(axis.title  = element_text(size = 24),
         axis.text = element_text(size = 15))
    p2.2 <- p2 + ylim(c(-0.5,0.10)) + theme(legend.position = 'none')
-   #ggsave(p2, filename = "./output/figures/fig2.png", width = 11.5, height = 8)
-  #ggsave(p2.2, filename = "./output/figures/fig2.2.png")
+   ggsave(p2, filename = "./output/figures/fig2.pdf", width = 11.5, height = 8)
+  ggsave(p2.2, filename = "./output/figures/fig2.2.pdf")
   
+  #(phylo) / (p1.2 / p2) + plot_annotation(tag_levels = "A", tag_suffix = ")")
   
-  phylo / (p1.2/p2) + plot_annotation(tag_levels = "A", tag_suffix = ")")
-  
+  fig1 <- image_read("./output/figures/fig1_final.png")
+  fig1
 ```
 
 ```{r, fig3, fig.align='center', eval = FALSE, fig.cap="Acute and Acclimation lnRR q10 across traits for A) marine, B) freshwater and C) terrestrial systems"}
@@ -1482,7 +1482,7 @@ ggsave(p91.2, filename = "./output/figures/fig9.png")
 ### *Does climate variability predict acclimation capacity among aquatic and terrestrial ectotherms?*
 
 
-```{r figphylogeny, fig.wdith = 10, fig.height=9, fig.cap="Phylogenetic tree"}
+```{r fig1a, fig.wdith = 10, fig.height=9, fig.cap="Phylogenetic tree"}
  # Map data to tree. Just one variable for now
       d <- ggtree(tree, layout="circular") %<+% tree_data 
 
@@ -1530,7 +1530,7 @@ ggsave(p91.2, filename = "./output/figures/fig9.png")
                hjust=0, font.size=3, width = 0.35) + 
                 scale_fill_viridis(alpha = 0.6) + labs(fill="# of Effects")
    
-ggsave(filename = "fig4.pdf", path = "./output/figures/", phylo, device = "pdf", width = 10, height = 9, units = "in") 
+ggsave(filename = "fig1a_unedited.pdf", path = "./output/figures/", phylo, device = "pdf", width = 10, height = 9, units = "in") 
 ``` 
 
 ## **Discussion**

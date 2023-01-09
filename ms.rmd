@@ -129,7 +129,7 @@ Variable thermal environments are expected to result in strong selection pressur
 
 Theory suggests that phenotypic plasticity will evolve in variable, but predictable, habitats with empirical data supporting this prediction. 
 
-Applying new effect sizes that allow us to make use of powerful meta-analytic models we: 1) quantify the degree to which aquatic and terrestrial ectotherms are capable of physiological plasticity; 2) test whether the opportunity for selection on physiological traits changes as temperatures rise and 3) test whether climate variability and predictability explain a populations capacity to respond plastically.  
+Applying new effect sizes that allow us to make use of powerful meta-analytic models we: 1) re-evaluate the degree to which aquatic and terrestrial ectotherms are capable of physiological plasticity; 2) test whether the opportunity for selection on physiological traits changes as temperatures rise, by applying new effect sizes that capture changes in physiological trait variance, and 3) test whether climate variability and predictability explain a populations acclimation capacity and affect changes in trait variance.  
 
 
 ## **Materials and Methods**

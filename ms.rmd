@@ -125,7 +125,9 @@ $^4$ Department of Biology, Lancaster University, Liverpool, UK
 
 ## **Introduction**
 
-Variable thermal environments are expected to result in strong selection pressures that result in adaptation or the evolution of phenotypic plasticity. Plasticity and adaptation are considered critical for population resilience to human-induced climate change. 
+Variable thermal environments are expected to result in strong selection pressures that result in adaptation or the evolution of phenotypic plasticity -- both of which are considered critical for population resilience to human-induced climate change [@Seebacher2015]. Periods of past climatic change have had disproportionate impacts on some ecosystems over others leading to debates over which ecosystems will be most vulnerable to contemporary climate change. Studies have highlighted species occupying terrestrial ecosystems as being particularly vulnerable given their weak acclimation abilities and greater probability of experiencing thermal extremes that overwhelm physiological homeostasis [@Seebacher2015;@Gunderson2015; @Pinsky2019]. Despite marine and freshwater ecosystems appearing to have greater physiological acclimation capacity [e.g., see @Seebacher2015], it is unclear if the magnitude of physiological adjustment is sufficient. In addition, low oxygen availability has been suggested as a major factor influencing the vulnerability of aquatic ecosystems 
+
+Theory suggests that phenotypic plasticity will evolve in variable, but predictable, habitats with empirical data supporting this prediction. 
 
 Applying new effect sizes that allow us to make use of powerful meta-analytic models we: 1) quantify the degree to which aquatic and terrestrial ectotherms are capable of physiological plasticity; 2) test whether the opportunity for selection on physiological traits changes as temperatures rise and 3) test whether climate variability and predictability explain a populations capacity to respond plastically.  
 
@@ -226,7 +228,7 @@ We first fit multi-level meta-analysis (MLMA) models (i.e., intercept only model
 A phylogeny was derived using the Open Tree of Life (OTL) with the *rotl* package in R [vers. `r utils::packageVersion("rotl")`, @rotl2016], and plotted using *ggtree* [vers. `r utils::packageVersion("ggtree")`, @Guangchuang2017]. We resolved all polytomies in the tree. Any missing taxa were replaced with closely related species and branch lengths were computed using Grafen's method [using power = 0.7, @Grafen1989]. We used the R packages *ape* [vers. `r utils::packageVersion("ape")`, @ape] and *phytools* [vers. `r utils::packageVersion("phytools")`, @Revell2012] to prune the tree for individual analyses and calculate phylogenetic covariance (or correlation) matrices used in meta-analytic models.  
 
 #### *Multi-level Meta-regression (MLMR) Models*
-
+We controlled for the duration of time organisms were given to acclimate by included scaled acclimation time (mean = 0, SD = 1) in all models. 
 
 ### *Sensitivity Analyses*
 ### *Publication Bias*
@@ -1309,181 +1311,15 @@ if(rerun){
     slope_t_4.9 <- posteriors4.9[,"b_cv_c"] + posteriors4.9[,"b_cv_c:habitatt"]; mean(slope_t_4.9); pmcmc(slope_t_4.9); quantile(slope_t_4.9, c(0.025, 0.975))
 ```
 
+```{r, fig1, fig.align='center', fig.cap= "**Phylogeny and Q10 estimate for acute and acclimation type effects**. A) Phylogenetic distribution of taxa contained within the data. Total number of acute and acclimation type Q10 effect sizes are highlighted as well as if the taxa is marine, freshwater or terrestrial. Silouettes are representative taxa of major clades within the tree. B) Acute and Acclimation lnRR Q10 across marine, freshwater and terrestrial environments. C) lnCVR Q10 across traits for marine, freshwater and terrestrial systems. Note there were no differences between acute and acclimation Q10 types. k = total number of effect size estimates while numbers in brackets indicate the number of species."}
 
-
-```{r, fig1, fig.align='center', fig.cap= "Acute and Acclimation lnRR Q10 across marine, freshwater and terrestrial environments"}
-
-col <- c("#0871B9", "#F3B40D", "#1BB908")
-p1.2 <- orchaRd::orchard_plot(model1.2, mod = "habitat", group  = "record_num", at = list(type = c("acute", "acclim")), by = "type", weights = "prop", data = lnRRQ10_data, xlab = TeX("$lnRR_{Q_{10}}$"), angle = 45, legend.pos = "top.left", trunk.size = 5) + scale_x_discrete(labels = c("T" = "Terrestrial","M" = "Marine" ,"F" = "Freshwater")) +
-  theme(legend.direction = "vertical") +
-  geom_segment(aes(x = 2.92, y = 2, xend = 3.07, yend = 2), 
-                            arrow = arrow(angle = 90, ends = "both", length = unit(0.01, "npc"))) +
-  geom_segment(aes(x = 1.92, y = 2, xend = 2.07, yend = 2), 
-                            arrow = arrow(angle = 90, ends = "both", length = unit(0.01, "npc"))) +
-  geom_segment(aes(x = 0.92, y = 2, xend = 1.07, yend = 2), 
-                            arrow = arrow(angle = 90, ends = "both", length = unit(0.01, "npc"))) +
-annotate("text", x = 1, y = 2.10, 
-         label =TeX(paste0("$\\beta = $", round(model1.2$b[3], 2), "[", round(model1.2$ci.lb[3], 2)," to ", round(model1.2$ci.ub[3], 2), "] ")), hjust = 0, size = 6) + 
-annotate("text", x = 1.01, y = 4.60, 
-         label =paste0(round(mean(change_f), 2), "%"), hjust = 0, size = 6) + labs(shape = "Type") +
-  geom_segment(aes(x = 0.92, y = 5.6, xend = 1.07, yend = 5.6), 
-                            arrow = arrow(angle = 45, ends = "first", length = unit(0.01, "npc"))) +
-  annotate("text", x = 0.85, y = 3, label = "P < 0.001", hjust = 0, size = 6) + 
-  
-  
-  annotate("text", x = 2, y = 2.10, 
-         label =TeX(paste0("$\\beta = $", round(mean(m_acclim - m_acute), 2), "[", round(quantile(m_acclim - m_acute, 0.025), 2)," to ", round(quantile(m_acclim - m_acute, 0.975),2), "] ")), hjust = 0, size = 6) + 
-annotate("text", x = 2.01, y = 4.60, 
-         label =paste0(round(mean(change_m), 2), "%"), hjust = 0, size = 6) +
-  geom_segment(aes(x = 1.92, y = 5.6, xend = 2.07, yend = 5.6), 
-                            arrow = arrow(angle = 45, ends = "first", length = unit(0.01, "npc"))) +
-  annotate("text", x = 1.85, y = 3, label = "P = 0.01", hjust = 0, size = 6) +
-  
-  annotate("text", x = 3, y = 2.10, 
-         label =TeX(paste0("$\\beta = $", round(mean(t_acclim - t_acute), 2), "[", round(quantile(t_acclim - t_acute, 0.025), 2)," to ", round(quantile(t_acclim - t_acute, 0.975),2), "] ")), hjust = 0, size = 6) + 
-annotate("text", x = 3.01, y = 4.60, 
-         label =paste0(round(mean(change_t), 2), "%"), hjust = 0, size = 6) +
-  geom_segment(aes(x = 2.92, y = 5.6, xend = 3.07, yend = 5.6), 
-                            arrow = arrow(angle = 45, ends = "last", length = unit(0.01, "npc"))) +
-  annotate("text", x = 2.85, y = 3, label = "P = 0.36", hjust = 0, size = 6) + scale_fill_manual(values = c(col))
-    
-  
-  p1.2 <- p1.2 + theme_classic() + theme(axis.title  = element_text(size = 24),
-        axis.text = element_text(size = 15))
-
-   p1.2.2 <- p1.2 + ylim(c(0,1)) + theme(legend.position = 'none')
-
-  ggsave(p1.2, filename = "./output/figures/fig1.pdf", width = 11.5, height = 8)
-  ggsave(p1.2.2, filename = "./output/figures/fig1.1.pdf")
-  
-  
-  
-# Clear from the model that there really is no difference between the change in variance for acute or acclimation CVR. But, there is a clear reduction in between individual variance for terrestrial species. As temperature get hotter then the variance in physiological rates decreases. This is not true of aquatic systems. 
-p2 <- orchard_plot(model2.2, xlab = TeX("$lnCVR_{Q_{10}}$"), mod = "habitat", group  = "record_num", weights = "prop", data = lnCVRQ10_data, angle = 45, trunk.size = 5) +
-            scale_x_discrete(labels = c("T" = "Terrestrial","M" = "Marine" ,"F" = "Freshwater")) + annotate("text", x = 1.3, y = -5.2, 
-         label =TeX(paste0("$\\mu = $", round(mean(f_cvr_mean), 2), "[", round(quantile(f_cvr_mean, 0.025), 2)," to ", round(quantile(f_cvr_mean, 0.975),2), "] ")), hjust = 0, size = 6) + 
-annotate("text", x = 1.15, y = -3.7, label = paste0("P = ", round(pmcmc(f_cvr_mean), digit = 2)), hjust = 0, size = 6) + 
-annotate("text", x = 1.15, y = -5, 
-         label =paste0(round(mean(exp(f_cvr_mean)-1)*100, 2), "%"), hjust = 0, size = 6) + 
-annotate("text", x = 2.3, y = -5.2, 
-         label =TeX(paste0("$\\mu = $", round(mean(m_cvr_mean), 2), "[", round(quantile(m_cvr_mean, 0.025), 2)," to ", round(quantile(m_cvr_mean, 0.975),2), "] ")), hjust = 0, size = 6) + 
-annotate("text", x = 2.15, y = -3.7, label = paste0("P = ", round(pmcmc(m_cvr_mean), digit = 2)), hjust = 0, size = 6) + 
-annotate("text", x = 2.15, y = -5, 
-         label =paste0(round(mean(exp(m_cvr_mean)-1)*100, 2), "%"), hjust = 0, size = 6) + annotate("text", x = 3.3, y = -5.2, 
-         label =TeX(paste0("$\\mu = $", round(mean(t_cvr_mean), 2), "[", round(quantile(t_cvr_mean, 0.025), 2)," to ", round(quantile(t_cvr_mean, 0.975),2), "] ")), hjust = 0, size = 6) + 
-annotate("text", x = 3.15, y = -5, 
-         label =paste0(round(mean(exp(t_cvr_mean)-1)*100, 2), "%"), hjust = 0, size = 6) + labs(shape = "Type") +
-  annotate("text", x = 3.15, y = -3.7, label = paste0("P = ", round(pmcmc(t_cvr_mean), digit = 3)), hjust = 0, size = 6) + scale_fill_manual(values = c(col))
- 
-
-p2 <- p2 + theme_classic() + theme(axis.title  = element_text(size = 24),
-        axis.text = element_text(size = 15))
-   p2.2 <- p2 + ylim(c(-0.5,0.10)) + theme(legend.position = 'none')
-   ggsave(p2, filename = "./output/figures/fig2.pdf", width = 11.5, height = 8)
-  ggsave(p2.2, filename = "./output/figures/fig2.2.pdf")
-  
-  #(phylo) / (p1.2 / p2) + plot_annotation(tag_levels = "A", tag_suffix = ")")
-  
+# Load and plot Figure 1. Note that this figure was derived using 3 separate code chunks described below. Figures were exported, imported into Adobe Illustrator for minor formatting changes and grid organisation. 
   fig1 <- image_read("./output/figures/fig1_final.png")
   fig1
-```
-
-```{r, fig3, fig.align='center', eval = FALSE, fig.cap="Acute and Acclimation lnRR q10 across traits for A) marine, B) freshwater and C) terrestrial systems"}
-
-ptm <- orchard_plot(model1.3_m, mod = "trait_category", at = list(type = c("acute", "acclim")), by = "type", group = "record_num", weights = "prop", data = lnRRQ10_data_m, xlab = TeX("$lnRR_{Q_{10}}$"), angle = 0) +
-  scale_x_discrete(labels = c("Mito_leak" = "Proton Leak",
-                              "Metabolic_enzyme" = "Metabolic Enzymes",
-                              "Rest_MR" = "Resting Metabolic Rate",
-                              "Max_MR" = "Maximum Metabolic Rate",
-                              "Mito_oxidation" = "OXPHOS"))
-ptm$layers[[1]] <- NULL # Lets just remove the data point geom layer as it's too busy
-
-
-ptf <- orchard_plot(model1.3_f, mod = "trait_category", at = list(type = c("acute", "acclim")), by = "type", group = "record_num", weights = "prop", data = lnRRQ10_data_f, xlab = TeX("$lnRR_{Q_{10}}$"), angle = 0) +
-  scale_x_discrete(labels = c("Mito_leak" = "Proton Leak",
-                              "Metabolic_enzyme" = "Metabolic Enzymes",
-                              "Rest_MR" = "Resting Metabolic Rate",
-                              "Max_MR" = "Maximum Metabolic Rate",
-                              "Mito_oxidation" = "OXPHOS"))
-ptf$layers[[1]] <- NULL # Lets just remove the data point geom layer as it's too busy
-
-
-ptt <- orchard_plot(model1.3_t, mod = "trait_category", at = list(type = c("acute", "acclim")), by = "type", group = "record_num", weights = "prop", data = lnRRQ10_data_t, xlab = TeX("$lnRR_{Q_{10}}$"), angle = 0)
-ptt$layers[[1]] <- NULL # Lets just remove the data point geom layer as it's too busy
-
-lnRRQ10_data %>% group_by(habitat, type, trait_category) %>% summarise(n = n()) %>% data.frame()
-
-```
-
-```{r, fig4, fig.align='center', fig.cap= "I2 estimates"}
-
-
-p4 <- ggplot(i2_lnrr, aes(x = est, y = name)) + xlim(0, 50) + geom_point(size = 5) + geom_errorbar(aes(xmin = lci, xmax = uci), width = 0.15) + theme_bw() + labs(x = "Percentage of Variation (%)") + theme(axis.title.y = element_blank(), axis.text = element_text(size = 20), axis.title = element_text(size = 24)) + geom_text(aes(label = paste0(round(est, 2), "% ", "[", round(lci, 2), " - ", round(uci, 2), "%]")), position = position_nudge(x = 5, y = 0.2)) + annotate("text", x = 30, y = 1.5, label = TeX(paste0("$I^2_{sv}$ = ", round(mean(tot_i2), 2), "%")), size = 12)
-
-p4
-ggsave(p4, filename = "./output/figures/fig4.png")
-
-```
-
-```{r, fig5, fig.align='center', fig.cap= "I2 estimates lnCVR"}
-p5 <- ggplot(i2_lncvr, aes(x = est, y = name)) + xlim(0, 50) + geom_point(size = 5) + geom_errorbar(aes(xmin = lci, xmax = uci), width = 0.15) + theme_bw() + labs(x = "Percentage of Variation (%)") + theme(axis.title.y = element_blank(), axis.text = element_text(size = 20), axis.title = element_text(size = 24)) + geom_text(aes(label = paste0(round(est, 2), "% ", "[", round(lci, 2), " - ", round(uci, 2), "%]")), position = position_nudge(x = 5, y = 0.2)) + annotate("text", x = 30, y = 1.5, label = TeX(paste0("$I^2_{sv}$ = ", round(mean(tot_i2_cvr), 2), "%")), size = 12)
-
-p5
-ggsave(p5, filename = "./output/figures/fig5.png")
-```
-
-```{r, fig6, fig.align='center', fig.cap= "Bubble plot environment lnRR wild populations"}
-p6 <- bubble_plot(model3.5, mod = "cv_c", group  = "record_num", data = lnRRQ10_data_wild, ylab = TeX("$lnRR_{Q_{10}}$"), xlab = "Thermal Coefficient of Variation (CV)") +annotate("text", x = 1, y = 3, label = TeX(paste0("$\\beta = $", round(model3.5$b[3], 3), ", 95%CI: ", round(model3.5$ci.lb[3],3), " to ", round(model3.5$ci.ub[3], 3), "; P = ", round(model3.5$pval[3],3)))) + theme_classic() + theme(legend.position = "none", axis.text = element_text(size = 12), axis.title = element_text(size = 18))
-
-p7 <- bubble_plot(model3.6, mod = "acf_all_c", group  = "record_num", data = lnRRQ10_data_wild, ylab = TeX("$lnRR_{Q_{10}}$"), xlab = "Thermal Predictability") + theme(axis.title.y = element_blank()) +annotate("text", x = -3, y = 3, label = TeX(paste0("$\\beta = $", round(model3.6$b[3], 3), ", 95%CI: ", round(model3.6$ci.lb[3],3), " to ", round(model3.6$ci.ub[3], 3), "; P = ", round(model3.6$pval[3],3)))) + theme_classic() + theme(axis.text = element_text(size = 12), axis.title = element_text(size = 18))
-  
-p67 <- (p6 | p7) + plot_annotation(tag_levels = "A")
-  
-ggsave(p67, filename = "./output/figures/fig6.png", height = 10, width = 30, units = "cm")
-```
-
-```{r, fig7, fig.align='center', fig.cap= "Bubble plot environment lnCVR wild populations"}
-p8 <- bubble_plot(model4.5, mod = "cv_c", group  = "record_num", data = lnCVRQ10_data_wild, ylab = TeX("$lnCVR_{Q_{10}}$"), xlab = "Thermal Coefficient of Variation (CV)", k = FALSE) +annotate("text", x = 1, y = -5, label = TeX(paste0("$\\beta = $", round(model4.5$b[3], 3), ", 95%CI: ", round(model4.5$ci.lb[3],3), " to ", round(model4.5$ci.ub[3], 3), " P = ", round(model4.5$pval[3],3)))) + theme_classic() + theme(legend.position = "none", axis.text = element_text(size = 12), axis.title = element_text(size = 18)) + ylim(c(-6, 3))
-
-p9 <- bubble_plot(model4.6, mod = "acf_all_c", group  = "record_num", data = lnCVRQ10_data_wild, ylab = TeX("$lnCVR_{Q_{10}}$"), xlab = "Thermal Predictability", k = FALSE) + theme(axis.title.y = element_blank()) +annotate("text", x = -3, y = -5, label = TeX(paste0("$\\beta = $", round(model4.6$b[3], 3), ", 95%CI: ", round(model4.6$ci.lb[3],3), " to ", round(model4.6$ci.ub[3], 3), " P = ", round(model4.6$pval[3],3)))) + theme_classic() + theme(axis.text = element_text(size = 12), axis.title = element_text(size = 18)) + ylim(c(-6, 3))
-  
-p89 <- (p8 | p9) + plot_annotation(tag_levels = "A")
-  
-ggsave(p89, filename = "./output/figures/fig7.png", height = 10, width = 30, units = "cm")
-```
-
-```{r, fig8, fig.align='center', fig.cap= "Bubble plot environment lnRR for wild populations by habitat"}
-
- col <- c("#0871B9", "#F3B40D", "#1BB908")
-p8.1 <- bubble_plot(model3.9, mod = "cv_c", group = "record_num", by = "habitat", data = lnRRQ10_data_wild_acclim, ylab = TeX("$lnRR_{Q_{10}}$"), xlab = "Thermal Coefficient of Variation (CV)", condition.nrow = 1) + theme_classic() + theme(legend.position = "none", strip.background = element_blank())  + scale_fill_manual(values = c(col))
-
-p8.2 <- bubble_plot(model3.8, mod = "acf_all_c", group = "record_num", by = "habitat", data = lnRRQ10_data_wild_acclim, ylab = TeX("$lnRR_{Q_{10}}$"), xlab = "Thermal Predictability", condition.nrow = 1) + theme_classic() + theme(legend.position = "bottom", strip.background = element_blank(), strip.text = element_blank())+ scale_fill_manual(values = c(col))
-
-p8.1.2 <- p8.1 / p8.2
-
-ggsave(p8.1.2, filename = "./output/figures/fig8.png")
-```
-
-```{r, fig9, fig.align='center', fig.cap= "Bubble plot environment lnRR for wild populations by habitat"}
-
- col <- c("#0871B9", "#F3B40D", "#1BB908")
-p9.1 <- bubble_plot(model4.9, mod = "cv_c", group = "record_num", by = "habitat", data = lnRRQ10_data_wild_acclim, ylab = TeX("$lnCVR_{Q_{10}}$"), xlab = "Thermal Coefficient of Variation (CV)", condition.nrow = 1, k.pos = "bottom.left") + theme_classic() + theme(legend.position = "none", strip.background = element_blank())  + scale_fill_manual(values = c(col))
-
-p9.2 <- bubble_plot(model4.8, mod = "acf_all_c", group = "record_num", by = "habitat", data = lnRRQ10_data_wild_acclim, ylab = TeX("$lnCVR_{Q_{10}}$"), xlab = "Thermal Predictability", condition.nrow = 1, k.pos = "bottom.left") + theme_classic() + theme(legend.position = "bottom", strip.background = element_blank(), strip.text = element_blank())+ scale_fill_manual(values = c(col))
-
-p91.2 <- p9.1 / p9.2
-
-ggsave(p91.2, filename = "./output/figures/fig9.png")
-```
-
-
-### *Does the opportunity for selection differ across terrestrial and aquatic ectotherms?*
-
-### *Does climate variability predict acclimation capacity among aquatic and terrestrial ectotherms?*
-
-
-```{r fig1a, fig.wdith = 10, fig.height=9, fig.cap="Phylogenetic tree"}
- # Map data to tree. Just one variable for now
+##################
+  # Figure 1a plot
+##################
+   # Map data to tree. Just one variable for now
       d <- ggtree(tree, layout="circular") %<+% tree_data 
 
       # Plot the tree
@@ -1530,10 +1366,185 @@ ggsave(p91.2, filename = "./output/figures/fig9.png")
                hjust=0, font.size=3, width = 0.35) + 
                 scale_fill_viridis(alpha = 0.6) + labs(fill="# of Effects")
    
-ggsave(filename = "fig1a_unedited.pdf", path = "./output/figures/", phylo, device = "pdf", width = 10, height = 9, units = "in") 
-``` 
+ggsave(filename = "fig1a_unedited.pdf", path = "./output/figures/", phylo, device = "pdf", width = 10, height = 9, units = "in")
+##################
+  # Figure 1b plot
+##################
+col <- c("#0871B9", "#F3B40D", "#1BB908")
+p1.2 <- orchaRd::orchard_plot(model1.2, mod = "habitat", group  = "record_num", at = list(type = c("acute", "acclim")), by = "type", weights = "prop", data = lnRRQ10_data, xlab = TeX("$lnRR_{Q_{10}}$"), angle = 45, legend.pos = "top.left", trunk.size = 5) + scale_x_discrete(labels = c("T" = "Terrestrial","M" = "Marine" ,"F" = "Freshwater")) +
+  theme(legend.direction = "vertical") +
+  geom_segment(aes(x = 2.92, y = 2, xend = 3.07, yend = 2), 
+                            arrow = arrow(angle = 90, ends = "both", length = unit(0.01, "npc"))) +
+  geom_segment(aes(x = 1.92, y = 2, xend = 2.07, yend = 2), 
+                            arrow = arrow(angle = 90, ends = "both", length = unit(0.01, "npc"))) +
+  geom_segment(aes(x = 0.92, y = 2, xend = 1.07, yend = 2), 
+                            arrow = arrow(angle = 90, ends = "both", length = unit(0.01, "npc"))) +
+annotate("text", x = 1, y = 2.10, 
+         label =TeX(paste0("$\\beta = $", round(model1.2$b[3], 2), "[", round(model1.2$ci.lb[3], 2)," to ", round(model1.2$ci.ub[3], 2), "] ")), hjust = 0, size = 6) + 
+annotate("text", x = 1.01, y = 4.60, 
+         label =paste0(round(mean(change_f), 2), "%"), hjust = 0, size = 6) + labs(shape = "Type") +
+  geom_segment(aes(x = 0.92, y = 5.6, xend = 1.07, yend = 5.6), 
+                            arrow = arrow(angle = 45, ends = "first", length = unit(0.01, "npc"))) +
+  annotate("text", x = 0.85, y = 3, label = "P < 0.001", hjust = 0, size = 6) + 
+  
+  
+  annotate("text", x = 2, y = 2.10, 
+         label =TeX(paste0("$\\beta = $", round(mean(m_acclim - m_acute), 2), "[", round(quantile(m_acclim - m_acute, 0.025), 2)," to ", round(quantile(m_acclim - m_acute, 0.975),2), "] ")), hjust = 0, size = 6) + 
+annotate("text", x = 2.01, y = 4.60, 
+         label =paste0(round(mean(change_m), 2), "%"), hjust = 0, size = 6) +
+  geom_segment(aes(x = 1.92, y = 5.6, xend = 2.07, yend = 5.6), 
+                            arrow = arrow(angle = 45, ends = "first", length = unit(0.01, "npc"))) +
+  annotate("text", x = 1.85, y = 3, label = "P = 0.01", hjust = 0, size = 6) +
+  
+  annotate("text", x = 3, y = 2.10, 
+         label =TeX(paste0("$\\beta = $", round(mean(t_acclim - t_acute), 2), "[", round(quantile(t_acclim - t_acute, 0.025), 2)," to ", round(quantile(t_acclim - t_acute, 0.975),2), "] ")), hjust = 0, size = 6) + 
+annotate("text", x = 3.01, y = 4.60, 
+         label =paste0(round(mean(change_t), 2), "%"), hjust = 0, size = 6) +
+  geom_segment(aes(x = 2.92, y = 5.6, xend = 3.07, yend = 5.6), 
+                            arrow = arrow(angle = 45, ends = "last", length = unit(0.01, "npc"))) +
+  annotate("text", x = 2.85, y = 3, label = "P = 0.36", hjust = 0, size = 6) + scale_fill_manual(values = c(col))
+    
+  
+  p1.2 <- p1.2 + theme_classic() + theme(axis.title  = element_text(size = 24),
+        axis.text = element_text(size = 15))
+
+   p1.2.2 <- p1.2 + ylim(c(0,1)) + theme(legend.position = 'none')
+
+  ggsave(p1.2, filename = "./output/figures/fig1.pdf", width = 11.5, height = 8)
+  ggsave(p1.2.2, filename = "./output/figures/fig1.1.pdf")
+  
+  
+##################
+  # Figure 1c plot
+################## 
+  # Clear from the model that there really is no difference between the change in variance for acute or acclimation CVR. But, there is a clear reduction in between individual variance for terrestrial species. As temperature get hotter then the variance in physiological rates decreases. This is not true of aquatic systems. 
+  p2 <- orchard_plot(model2.2, xlab = TeX("$lnCVR_{Q_{10}}$"), mod = "habitat", group  = "record_num", weights = "prop", data = lnCVRQ10_data, angle = 45, trunk.size = 5) +
+              scale_x_discrete(labels = c("T" = "Terrestrial","M" = "Marine" ,"F" = "Freshwater")) + annotate("text", x = 1.3, y = -5.2, 
+           label =TeX(paste0("$\\mu = $", round(mean(f_cvr_mean), 2), "[", round(quantile(f_cvr_mean, 0.025), 2)," to ", round(quantile(f_cvr_mean, 0.975),2), "] ")), hjust = 0, size = 6) + 
+  annotate("text", x = 1.15, y = -3.7, label = paste0("P = ", round(pmcmc(f_cvr_mean), digit = 2)), hjust = 0, size = 6) + 
+  annotate("text", x = 1.15, y = -5, 
+           label =paste0(round(mean(exp(f_cvr_mean)-1)*100, 2), "%"), hjust = 0, size = 6) + 
+  annotate("text", x = 2.3, y = -5.2, 
+           label =TeX(paste0("$\\mu = $", round(mean(m_cvr_mean), 2), "[", round(quantile(m_cvr_mean, 0.025), 2)," to ", round(quantile(m_cvr_mean, 0.975),2), "] ")), hjust = 0, size = 6) + 
+  annotate("text", x = 2.15, y = -3.7, label = paste0("P = ", round(pmcmc(m_cvr_mean), digit = 2)), hjust = 0, size = 6) + 
+  annotate("text", x = 2.15, y = -5, 
+           label =paste0(round(mean(exp(m_cvr_mean)-1)*100, 2), "%"), hjust = 0, size = 6) + annotate("text", x = 3.3, y = -5.2, 
+           label =TeX(paste0("$\\mu = $", round(mean(t_cvr_mean), 2), "[", round(quantile(t_cvr_mean, 0.025), 2)," to ", round(quantile(t_cvr_mean, 0.975),2), "] ")), hjust = 0, size = 6) + 
+  annotate("text", x = 3.15, y = -5, 
+           label =paste0(round(mean(exp(t_cvr_mean)-1)*100, 2), "%"), hjust = 0, size = 6) + labs(shape = "Type") +
+    annotate("text", x = 3.15, y = -3.7, label = paste0("P = ", round(pmcmc(t_cvr_mean), digit = 3)), hjust = 0, size = 6) + scale_fill_manual(values = c(col))
+   
+  
+  p2 <- p2 + theme_classic() + theme(axis.title  = element_text(size = 24),
+          axis.text = element_text(size = 15))
+     p2.2 <- p2 + ylim(c(-0.5,0.10)) + theme(legend.position = 'none')
+     ggsave(p2, filename = "./output/figures/fig2.pdf", width = 11.5, height = 8)
+    ggsave(p2.2, filename = "./output/figures/fig2.2.pdf")
+    
+  #(phylo) / (p1.2 / p2) + plot_annotation(tag_levels = "A", tag_suffix = ")")
+  
+```
+
+```{r, fig3, fig.align='center', eval = FALSE, fig.cap="Acute and Acclimation lnRR q10 across traits for A) marine, B) freshwater and C) terrestrial systems"}
+
+ptm <- orchard_plot(model1.3_m, mod = "trait_category", at = list(type = c("acute", "acclim")), by = "type", group = "record_num", weights = "prop", data = lnRRQ10_data_m, xlab = TeX("$lnRR_{Q_{10}}$"), angle = 0) +
+  scale_x_discrete(labels = c("Mito_leak" = "Proton Leak",
+                              "Metabolic_enzyme" = "Metabolic Enzymes",
+                              "Rest_MR" = "Resting Metabolic Rate",
+                              "Max_MR" = "Maximum Metabolic Rate",
+                              "Mito_oxidation" = "OXPHOS"))
+ptm$layers[[1]] <- NULL # Lets just remove the data point geom layer as it's too busy
+
+
+ptf <- orchard_plot(model1.3_f, mod = "trait_category", at = list(type = c("acute", "acclim")), by = "type", group = "record_num", weights = "prop", data = lnRRQ10_data_f, xlab = TeX("$lnRR_{Q_{10}}$"), angle = 0) +
+  scale_x_discrete(labels = c("Mito_leak" = "Proton Leak",
+                              "Metabolic_enzyme" = "Metabolic Enzymes",
+                              "Rest_MR" = "Resting Metabolic Rate",
+                              "Max_MR" = "Maximum Metabolic Rate",
+                              "Mito_oxidation" = "OXPHOS"))
+ptf$layers[[1]] <- NULL # Lets just remove the data point geom layer as it's too busy
+
+
+ptt <- orchard_plot(model1.3_t, mod = "trait_category", at = list(type = c("acute", "acclim")), by = "type", group = "record_num", weights = "prop", data = lnRRQ10_data_t, xlab = TeX("$lnRR_{Q_{10}}$"), angle = 0)
+ptt$layers[[1]] <- NULL # Lets just remove the data point geom layer as it's too busy
+
+lnRRQ10_data %>% group_by(habitat, type, trait_category) %>% summarise(n = n()) %>% data.frame()
+
+```
+
+### *Does the opportunity for selection differ across terrestrial and aquatic ectotherms?*
+
+### *Does climate variability predict acclimation capacity among aquatic and terrestrial ectotherms?*
+
+```{r, fig8, fig.align='center', fig.cap= "Bubble plot environment lnRR for wild populations by habitat"}
+
+ col <- c("#0871B9", "#F3B40D", "#1BB908")
+p8.1 <- bubble_plot(model3.9, mod = "cv_c", group = "record_num", by = "habitat", data = lnRRQ10_data_wild_acclim, ylab = TeX("$lnRR_{Q_{10}}$"), xlab = "Thermal Coefficient of Variation (CV)", condition.nrow = 1) + theme_classic() + theme(legend.position = "none", strip.background = element_blank())  + scale_fill_manual(values = c(col))
+
+p8.2 <- bubble_plot(model3.8, mod = "acf_all_c", group = "record_num", by = "habitat", data = lnRRQ10_data_wild_acclim, ylab = TeX("$lnRR_{Q_{10}}$"), xlab = "Thermal Predictability", condition.nrow = 1) + theme_classic() + theme(legend.position = "bottom", strip.background = element_blank(), strip.text = element_blank())+ scale_fill_manual(values = c(col))
+
+p8.1.2 <- p8.1 / p8.2
+
+ggsave(p8.1.2, filename = "./output/figures/fig8.png")
+```
+
+```{r, fig9, fig.align='center', fig.cap= "Bubble plot environment lnRR for wild populations by habitat"}
+
+ col <- c("#0871B9", "#F3B40D", "#1BB908")
+p9.1 <- bubble_plot(model4.9, mod = "cv_c", group = "record_num", by = "habitat", data = lnRRQ10_data_wild_acclim, ylab = TeX("$lnCVR_{Q_{10}}$"), xlab = "Thermal Coefficient of Variation (CV)", condition.nrow = 1, k.pos = "bottom.left") + theme_classic() + theme(legend.position = "none", strip.background = element_blank())  + scale_fill_manual(values = c(col))
+
+p9.2 <- bubble_plot(model4.8, mod = "acf_all_c", group = "record_num", by = "habitat", data = lnRRQ10_data_wild_acclim, ylab = TeX("$lnCVR_{Q_{10}}$"), xlab = "Thermal Predictability", condition.nrow = 1, k.pos = "bottom.left") + theme_classic() + theme(legend.position = "bottom", strip.background = element_blank(), strip.text = element_blank())+ scale_fill_manual(values = c(col))
+
+p91.2 <- p9.1 / p9.2
+
+ggsave(p91.2, filename = "./output/figures/fig9.png")
+```
+
 
 ## **Discussion**
 
 
 ## References
+
+
+
+## Extra Figures
+
+
+```{r, fig4, fig.align='center', fig.cap= "I2 estimates"}
+
+
+p4 <- ggplot(i2_lnrr, aes(x = est, y = name)) + xlim(0, 50) + geom_point(size = 5) + geom_errorbar(aes(xmin = lci, xmax = uci), width = 0.15) + theme_bw() + labs(x = "Percentage of Variation (%)") + theme(axis.title.y = element_blank(), axis.text = element_text(size = 20), axis.title = element_text(size = 24)) + geom_text(aes(label = paste0(round(est, 2), "% ", "[", round(lci, 2), " - ", round(uci, 2), "%]")), position = position_nudge(x = 5, y = 0.2)) + annotate("text", x = 30, y = 1.5, label = TeX(paste0("$I^2_{sv}$ = ", round(mean(tot_i2), 2), "%")), size = 12)
+
+p4
+ggsave(p4, filename = "./output/figures/fig4.png")
+
+```
+
+```{r, fig5, fig.align='center', fig.cap= "I2 estimates lnCVR"}
+p5 <- ggplot(i2_lncvr, aes(x = est, y = name)) + xlim(0, 50) + geom_point(size = 5) + geom_errorbar(aes(xmin = lci, xmax = uci), width = 0.15) + theme_bw() + labs(x = "Percentage of Variation (%)") + theme(axis.title.y = element_blank(), axis.text = element_text(size = 20), axis.title = element_text(size = 24)) + geom_text(aes(label = paste0(round(est, 2), "% ", "[", round(lci, 2), " - ", round(uci, 2), "%]")), position = position_nudge(x = 5, y = 0.2)) + annotate("text", x = 30, y = 1.5, label = TeX(paste0("$I^2_{sv}$ = ", round(mean(tot_i2_cvr), 2), "%")), size = 12)
+
+p5
+ggsave(p5, filename = "./output/figures/fig5.png")
+```
+
+```{r, fig6, fig.align='center', fig.cap= "Bubble plot environment lnRR wild populations"}
+p6 <- bubble_plot(model3.5, mod = "cv_c", group  = "record_num", data = lnRRQ10_data_wild, ylab = TeX("$lnRR_{Q_{10}}$"), xlab = "Thermal Coefficient of Variation (CV)") +annotate("text", x = 1, y = 3, label = TeX(paste0("$\\beta = $", round(model3.5$b[3], 3), ", 95%CI: ", round(model3.5$ci.lb[3],3), " to ", round(model3.5$ci.ub[3], 3), "; P = ", round(model3.5$pval[3],3)))) + theme_classic() + theme(legend.position = "none", axis.text = element_text(size = 12), axis.title = element_text(size = 18))
+
+p7 <- bubble_plot(model3.6, mod = "acf_all_c", group  = "record_num", data = lnRRQ10_data_wild, ylab = TeX("$lnRR_{Q_{10}}$"), xlab = "Thermal Predictability") + theme(axis.title.y = element_blank()) +annotate("text", x = -3, y = 3, label = TeX(paste0("$\\beta = $", round(model3.6$b[3], 3), ", 95%CI: ", round(model3.6$ci.lb[3],3), " to ", round(model3.6$ci.ub[3], 3), "; P = ", round(model3.6$pval[3],3)))) + theme_classic() + theme(axis.text = element_text(size = 12), axis.title = element_text(size = 18))
+  
+p67 <- (p6 | p7) + plot_annotation(tag_levels = "A")
+  
+ggsave(p67, filename = "./output/figures/fig6.png", height = 10, width = 30, units = "cm")
+```
+
+```{r, fig7, fig.align='center', fig.cap= "Bubble plot environment lnCVR wild populations"}
+p8 <- bubble_plot(model4.5, mod = "cv_c", group  = "record_num", data = lnCVRQ10_data_wild, ylab = TeX("$lnCVR_{Q_{10}}$"), xlab = "Thermal Coefficient of Variation (CV)", k = FALSE) +annotate("text", x = 1, y = -5, label = TeX(paste0("$\\beta = $", round(model4.5$b[3], 3), ", 95%CI: ", round(model4.5$ci.lb[3],3), " to ", round(model4.5$ci.ub[3], 3), " P = ", round(model4.5$pval[3],3)))) + theme_classic() + theme(legend.position = "none", axis.text = element_text(size = 12), axis.title = element_text(size = 18)) + ylim(c(-6, 3))
+
+p9 <- bubble_plot(model4.6, mod = "acf_all_c", group  = "record_num", data = lnCVRQ10_data_wild, ylab = TeX("$lnCVR_{Q_{10}}$"), xlab = "Thermal Predictability", k = FALSE) + theme(axis.title.y = element_blank()) +annotate("text", x = -3, y = -5, label = TeX(paste0("$\\beta = $", round(model4.6$b[3], 3), ", 95%CI: ", round(model4.6$ci.lb[3],3), " to ", round(model4.6$ci.ub[3], 3), " P = ", round(model4.6$pval[3],3)))) + theme_classic() + theme(axis.text = element_text(size = 12), axis.title = element_text(size = 18)) + ylim(c(-6, 3))
+  
+p89 <- (p8 | p9) + plot_annotation(tag_levels = "A")
+  
+ggsave(p89, filename = "./output/figures/fig7.png", height = 10, width = 30, units = "cm")
+```
+

@@ -75,7 +75,7 @@ write.csv(data_wide, file = "./output/data/data_final_wide.csv", row.names = FAL
 # We want to be able to reorganise the data longitudianlly based on the two acute and acclimation data. Extract the data in chunks
 
 data_long <- data_wide %>%
-  pivot_longer(cols = c(27, 29, 31, 33, 35, 37, 39, 41, 43), values_to = "effect_size", values_drop_na = FALSE) %>% 
+  pivot_longer(cols = c(27, 29, 31, 33, 35, 37, 39, 41, 43)+4, values_to = "effect_size", values_drop_na = FALSE) %>% 
   mutate(V = ifelse(name == "lnRR_Q10_acute_t1", V_lnRR_Q10_acute_t1, 
                     ifelse(name == "lnRR_Q10_acute_t2", V_lnRR_Q10_acute_t2, 
                            ifelse(name == "lnRR_Q10_acclim", V_lnRR_Q10_acclim, 

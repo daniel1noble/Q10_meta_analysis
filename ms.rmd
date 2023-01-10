@@ -1,5 +1,5 @@
 ---
-title: "Reduced plasticity and opportunity for selection across terrestrial ectotherm populations"
+title: "Double trouble: Terrestrial ectortherm populations have both reduced opportunity for selection and physiological plasticity"
 bibliography: ./bib/refs.bib
 csl: ./bib/ecology-letters.csl
 output: 
@@ -20,7 +20,7 @@ editor_options:
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE, tidy = TRUE, fig.width = 10)
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, cache = TRUE, warning = FALSE, tidy = TRUE, fig.width = 10)
 ## numbers >= 10^5 will be denoted in scientific notation,		  ## numbers >= 10^5 will be denoted in scientific notation,
   ## and rounded to 2 digits		  ## and rounded to 2 digits
   options(digits = 2)
@@ -70,6 +70,16 @@ data_long2 <- data_long %>% mutate(type = factor(type, levels = c("acute", "accl
                       group_by(habitat) %>%
                       summarise(spp_n = length(unique(species_full)))
       tot_spp <- sum(spp_habitat[,2])
+      
+    # Taxa
+      taxa_sum <- data_wide %>%  
+              group_by(habitat, phylum, class) %>% 
+              summarise(spp = length(unique(species_full)), n = n()) %>%  
+              data.frame()
+      
+      taxa_sum_long <- data_long2 %>% group_by(habitat, phylum, class) %>% 
+              summarise(spp = length(unique(species_full)), n = n()) %>%  
+              data.frame()
 
 #########################
 ## Phylogeny
@@ -125,9 +135,10 @@ $^4$ Department of Biology, Lancaster University, Liverpool, UK
 
 ## **Introduction**
 
-Variable thermal environments are expected to result in strong selection pressures that result in adaptation or the evolution of phenotypic plasticity -- both of which are considered critical for population resilience to human-induced climate change [@Seebacher2015]. Periods of past climatic change have had disproportionate impacts on some ecosystems over others leading to debates over which ecosystems will be most vulnerable to contemporary climate change. Studies have highlighted species occupying terrestrial ecosystems as being particularly vulnerable given their weak acclimation abilities and greater probability of experiencing thermal extremes that overwhelm physiological homeostasis [@Seebacher2015;@Gunderson2015; @Pinsky2019]. Despite marine and freshwater ecosystems appearing to have greater physiological acclimation capacity [e.g., see @Seebacher2015], it is unclear if the magnitude of physiological adjustment is sufficient. In addition, low oxygen availability has been suggested as a major factor influencing the vulnerability of aquatic ecosystems 
+Variable thermal environments are expected to result in strong selection pressures that lead to adaptation or the evolution of phenotypic plasticity -- both of which are considered critical for population resilience to human-induced climate change [@Seebacher2015]. Phenotypic plasticity is predicted to evolve when environmental variability is high but predictable. Despite this theoretical expectation, empirical support for this prediction is scant [], likely because many organisms can behaviorally adjust micro-habitat selection to offset thermal stress, the costs of plasticity are high [], and/or the prediction is likely only supported for specific plastic responses (i.e., active and developmental plasticity). Reversible forms of phenotypic plasticity, such as acclimatization, may not be expected to adhere to such predictions. 
 
-Theory suggests that phenotypic plasticity will evolve in variable, but predictable, habitats with empirical data supporting this prediction. 
+Periods of past climatic change have had disproportionate impacts on some ecosystems over others leading to debates over which ecosystems will be most vulnerable to contemporary climate change. Studies have highlighted species occupying terrestrial ecosystems as being particularly vulnerable given their weak acclimation abilities and greater probability of experiencing thermal extremes that overwhelm physiological homeostasis [@Seebacher2015;@Gunderson2015; @Pinsky2019]. Despite marine and freshwater ecosystems appearing to have greater physiological acclimation capacity [e.g., see @Seebacher2015], it is unclear if the magnitude of physiological adjustment is sufficient. In addition, low oxygen availability has been suggested as a major factor influencing the vulnerability of aquatic ecosystems 
+
 
 Applying new effect sizes that allow us to make use of powerful meta-analytic models we: 1) re-evaluate the degree to which aquatic and terrestrial ectotherms are capable of physiological plasticity; 2) test whether the opportunity for selection on physiological traits changes as temperatures rise, by applying new effect sizes that capture changes in physiological trait variance, and 3) test whether climate variability and predictability explain a populations acclimation capacity and affect changes in trait variance.  
 
@@ -220,10 +231,10 @@ Temperature data was extracted using the monthly averages provided by the ERA5 c
 Using the thermal time-series data for each location we summarised various metrics of thermal variability across months and years as well as estimates of thermal predictability (i.e., autocorrelation). To estimate thermal variability, we calculated the coefficient of variation ($\frac{SD}{M}$, where SD = standard deviation in temperature and M = the mean temperature for each year). To estimate thermal predictability, we calculated the auto-regressive time lag across the entire dataset. Theoretical and empirical studies of plasticity evolution have emphasised the importance of both climate variability and predictability in plasticity evolution.
 
 ### *Meta-Analysis*
-We analysed our data using multilevel meta-analytic (MLMA) and meta-regression (MLMR) models in R (vers. `r paste0(R.Version()$major, ".", R.Version()$minor)`) using *brms* [vers. `r utils::packageVersion("brms")` @Burkner2018; @Burkner2017; @stan] and *metafor* [vers. `r utils::packageVersion("metafor")` @Viechtbauer2010].  We fit both Bayesian and frequentist approaches to ensure that our results were consistent, and to create orchard plots more easily [vers. 2.0, @Nakagawa2021c]. For our Bayesian models, we ran 4 MCMC chains, each with a warm-up of 1000 followed by 4000 sampling iterations keeping every 5 iterations for a total of 3200 samples from the posterior distribution. We used flat Gaussian priors for 'fixed' effects (i.e., $N(0, 10)$) and a student t-distribution for 'random' effects (i.e., $student_{t}(3, 0, 10)$). We checked that all MCMC chains were mixing and had converged (i.e., $R_{hat} = 1$). 
+We analysed our data using multilevel meta-analytic (MLMA) and meta-regression (MLMR) models in R (vers. `r paste0(R.Version()$major, ".", R.Version()$minor)`) using *brms* [vers. `r utils::packageVersion("brms")` @Burkner2018; @Burkner2017; @stan] and *metafor* [vers. `r utils::packageVersion("metafor")` @Viechtbauer2010].  We fit both Bayesian and frequentist approaches to ensure that our results were consistent, and to create orchard plots more easily [vers. 2.0, @Nakagawa2021c]. In addition, Bayesian methods better protect against type I errors in the presence of complex sources of non-independence [@Nakagawa2021; @Song2021]. For our Bayesian models, we ran 4 MCMC chains, each with a warm-up of 1000 followed by 4000 sampling iterations keeping every 5 iterations for a total of 3200 samples from the posterior distribution. We used flat Gaussian priors for 'fixed' effects (i.e., $N(0, 10)$) and a student t-distribution for 'random' effects (i.e., $student_{t}(3, 0, 10)$). We checked that all MCMC chains were mixing and had converged (i.e., $R_{hat} = 1$). 
 
 #### *Multi-level Meta-analysis (MLMA) Models*
-We first fit multi-level meta-analysis (MLMA) models (i.e., intercept only models) for both $lnRR_{Q_{10}}$ and $lnCVR_{Q_{10}}$, that included study, species, and phylogeny as random effects to account for non-independence. We also included trait as a random effect to account for trait variation within the data. Our MLMA models allowed us to partition the variation in $lnRR_{Q_{10}}$ and $lnCVR_{Q_{10}}$ among these key sources while accounting for total sampling variance in each. This allowed us to calculate total heterogeneity [i.e., $I_{total}^2$; *sensu* @NakagawaSantos2012; @Noble2022] along with various $I^2$ metrics describing the proportion of variance explained by each random effect level [@NakagawaSantos2012]. 
+We first fit multi-level meta-analysis (MLMA) models (i.e., intercept only models) for both $lnRR_{Q_{10}}$ and $lnCVR_{Q_{10}}$, that included study, species, and phylogeny as random effects to account for non-independence. We also included trait as a random effect to account for trait variation within the data. Our MLMA models allowed us to partition the variation in $lnRR_{Q_{10}}$ and $lnCVR_{Q_{10}}$ among these key sources while accounting for total sampling variance in each. This allowed us to calculate total heterogeneity [i.e., $I_{total}^2$; *sensu* @NakagawaSantos2012; @Noble2022] along with various $I^2$ metrics describing the proportion of variance explained by each random effect level [@NakagawaSantos2012]. We also present 95% prediction intervals which describe the expected distribution of effects from future studies [@Nakagawa2021c; @Noble2022]. 
 
 A phylogeny was derived using the Open Tree of Life (OTL) with the *rotl* package in R [vers. `r utils::packageVersion("rotl")`, @rotl2016], and plotted using *ggtree* [vers. `r utils::packageVersion("ggtree")`, @Guangchuang2017]. We resolved all polytomies in the tree. Any missing taxa were replaced with closely related species and branch lengths were computed using Grafen's method [using power = 0.7, @Grafen1989]. We used the R packages *ape* [vers. `r utils::packageVersion("ape")`, @ape] and *phytools* [vers. `r utils::packageVersion("phytools")`, @Revell2012] to prune the tree for individual analyses and calculate phylogenetic covariance (or correlation) matrices used in meta-analytic models.  
 
@@ -234,6 +245,8 @@ We controlled for the duration of time organisms were given to acclimate by incl
 ### *Publication Bias*
 
 ## **Results**
+
+The final dataset included a total of `r f <- taxa_sum %>% filter(habitat == "f") %>% summarise(spp = sum(spp), k = sum(n)); f[1,1]` freshwater (fishes = `r taxa_sum %>% filter(habitat == "f" & class == "Actinopterygii") %>% summarise(sp = sum(spp))`, Molluscs = `r taxa_sum %>% filter(habitat == "f" & phylum == "Mollusca") %>% summarise(sp = sum(spp))`, Amphibians = `r taxa_sum %>% filter(habitat == "f" & class == "Amphibia") %>% summarise(sp = sum(spp))`, Reptiles = `r taxa_sum %>% filter(habitat == "f" & class == "Reptilia") %>% summarise(sp = sum(spp))`, Arthropods = `r taxa_sum %>% filter(habitat == "f" & phylum == "Arthropoda") %>% summarise(sp = sum(spp))`, and a single Crustacean and Nematode species), `r m <- taxa_sum %>% filter(habitat == "m") %>% summarise(spp = sum(spp), k = sum(n)); m[1,1]` marine (fishes = `r taxa_sum %>% filter(habitat == "m" & class %in% c("Actinopterygii", "Agnatha","Chondrichthyes")) %>% summarise(sp = sum(spp))`, Annelids = `r taxa_sum %>% filter(habitat == "m" & phylum == "Annelida") %>% summarise(sp = sum(spp))`, Molluscs = `r taxa_sum %>% filter(habitat == "m" & phylum == "Mollusca") %>% summarise(sp = sum(spp))`, Echinoderms = `r taxa_sum %>% filter(habitat == "m" & phylum == "Echinodermata") %>% summarise(sp = sum(spp))`, Reptiles = `r taxa_sum %>% filter(habitat == "m" & class == "Reptilia") %>% summarise(sp = sum(spp))`, Arthropods = `r taxa_sum %>% filter(habitat == "m" & phylum == "Arthropoda") %>% summarise(sp = sum(spp))`, and a single species of Crustacean, Cnidarian), and `r t <- taxa_sum %>% filter(habitat == "t") %>% summarise(spp = sum(spp), k = sum(n)); t[1,1]` terrestrial species (Annelids = `r taxa_sum %>% filter(habitat == "t" & phylum == "Annelida") %>% summarise(sp = sum(spp))`, Molluscs = `r taxa_sum %>% filter(habitat == "t" & phylum == "Mollusca") %>% summarise(sp = sum(spp))`, Arthropods = `r taxa_sum %>% filter(habitat == "t" & phylum == "Arthropoda") %>% summarise(sp = sum(spp))`, Reptiles = `r taxa_sum %>% filter(habitat == "t" & class == "Reptilia") %>% summarise(sp = sum(spp))` and Amphibians = `r taxa_sum %>% filter(habitat == "t" & class == "Amphibia") %>% summarise(sp = sum(spp))` along with a single Tardigrade species) (Fig. \@ref(fig:fig1)A). We had more data on acute thermal responses (n = `r trimmed <- data_long2 %>% filter(grepl("lnRR", name) & !is.na(effect_size) & !is.na(V) & !V == 0); sum1 = trimmed %>% group_by(name, type) %>% summarise(n = n()) %>% filter(type =="acute"); sum(sum1$n)`) compared to thermal responses after an acclimation period (n = `r sum2 <- trimmed %>% group_by(name, type) %>% summarise(n = n()) %>% filter(type =="acclim"); sum2$n`) (Fig. \@ref(fig:fig1)A). 
 
 ### *Do terrestrial and aquatic ectotherms differ in their capacity to acclimate?*
 

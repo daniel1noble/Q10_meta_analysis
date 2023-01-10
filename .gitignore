@@ -17,3 +17,4 @@ readme.txt
 data/climate_data/ERA5/ERA5_LST_and_SST_1979-present.nc
 .DS_Store
 ~$ms.docx
+ms_cache

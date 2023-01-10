@@ -672,4 +672,41 @@ f_plot <- function(res, title = "", place = "positive") {
 #     legend.position="none")
 # }
 
+### Adding plotting theme function from Glenn Tattersall (Brock Uni). Probably won't use, but looks great!
 
+ggtheme <- function(base_size=12, base_line=0.3) {
+  theme(
+    
+    text =        element_text(size=base_size),
+    line =        element_line(size=base_line, linetype="solid"),
+    
+    axis.text.x = element_text(size=base_size*0.8, colour='black',  hjust=0.5, vjust=1, angle=0),
+    axis.text.y = element_text(size=base_size*0.8, colour='black', hjust=1, vjust=0.5, angle=0),
+    axis.line.x = element_line(size=base_line),
+    axis.line.y = element_line(size=base_line),
+    
+    axis.title.x =  element_text(size = base_size, vjust = 1, margin=unit(c(3,0,0,0),"mm")),
+    axis.title.y =  element_text(size = base_size, angle = 90, vjust = 0.5, margin=unit(c(0,3,0,0),"mm")),
+    axis.ticks = element_line(size=base_line),
+    axis.ticks.length = unit(0.3, "lines"),
+    
+    panel.background = element_blank(),
+    panel.grid.minor = element_blank(),
+    panel.grid.major = element_blank(),
+    panel.border     = element_rect(fill=NA, colour=NA, size=base_line),
+    panel.spacing    = unit(1, "lines"),
+    
+    legend.background = element_rect(fill="transparent", colour="transparent"),
+    legend.key =       element_rect(fill="transparent", colour="transparent"),
+    legend.text=       element_text(size=base_size),
+    
+    strip.background =  element_blank(),
+    strip.text.x =      element_text(size = base_size * 0.8),
+    strip.text.y =      element_text(size = base_size * 0.8, angle = -90),
+    strip.switch.pad.grid = unit(0, "mm"),
+    strip.switch.pad.wrap = unit(0, "mm"),
+    
+    plot.margin =       unit(c(0.5, 0.5, 0.5, 0.5), "cm"),
+    plot.title =        element_text(size = base_size * 1.2),
+    plot.background =   element_rect(colour = "transparent", fill="transparent", size=base_line)
+  )}

@@ -59,7 +59,7 @@ data_wide <- data_wide %>%
          lnCVR_Q10(t2=temp_2, t1=temp_1, r1=r1.1, r2=r2.2, sd1=r1.1_sd, sd2=r2.2_sd, n1=r1.1_N, n2=r2.2_N, 
                    name = "acclim"),
          obs = 1:n()) %>%
-  dplyr::select(-c(data_source, source_page,phylum, class, order, family, genus, species, geo_location, details, notes)) %>%
+  dplyr::select(-c(data_source, source_page, genus, species, geo_location, details, notes)) %>%
   filter_if(~is.numeric(.), all_vars(!is.infinite(.)))
 
 # #******** Problem with effect size calculation. V_lnVR and V_lnCVR are negative for a couple studies, should not be! Hence warning messages NaN in plotting of precision; explored this probalem more. It's actually incorrect data in the old dataset from Frank. Fonti explored the extraction for p088_o and error bars not found, sample sizes not correct. For second study, the N value was incorrect, should have been N = 5 not 0.11. Will exclude p_088_o from the data. Fonti did a check and tried to re-extract but in the end missing error so excluded

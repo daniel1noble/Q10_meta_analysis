@@ -397,5 +397,10 @@ f_plot <- function(res, title = "", place = "positive") {
     legend.position="none")
 }
 
-
+## Calculation a correction factor to apply to AIC to calculate AICc from metafor model objects
+AICc_correction <- function(model){
+  k = length(coef(model)) + length(model$sigma2) + length(model$gamma2) + length(model$tau2)
+  cor = (2*k^2 + 2*k) / model$k - k - 1
+  cor
+}
 

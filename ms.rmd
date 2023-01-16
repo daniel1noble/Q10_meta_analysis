@@ -1549,6 +1549,10 @@ ptf$layers[[1]] <- NULL # Lets just remove the data point geom layer as it's too
 ptt <- orchard_plot(model1.3_t_het, mod = "trait_category", at = list(type = c("acute", "acclim")), by = "type", group = "record_num", weights = "prop", data = lnRRQ10_data_t, xlab = TeX("$lnRR_{Q_{10}}$"), angle = 0)
 ptt$layers[[1]] <- NULL # Lets just remove the data point geom layer as it's too busy
 
+
+fig2 <- (ptm + ptf + ptt) + plot_annotation(tag_levels = "A", tag_suffix = ")")
+
+
 lnRRQ10_data %>% group_by(habitat, type, trait_category) %>% summarise(n = n()) %>% data.frame()
 
 ```

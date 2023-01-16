@@ -1551,9 +1551,7 @@ ptt$layers[[1]] <- NULL # Lets just remove the data point geom layer as it's too
 
 
 fig2 <- (ptm + ptf + ptt) + plot_annotation(tag_levels = "A", tag_suffix = ")")
-
-
-lnRRQ10_data %>% group_by(habitat, type, trait_category) %>% summarise(n = n()) %>% data.frame()
+fig2
 
 ```
 

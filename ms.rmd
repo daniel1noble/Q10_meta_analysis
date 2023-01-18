@@ -19,11 +19,15 @@ editor_options:
   chunk_output_type: console
 ---
 
-```{r setup, echo = FALSE, results="hide"}
+```{r knitrops, echo = FALSE, results="hide"}
 knitr::opts_chunk$set(echo = FALSE, cache = TRUE, message = FALSE, warning = FALSE, tidy = TRUE, fig.width = 10)
 ## numbers >= 10^5 will be denoted in scientific notation,		  ## numbers >= 10^5 will be denoted in scientific notation,
   ## and rounded to 2 digits		  ## and rounded to 2 digits
   options(digits = 2)
+
+```
+
+```{r setup, echo = FALSE, results="hide"}
 
 ##################################
 # Clean workspace
@@ -423,10 +427,10 @@ if(rerun){
    lnRRQ10_data_f <- lnRRQ10_data %>% filter(habitat == "f") 
    lnRRQ10_data_t <- lnRRQ10_data %>% filter(habitat == "t")
   
-    # Filter out antioxidant and NAs
+    # Filter out antioxidant and NAs. For terrestrial, need to filter out endurance and max_MR because only 3 effect sizes
   lnRRQ10_data_m <- lnRRQ10_data_m %>% filter(!trait_category =="antiox") %>% filter(!is.na(c_accl_time))
   lnRRQ10_data_f <- lnRRQ10_data_f %>% filter(!is.na(c_accl_time))
-  lnRRQ10_data_t <- lnRRQ10_data_t %>% filter(!is.na(c_accl_time))
+  lnRRQ10_data_t <- lnRRQ10_data_t %>% filter(!is.na(c_accl_time)) %>% filter(!trait_category %in% c("endurance", "max_MR"))
   
   # Prune tree
    tree_m <- tree_checks(lnRRQ10_data_m, tree = tree_lnrr, dataCol = "species_full", type = "prune")
@@ -533,7 +537,7 @@ if(rerun){
   # Bayesian model
    model1.3_t_bayes <- brms::brm(effect_size | se(sqrt(V)) ~  c_accl_time + type + trait_category + type:trait_category + (~1 | record_num) + (1 | gr(species_full, cov = A_t)) + (1 | spp) + (1 | trait) + (1 + trait_category | gr(obs, cor = FALSE)), data2 = list(A_t=A_t), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 4, data = lnRRQ10_data_t)
                       
-  # Save models
+    # Save models
   saveRDS(model1.3_m, file = "./output/models/lnRRQ10_1.3m")
   saveRDS(model1.3_m_het, file = "./output/models/lnRRQ10_1.3m_het")
   saveRDS(model1.3_m_bayes, file = "./output/models/lnRRQ10_1.3_bayes_m")

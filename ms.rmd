@@ -41,7 +41,7 @@ knitr::opts_chunk$set(echo = FALSE, cache = TRUE, message = FALSE, warning = FAL
 
 #devtools::install_github(repo = "ErikKusch/KrigR")
 ## Function to produce colour palette
-# Note that temp is stored as a factor of 10 C larger, so needs to be divided. Also, we can greate a custom colour palelte function using colorRampPallette
+# Note that temp is stored as a factor of 10 C larger, so needs to be divided. Also, we can create a custom colour palette function using colorRampPallette
 colfunc <- colorRampPalette(rev(brewer.pal(10,"RdBu")))
 #test colfunc(10) will generate the exact Hex codes for 10 different colours can 10 to 100 and you get 100 colour hex codes. Very useful webpage: https://pjbartlein.github.io/REarthSysSci/rasterVis01.html
 
@@ -499,7 +499,7 @@ if(rerun){
                               test = "t", data = lnRRQ10_data_f, method = "REML", control=list(iter.max=1000, rel.tol=1e-8))
   
   ## Check support for two models
-  AICc_model1.3_f_het <- AIC(model1.3_f_het) + AICc_correction(model1.3_f_het). # Clearly better supported.
+  AICc_model1.3_f_het <- AIC(model1.3_f_het) + AICc_correction(model1.3_f_het) # Clearly better supported.
       AICc_model1.3_f <- AIC(model1.3_f) + AICc_correction(model1.3_f)
   delat_AICc_model1.3_f <- AICc_model1.3_f - AICc_model1.3_f_het
   
@@ -1530,33 +1530,35 @@ annotate("text", x = 3.01, y = 4.60,
   
 ```
 
-```{r, fig2, fig.align='center', eval = FALSE, fig.cap="Acute and Acclimation lnRR q10 across traits for A) marine, B) freshwater and C) terrestrial systems"}
+```{r, fig2, fig.align='center', eval = TRUE, fig.cap="Acute and Acclimation lnRR q10 across traits for A) marine, B) freshwater and C) terrestrial systems"}
 
-ptm <- orchard_plot(model1.3_m_het, mod = "trait_category", at = list(type = c("acute", "acclim")), by = "type", group = "record_num", weights = "prop", data = lnRRQ10_data_m, xlab = TeX("$lnRR_{Q_{10}}$"), angle = 0) +
+ptm <- orchard_plot(model1.3_m_het, mod = "trait_category", at = list(type = c("acute", "acclim")), by = "type", group = "record_num", weights = "prop", data = lnRRQ10_data_m, xlab = TeX("$lnRR_{Q_{10}}$"), angle = 0, condition.lab = "Type") +
   scale_x_discrete(labels = c("Mito_leak" = "Proton Leak",
                               "Metabolic_enzyme" = "Metabolic Enzymes",
                               "Rest_MR" = "Resting Metabolic Rate",
                               "Max_MR" = "Maximum Metabolic Rate",
-                              "Mito_oxidation" = "OXPHOS"))
-ptm$layers[[1]] <- NULL # Lets just remove the data point geom layer as it's too busy
+                              "Mito_oxidation" = "OXPHOS")) + theme_classic()
+#ptm$layers[[1]] <- NULL # Lets just remove the data point geom layer as it's too busy
 
 
-ptf <- orchard_plot(model1.3_f_het, mod = "trait_category", at = list(type = c("acute", "acclim")), by = "type", group = "record_num", weights = "prop", data = lnRRQ10_data_f, xlab = TeX("$lnRR_{Q_{10}}$"), angle = 0) +
+ptf <- orchard_plot(model1.3_f_het, mod = "trait_category", at = list(type = c("acute", "acclim")), by = "type", group = "record_num", weights = "prop", data = lnRRQ10_data_f, xlab = TeX("$lnRR_{Q_{10}}$"), angle = 0, condition.lab = "Type") +
   scale_x_discrete(labels = c("Mito_leak" = "Proton Leak",
                               "Metabolic_enzyme" = "Metabolic Enzymes",
                               "Rest_MR" = "Resting Metabolic Rate",
                               "Max_MR" = "Maximum Metabolic Rate",
-                              "Mito_oxidation" = "OXPHOS"))
-ptf$layers[[1]] <- NULL # Lets just remove the data point geom layer as it's too busy
+                              "Mito_oxidation" = "OXPHOS")) + theme_classic()
+#ptf$layers[[1]] <- NULL # Lets just remove the data point geom layer as it's too busy
 
 
-ptt <- orchard_plot(model1.3_t_het, mod = "trait_category", at = list(type = c("acute", "acclim")), by = "type", group = "record_num", weights = "prop", data = lnRRQ10_data_t, xlab = TeX("$lnRR_{Q_{10}}$"), angle = 0)
-ptt$layers[[1]] <- NULL # Lets just remove the data point geom layer as it's too busy
+ptt <- orchard_plot(model1.3_t_het, mod = "trait_category", at = list(type = c("acute", "acclim")), by = "type", group = "record_num", weights = "prop", data = lnRRQ10_data_t, xlab = TeX("$lnRR_{Q_{10}}$"), angle = 0, condition.lab = "Type") +
+  scale_x_discrete(labels = c("Metabolic_enzyme" = "Metabolic Enzymes",
+                              "Rest_MR" = "Resting Metabolic Rate")) + theme_classic() + labs(legend = "Type")
+#ptt$layers[[1]] <- NULL # Lets just remove the data point geom layer as it's too busy
 
 
 fig2 <- (ptm + ptf + ptt) + plot_annotation(tag_levels = "A", tag_suffix = ")")
 fig2
-
+ggsave(fig2, filename = "./output/figures/fig2_trait.pdf", height = 10, width = 40, device = "pdf", limitsize = FALSE, units = "cm")
 ```
 
 ### *Does the opportunity for selection differ across terrestrial and aquatic ectotherms?*

@@ -1396,7 +1396,7 @@ if(rerun){
     slope_t_4.9 <- posteriors4.9[,"b_cv_c"] + posteriors4.9[,"b_cv_c:habitatt"]; mean(slope_t_4.9); pmcmc(slope_t_4.9); quantile(slope_t_4.9, c(0.025, 0.975))
 ```
 
-```{r, fig1, fig.align='center', fig.cap= "**Taxonomic distribution of acute and acclimation Q10 estimates across major habitats**. **A)** Phylogenetic distribution of taxa contained within the data. The total number of acute and acclimation type Q10 effect sizes are highlighted as well as whether the taxa is marine, freshwater or terrestrial. Silouettes are representative taxa of major clades within the tree. **B)** Acute and Acclimation lnRR Q10 across marine, freshwater, and terrestrial environments. **C)** lnCVR Q10 across traits for marine, freshwater and terrestrial systems. Note there were no differences between acute and acclimation Q10 types. k = total number of effect size estimates while the numbers in brackets indicate the number of species."}
+```{r, fig1,  fig.cap= "**Taxonomic distribution of acute and acclimation Q10 estimates across major habitats**. **A)** Phylogenetic distribution of taxa contained within the data. The total number of acute and acclimation type Q10 effect sizes are highlighted as well as whether the taxa is marine, freshwater or terrestrial. Silouettes are representative taxa of major clades within the tree. **B)** Acute and Acclimation lnRR Q10 across marine, freshwater, and terrestrial environments. **C)** lnCVR Q10 across traits for marine, freshwater and terrestrial systems. Note there were no differences between acute and acclimation Q10 types. k = total number of effect size estimates while the numbers in brackets indicate the number of species."}
 
 # Load and plot Figure 1. Note that this figure was derived using 3 separate code chunks described below. Figures were exported, imported into Adobe Illustrator for minor formatting changes and grid organisation. 
   fig1 <- image_read("./output/figures/fig1_final.png")
@@ -1530,7 +1530,7 @@ annotate("text", x = 3.01, y = 4.60,
   
 ```
 
-```{r, fig2, fig.align='center', eval = TRUE, fig.cap="Acute and Acclimation lnRR q10 across traits for A) marine, B) freshwater and C) terrestrial systems"}
+```{r, fig2,  eval = TRUE, fig.cap="Acute and Acclimation lnRR q10 across traits for A) marine, B) freshwater and C) terrestrial systems"}
 
 ptm <- orchard_plot(model1.3_m_het, mod = "trait_category", at = list(type = c("acute", "acclim")), by = "type", group = "record_num", weights = "prop", data = lnRRQ10_data_m, xlab = TeX("$lnRR_{Q_{10}}$"), angle = 0, condition.lab = "Type") +
   scale_x_discrete(labels = c("Mito_leak" = "Proton Leak",

@@ -576,7 +576,7 @@ Most of the effect size estimates came from measurements of metabolic rates (bot
 
 ### *Do terrestrial and aquatic ectotherms differ in their capacity to acclimate?*
 
- 
+The magnitude of difference in $lnRR_{Q_{10}}_{acclimation}$ and $lnRR_{Q_{10}}_{acute}$ was very small (). Considering acute responses of acclimated animals at high temperatures are also expected to increase (see above), acclimatization is not likely going to provide adaptive benefits under climate change. 
 
 ```{r, lncvrq10, echo = FALSE, message=FALSE, warning=FALSE, results='hide'}
 #############
@@ -1544,7 +1544,7 @@ annotate("text", x = 3.01, y = 4.60,
   
 ```
 
-```{r, fig2,  eval = TRUE, fig.cap="Acute and Acclimation lnRR q10 across traits for A) marine, B) freshwater and C) terrestrial systems"}
+```{r, fig2, out.width = "100%", eval = TRUE, fig.cap="Acute and Acclimation lnRR q10 across traits for A) marine, B) freshwater and C) terrestrial systems"}
 
 ptm <- orchard_plot(model1.3_m_het, mod = "trait_category", at = list(type = c("acute", "acclim")), by = "type", group = "record_num", weights = "prop", data = lnRRQ10_data_m, xlab = TeX("$lnRR_{Q_{10}}$"), angle = 0, condition.lab = "Type") +
   scale_x_discrete(labels = c("Mito_leak" = "Proton Leak",
@@ -1571,9 +1571,12 @@ ptt <- orchard_plot(model1.3_t_het, mod = "trait_category", at = list(type = c("
 
 
 fig2 <- (ptm + ptf + ptt) + plot_annotation(tag_levels = "A", tag_suffix = ")")
-fig2
 ggsave(fig2, filename = "./output/figures/fig2_trait.pdf", height = 10, width = 40, device = "pdf", limitsize = FALSE, units = "cm")
+
+img_fig2 <- magick::image_read("./output/figures/fig2_trait.pdf")
+img_fig2
 ```
+
 
 ### *Does the opportunity for selection differ across terrestrial and aquatic ectotherms?*
 

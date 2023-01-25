@@ -576,7 +576,7 @@ Most of the effect size estimates came from measurements of metabolic rates (bot
 
 ### *Do terrestrial and aquatic ectotherms differ in their capacity to acclimate?*
 
-The magnitude of difference in $lnRR_{Q_{10}}_{acclimation}$ and $lnRR_{Q_{10}}_{acute}$ was very small (). Considering acute responses of animals acclimated to high temperatures is generally slightly elevated compared to cold acclimated animals ($\beta$ = `r model1.s1$b[3]`, 95% CI: `r model1.s1$ci.lb[3]` to `r model1.s1$ci.ub[3]`, p < 0.001), acclimatization is not likely going to provide adaptive benefits under climate change. 
+The magnitude of difference in $lnRR_{Q_{10}}_{acclimation}$ and $lnRR_{Q_{10}}_{acute}$ was very small (). Considering acute responses of animals acclimated to high temperatures is generally slightly elevated compared to cold acclimated animals ($\beta$ = `r model1.s1$b[3]`, 95% CI: `r model1.s1$ci.lb[3]` to `r model1.s1$ci.ub[3]`, p < 0.001), acclimatization is not likely going to provide adaptive benefits under climate change, on average. 
 
 ```{r, lncvrq10, echo = FALSE, message=FALSE, warning=FALSE, results='hide'}
 #############

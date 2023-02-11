@@ -1,6 +1,6 @@
 ---
 title: "Reduced plasticity and opportunity for selection in terrestrial ectotherm populations under climate change"
-bibliography: ./bib/refs.bib
+bibliography: [./bib/refs.bib]
 csl: ./bib/ecology-letters.csl
 format:
   docx:
@@ -159,8 +159,7 @@ $^4$ Department of Biology, Lancaster University, Liverpool, UK
 
 Variable thermal environments are expected to result in strong selection pressures that lead to adaptation or the evolution of phenotypic plasticity -- both of which are considered critical for population resilience to human-induced climate change [@Seebacher2015]. Phenotypic plasticity is predicted to evolve when environmental variability is high but predictable. Despite this theoretical expectation, empirical support for this prediction is scant [], likely because many organisms can behaviorally adjust micro-habitat selection to offset thermal stress, the costs of plasticity are high [], and/or the prediction is likely only supported for specific plastic responses (i.e., active and developmental plasticity). Reversible forms of phenotypic plasticity, such as acclimatization, may not be expected to adhere to such predictions. 
 
-Periods of past climatic change have had disproportionate impacts on some ecosystems over others leading to debates over which ecosystems will be most vulnerable to contemporary climate change. Studies have highlighted species occupying terrestrial ecosystems as being particularly vulnerable given their weak acclimation abilities and greater probability of experiencing thermal extremes that overwhelm physiological homeostasis [@Seebacher2015;@Gunderson2015; @Pinsky2019]. Despite marine and freshwater ecosystems appearing to have greater physiological acclimation capacity [e.g., see @Seebacher2015], it is unclear if the magnitude of physiological adjustment is sufficient. In addition, low oxygen availability has been suggested as a major factor influencing the vulnerability of aquatic ecosystems 
-
+Periods of past climatic change have had disproportionate impacts on some ecosystems over others leading to debates over which ecosystems will be most vulnerable to contemporary climate change. Studies have highlighted species occupying terrestrial ecosystems as being particularly vulnerable given their weak acclimation abilities and greater probability of experiencing thermal extremes that overwhelm physiological homeostasis [@Seebacher2015;@Gunderson2015; @Pinsky2019]. Despite marine and freshwater ecosystems appearing to have greater physiological acclimation capacity [e.g., see @Seebacher2015], it is unclear if the magnitude of physiological adjustment is sufficient. In addition, low oxygen availability has been suggested as a major factor influencing the vulnerability of aquatic ecosystems. 
 
 Applying new effect sizes that allow us to make use of powerful meta-analytic models we: 1) re-evaluate the degree to which aquatic and terrestrial ectotherms are capable of physiological plasticity; 2) test whether the opportunity for selection on physiological traits changes as temperatures rise, by applying new effect sizes that capture changes in physiological trait variance, and 3) test whether climate variability and predictability explain a populations acclimation capacity and affect changes in trait variance.
 

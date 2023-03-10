@@ -1603,7 +1603,6 @@ One explanation for why terrestrial ectotherms show minimal acclimation capacity
 
 ## Supplemental Results and Figures
 
-
 ```{r, fig4, fig.align='center', fig.cap= "I2 estimates"}
 
 

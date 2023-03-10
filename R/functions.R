@@ -404,3 +404,14 @@ AICc_correction <- function(model){
   cor
 }
 
+#' @title p_value
+#' @description Checks p-value and assigned to catagories unless non-significant then gives actual p
+#' @param x the value to check against
+#' 
+p_value <- function(x){
+  if(x <= 0.0001) {tmp = "< 0.0001"}
+  if(x <= 0.001 & x >= 0.0001) {tmp ="< 0.001"}
+  if(x <= 0.01 & x >= 0.001) {tmp ="< 0.01"}
+  if(x >= 0.01) {tmp = round(x, digits =2)}
+  return(tmp)
+}

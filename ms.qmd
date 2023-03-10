@@ -45,7 +45,7 @@ colfunc <- colorRampPalette(rev(brewer.pal(10,"RdBu")))
     # loading functions
     source("./R/functions.R")
   
-options(digits = 3, scipen = 3)
+  options(digits = 2, scipen = 3)
 ```
 
 
@@ -142,7 +142,8 @@ data_long2 <- data_long %>% mutate(type = factor(type, levels = c("acute", "accl
       tree_p0.7$node.label <- NULL # We don't use nodes and will cause a warning so create null node names
 ```
 
-Daniel W.A. Noble$^1$, Fonti Kar$^2$, Frank Seebacher$^3$, Alex Bush$^4$, & Shinichi Nakagawa$^2$
+<p style="text-align: center;">Daniel W.A. Noble$^1$, Fonti Kar$^2$, Frank Seebacher$^3$, Alex Bush$^4$, & Shinichi Nakagawa$^2$</p>
+
 
 #### Affliations:
 $^1$ Division of Ecology and Evolution, Research School of Biology, The Australian National University, Canberra, ACT 2600, Australia
@@ -1570,27 +1571,31 @@ if(rerun){
 
 ### *Does climate variability predict acclimation capacity among aquatic and terrestrial ectotherms?*
 
-```{r, fig8, fig.align='center', fig.cap= "Bubble plot environment lnRR for wild populations by habitat"}
-
+```{r}
+#| label: fig-fig8
+#| fig-align: center
+#| fig-cap: Bubble plot environment lnRR for wild populations by habitat
  col <- c("#0871B9", "#F3B40D", "#1BB908")
 p8.1 <- bubble_plot(model3.9, mod = "cv_c", group = "record_num", by = "habitat", data = lnRRQ10_data_wild_acclim, ylab = TeX("$lnRR_{Q_{10}}$"), xlab = "Thermal Coefficient of Variation (CV)", condition.nrow = 1) + theme_classic() + theme(legend.position = "none", strip.background = element_blank())  + scale_fill_manual(values = c(col))
 
 p8.2 <- bubble_plot(model3.8, mod = "acf_all_c", group = "record_num", by = "habitat", data = lnRRQ10_data_wild_acclim, ylab = TeX("$lnRR_{Q_{10}}$"), xlab = "Thermal Predictability", condition.nrow = 1) + theme_classic() + theme(legend.position = "bottom", strip.background = element_blank(), strip.text = element_blank())+ scale_fill_manual(values = c(col))
 
 p8.1.2 <- p8.1 / p8.2
-
+p8.1.2
 ggsave(p8.1.2, filename = "./output/figures/fig8.png")
 ```
 
-```{r, fig9, fig.align='center', fig.cap= "Bubble plot environment lnRR for wild populations by habitat"}
-
+```{r}
+#| label: fig-fig9
+#| fig-align: center
+#| fig-cap: Bubble plot environment lnRR for wild populations by habitat
  col <- c("#0871B9", "#F3B40D", "#1BB908")
 p9.1 <- bubble_plot(model4.9, mod = "cv_c", group = "record_num", by = "habitat", data = lnRRQ10_data_wild_acclim, ylab = TeX("$lnCVR_{Q_{10}}$"), xlab = "Thermal Coefficient of Variation (CV)", condition.nrow = 1, k.pos = "bottom.left") + theme_classic() + theme(legend.position = "none", strip.background = element_blank())  + scale_fill_manual(values = c(col))
 
 p9.2 <- bubble_plot(model4.8, mod = "acf_all_c", group = "record_num", by = "habitat", data = lnRRQ10_data_wild_acclim, ylab = TeX("$lnCVR_{Q_{10}}$"), xlab = "Thermal Predictability", condition.nrow = 1, k.pos = "bottom.left") + theme_classic() + theme(legend.position = "bottom", strip.background = element_blank(), strip.text = element_blank())+ scale_fill_manual(values = c(col))
 
 p91.2 <- p9.1 / p9.2
-
+p91.2
 ggsave(p91.2, filename = "./output/figures/fig9.png")
 ```
 
@@ -1639,7 +1644,7 @@ p6 <- bubble_plot(model3.5, mod = "cv_c", group  = "record_num", data = lnRRQ10_
 p7 <- bubble_plot(model3.6, mod = "acf_all_c", group  = "record_num", data = lnRRQ10_data_wild, ylab = TeX("$lnRR_{Q_{10}}$"), xlab = "Thermal Predictability") + theme(axis.title.y = element_blank()) +annotate("text", x = -3, y = 3, label = TeX(paste0("$\\beta = $", round(model3.6$b[3], 3), ", 95%CI: ", round(model3.6$ci.lb[3],3), " to ", round(model3.6$ci.ub[3], 3), "; P = ", round(model3.6$pval[3],3)))) + theme_classic() + theme(axis.text = element_text(size = 12), axis.title = element_text(size = 18))
   
 p67 <- (p6 | p7) + plot_annotation(tag_levels = "A")
-  
+p67
 ggsave(p67, filename = "./output/figures/fig6.png", height = 10, width = 30, units = "cm")
 ```
 
@@ -1652,7 +1657,7 @@ p8 <- bubble_plot(model4.5, mod = "cv_c", group  = "record_num", data = lnCVRQ10
 p9 <- bubble_plot(model4.6, mod = "acf_all_c", group  = "record_num", data = lnCVRQ10_data_wild, ylab = TeX("$lnCVR_{Q_{10}}$"), xlab = "Thermal Predictability", k = FALSE) + theme(axis.title.y = element_blank()) +annotate("text", x = -3, y = -5, label = TeX(paste0("$\\beta = $", round(model4.6$b[3], 3), ", 95%CI: ", round(model4.6$ci.lb[3],3), " to ", round(model4.6$ci.ub[3], 3), " P = ", round(model4.6$pval[3],3)))) + theme_classic() + theme(axis.text = element_text(size = 12), axis.title = element_text(size = 18)) + ylim(c(-6, 3))
   
 p89 <- (p8 | p9) + plot_annotation(tag_levels = "A")
-  
+p89
 ggsave(p89, filename = "./output/figures/fig7.png", height = 10, width = 30, units = "cm")
 ```
 

@@ -420,6 +420,14 @@ p_value <- function(x){
 #' @description Converts posterior distribution into a text statement for plotting
 #' @param post the posterior distribution as a vector
 #' 
- text <- function(post){
-      paste0("B = ", round(mean(post), 2), ", 95% CI: ", round(quantile(post, c(0.025, 0.975)[1]), 2), " to ", round(quantile(post, c(0.025, 0.975)[2]), 2))
+ text <- function(post, b = TRUE){
+      if(b){
+        paste0("B = ", round(mean(post), 2))
+      } else {
+        paste0("95% CI: ", round(quantile(post, c(0.025, 0.975)[1]), 2), " to ", round(quantile(post, c(0.025, 0.975)[2]), 2))
+      }
   }
+
+p_text <- function(post){
+   paste0("p = ", round(pmcmc(post), 2))
+}

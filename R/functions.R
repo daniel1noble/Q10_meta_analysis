@@ -415,3 +415,11 @@ p_value <- function(x){
   if(x >= 0.01) {tmp = round(x, digits =2)}
   return(tmp)
 }
+
+#' @title text
+#' @description Converts posterior distribution into a text statement for plotting
+#' @param post the posterior distribution as a vector
+#' 
+ text <- function(post){
+      paste0("B = ", round(mean(post), 2), ", 95% CI: ", round(quantile(post, c(0.025, 0.975)[1]), 2), " to ", round(quantile(post, c(0.025, 0.975)[2]), 2))
+  }

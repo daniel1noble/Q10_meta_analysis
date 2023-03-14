@@ -9,7 +9,7 @@ editor_options:
   chunk_output_type: console
 execute:
   freeze: auto  # re-render only when source changes
-  cache: true
+  cache: false
   echo: false
   warning: false
   error: false
@@ -1576,37 +1576,54 @@ if(rerun){
 #| fig-align: center
 #| fig-cap: Bubble plot environment lnRR for wild populations by habitat
 
-    # Add slopes and 95% CI to each panel
-    # CV
-    slope_f <-     posteriors[,"b_cv_c"]; pmcmc(slope_f); quantile(slope_f, c(0.025, 0.975))
-    slope_m <-     posteriors[,"b_cv_c"] + posteriors[,"b_cv_c:habitatm"]; pmcmc(slope_m); quantile(slope_m, c(0.025, 0.975))
-    slope_t <-     posteriors[,"b_cv_c"] + posteriors[,"b_cv_c:habitatt"]; pmcmc(slope_t); quantile(slope_t, c(0.025, 0.975))
-
-    # ACF
-    posteriors3.8 <- posterior_samples(model3.8_bayes, "^b") 
-        
-    slope_f_3.8 <- posteriors3.8[,"b_acf_all_c"]; pmcmc(slope_f_3.8); quantile(slope_f_3.8, c(0.025, 0.975))
-    slope_m_3.8 <- posteriors3.8[,"b_acf_all_c"] + posteriors3.8[,"b_acf_all_c:habitatm"]; pmcmc(slope_m_3.8); quantile(slope_m_3.8, c(0.025, 0.975))
-    slope_t_3.8 <- posteriors3.8[,"b_acf_all_c"] + posteriors3.8[,"b_acf_all_c:habitatt"]; pmcmc(slope_t_3.8); quantile(slope_t_3.8, c(0.025, 0.975))
-    
+size_axis = 18
+# CV
 dat_text <- data.frame(label = c(text(slope_f), text(slope_m), text(slope_t)),
+                      label2 = c(text(slope_f, b = FALSE), text(slope_m,b = FALSE), text(slope_t,b = FALSE)),
+                      p = c(p_text(slope_f), p_text(slope_m), p_text(slope_t)),
+                      title = c("Freshwater", "Marine", "Terrestrial"), 
                       condition = c("f", "m", "t"),
                       x = rep(1.2, 3),
                       y = rep(-1.2, 3))
  
  col <- c("#0871B9", "#F3B40D", "#1BB908")
-p8.1 <- bubble_plot(model3.9, mod = "cv_c", group = "record_num", by = "habitat", data = lnRRQ10_data_wild_acclim, ylab = TeX("$lnRR_{Q_{10}}$"), xlab = "Thermal Coefficient of Variation (CV)", condition.nrow = 1) + theme_classic() + theme(legend.position = "none", strip.background = element_blank())  + scale_fill_manual(values = c(col)) + geom_text(data = dat_text, aes(x = x, y = y, label = label), size = 7)
+p8.1 <- bubble_plot(model3.9, mod = "cv_c", group = "record_num", by = "habitat", data = lnRRQ10_data_wild_acclim, ylab = TeX("$lnRR_{Q_{10}}$"), xlab = "Thermal Coefficient of Variation (CV)", condition.nrow = 1) + 
+theme_classic() + 
+scale_fill_manual(values = c(col)) + 
+geom_text(data = dat_text, aes(x = x, y = y, label = label), size = 7) + 
+geom_text(data = dat_text, aes(x = x, y = y-0.2, label = label2), size = 7) +
+geom_text(data = dat_text, aes(x = x, y = y-0.4, label = p), size = 7) +
+geom_text(data = dat_text, aes(x = x, y = y+4, label = title), size = 7) + 
+theme(legend.position = "none", strip.background = element_blank(), strip.text = element_blank(),axis.text = element_text(size = size_axis), axis.title = element_text(size = size_axis)) 
 
+  # ACF
 dat_text2 <- data.frame(label = c(text(slope_f_3.8), text(slope_m_3.8), text(slope_t_3.8)),
+                      label2 = c(text(slope_f_3.8, b = FALSE), text(slope_m_3.8,b = FALSE), text(slope_t_3.8,b = FALSE)),
+                      p = c(p_text(slope_f_3.8), p_text(slope_m_3.8), p_text(slope_t_3.8)),
                       condition = c("f", "m", "t"),
-                      x = rep(1.2, 3),
+                      x = rep(-2.8, 3),
                       y = rep(-1.2, 3))
 
-p8.2 <- bubble_plot(model3.8, mod = "acf_all_c", group = "record_num", by = "habitat", data = lnRRQ10_data_wild_acclim, ylab = TeX("$lnRR_{Q_{10}}$"), xlab = "Thermal Predictability", condition.nrow = 1) + theme_classic() + theme(legend.position = "bottom", strip.background = element_blank(), strip.text = element_blank())+ scale_fill_manual(values = c(col)) geom_text(data = dat_text2, aes(x = x, y = y, label = label), size = 7)
+p8.2 <- bubble_plot(model3.8, mod = "acf_all_c", group = "record_num", by = "habitat", data = lnRRQ10_data_wild_acclim, ylab = TeX("$lnRR_{Q_{10}}$"), xlab = "Thermal Predictability", condition.nrow = 1, k = FALSE) + 
+theme_classic() + 
+scale_fill_manual(values = c(col)) + 
+geom_text(data = dat_text2, aes(x = x, y = y, label = label), size = 7) + 
+geom_text(data = dat_text2, aes(x = x, y = y-0.2, label = label2), size = 7) +
+geom_text(data = dat_text2, aes(x = x, y = y-0.4, label = p), size = 7) +
+theme(legend.position = "bottom", 
+      strip.background = element_blank(), 
+      strip.text = element_blank(), 
+      axis.text = element_text(size = size_axis), 
+      axis.title = element_text(size = size_axis),
+      legend.text = element_text(size = 16),
+      legend.title = element_text(size = 16))
 
-p8.1.2 <- p8.1 / p8.2
+p8.1.2 <- (p8.1 / p8.2) + plot_annotation(tag_levels = "A", tag_suffix = ")")
+
+ggsave(p8.1.2, width = 13, height = 12.5, filename = "./output/figures/fig8.png")
+
+  p8.1.2 <- image_read("./output/figures/fig8.png")
 p8.1.2
-ggsave(p8.1.2, filename = "./output/figures/fig8.png")
 ```
 
 ```{r}

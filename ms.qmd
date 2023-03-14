@@ -696,10 +696,15 @@ if(rerun){
     N <- lnCVRQ10_data %>% group_by(habitat, type) %>% summarise(n=n())
   
   # Calculated weighted mean by sample size. 
-    f_cvr_mean <- (f_acute_cvr*N[1,"n"][[1]] + f_acclim_cvr*N[2,"n"][[1]]) / sum(N[1:2, "n"]); pmcmc(f_cvr_mean)
-    m_cvr_mean <- (m_acute_cvr*N[3,"n"][[1]] + m_acclim_cvr*N[3,"n"][[1]]) / sum(N[3:4, "n"]); pmcmc(m_cvr_mean)
-    t_cvr_mean <- (t_acute_cvr*N[5,"n"][[1]] + t_acclim_cvr*N[6,"n"][[1]]) / sum(N[5:6, "n"]); pmcmc(t_cvr_mean)
-    
+    f_cvr_mean <- (f_acute_cvr * N[1,"n"][[1]] + f_acclim_cvr * N[2,"n"][[1]]) / sum(N[1:2, "n"]); pmcmc(f_cvr_mean)
+    m_cvr_mean <- (m_acute_cvr * N[3,"n"][[1]] + m_acclim_cvr * N[3,"n"][[1]]) / sum(N[3:4, "n"]); pmcmc(m_cvr_mean)
+    t_cvr_mean <- (t_acute_cvr * N[5,"n"][[1]] + t_acclim_cvr * N[6,"n"][[1]]) / sum(N[5:6, "n"]); pmcmc(t_cvr_mean)
+  
+  # Lets now convert these to a %
+  f_cvr_mean_ef  <- abs((exp(f_cvr_mean) - 1)*100) # ~8.4% reduction
+  m_cvr_mean_ef  <- abs((exp(m_cvr_mean) - 1)*100) # ~15% reduction
+  t_cvr_mean_ef  <- abs((exp(t_cvr_mean) - 1)*100) # ~30% reduction
+
 ```
 
 ```{r}
@@ -879,6 +884,9 @@ img_fig2
 
 
 ### *Does the opportunity for selection differ across terrestrial and aquatic ectotherms?*
+
+The opportunity for selection, as captured by $lnCVR_{Q_{10}}$, showed a decrease across all habitat types but were especially pronouced in terrestrial and marine ectotherms. Overall, there was a `r mean(t_cvr_mean_ef)`% (95% CI: `r quantile(t_cvr_mean_ef, 0.025)[1]` to `r quantile(t_cvr_mean_ef, 0.975)[1]`, $p_{mcmc}$ = `r pmcmc(t_cvr_mean)`) reduction in variation in physiological rates for terrestrial ectotherms and a `r mean(m_cvr_mean_ef)`% (95% CI: `r quantile(m_cvr_mean_ef, 0.025)[1]` to `r quantile(m_cvr_mean_ef, 0.975)[1]`, $p_{mcmc}$ = `r pmcmc(m_cvr_mean)`) reduction in variation for marine ectotherms when temperatures increase by 10$\deg$C. In contrast, freshwater ectotherms exhibited a much smaller reduction in physiologiocal rate variance at high temperatures (`r mean(f_cvr_mean_ef)`%, 95% CI: `r quantile(f_cvr_mean_ef, 0.025)[1]` to `r quantile(f_cvr_mean_ef, 0.975)[1]`, $p_{mcmc}$ = `r pmcmc(f_cvr_mean)`). 
+
 ```{r, wildlnRR10}
 #| cache: true
 #| include: false

@@ -556,7 +556,7 @@ Most of the effect size estimates came from measurements of metabolic rates (bot
 
 ### *Do terrestrial and aquatic ectotherms differ in their capacity to acclimate?*
 
-Overall, $lnRR_{Q_{10}}_{acclimation}$ and $lnRR_{Q_{10}}_{acute}$ differed by only `r mean(avg_change)`% across all habitats (95%CI: `r quantile(avg_change, c(0.025, 0.975))[1]` to `r quantile(avg_change, c(0.025, 0.975))[2]`%). Ectotherms in marine and freshwater environments showed partial compensation of physiological rates (@fig-1 B) amounting to reduced $lnRR_{Q_{10}}_{acclimation}$ of `r mean(change_f)`% (95% CI: `r quantile(change_f, c(0.025, 0.975))[1]` to `r quantile(change_f, c(0.025, 0.975))[2]`) in freshwater and `r mean(change_m)`% (95% CI: `r quantile(change_m, c(0.025, 0.975))[1]` to `r quantile(change_m, c(0.025, 0.975))[2]`) in marine environments. In contrast, terrestrial ectotherms showed no acclimation (possibly even inverse acclimation) -- showing a `r mean(change_t)`% increase in $lnRR_{Q_{10}}_{acclimation}$ (95% CI: `r quantile(change_t, c(0.025, 0.975))[1]` to `r quantile(change_t, c(0.025, 0.975))[2]`, @fig-1 B). Considering acute responses of animals acclimated to high temperatures are generally slightly elevated compared to cold acclimated animals (~7%; $\beta$ = `r model1.s1$b[3]`, 95% CI: `r model1.s1$ci.lb[3]` to `r model1.s1$ci.ub[3]`, p `r p_value(model1.s1$pval[3])`), acclimatization is not likely going to provide adaptive benefits under climate change. 
+Overall, $lnRR_{Q_{10}}_{acclimation}$ and $lnRR_{Q_{10}}_{acute}$ differed by only `r mean(avg_change)`% across all habitats (95%CI: `r quantile(avg_change, c(0.025, 0.975))[1]` to `r quantile(avg_change, c(0.025, 0.975))[2]`%). Ectotherms in marine and freshwater environments showed partial compensation of physiological rates (@fig-1 B) amounting to reduced $lnRR_{Q_{10}}_{acclimation}$ of `r mean(change_f)`% (95% CI: `r quantile(change_f, c(0.025, 0.975))[1]` to `r quantile(change_f, c(0.025, 0.975))[2]`) in freshwater and `r mean(change_m)`% (95% CI: `r quantile(change_m, c(0.025, 0.975))[1]` to `r quantile(change_m, c(0.025, 0.975))[2]`) in marine environments. In contrast, terrestrial ectotherms showed no acclimation (possibly even inverse acclimation) -- showing a `r mean(change_t)`% increase in $lnRR_{Q_{10}}_{acclimation}$ (95% CI: `r quantile(change_t, c(0.025, 0.975))[1]` to `r quantile(change_t, c(0.025, 0.975))[2]`, @fig-1 B). Considering acute responses of animals acclimated to high temperatures are generally slightly elevated compared to cold acclimated animals (~7%; $\beta$ = `r model1.s1$b[3]`, 95% CI: `r model1.s1$ci.lb[3]` to `r model1.s1$ci.ub[3]`, p `r p_value(model1.s1$pval[3])`), acclimatization is not likely going to provide adaptive benefits under climate change. Effect heterogeneity was nontheless high (only `r mean(tot_i2)`% of the variance was the resulting of sampling varianbility, 95% CI: `r quantile(tot_i2, 0.025)[1]` to `r quantile(tot_i2, 0.975)[1]`%), with most variance being explained by the specific study and type of trait (Study: `r mean(stdy_i2)`% , 95% CI: `r quantile(stdy_i2, 0.025)[1]` to `r quantile(stdy_i2, 0.975)[1]`%; Trait Type: `r mean(trait_i2)`% , 95% CI: `r quantile(trait_i2, 0.025)[1]` to `r quantile(trait_i2, 0.975)[1]`%). Evolutionary and species specific ecoloogy explained little variation in acute and acclimation repsonses (Species: `r mean(spp_i2)`% , 95% CI: `r quantile(spp_i2, 0.025)[1]` to `r quantile(spp_i2, 0.975)[1]`%; Phylogeny: `r mean(phylo_i2)`% , 95% CI: `r quantile(phylo_i2, 0.025)[1]` to `r quantile(phylo_i2, 0.975)[1]`%)
 
 
 ```{r, lncvrq10}
@@ -844,7 +844,7 @@ ptm <- orchard_plot(model1.3_m_het, mod = "trait_category", at = list(type = c("
                               "Metabolic_enzyme" = "Metabolic Enzymes",
                               "Rest_MR" = "Resting Metabolic Rate",
                               "Max_MR" = "Maximum Metabolic Rate",
-                              "Mito_oxidation" = "OXPHOS")) + theme_classic()
+                              "Mito_oxidation" = "OXPHOS")) + theme_classic() 
 #ptm$layers[[1]] <- NULL # Lets just remove the data point geom layer as it's too busy
 
 
@@ -1578,7 +1578,7 @@ if(rerun){
 
     # Add slopes and 95% CI to each panel
     # CV
-    slope_f <-  posteriors[,"b_cv_c"]; pmcmc(slope_f); quantile(slope_f, c(0.025, 0.975))
+    slope_f <-     posteriors[,"b_cv_c"]; pmcmc(slope_f); quantile(slope_f, c(0.025, 0.975))
     slope_m <-     posteriors[,"b_cv_c"] + posteriors[,"b_cv_c:habitatm"]; pmcmc(slope_m); quantile(slope_m, c(0.025, 0.975))
     slope_t <-     posteriors[,"b_cv_c"] + posteriors[,"b_cv_c:habitatt"]; pmcmc(slope_t); quantile(slope_t, c(0.025, 0.975))
 
@@ -1589,11 +1589,20 @@ if(rerun){
     slope_m_3.8 <- posteriors3.8[,"b_acf_all_c"] + posteriors3.8[,"b_acf_all_c:habitatm"]; pmcmc(slope_m_3.8); quantile(slope_m_3.8, c(0.025, 0.975))
     slope_t_3.8 <- posteriors3.8[,"b_acf_all_c"] + posteriors3.8[,"b_acf_all_c:habitatt"]; pmcmc(slope_t_3.8); quantile(slope_t_3.8, c(0.025, 0.975))
     
+dat_text <- data.frame(label = c(text(slope_f), text(slope_m), text(slope_t)),
+                      condition = c("f", "m", "t"),
+                      x = rep(1.2, 3),
+                      y = rep(-1.2, 3))
  
  col <- c("#0871B9", "#F3B40D", "#1BB908")
-p8.1 <- bubble_plot(model3.9, mod = "cv_c", group = "record_num", by = "habitat", data = lnRRQ10_data_wild_acclim, ylab = TeX("$lnRR_{Q_{10}}$"), xlab = "Thermal Coefficient of Variation (CV)", condition.nrow = 1) + theme_classic() + theme(legend.position = "none", strip.background = element_blank())  + scale_fill_manual(values = c(col))
+p8.1 <- bubble_plot(model3.9, mod = "cv_c", group = "record_num", by = "habitat", data = lnRRQ10_data_wild_acclim, ylab = TeX("$lnRR_{Q_{10}}$"), xlab = "Thermal Coefficient of Variation (CV)", condition.nrow = 1) + theme_classic() + theme(legend.position = "none", strip.background = element_blank())  + scale_fill_manual(values = c(col)) + geom_text(data = dat_text, aes(x = x, y = y, label = label), size = 7)
 
-p8.2 <- bubble_plot(model3.8, mod = "acf_all_c", group = "record_num", by = "habitat", data = lnRRQ10_data_wild_acclim, ylab = TeX("$lnRR_{Q_{10}}$"), xlab = "Thermal Predictability", condition.nrow = 1) + theme_classic() + theme(legend.position = "bottom", strip.background = element_blank(), strip.text = element_blank())+ scale_fill_manual(values = c(col))
+dat_text2 <- data.frame(label = c(text(slope_f_3.8), text(slope_m_3.8), text(slope_t_3.8)),
+                      condition = c("f", "m", "t"),
+                      x = rep(1.2, 3),
+                      y = rep(-1.2, 3))
+
+p8.2 <- bubble_plot(model3.8, mod = "acf_all_c", group = "record_num", by = "habitat", data = lnRRQ10_data_wild_acclim, ylab = TeX("$lnRR_{Q_{10}}$"), xlab = "Thermal Predictability", condition.nrow = 1) + theme_classic() + theme(legend.position = "bottom", strip.background = element_blank(), strip.text = element_blank())+ scale_fill_manual(values = c(col)) geom_text(data = dat_text2, aes(x = x, y = y, label = label), size = 7)
 
 p8.1.2 <- p8.1 / p8.2
 p8.1.2

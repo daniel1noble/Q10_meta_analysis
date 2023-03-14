@@ -250,7 +250,13 @@ Second, we tested whether different life-stages are more or less likely to accli
 ### *Sensitivity Analyses*
 ### *Publication Bias*
 
-```{r lnrrq10, echo = FALSE, message=FALSE, warning=FALSE, results='hide'}
+```{r lnrrq10}
+#| echo: false
+#| cache: true
+#| message: false
+#| warning: false
+#| include: false
+
 #############
 ## lnRRQ10 ##
 #############
@@ -564,6 +570,7 @@ Overall, $lnRR_{Q_{10}}_{acclimation}$ and $lnRR_{Q_{10}}_{acute}$ differed by o
 #| warning: false
 #| error: false
 #| include: false
+#| cache: true
 
 #############
   ## lnCVRQ10
@@ -872,7 +879,12 @@ img_fig2
 
 
 ### *Does the opportunity for selection differ across terrestrial and aquatic ectotherms?*
-```{r, wildlnRR10, echo = FALSE, message=FALSE, warning=FALSE, results='hide'}
+```{r, wildlnRR10}
+#| cache: true
+#| include: false
+#| echo: false
+#| warning: false
+#| 
 #######################################
   ## lnRRQ10 from Wild Populations ##
 #######################################
@@ -1266,7 +1278,12 @@ if(rerun){
   
 ```
 
-```{r wildlncvr, echo = FALSE, message=FALSE, warning=FALSE, results='hide'}
+```{r wildlncvr}
+#| cache: true
+#| include: false
+#| echo: false
+#| warning: false
+#| 
 #######################################
   ## lnCVRQ10 from Wild Populations ##
 #######################################

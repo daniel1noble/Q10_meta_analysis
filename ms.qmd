@@ -15,11 +15,11 @@ execute:
   error: false
   include: true
 crossref:
-  fig-title: '**Fig**'
+  fig-title: 'Figure'
   fig-labels: arabic
-  title-delim: "**-**"
+  title-delim: "-"
   fig-prefix: "Figure"
-  tbl-labels: "**Table**"
+  tbl-labels: "Table"
 ---
 
 
@@ -1677,6 +1677,151 @@ One explanation for why terrestrial ectotherms show minimal acclimation capacity
 <br> 
 
 ## Supplemental Results and Figures
+
+
+```{r, lnvrq10}
+#| echo: false
+#| warning: false
+#| error: false
+#| include: false
+#| cache: true
+
+#############
+  ## lnVRQ10
+#############
+##################################################
+  # Organise the data and prune tree
+#################################################
+  lnVRQ10_data <- data_long2 %>% filter(grepl("lnVR", name) & !is.na(effect_size) & !is.na(V) & !V == 0) %>% 
+                              mutate(spp = species_full, c_accl_time = acclim_period - mean(acclim_period, na.rm = TRUE))
+
+# Check and prune tree
+  tree_lnVR <- tree_checks(data = lnVRQ10_data, tree = tree_p0.7, dataCol = "species_full", type = "prune")
+  tree_checks(data = lnVRQ10_data, tree = tree_lnVR, dataCol = "species_full", type = "check") # Good
+
+# Create the phylo correlation matrix
+  phylo_cor_VR <- vcv(tree_lnVR, cor = TRUE)
+          A_VR <- vcv(tree_lnVR, cor = FALSE) # For bayes, need cov matrix
+
+# Found some other data entry problems from old dataset. Sample sizes are decimals. That's not correct. It has to be an integer. Need to check. These are not the new data that we entered. 
+  #hist(lnVRQ10_data$V)
+
+# Studies with big V, why? Check N
+  lnVRQ10_data %>% filter(V >= 2)
+
+###################################################
+  # Model 3.1: Intercept only model.
+  # Used for heterogeneity analysis
+###################################################
+rerun = TRUE
+if(rerun){
+  model3.1 <- metafor::rma.mv(effect_size ~ 1, V = V, 
+                              random = list(~1 | record_num,
+                                            ~1 | species_full,
+                                            ~1 | spp,
+                                            ~1 | trait,
+                                            ~1 | obs),
+                              R = list(species_full = phylo_cor_VR), dfs = "contain", 
+                              test = "t", data = lnVRQ10_data) 
+  
+  model3.1_bayes <- brms::brm(effect_size | se(sqrt(V), sigma = TRUE) ~  1 + (~1 | record_num) + (1 | gr(species_full, cov = A_VR)) + (1 | spp) + (1|trait), data2 = list(A_VR=A_VR), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 4, data = lnVRQ10_data)
+  
+  # Save model1.1
+  saveRDS(model3.1, file = "./output/models/lnVRQ10_3.1")
+  saveRDS(model3.1_bayes, file = "./output/models/lnVRQ10_3.1_bayes")
+} else{ 
+        model3.1 <- readRDS("./output/models/lnVRQ10_3.1")
+  model3.1_bayes <- readRDS("./output/models/lnVRQ10_3.1_bayes")
+  }
+
+# Heterogeneity analysis
+   w_VR <- with(lnVRQ10_data, 1/V) # weights
+  sv_VR <- sum(w_VR*(dim(lnVRQ10_data)[1]-1)) / (sum(w_VR)^2 + sum(w_VR^2))
+
+# extract posterior sds, but square them to turn to variance
+  posteriors_3.1 <- posterior_samples(model3.1_bayes, pars = c("^sd", "sigma"))^2
+  colnames(posteriors_3.1) <- gsub("__Intercept", "", colnames(posteriors_3.1))
+  colnames(posteriors_3.1) <- gsub("sd_", "", colnames(posteriors_3.1))
+  
+    res_VR <- posteriors_3.1[,"sigma"]
+   stdy_VR <- posteriors_3.1[,"record_num"]
+  phylo_VR <- posteriors_3.1[,"species_full"]
+    spp_VR <- posteriors_3.1[,"spp"]
+  trait_VR <- posteriors_3.1[,"trait"]
+  total_VR <- phylo_VR + spp_VR + res_VR + sv_VR + stdy_VR + trait_VR
+ 
+  # Calculate I2
+     tot_i2_VR <- (sv_VR / total_VR)*100    ; mean(tot_i2_VR)  ; quantile(tot_i2_VR, c(0.025, 0.975))
+   phylo_i2_VR <- (phylo_VR / total_VR)*100 ; mean(phylo_i2_VR); quantile(phylo_i2_VR, c(0.025, 0.975))
+     spp_i2_VR <- (spp_VR / total_VR)*100   ; mean(spp_i2_VR)  ; quantile(spp_i2_VR, c(0.025, 0.975))
+    stdy_i2_VR <- (stdy_VR / total_VR)*100  ; mean(stdy_i2_VR) ; quantile(stdy_i2_VR, c(0.025, 0.975))
+   trait_i2_VR <- (trait_VR / total_VR)*100 ; mean(trait_i2_VR); quantile(trait_i2_VR, c(0.025, 0.975))
+     res_i2_VR <- (res_VR / total_VR)*100   ; mean(res_i2_VR)  ; quantile(res_i2_VR, c(0.025, 0.975))
+  
+  # Table
+     i2_lnVR <- data.frame(name = c("Phylogeny", "Species", "Study", "Trait"),
+                           est = c(mean(phylo_i2_VR),mean(spp_i2_VR), mean(stdy_i2_VR), mean(trait_i2_VR)),
+                           lci = c(quantile(phylo_i2_VR, c(0.025, 0.975))[1], quantile(spp_i2_VR, c(0.025, 0.975))[1],
+                                   quantile(stdy_i2_VR, c(0.025, 0.975))[1], quantile(trait_i2_VR, c(0.025, 0.975))[1]),
+                           uci = c(quantile(phylo_i2_VR, c(0.025, 0.975))[2], quantile(spp_i2_VR, c(0.025, 0.975))[2],
+                                   quantile(stdy_i2_VR, c(0.025, 0.975))[2], quantile(trait_i2_VR, c(0.025, 0.975))[2]))  
+  
+###################################################
+  # Model 3.2: Model controlling for acclimation time, 
+  # type and habitat assuming type can vary by habitat
+###################################################
+
+if(rerun){
+  # More realistic model 
+  model3.2 <- metafor::rma.mv(effect_size ~  c_accl_time + type + habitat + type:habitat, V = V, 
+                              random = list(~1 | record_num,
+                                            ~1 | species_full,
+                                            ~1 | spp,
+                                            ~1 | trait,
+                                            ~1 | obs),
+                              R = list(species_full = phylo_cor_VR), dfs = "contain", 
+                              test = "t", data = lnVRQ10_data)
+  
+   model3.2_bayes <- brms::brm(effect_size | se(sqrt(V), sigma = TRUE) ~  c_accl_time + type + habitat + type:habitat + (~1 | record_num) + (1 | gr(species_full, cov = A_VR)) + (1 | spp) + (1|trait), data2 = list(A_VR=A_VR), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 4, data = lnVRQ10_data)
+                                  
+  # Save model1.2
+  saveRDS(model3.2, file = "./output/models/lnVRQ10_3.2")
+  saveRDS(model3.2_bayes, file = "./output/models/lnVRQ10_3.2_bayes")
+
+  } else{
+        model3.2 <- readRDS("./output/models/lnVRQ10_3.2")
+  model3.2_bayes <- readRDS("./output/models/lnVRQ10_3.2_bayes")
+}
+
+######################################################
+  # Bayesian Contrasts
+######################################################
+
+  posteriors_3.2 <- posterior_samples(model3.2_bayes, pars = "^b")
+  f_acute_VR  <- posteriors_3.2[,"b_Intercept"]; pmcmc(f_acute_VR)
+  f_acclim_VR <- posteriors_3.2[,"b_Intercept"] + posteriors_3.2[,"b_typeacclim"]
+  m_acute_VR  <- posteriors_3.2[,"b_Intercept"] + posteriors_3.2[,"b_habitatm"]
+  m_acclim_VR <- posteriors_3.2[,"b_Intercept"] + posteriors_3.2[,"b_habitatm"] + posteriors_3.2[,"b_typeacclim"] + posteriors_3.2[,"b_typeacclim:habitatm"]
+  t_acute_VR  <- posteriors_3.2[,"b_Intercept"] + posteriors_3.2[,"b_habitatt"]
+  t_acclim_VR <- posteriors_3.2[,"b_Intercept"] + posteriors_3.2[,"b_habitatt"] + posteriors_3.2[,"b_typeacclim"] + posteriors_3.2[,"b_typeacclim:habitatt"]
+
+# We'll take the marginalised mean for each type as there is no difference between acclimation and acute really except for in freshwater, but this effect size is so tiny. It's a 10% reduction at high temps and acclim is only a 2% reduction in variance at high temps.
+  # First get sample sizes
+    N <- lnVRQ10_data %>% group_by(habitat, type) %>% summarise(n=n())
+  
+  # Calculated weighted mean by sample size. 
+    f_VR_mean <- (f_acute_VR * N[1,"n"][[1]] + f_acclim_VR * N[2,"n"][[1]]) / sum(N[1:2, "n"]); pmcmc(f_VR_mean)
+    m_VR_mean <- (m_acute_VR * N[3,"n"][[1]] + m_acclim_VR * N[3,"n"][[1]]) / sum(N[3:4, "n"]); pmcmc(m_VR_mean)
+    t_VR_mean <- (t_acute_VR * N[5,"n"][[1]] + t_acclim_VR * N[6,"n"][[1]]) / sum(N[5:6, "n"]); pmcmc(t_VR_mean)
+  
+  # Lets now convert these to a %
+    f_VR_mean_ef  <- abs((exp(f_VR_mean) - 1)*100) # ~8.4% reduction
+    m_VR_mean_ef  <- abs((exp(m_VR_mean) - 1)*100) # ~15% reduction
+    t_VR_mean_ef  <- abs((exp(t_VR_mean) - 1)*100) # ~30% reduction
+
+```
+
+
 
 ```{r}
 #| label: fig-fig4

@@ -701,9 +701,9 @@ if(rerun){
     t_cvr_mean <- (t_acute_cvr * N[5,"n"][[1]] + t_acclim_cvr * N[6,"n"][[1]]) / sum(N[5:6, "n"]); pmcmc(t_cvr_mean)
   
   # Lets now convert these to a %
-  f_cvr_mean_ef  <- abs((exp(f_cvr_mean) - 1)*100) # ~8.4% reduction
-  m_cvr_mean_ef  <- abs((exp(m_cvr_mean) - 1)*100) # ~15% reduction
-  t_cvr_mean_ef  <- abs((exp(t_cvr_mean) - 1)*100) # ~30% reduction
+    f_cvr_mean_ef  <- abs((exp(f_cvr_mean) - 1)*100) # ~8.4% reduction
+    m_cvr_mean_ef  <- abs((exp(m_cvr_mean) - 1)*100) # ~15% reduction
+    t_cvr_mean_ef  <- abs((exp(t_cvr_mean) - 1)*100) # ~30% reduction
 
 ```
 

@@ -1615,10 +1615,10 @@ dat_text <- data.frame(label = c(text(slope_f), text(slope_m), text(slope_t)),
 p8.1 <- bubble_plot(model3.9, mod = "cv_c", group = "record_num", by = "habitat", data = lnRRQ10_data_wild_acclim, ylab = TeX("$lnRR_{Q_{10}}$"), xlab = "Thermal Coefficient of Variation (CV)", condition.nrow = 1) + 
 theme_classic() + 
 scale_fill_manual(values = c(col)) + 
-geom_text(data = dat_text, aes(x = x, y = y, label = label), size = 7) + 
-geom_text(data = dat_text, aes(x = x, y = y-0.2, label = label2), size = 7) +
-geom_text(data = dat_text, aes(x = x, y = y-0.4, label = p), size = 7) +
-geom_text(data = dat_text, aes(x = x, y = y+4, label = title), size = 7) + 
+geom_text(data = dat_text, aes(x = x, y = y, label = label), size = 5) + 
+geom_text(data = dat_text, aes(x = x, y = y-0.3, label = label2), size = 5) +
+geom_text(data = dat_text, aes(x = x, y = y-0.6, label = p), size = 5) +
+geom_text(data = dat_text, aes(x = x, y = y+4, label = title), size = 5) + 
 theme(legend.position = "none", strip.background = element_blank(), strip.text = element_blank(),axis.text = element_text(size = size_axis), axis.title = element_text(size = size_axis)) 
 
   # ACF
@@ -1632,9 +1632,9 @@ dat_text2 <- data.frame(label = c(text(slope_f_3.8), text(slope_m_3.8), text(slo
 p8.2 <- bubble_plot(model3.8, mod = "acf_all_c", group = "record_num", by = "habitat", data = lnRRQ10_data_wild_acclim, ylab = TeX("$lnRR_{Q_{10}}$"), xlab = "Thermal Predictability", condition.nrow = 1, k = FALSE) + 
 theme_classic() + 
 scale_fill_manual(values = c(col)) + 
-geom_text(data = dat_text2, aes(x = x, y = y, label = label), size = 7) + 
-geom_text(data = dat_text2, aes(x = x, y = y-0.2, label = label2), size = 7) +
-geom_text(data = dat_text2, aes(x = x, y = y-0.4, label = p), size = 7) +
+geom_text(data = dat_text2, aes(x = x, y = y, label = label), size = 5) + 
+geom_text(data = dat_text2, aes(x = x, y = y-0.3, label = label2), size = 5) +
+geom_text(data = dat_text2, aes(x = x, y = y-0.65, label = p), size = 5) +
 theme(legend.position = "bottom", 
       strip.background = element_blank(), 
       strip.text = element_blank(), 
@@ -1643,12 +1643,12 @@ theme(legend.position = "bottom",
       legend.text = element_text(size = 16),
       legend.title = element_text(size = 16))
 
-p8.1.2 <- (p8.1 / p8.2) + plot_annotation(tag_levels = "A", tag_suffix = ")")
+p8.1.2 <- (p8.1 / p8.2) + plot_annotation(tag_levels = "A", tag_suffix = ")") & theme(plot.tag = element_text(size = 20))
 
-ggsave(p8.1.2, width = 13, height = 12.5, filename = "./output/figures/fig8.png")
+ggsave(p8.1.2, width = 8.2, height = 8.7, filename = "./output/figures/fig8.png")
 
   p8.1.2 <- image_read("./output/figures/fig8.png")
-p8.1.2
+  p8.1.2 
 ```
 
 ```{r}

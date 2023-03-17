@@ -247,8 +247,9 @@ We first tested the degree to which acute and acclimation $lnRR_{Q_{10}}$ and $l
 
 Second, we tested whether different life-stages are more or less likely to acclimate by fitting a model for each habitat type and including an interaction between life-stage ('adult' or 'juvenile') and effect type. We predicted that acclimation responses would be more likely early in development compared to later in development, but that this should depend on the habitat type given the different constraints faced by different early life stages across major habitat types. 
 
-### *Sensitivity Analyses*
 ### *Publication Bias*
+
+We explored the possibility for publication bias graphically, using funnel plots, and more formally by including in our meta-regression models sampling varinace and publication year [@Nakagawa2021-uf]. Funnel plot asymetry may suggest a 'file-drawer' form of publication bias whereby low-powered studies are less likely to be published. However, asymetry can also result form high hetereogenity. As such, testing (and correcting) for publication bias using a meta-regression approach can attempt to counteract bias that maybe driven by high hetereogneity. In addition, time-lag bias is very common, whereby effect magnitude declines through time with the publication of more studies, often of higher power [@Yang2022-qw]. 
 
 ```{r lnrrq10}
 #| echo: false
@@ -1856,7 +1857,7 @@ Analysis of $lnVR_{Q_{10}}$ suggested that variance increases with higher temper
           axis.text = element_text(size = 15), legend.text = element_text(size = 15),
           legend.title = element_text(size = 15))
   
-  ggsave(p3, filename = "./output/figures/figS1.pdf", width = 10, height = 8)
+  ggsave(p3, filename = "./output/figures/figS1.pdf", width = 11.5, height = 8)
 
   figs1 <- image_read("./output/figures/figS1.pdf")
   figs1

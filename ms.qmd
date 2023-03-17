@@ -1035,7 +1035,7 @@ if(rerun){
   
 ################################################################
   # Model 3.5: Environmental variability  model
-################################################################
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  ################################################################
   if(rerun){
   # More realistic model with 
   model3.5          <- metafor::rma.mv(effect_size ~ c_accl_time + cv_c + type, V = V,

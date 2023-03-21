@@ -1719,7 +1719,7 @@ One explanation for why terrestrial ectotherms show minimal acclimation capacity
 <br> 
 
 ## Supplemental Results and Figures
-
+ 
 
 ```{r, lnvrq10}
 #| echo: false

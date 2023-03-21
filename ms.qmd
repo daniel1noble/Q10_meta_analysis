@@ -769,6 +769,7 @@ if(rerun){
                 scale_fill_viridis(alpha = 0.6) + labs(fill="# of Effects")
    
 ggsave(filename = "fig1a_unedited.pdf", path = "./output/figures/", phylo, device = "pdf", width = 10, height = 9, units = "in")
+
 ##################
   # Figure 1b plot
 ##################
@@ -814,8 +815,7 @@ annotate("text", x = 3.01, y = 4.60,
 
   ggsave(p1.2, filename = "./output/figures/fig1.pdf", width = 11.5, height = 8)
   ggsave(p1.2.2, filename = "./output/figures/fig1.1.pdf")
-  
-  
+   
 ##################
   # Figure 1c plot
 ################## 
@@ -836,7 +836,6 @@ annotate("text", x = 3.01, y = 4.60,
            label =paste0(round(mean(exp(t_cvr_mean)-1)*100, 2), "%"), hjust = 0, size = 6) + labs(shape = "Type") +
     annotate("text", x = 3.15, y = -3.7, label = paste0("P = ", round(pmcmc(t_cvr_mean), digit = 3)), hjust = 0, size = 6) + scale_fill_manual(values = c(col))
    
-  
   p2 <- p2 + theme_classic() + theme(axis.title  = element_text(size = 24),
           axis.text = element_text(size = 15))
      p2.2 <- p2 + ylim(c(-0.5,0.10)) + theme(legend.position = 'none')
@@ -925,6 +924,7 @@ phylo_cor_wild <- vcv(tree_lnrr_wild, cor = TRUE)
 # Scale data
         lnRRQ10_data_wild <- lnRRQ10_data_wild %>% mutate(cv_c = scale(cv),
                                                           acf_all_c = scale(acf_all))
+
 ###################################################
   # Model 3.2: Model controlling for acclimation time, 
   # type and habitat assuming type can vary by habitat
@@ -986,7 +986,7 @@ if(rerun){
   #  acclim 
 ####################################################
   rerun = FALSE
-if(rerun){
+  if(rerun){
   # More realistic model with 
   model3.3          <- metafor::rma.mv(effect_size ~ c_accl_time + cv_c + type + type:cv_c, V = V,
                                        random = list(~1 | record_num,
@@ -1035,7 +1035,7 @@ if(rerun){
   
 ################################################################
   # Model 3.5: Environmental variability  model
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  ################################################################
+################################################################
   if(rerun){
   # More realistic model with 
   model3.5          <- metafor::rma.mv(effect_size ~ c_accl_time + cv_c + type, V = V,
@@ -1326,6 +1326,7 @@ phylo_cor_wild_cvr <- vcv(tree_lncvr_wild, cor = TRUE)
 # Scale environment variables
     lnCVRQ10_data_wild <- lnCVRQ10_data_wild %>% mutate(     cv_c = scale(cv),
                                                         acf_all_c = scale(acf_all))
+
 ###################################################
   # Model 4.2: Model controlling for acclimation time, 
   # type and habitat assuming type can vary by habitat
@@ -1508,7 +1509,6 @@ if(rerun){
   #model4.7_bayes <- readRDS("./output/models/lnCVRQ10_4.7_bayes")
   }
   
-  
 ############################################################################################
   # Model 4.8: Acclimatization lnCVRQ10 only. Test if environmental predictability explains 
   # differently in each habitat
@@ -1546,8 +1546,7 @@ phylo_cor_wild_acclim <- vcv(tree_lncvr_wild_acclim, cor = TRUE)
         model4.8 <- readRDS("./output/models/lnRRQ10_4.8")
   model4.8_bayes <- readRDS("./output/models/lnRRQ10_4.8_bayes")
 }
-  
-        
+     
 #################################################
 ### Bayesian Slopes from Model 4.8
 #################################################
@@ -1583,8 +1582,7 @@ if(rerun){
         model4.9 <- readRDS("./output/models/lnRRQ10_4.9")
   model4.9_bayes <- readRDS("./output/models/lnRRQ10_4.9_bayes")
 }
-               
-    
+                  
 #################################################
 ### Bayesian Slopes from Model 4.9
 #################################################
@@ -1720,7 +1718,7 @@ One explanation for why terrestrial ectotherms show minimal acclimation capacity
 
 ## Supplemental Results and Figures
  
-
+#### Comparing raw variance changes using $lnVR_{Q_{10}}$
 ```{r, lnvrq10}
 #| echo: false
 #| warning: false
@@ -1902,6 +1900,24 @@ Analysis of $lnVR_{Q_{10}}$ suggested that variance increases with higher temper
 
   figs1 <- image_read("./output/figures/figS1.pdf")
   figs1
+```
+
+#### Publicaton Bias Analysis
+
+We compared 
+
+```{r}
+#| label: fig-figs2
+#| fig-cap: Funnel plots of sampling error variance agaist effect size for a) $lnRR_{Q_{10}}$, b) $lnCVR_{Q_{10}}$ and c) $lnVR_{Q_{10}}$.
+cols <- c("#2ECC71", "#FFC300")
+ps2_1 <- ggplot(lnRRQ10_data, aes(y = 1/sqrt(V), x = effect_size, color = type)) + geom_point() + theme_classic() + labs(y = TeX("Precision\\ $\\left( \\frac{1}{\\sqrt{V}} \\right)$"), x = TeX("$lnRR_{Q_{10}}$"))+geom_vline(xintercept = 0, linetype = 3) + theme(legend.title  = element_text(size = 15), legend.text = element_text(size = 15), axis.title = element_text(size = 15), axis.text = element_text(size = 15), legend.position = "none")
+
+ps2_2 <- ggplot(lnCVRQ10_data, aes(y = 1/sqrt(V), x = effect_size, color = type)) + geom_point() + theme_classic() + labs(y = TeX("Precision\\ $\\left( \\frac{1}{\\sqrt{V}} \\right)$"), x = TeX("$lnCVR_{Q_{10}}$"))+geom_vline(xintercept = 0, linetype = 3) + theme(legend.title  = element_text(size = 15), legend.text = element_text(size = 15), axis.title = element_text(size = 15), axis.text = element_text(size = 15), legend.position = "none", axis.title.y = element_blank())
+
+ps2_3 <- ggplot(lnVRQ10_data, aes(y = 1/sqrt(V), x = effect_size, color = type)) + geom_point() + theme_classic() + labs(y = TeX("Precision\\ $\\left( \\frac{1}{\\sqrt{V}} \\right)$"), x = TeX("$lnVR_{Q_{10}}$"))+geom_vline(xintercept = 0, linetype = 3) + theme(legend.title  = element_text(size = 15), legend.text = element_text(size = 15), axis.title = element_text(size = 15), axis.text = element_text(size = 15),  axis.title.y = element_blank())
+
+(ps2_1 | ps2_2 | ps2_3) + plot_annotation(tag_levels = "A", tag_suffix = ")")
+
 ```
 
 ```{r}

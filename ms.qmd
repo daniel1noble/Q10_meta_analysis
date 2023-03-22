@@ -1904,20 +1904,23 @@ Analysis of $lnVR_{Q_{10}}$ suggested that variance increases with higher temper
 
 #### Publicaton Bias Analysis
 
-We compared 
+Funnel plots did not show any noticable deviation from the typical funnel shape for any of the effect size estimates (@fig-figs2). 
 
 ```{r}
 #| label: fig-figs2
-#| fig-cap: Funnel plots of sampling error variance agaist effect size for a) $lnRR_{Q_{10}}$, b) $lnCVR_{Q_{10}}$ and c) $lnVR_{Q_{10}}$.
+#| fig-cap: Funnel plot of precision (1/sampling standard error) against effect size for A) log response ratio $Q_{10}$ ($lnRR_{Q_{10}}$), B)log coefficient of variance ratio $Q_{10}$ ($lnCVR_{Q_{10}}$) and C) log variance ratio $Q_{10}$ ($lnVR_{Q_{10}}$). Both acute ('green') and acclimation ('orange') effect sizes are plotted.
 cols <- c("#2ECC71", "#FFC300")
-ps2_1 <- ggplot(lnRRQ10_data, aes(y = 1/sqrt(V), x = effect_size, color = type)) + geom_point() + theme_classic() + labs(y = TeX("Precision\\ $\\left( \\frac{1}{\\sqrt{V}} \\right)$"), x = TeX("$lnRR_{Q_{10}}$"))+geom_vline(xintercept = 0, linetype = 3) + theme(legend.title  = element_text(size = 15), legend.text = element_text(size = 15), axis.title = element_text(size = 15), axis.text = element_text(size = 15), legend.position = "none")
+ps2_1 <- ggplot(lnRRQ10_data, aes(y = 1/sqrt(V), x = effect_size, color = type)) + geom_point() + theme_classic() + labs(y = TeX("Precision\\ $\\left( \\frac{1}{\\sqrt{V}} \\right)$"), x = TeX("$lnRR_{Q_{10}}$"))+geom_vline(xintercept = 0, linetype = 3) + theme(legend.title  = element_text(size = 15), legend.text = element_text(size = 15), axis.title = element_text(size = 15), axis.text = element_text(size = 15), legend.position = "none") + scale_color_manual(name = "Type", values = cols)
 
-ps2_2 <- ggplot(lnCVRQ10_data, aes(y = 1/sqrt(V), x = effect_size, color = type)) + geom_point() + theme_classic() + labs(y = TeX("Precision\\ $\\left( \\frac{1}{\\sqrt{V}} \\right)$"), x = TeX("$lnCVR_{Q_{10}}$"))+geom_vline(xintercept = 0, linetype = 3) + theme(legend.title  = element_text(size = 15), legend.text = element_text(size = 15), axis.title = element_text(size = 15), axis.text = element_text(size = 15), legend.position = "none", axis.title.y = element_blank())
+ps2_2 <- ggplot(lnCVRQ10_data, aes(y = 1/sqrt(V), x = effect_size, color = type)) + geom_point() + theme_classic() + labs(y = TeX("Precision\\ $\\left( \\frac{1}{\\sqrt{V}} \\right)$"), x = TeX("$lnCVR_{Q_{10}}$"))+geom_vline(xintercept = 0, linetype = 3) + theme(legend.title  = element_text(size = 15), legend.text = element_text(size = 15), axis.title = element_text(size = 15), axis.text = element_text(size = 15), legend.position = "none", axis.title.y = element_blank())+ scale_color_manual(name = "Type", values = cols)
 
-ps2_3 <- ggplot(lnVRQ10_data, aes(y = 1/sqrt(V), x = effect_size, color = type)) + geom_point() + theme_classic() + labs(y = TeX("Precision\\ $\\left( \\frac{1}{\\sqrt{V}} \\right)$"), x = TeX("$lnVR_{Q_{10}}$"))+geom_vline(xintercept = 0, linetype = 3) + theme(legend.title  = element_text(size = 15), legend.text = element_text(size = 15), axis.title = element_text(size = 15), axis.text = element_text(size = 15),  axis.title.y = element_blank())
+ps2_3 <- ggplot(lnVRQ10_data, aes(y = 1/sqrt(V), x = effect_size, color = type)) + geom_point() + theme_classic() + labs(y = TeX("Precision\\ $\\left( \\frac{1}{\\sqrt{V}} \\right)$"), x = TeX("$lnVR_{Q_{10}}$"))+geom_vline(xintercept = 0, linetype = 3) + theme(legend.title  = element_text(size = 15), legend.text = element_text(size = 15), axis.title = element_text(size = 15), axis.text = element_text(size = 15),  axis.title.y = element_blank())+ scale_color_manual(name = "Type", values = cols)
 
-(ps2_1 | ps2_2 | ps2_3) + plot_annotation(tag_levels = "A", tag_suffix = ")")
+figs2 <- (ps2_1 | ps2_2 | ps2_3) + plot_annotation(tag_levels = "A", tag_suffix = ")") & theme(plot.tag = element_text(size = 20))
+ggsave(figs2, width = 11.5, height = 4.8, filename = "./output/figures/figS2.png")
 
+figs2 <- image_read("./output/figures/figS2.png")
+figs2
 ```
 
 ```{r}

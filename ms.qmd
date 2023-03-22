@@ -249,7 +249,7 @@ Second, we tested whether different life-stages are more or less likely to accli
 
 ### *Publication Bias*
 
-We explored the possibility for publication bias graphically, using funnel plots, and more formally by including in our meta-regression models sampling variance (or sampling standard error) and publication year [@Nakagawa2021-gy]. Funnel plot asymetry may suggest a form of publication called a 'file-drawer' effect whereby low-powered studies are less likely to be published. However, asymetry can also result form high hetereogenity. As such, testing (and correcting) for publication bias using a meta-regression approach can attempt to counteract bias that maybe driven by high effect hetereogneity. In addition, a second form of publication bias, time-lag bias, is very common, whereby effect magnitude declines through time with the publication of more studies, often of higher power [@Yang2022-qw]. 
+We explored the possibility for publication bias graphically, using funnel plots, and more formally by including in our meta-regression models sampling variance (or sampling standard error) and publication year [@Nakagawa2022-gy]. Funnel plot asymetry may suggest a form of publication called a 'file-drawer' effect whereby low-powered studies are less likely to be published. However, asymetry can also result form high hetereogenity. As such, testing (and correcting) for publication bias using a meta-regression approach can attempt to counteract bias that maybe driven by high effect hetereogneity. In addition, a second form of publication bias, time-lag bias, is very common, whereby effect magnitude declines through time with the publication of more studies, often of higher power [@Yang2023-qw]. 
 
 ```{r lnrrq10}
 #| echo: false

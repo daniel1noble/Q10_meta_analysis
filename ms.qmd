@@ -1743,11 +1743,6 @@ One explanation for why terrestrial ectotherms show minimal acclimation capacity
   phylo_cor_VR <- vcv(tree_lnVR, cor = TRUE)
           A_VR <- vcv(tree_lnVR, cor = FALSE) # For bayes, need cov matrix
 
-# Found some other data entry problems from old dataset. Sample sizes are decimals. That's not correct. It has to be an integer. Need to check. These are not the new data that we entered. 
-  #hist(lnVRQ10_data$V)
-
-# Studies with big V, why? Check N
-  lnVRQ10_data %>% filter(V >= 2)
 
 ###################################################
   # Model 3.1: Intercept only model.
@@ -1862,10 +1857,10 @@ if(rerun){
 ```
 
 
-Analysis of $lnVR_{Q_{10}}$ suggested that variance increases with higher temperatures across all habitat types, with terrestrial ectotherms having the smallest increase in variance (@fig-lnvr). 
+Analysis of $lnVR_{Q_{10}}$ suggested that variance increases with higher temperatures across all habitat types, with terrestrial ectotherms having the smallest increase in variance (@fig-figs1). 
 
 ```{r}
-#| label: fig-lnvr
+#| label: fig-figs1
 #| fig-align: center
 #| fig-cap: lnVR
 
@@ -1902,6 +1897,26 @@ Analysis of $lnVR_{Q_{10}}$ suggested that variance increases with higher temper
   figs1
 ```
 
+#### Plots of $I^2$ for multi-level models
+```{r}
+#| label: fig-figs3
+#| fig-cap: I2 estimates
+#| fig-align: center
+
+ps3_1 <- ggplot(i2_lnrr, aes(x = est, y = name)) + xlim(0, 50) + geom_point(size = 5) + geom_errorbar(aes(xmin = lci, xmax = uci), width = 0.15) + theme_bw() + labs(x = "Percentage of Variation (%)") + theme(axis.title.y = element_blank(), axis.text = element_text(size = 20), axis.title = element_text(size = 24)) + geom_text(aes(label = paste0(round(est, 2), "% ", "[", round(lci, 2), " - ", round(uci, 2), "%]")), position = position_nudge(x = 5, y = 0.2)) + annotate("text", x = 30, y = 1.5, label = TeX(paste0("$I^2_{sv}$ = ", round(mean(tot_i2), 2), "%")), size = 10)
+
+ps3_2 <- ggplot(i2_lncvr, aes(x = est, y = name)) + xlim(0, 50) + geom_point(size = 5) + geom_errorbar(aes(xmin = lci, xmax = uci), width = 0.15) + theme_bw() + labs(x = "Percentage of Variation (%)") + theme(axis.title.y = element_blank(), axis.text = element_blank(), axis.title = element_text(size = 24)) + geom_text(aes(label = paste0(round(est, 2), "% ", "[", round(lci, 2), " - ", round(uci, 2), "%]")), position = position_nudge(x = 5, y = 0.2)) + annotate("text", x = 30, y = 1.5, label = TeX(paste0("$I^2_{sv}$ = ", round(mean(tot_i2_cvr), 2), "%")), size = 10)
+
+ps3_3 <- ggplot(i2_lnVR, aes(x = est, y = name)) + xlim(0, 50) + geom_point(size = 5) + geom_errorbar(aes(xmin = lci, xmax = uci), width = 0.15) + theme_bw() + labs(x = "Percentage of Variation (%)") + theme(axis.title.y = element_blank(), axis.text = element_blank(), axis.title = element_text(size = 24)) + geom_text(aes(label = paste0(round(est, 2), "% ", "[", round(lci, 2), " - ", round(uci, 2), "%]")), position = position_nudge(x = 5, y = 0.2)) + annotate("text", x = 30, y = 1.5, label = TeX(paste0("$I^2_{sv}$ = ", round(mean(tot_i2_cvr), 2), "%")), size = 10)
+
+figs3 <- (ps3_1 | ps3_2 | ps3_3) + plot_annotation(tag_levels = "A", tag_suffix = ")") & theme(plot.tag = element_text(size = 20))
+ggsave(figs3, width = 16, height = 5.7, filename = "./output/figures/figs3.png")
+
+figs3 <- image_read("./output/figures/figs3.png")
+figs3
+```
+
+
 #### Publicaton Bias Analysis
 
 Funnel plots did not show any noticable deviation from the typical funnel shape for any of the effect size estimates (@fig-figs2). 
@@ -1921,54 +1936,5 @@ ggsave(figs2, width = 11.5, height = 4.8, filename = "./output/figures/figS2.png
 
 figs2 <- image_read("./output/figures/figS2.png")
 figs2
-```
-
-```{r}
-#| label: fig-fig4
-#| fig-cap: I2 estimates
-#| fig-align: center
-
-p4 <- ggplot(i2_lnrr, aes(x = est, y = name)) + xlim(0, 50) + geom_point(size = 5) + geom_errorbar(aes(xmin = lci, xmax = uci), width = 0.15) + theme_bw() + labs(x = "Percentage of Variation (%)") + theme(axis.title.y = element_blank(), axis.text = element_text(size = 20), axis.title = element_text(size = 24)) + geom_text(aes(label = paste0(round(est, 2), "% ", "[", round(lci, 2), " - ", round(uci, 2), "%]")), position = position_nudge(x = 5, y = 0.2)) + annotate("text", x = 30, y = 1.5, label = TeX(paste0("$I^2_{sv}$ = ", round(mean(tot_i2), 2), "%")), size = 12)
-
-p4
-ggsave(p4, filename = "./output/figures/fig4.png")
-
-```
-
-```{r}
-#| label: fig-fig5
-#| fig-cap: I2 estimates lnCVR
-#| fig-align: center
-#| 
-p5 <- ggplot(i2_lncvr, aes(x = est, y = name)) + xlim(0, 50) + geom_point(size = 5) + geom_errorbar(aes(xmin = lci, xmax = uci), width = 0.15) + theme_bw() + labs(x = "Percentage of Variation (%)") + theme(axis.title.y = element_blank(), axis.text = element_text(size = 20), axis.title = element_text(size = 24)) + geom_text(aes(label = paste0(round(est, 2), "% ", "[", round(lci, 2), " - ", round(uci, 2), "%]")), position = position_nudge(x = 5, y = 0.2)) + annotate("text", x = 30, y = 1.5, label = TeX(paste0("$I^2_{sv}$ = ", round(mean(tot_i2_cvr), 2), "%")), size = 12)
-
-p5
-ggsave(p5, filename = "./output/figures/fig5.png")
-```
-
-```{r}
-#| label: fig-fig6
-#| fig-cap: Bubble plot environment lnRR wild populations
-#| fig-align: center
-p6 <- bubble_plot(model3.5, mod = "cv_c", group  = "record_num", data = lnRRQ10_data_wild, ylab = TeX("$lnRR_{Q_{10}}$"), xlab = "Thermal Coefficient of Variation (CV)") +annotate("text", x = 1, y = 3, label = TeX(paste0("$\\beta = $", round(model3.5$b[3], 3), ", 95%CI: ", round(model3.5$ci.lb[3],3), " to ", round(model3.5$ci.ub[3], 3), "; P = ", round(model3.5$pval[3],3)))) + theme_classic() + theme(legend.position = "none", axis.text = element_text(size = 12), axis.title = element_text(size = 18))
-
-p7 <- bubble_plot(model3.6, mod = "acf_all_c", group  = "record_num", data = lnRRQ10_data_wild, ylab = TeX("$lnRR_{Q_{10}}$"), xlab = "Thermal Predictability") + theme(axis.title.y = element_blank()) +annotate("text", x = -3, y = 3, label = TeX(paste0("$\\beta = $", round(model3.6$b[3], 3), ", 95%CI: ", round(model3.6$ci.lb[3],3), " to ", round(model3.6$ci.ub[3], 3), "; P = ", round(model3.6$pval[3],3)))) + theme_classic() + theme(axis.text = element_text(size = 12), axis.title = element_text(size = 18))
-  
-p67 <- (p6 | p7) + plot_annotation(tag_levels = "A")
-p67
-ggsave(p67, filename = "./output/figures/fig6.png", height = 10, width = 30, units = "cm")
-```
-
-```{r}
-#| label: fig-fig7
-#| fig-cap: Bubble plot environment lnCVR wild populations
-#| fig-align: center
-p8 <- bubble_plot(model4.5, mod = "cv_c", group  = "record_num", data = lnCVRQ10_data_wild, ylab = TeX("$lnCVR_{Q_{10}}$"), xlab = "Thermal Coefficient of Variation (CV)", k = FALSE) +annotate("text", x = 1, y = -5, label = TeX(paste0("$\\beta = $", round(model4.5$b[3], 3), ", 95%CI: ", round(model4.5$ci.lb[3],3), " to ", round(model4.5$ci.ub[3], 3), " P = ", round(model4.5$pval[3],3)))) + theme_classic() + theme(legend.position = "none", axis.text = element_text(size = 12), axis.title = element_text(size = 18)) + ylim(c(-6, 3))
-
-p9 <- bubble_plot(model4.6, mod = "acf_all_c", group  = "record_num", data = lnCVRQ10_data_wild, ylab = TeX("$lnCVR_{Q_{10}}$"), xlab = "Thermal Predictability", k = FALSE) + theme(axis.title.y = element_blank()) +annotate("text", x = -3, y = -5, label = TeX(paste0("$\\beta = $", round(model4.6$b[3], 3), ", 95%CI: ", round(model4.6$ci.lb[3],3), " to ", round(model4.6$ci.ub[3], 3), " P = ", round(model4.6$pval[3],3)))) + theme_classic() + theme(axis.text = element_text(size = 12), axis.title = element_text(size = 18)) + ylim(c(-6, 3))
-  
-p89 <- (p8 | p9) + plot_annotation(tag_levels = "A")
-p89
-ggsave(p89, filename = "./output/figures/fig7.png", height = 10, width = 30, units = "cm")
 ```
 

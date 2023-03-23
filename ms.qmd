@@ -1916,10 +1916,12 @@ Analysis of $lnVR_{Q_{10}}$ suggested that variance increases with higher temper
 
 # Create the table
   tabs1 <- rbind(fixed, random)
-  gt(tabs1) %>%  fmt_number(
-    columns = 2:5,
-    decimals = 2
-  ) %>% tab_row_group(label = "Fixed Effects", rows = 1:7) %>% tab_row_group(label = "Random Effects", rows = 8:11)
+  gt(tabs1) %>%  
+  fmt_number(columns = 2:5, decimals = 2) %>% 
+  tab_row_group(label = "Fixed Effects", rows = 1:7) %>% 
+  tab_row_group(label = "Random Effects", rows = 8:11) %>%  
+  tab_style(style = list(cell_text(weight = "bold")),
+        locations = list(cells_column_labels(), cells_row_groups()))
 ```
 
 #### Plots of $I^2$ for multi-level models

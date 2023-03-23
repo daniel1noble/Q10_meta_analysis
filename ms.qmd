@@ -34,7 +34,7 @@ crossref:
 ##################################
 # Loading packages & Functions
 ##################################
-    pacman::p_load(tidyverse,  metafor, flextable, raster, rasterVis,  patchwork, RColorBrewer, ggtree, ape, phytools, viridis, MCMCglmm, brms, latex2exp, orchaRd, multcomp, ggbeeswarm, magick, ggimage)
+    pacman::p_load(tidyverse,  metafor, flextable, raster, rasterVis,  patchwork, RColorBrewer, ggtree, ape, phytools, viridis, MCMCglmm, brms, latex2exp, orchaRd, multcomp, ggbeeswarm, magick, ggimage, gt)
 
 #devtools::install_github(repo = "ErikKusch/KrigR")
 ## Function to produce colour palette
@@ -1818,7 +1818,7 @@ if(rerun){
                               test = "t", data = lnVRQ10_data)
   
    model3.2_bayes <- brms::brm(effect_size | se(sqrt(V), sigma = TRUE) ~  c_accl_time + type + habitat + type:habitat + (~1 | record_num) + (1 | gr(species_full, cov = A_VR)) + (1 | spp) + (1|trait), data2 = list(A_VR=A_VR), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 4, data = lnVRQ10_data)
-                                  
+      summary(model3.2_bayes)                            
   # Save model1.2
   saveRDS(model3.2, file = "./output/models/lnVRQ10_3.2")
   saveRDS(model3.2_bayes, file = "./output/models/lnVRQ10_3.2_bayes")
@@ -1895,6 +1895,31 @@ Analysis of $lnVR_{Q_{10}}$ suggested that variance increases with higher temper
 
   figs1 <- image_read("./output/figures/figS1.pdf")
   figs1
+```
+
+```{r}
+#| label: tbl-tabs1
+#| tbl-cap: Model estimates, standard error, and 95% credible intervals 
+ 
+ # Extract the fixed / population-level effect summaries of the posterior
+    fixed <- summary(model3.2_bayes)$fixed[,1:4]
+    fixed <- cbind(Parameter = rownames(fixed), fixed)
+  rownames(fixed) <- NULL
+
+ # Extract the random effect summaries of the posteriors (SDs)
+  random <- plyr::ldply(summary(model3.2_bayes)$random)[,1:5]
+  colnames(random)[1] <- "Parameter"
+
+# Headers for the table to indicate fixed and random effects
+  fixed_head <- c("Fixed Effects", rep(" ", 4))
+  random_head <- c("Random Effects", rep(" ", 4))
+
+# Create the table
+  tabs1 <- rbind(fixed, random)
+  gt(tabs1) %>%  fmt_number(
+    columns = 2:5,
+    decimals = 2
+  ) %>% tab_row_group(label = "Fixed Effects", rows = 1:7) %>% tab_row_group(label = "Random Effects", rows = 8:11)
 ```
 
 #### Plots of $I^2$ for multi-level models

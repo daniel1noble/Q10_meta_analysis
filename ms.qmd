@@ -9,7 +9,7 @@ editor_options:
   chunk_output_type: console
 execute:
   freeze: auto  # re-render only when source changes
-  cache: false
+  cache: true
   echo: false
   warning: false
   error: false
@@ -1827,7 +1827,8 @@ if(rerun){
         model3.2 <- readRDS("./output/models/lnVRQ10_3.2")
   model3.2_bayes <- readRDS("./output/models/lnVRQ10_3.2_bayes")
 }
-
+str(summary(model3.2_bayes)
+)
 ######################################################
   # Bayesian Contrasts
 ######################################################
@@ -1857,7 +1858,7 @@ if(rerun){
 ```
 
 
-Analysis of $lnVR_{Q_{10}}$ suggested that variance increases with higher temperatures across all habitat types, with terrestrial ectotherms having the smallest increase in variance (@fig-figs1). 
+Analysis of $lnVR_{Q_{10}}$ suggested that variance increases with higher temperatures across all habitat types, with terrestrial ectotherms having the smallest increase in variance (@fig-figs1). @tbl-tabs1
 
 ```{r}
 #| label: fig-figs1
@@ -1899,34 +1900,30 @@ Analysis of $lnVR_{Q_{10}}$ suggested that variance increases with higher temper
 
 ```{r}
 #| label: tbl-tabs1
-#| tbl-cap: Model estimates, standard error, and 95% credible intervals 
+#| tbl-cap: Model estimates, standard error, and 95% credible intervals comparing changes in acute and acclimation $lnVR_{Q_{10}}$ across habitat types. Models estimates are based off `r summary(model3.2_bayes)$nobs` effect sizes from `r summary(model3.2_bayes)$ngrps$record_num` studies.
  
  # Extract the fixed / population-level effect summaries of the posterior
     fixed <- summary(model3.2_bayes)$fixed[,1:4]
     fixed <- cbind(Parameter = rownames(fixed), fixed)
-  rownames(fixed) <- NULL
+    rownames(fixed) <- NULL
 
  # Extract the random effect summaries of the posteriors (SDs)
-  random <- plyr::ldply(summary(model3.2_bayes)$random)[,1:5]
-  colnames(random)[1] <- "Parameter"
-
-# Headers for the table to indicate fixed and random effects
-  fixed_head <- c("Fixed Effects", rep(" ", 4))
-  random_head <- c("Random Effects", rep(" ", 4))
+    random <- plyr::ldply(summary(model3.2_bayes)$random)[,1:5]
+    colnames(random)[1] <- "Parameter"
 
 # Create the table
-  tabs1 <- rbind(fixed, random)
-  gt(tabs1) %>%  
-  fmt_number(columns = 2:5, decimals = 2) %>% 
-  tab_row_group(label = "Fixed Effects", rows = 1:7) %>% 
-  tab_row_group(label = "Random Effects", rows = 8:11) %>%  
-  tab_style(style = list(cell_text(weight = "bold")),
-        locations = list(cells_column_labels(), cells_row_groups())) %>% 
-  opt_table_lines(extent = "none")  %>% 
-  tab_style(style = cell_borders(sides = c("top", "bottom")),
-        locations = list(cells_column_labels()))  %>% 
-tab_style(style = cell_borders(sides = "bottom", weight = px(2)),
-        locations =  cells_body(rows = 7))
+    tabs1 <- rbind(fixed, random)
+    gt(tabs1) %>%  
+    fmt_number(columns = 2:5, decimals = 2) %>% 
+    tab_row_group(label = "Fixed Effects", rows = 1:7) %>% 
+    tab_row_group(label = "Random Effects", rows = 8:11) %>%  
+    tab_style(style = list(cell_text(weight = "bold")),
+          locations = list(cells_column_labels(), cells_row_groups())) %>% 
+    opt_table_lines(extent = "none")  %>% 
+    tab_style(style = cell_borders(sides = c("top", "bottom")),
+          locations = list(cells_column_labels()))  %>% 
+    tab_style(style = cell_borders(sides = "bottom", weight = px(2)),
+          locations =  cells_body(rows = 7))
        
 ```
 

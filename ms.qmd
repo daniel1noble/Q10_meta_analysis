@@ -1900,6 +1900,7 @@ Analysis of $lnVR_{Q_{10}}$ suggested that variance increases with higher temper
 
 ```{r}
 #| label: tbl-tabs1
+#| echo: false
 #| tbl-cap: Model estimates, standard error, and 95% credible intervals comparing changes in acute and acclimation $lnVR_{Q_{10}}$ across habitat types. Models estimates are based off `r summary(model3.2_bayes)$nobs` effect sizes from `r summary(model3.2_bayes)$ngrps$record_num` studies.
  
  # Extract the fixed / population-level effect summaries of the posterior
@@ -1913,7 +1914,7 @@ Analysis of $lnVR_{Q_{10}}$ suggested that variance increases with higher temper
 
 # Create the table
     tabs1 <- rbind(fixed, random)
-    gt(tabs1) %>%  
+   tabs1_2 <-  gt(tabs1) %>%  
     fmt_number(columns = 2:5, decimals = 2) %>% 
     tab_row_group(label = "Fixed Effects", rows = 1:7) %>% 
     tab_row_group(label = "Random Effects", rows = 8:11) %>%  
@@ -1924,7 +1925,7 @@ Analysis of $lnVR_{Q_{10}}$ suggested that variance increases with higher temper
           locations = list(cells_column_labels()))  %>% 
     tab_style(style = cell_borders(sides = "bottom", weight = px(2)),
           locations =  cells_body(rows = 7))
-       
+    tabs1_2
 ```
 
 #### Plots of $I^2$ for multi-level models

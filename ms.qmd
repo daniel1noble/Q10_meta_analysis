@@ -19,7 +19,7 @@ crossref:
   fig-labels: arabic
   title-delim: "-"
   fig-prefix: "Figure"
-  tbl-labels: "Table"
+  tbl-prefix: "Table"
 ---
 
 

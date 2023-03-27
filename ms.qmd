@@ -1595,6 +1595,8 @@ if(rerun){
 
 ### *Does climate variability predict acclimation capacity among aquatic and terrestrial ectotherms?*
 
+Thermal variability (i.e., $CV$) explained acclimation capacity of populations differently across habitat types in wild populatons ()
+
 ```{r}
 #| label: fig-fig8
 #| fig-align: center

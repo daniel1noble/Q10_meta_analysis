@@ -1188,7 +1188,7 @@ if(rerun){
 #################################################
  posteriors <- posterior_samples(model3.9_bayes, "^b") 
         
-    slope_f <-     posteriors[,"b_cv_c"]; pmcmc(slope_f); quantile(slope_f, c(0.025, 0.975))
+    slope_f <-     posteriors[,"b_cv_c"]; pmcmc(slope_f); mean(slope_f); quantile(slope_f, c(0.025, 0.975))
     slope_m <-     posteriors[,"b_cv_c"] + posteriors[,"b_cv_c:habitatm"]; pmcmc(slope_m); quantile(slope_m, c(0.025, 0.975))
     slope_t <-     posteriors[,"b_cv_c"] + posteriors[,"b_cv_c:habitatt"]; pmcmc(slope_t); quantile(slope_t, c(0.025, 0.975))
    
@@ -1218,6 +1218,8 @@ if(rerun){
                                             ~1 | obs),
                               R = list(species_full = phylo_cor_wild_acclim), dfs = "contain", 
                               test = "t", data = lnRRQ10_data_wild_acclim_t)
+
+       r2_t <- r2_ml(model3.9_t)[1]                       
         # Model just quickly tests if we are missing an important interaction. It may not necessarily be just about the variability. We could have variable sites, but a variance site that has some predictability vs a variable site without predictability are two different things. We want predictability AND variance
     model3.10_t  <- metafor::rma.mv(effect_size ~ c_accl_time + cv_c + acf_all_c + acf_all_c:cv_c, V = V,
                                        random = list(~1 | record_num,
@@ -1595,7 +1597,7 @@ if(rerun){
 
 ### *Does climate variability predict acclimation capacity among aquatic and terrestrial ectotherms?*
 
-Thermal variability (i.e., $CV$) explained acclimation capacity of populations differently across habitat types in wild populatons ()
+Thermal variability (i.e., $CV$) explained acclimation capacity among terrestrial ectotherms, but explained little variability in acclimation responses among marine or freshwater populations (@fig-fig8). Wild populations with a history of greater thermal variability were more likely to show greater capacity for thermal acclimation compared to populations with lower thermal variability (`r mean(slope_t)`, 95%CI: `r quantile(slope_t, 0.025)[1]` to `r quantile(slope_t, 0.975)[1]`, $p_{mcmc}$ = `r pmcmc(slope_t)`; $R^2$ = `r r2_t*100`%). In contrast, thermal predcitability did not explain much variation across marine, freshwater or terrestrial ectotherm populations (@fig-fig8). 
 
 ```{r}
 #| label: fig-fig8
@@ -1957,7 +1959,7 @@ Funnel plots did not show any noticable deviation from the typical funnel shape 
 ```{r}
 #| label: fig-figs2
 #| fig-cap: Funnel plot of precision (1/sampling standard error) against effect size for A) log response ratio $Q_{10}$ ($lnRR_{Q_{10}}$), B)log coefficient of variance ratio $Q_{10}$ ($lnCVR_{Q_{10}}$) and C) log variance ratio $Q_{10}$ ($lnVR_{Q_{10}}$). Both acute ('green') and acclimation ('orange') effect sizes are plotted.
-cols <- c("#2ECC71", "#FFC300")
+cols <- c("#303234", "#D3D3D3")
 ps2_1 <- ggplot(lnRRQ10_data, aes(y = 1/sqrt(V), x = effect_size, color = type)) + geom_point() + theme_classic() + labs(y = TeX("Precision\\ $\\left( \\frac{1}{\\sqrt{V}} \\right)$"), x = TeX("$lnRR_{Q_{10}}$"))+geom_vline(xintercept = 0, linetype = 3) + theme(legend.title  = element_text(size = 15), legend.text = element_text(size = 15), axis.title = element_text(size = 15), axis.text = element_text(size = 15), legend.position = "none") + scale_color_manual(name = "Type", values = cols)
 
 ps2_2 <- ggplot(lnCVRQ10_data, aes(y = 1/sqrt(V), x = effect_size, color = type)) + geom_point() + theme_classic() + labs(y = TeX("Precision\\ $\\left( \\frac{1}{\\sqrt{V}} \\right)$"), x = TeX("$lnCVR_{Q_{10}}$"))+geom_vline(xintercept = 0, linetype = 3) + theme(legend.title  = element_text(size = 15), legend.text = element_text(size = 15), axis.title = element_text(size = 15), axis.text = element_text(size = 15), legend.position = "none", axis.title.y = element_blank())+ scale_color_manual(name = "Type", values = cols)

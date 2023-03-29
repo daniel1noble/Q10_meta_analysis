@@ -878,6 +878,8 @@ annotate("text", x = 3.01, y = 4.60,
   
 ```
 
+\newpage
+\begin{landscape}
 ```{r}
 #| label: fig-2
 #| fig-cap: Acute and Acclimation lnRR q10 across traits for A) marine, B) freshwater and C) terrestrial systems
@@ -913,6 +915,8 @@ ggsave(fig2, filename = "./output/figures/fig2_trait.pdf", height = 10, width = 
 img_fig2 <- magick::image_read("./output/figures/fig2_trait.pdf")
 img_fig2
 ```
+
+\end{landscape}
 
 ```{r}
 #| label: fig-fig3

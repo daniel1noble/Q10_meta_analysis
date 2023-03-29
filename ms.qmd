@@ -546,6 +546,7 @@ if(rerun){
 ###########################################################
 ## Model 1.4 - whether chance between q10 depends on life stage and habita
 ###########################################################
+rerun = FALSE
 if(rerun){
   # More realistic model with 
   model1.4 <- metafor::rma.mv(effect_size ~  c_accl_time + type*habitat*life.hist, V = V, 
@@ -913,7 +914,23 @@ img_fig2 <- magick::image_read("./output/figures/fig2_trait.pdf")
 img_fig2
 ```
 
+```{r}
+#| label: fig-fig3
+#| fig-cap: Predicted mean acclimation and acute "$lnRR_{Q_{10}}$" for adult and juevenile life-history stages for A) Marine, B) Freshwater and C) Terrestrial ectotherms. 
 
+p1 <- orchard_plot(model1.4, mod = "type", at = list(c_accl_time = 0, habitat = "m"), group = "record_num", xlab = TeX("$lnRR_{Q_{10}}$"), condition.lab = "Life Stage", by = "life.hist", data = lnRRQ10_data, g = FALSE, k = FALSE, legend.pos = "top.left", angle = 45) + labs(title = "Marine") + ylim(c(-2, 2.2))
+
+p2 <- orchard_plot(model1.4, mod = "type", at = list(c_accl_time = 0, habitat = "f"), group = "record_num", xlab = TeX("$lnRR_{Q_{10}}$"), condition.lab = "Life Stage", by = "life.hist", data = lnRRQ10_data, g = FALSE, k = FALSE)+ labs(title = "Freshwater") + theme(legend.position = "none", axis.text.y = element_blank())
+
+p3 <- orchard_plot(model1.4, mod = "type", at = list(c_accl_time = 0, habitat = "t"), group = "record_num", xlab = TeX("$lnRR_{Q_{10}}$"), condition.lab = "Life Stage", by = "life.hist", data = lnRRQ10_data, g = FALSE, k = FALSE)+ labs(title = "Terrestrial")+ theme(legend.position = "none", axis.text.y = element_blank())
+
+fig3 <- (p1 | p2 | p3) + plot_annotation(tag_levels = "A", tag_suffix = ")")
+ggsave(fig3, filename = "./output/figures/fig3_lh.pdf", width = 8, height = 4.5)
+
+fig3 <- magick::image_read("./output/figures/fig3_lh.pdf")
+fig3
+
+```
 ### *Does the opportunity for selection differ across terrestrial and aquatic ectotherms?*
 
 The opportunity for selection, as captured by $lnCVR_{Q_{10}}$, showed a decrease across all habitat types but were especially pronouced in terrestrial and marine ectotherms. Overall, there was a `r mean(t_cvr_mean_ef)`% (95% CI: `r quantile(t_cvr_mean_ef, 0.025)[1]` to `r quantile(t_cvr_mean_ef, 0.975)[1]`, $p_{mcmc}$ = `r pmcmc(t_cvr_mean)`) reduction in variation in physiological rates for terrestrial ectotherms and a `r mean(m_cvr_mean_ef)`% (95% CI: `r quantile(m_cvr_mean_ef, 0.025)[1]` to `r quantile(m_cvr_mean_ef, 0.975)[1]`, $p_{mcmc}$ = `r pmcmc(m_cvr_mean)`) reduction in variation for marine ectotherms when temperatures increase by 10$\deg$C. In contrast, freshwater ectotherms exhibited a much smaller reduction in physiologiocal rate variance at high temperatures (`r mean(f_cvr_mean_ef)`%, 95% CI: `r quantile(f_cvr_mean_ef, 0.025)[1]` to `r quantile(f_cvr_mean_ef, 0.975)[1]`, $p_{mcmc}$ = `r pmcmc(f_cvr_mean)`). 
@@ -1996,10 +2013,23 @@ Funnel plots did not show any noticable deviation from the typical funnel shape 
 #| label: pubias
 #| echo: false
 
-model_full_lnrr_pb <- brms::brm(effect_size | se(sqrt(V)) ~  c_accl_time + V + habitat + life.hist + type + trait_category + habitat:type + habitat:life.hist + habitat:life.hist:type + (~1 | record_num) + (1 | gr(species_full, cov = A)) + (1 | spp) + (1 | trait) + (1  | obs),  data2 = list(A=A), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 8, data = lnRRQ10_data)
+if(rerun){
+  model_full_lnrr_pb <- brms::brm(effect_size | se(sqrt(V)) ~  c_accl_time + V + habitat*life.hist*type + trait_category + habitat:type + habitat:life.hist + habitat:life.hist:type + (~1 | record_num) + (1 | gr(species_full, cov = A)) + (1 | spp) + (1 | trait) + (1  | obs),  data2 = list(A=A), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 8, data = lnRRQ10_data)
 
+  model_full_lncvr_pb <- brms::brm(effect_size | se(sqrt(V)) ~  c_accl_time + V + habitat*life.hist*type + trait_category + (~1 | record_num) + (1 | gr(species_full, cov = A_CVR)) + (1 | spp) + (1 | trait) + (1  | obs),  data2 = list(A_CVR=A_CVR), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 8, data = lnCVRQ10_data)
 
+  model_full_lnvr_pb <- brms::brm(effect_size | se(sqrt(V)) ~  c_accl_time + V + habitat*life.hist*type + trait_category  + (~1 | record_num) + (1 | gr(species_full, cov = A_VR)) + (1 | spp) + (1 | trait) + (1  | obs),  data2 = list(A_VR=A_VR), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 8, data = lnVRQ10_data)
 
+  saveRDS(model_full_lnrr_pb, file = "./output/models/lnRRQ10_pubbias")
+  saveRDS(model_full_lncvr_pb, file = "./output/models/lnCVRQ10_pubbias")
+  saveRDS(model_full_lnvr_pb, file = "./output/models/lnVRQ10_pubbias")
+} else {
+   model_full_lnrr_pb <- readRDS(file = "./output/models/lnRRQ10_pubbias")
+  model_full_lncvr_pb <- readRDS(file = "./output/models/lnCVRQ10_pubbias")
+  model_full_lnvr_pb <- readRDS(file = "./output/models/lnVRQ10_pubbias")
+}
+
+summary(model_full_lnrr_pb)
 ```
 
 ```{r}

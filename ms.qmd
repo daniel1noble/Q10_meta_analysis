@@ -249,9 +249,10 @@ Second, we tested whether different life-stages are more or less likely to accli
 
 ### *Publication Bias*
 
-We explored the possibility for publication bias graphically, using funnel plots, and more formally by including in our meta-regression models sampling variance (or sampling standard error) and publication year [@Nakagawa2022-gy]. Funnel plot asymetry may suggest a form of publication called a 'file-drawer' effect whereby low-powered studies are less likely to be published. However, asymetry can also result form high hetereogenity. As such, testing (and correcting) for publication bias using a meta-regression approach can attempt to counteract bias that maybe driven by high effect hetereogneity. In addition, a second form of publication bias, time-lag bias, is very common, whereby effect magnitude declines through time with the publication of more studies, often of higher power [@Yang2023-qw]. 
+We explored the possibility for publication bias graphically, using funnel plots, and more formally by including in our meta-regression models sampling variance (or sampling standard error) [@Nakagawa2022-gy]. Funnel plot asymmetry may suggest a form of publication bias called the 'file-drawer' effect whereby low-powered studies are less likely to be published. To test whether sampling variance covaried with effect size we included it in a multi-level meta-regression model that acounted for all the random effects (study, species, trait) and fixed effects (acclimation time, type of effect, habitat, trait category and the interaction between habitat type and trait category). 
 
 ```{r lnrrq10}
+#| label: lnrrq10
 #| echo: false
 #| cache: true
 #| message: false
@@ -281,6 +282,9 @@ phylo_cor <- vcv(tree_lnrr, cor = TRUE)
 
 # Studies with big V, why? Check N
 lnRRQ10_data %>% filter(V >= 2)
+
+# have a quick look on habitat, development and type. Mostly looks sensibel but there is not too much data in terrestrial realm.
+sum_life <- lnRRQ10_data %>% group_by(life.hist, type, habitat) %>% summarise(n=n()) %>% arrange(habitat)
 
 ##################################################
 # Model 1.1: Intercept only model. 
@@ -539,6 +543,32 @@ if(rerun){
   model1.3_t_bayes <- readRDS("./output/models/lnRRQ10_1.3_bayes_t")
 }
 
+###########################################################
+## Model 1.4 - whether chance between q10 depends on life stage and habita
+###########################################################
+if(rerun){
+  # More realistic model with 
+  model1.4 <- metafor::rma.mv(effect_size ~  c_accl_time + type*habitat*life.hist, V = V, 
+                              random = list(~1 | record_num,
+                                            ~1 | species_full,
+                                            ~1 | trait,
+                                            ~1 | spp,
+                                            ~1 | obs),
+                              R = list(species_full = phylo_cor), dfs = "contain", 
+                              test = "t", data = lnRRQ10_data)
+
+  
+   model1.4_bayes <- brms::brm(effect_size | se(sqrt(V), sigma = TRUE) ~  c_accl_time + type*habitat*life.hist + (~1 | record_num) + (1 | gr(species_full, cov = A)) + (1 | spp) + (1|trait), data2 = list(A=A), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 8, data = lnRRQ10_data)
+                                  
+  # Save model1.4
+  saveRDS(model1.4, file = "./output/models/lnRRQ10_1.4")
+  saveRDS(model1.4_bayes, file = "./output/models/lnRRQ10_1.4_bayes")
+
+  } else{
+        model1.4 <- readRDS("./output/models/lnRRQ10_1.4")
+  model1.4_bayes <- readRDS("./output/models/lnRRQ10_1.4_bayes")
+}
+
 ####################################################
 # Sensitivity analysis -- Do Acute Q10's (hot / cold) differ?
 ####################################################
@@ -567,6 +597,7 @@ Overall, $lnRR_{Q_{10}}_{acclimation}$ and $lnRR_{Q_{10}}_{acute}$ differed by o
 
 
 ```{r, lncvrq10}
+#| label: lncvrq10
 #| echo: false
 #| warning: false
 #| error: false
@@ -888,6 +919,7 @@ img_fig2
 The opportunity for selection, as captured by $lnCVR_{Q_{10}}$, showed a decrease across all habitat types but were especially pronouced in terrestrial and marine ectotherms. Overall, there was a `r mean(t_cvr_mean_ef)`% (95% CI: `r quantile(t_cvr_mean_ef, 0.025)[1]` to `r quantile(t_cvr_mean_ef, 0.975)[1]`, $p_{mcmc}$ = `r pmcmc(t_cvr_mean)`) reduction in variation in physiological rates for terrestrial ectotherms and a `r mean(m_cvr_mean_ef)`% (95% CI: `r quantile(m_cvr_mean_ef, 0.025)[1]` to `r quantile(m_cvr_mean_ef, 0.975)[1]`, $p_{mcmc}$ = `r pmcmc(m_cvr_mean)`) reduction in variation for marine ectotherms when temperatures increase by 10$\deg$C. In contrast, freshwater ectotherms exhibited a much smaller reduction in physiologiocal rate variance at high temperatures (`r mean(f_cvr_mean_ef)`%, 95% CI: `r quantile(f_cvr_mean_ef, 0.025)[1]` to `r quantile(f_cvr_mean_ef, 0.975)[1]`, $p_{mcmc}$ = `r pmcmc(f_cvr_mean)`). 
 
 ```{r, wildlnRR10}
+#| label: wildlnRR10
 #| cache: true
 #| include: false
 #| echo: false
@@ -1290,6 +1322,7 @@ if(rerun){
 ```
 
 ```{r wildlncvr}
+#| label: wildlncvr
 #| cache: true
 #| include: false
 #| echo: false
@@ -1597,7 +1630,9 @@ if(rerun){
 
 ### *Does climate variability predict acclimation capacity among aquatic and terrestrial ectotherms?*
 
-Thermal variability (i.e., $CV$) explained acclimation capacity among terrestrial ectotherms, but explained little variability in acclimation responses among marine or freshwater populations (@fig-fig8). Wild populations with a history of greater thermal variability were more likely to show greater capacity for thermal acclimation compared to populations with lower thermal variability (`r mean(slope_t)`, 95%CI: `r quantile(slope_t, 0.025)[1]` to `r quantile(slope_t, 0.975)[1]`, $p_{mcmc}$ = `r pmcmc(slope_t)`; $R^2$ = `r r2_t*100`%). In contrast, thermal predcitability did not explain much variation across marine, freshwater or terrestrial ectotherm populations (@fig-fig8). 
+Thermal variability (i.e., $CV$) explained variation in acclimation capacity among terrestrial ectotherms, but not for marine or freshwater populations (@fig-fig8). Terrestrial ectotherm populations with a history of greater thermal variability were more likely to show greater capacity for thermal acclimation compared to populations with lower thermal variability (`r mean(slope_t)`, 95%CI: `r quantile(slope_t, 0.025)[1]` to `r quantile(slope_t, 0.975)[1]`, $p_{mcmc}$ = `r pmcmc(slope_t)`; $R^2$ = `r r2_t*100`%). In contrast, thermal predcitability did not explain much variation across marine, freshwater or terrestrial ectotherm populations (@fig-fig8). 
+
+In contrast, the opportunity for selection (i.e., the change in physiological variability) did not depend on a populations thermal variability or predictability (@fig-fig9). 
 
 ```{r}
 #| label: fig-fig8
@@ -1724,6 +1759,7 @@ One explanation for why terrestrial ectotherms show minimal acclimation capacity
  
 #### Comparing raw variance changes using $lnVR_{Q_{10}}$
 ```{r, lnvrq10}
+#| label: lnvrq10
 #| echo: false
 #| warning: false
 #| error: false
@@ -1955,6 +1991,16 @@ figs3
 #### Publicaton Bias Analysis
 
 Funnel plots did not show any noticable deviation from the typical funnel shape for any of the effect size estimates (@fig-figs2). 
+
+```{r, pubias}
+#| label: pubias
+#| echo: false
+
+model_full_lnrr_pb <- brms::brm(effect_size | se(sqrt(V)) ~  c_accl_time + V + habitat + life.hist + type + trait_category + habitat:type + habitat:life.hist + habitat:life.hist:type + (~1 | record_num) + (1 | gr(species_full, cov = A)) + (1 | spp) + (1 | trait) + (1  | obs),  data2 = list(A=A), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 8, data = lnRRQ10_data)
+
+
+
+```
 
 ```{r}
 #| label: fig-figs2

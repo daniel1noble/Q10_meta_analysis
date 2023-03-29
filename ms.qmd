@@ -917,7 +917,7 @@ img_fig2
 ```
 
 \end{landscape}
-
+\newpage
 ```{r}
 #| label: fig-fig3
 #| fig-cap: Predicted mean acclimation and acute "$lnRR_{Q_{10}}$" for adult and juevenile life-history stages for A) Marine, B) Freshwater and C) Terrestrial ectotherms. 

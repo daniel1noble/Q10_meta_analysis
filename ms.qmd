@@ -1973,7 +1973,7 @@ Analysis of $lnVR_{Q_{10}}$ suggested that variance increases with higher temper
 # Create the table
     tabs1 <- rbind(fixed, random)
    
-    flextable(tabs1)  %>%  add_body_row()  %>% autofit()
+    flextable(tabs1)   %>% autofit()
 ```
 
 #### Plots of $I^2$ for multi-level models

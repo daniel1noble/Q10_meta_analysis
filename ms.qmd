@@ -306,7 +306,8 @@ if(rerun){
   saveRDS(model1.1_bayes, file = "./output/models/lnRRQ10_1.1_bayes")
 } else{ 
   model1.1 <- readRDS("./output/models/lnRRQ10_1.1")
-model1.1_bayes <- readRDS("./output/models/lnRRQ10_1.1_bayes")}
+model1.1_bayes <- readRDS("./output/models/lnRRQ10_1.1_bayes")
+}
 
 # Heterogeneity analysis
    w <- with(lnRRQ10_data, 1/V) # weights
@@ -574,8 +575,9 @@ if(rerun){
 ####################################################
  # Goal here is to test the assumption that acute Q10's are different or not
  lnRRQ10_data_acute <-  lnRRQ10_data %>% filter(grepl("acute", name))
-       
-  model1.s1 <- metafor::rma.mv(effect_size ~  c_accl_time + name, V = V, 
+
+ if(rerun){ 
+    model1.s1 <- metafor::rma.mv(effect_size ~  c_accl_time + name, V = V, 
                               random = list(~1 | record_num,
                                             ~1 | species_full,
                                             ~1 | trait,
@@ -583,6 +585,11 @@ if(rerun){
                                             ~1 | obs),
                               R = list(species_full = phylo_cor), dfs = "contain", 
                               test = "t", data = lnRRQ10_data_acute)
+    saveRDS(model1.s1, file = "./output/models/model1.s1")
+} else{
+      model1.s1 <-  readRDS(file = "./output/models/model1.s1")
+}
+
 ```
 
 ## **Results**
@@ -650,7 +657,7 @@ if(rerun){
 } else{ 
         model2.1 <- readRDS("./output/models/lnCVRQ10_2.1")
   model2.1_bayes <- readRDS("./output/models/lnCVRQ10_2.1_bayes")
-  }
+}
 
 # Heterogeneity analysis
    w_cvr <- with(lnCVRQ10_data, 1/V) # weights
@@ -908,9 +915,9 @@ ptt <- orchard_plot(model1.3_t_het, mod = "trait_category", at = list(type = c("
 
 
 fig2 <- (ptm + ptf + ptt) + plot_annotation(tag_levels = "A", tag_suffix = ")")
-ggsave(fig2, filename = "./output/figures/fig2_trait.pdf", height = 10, width = 40, device = "pdf", limitsize = FALSE, units = "cm")
+ggsave(fig2, filename = "./output/figures/fig2_trait.png", height = 8.5, width = 26)
 
-img_fig2 <- magick::image_read("./output/figures/fig2_trait.pdf")
+img_fig2 <- magick::image_read("./output/figures/fig2_trait.png")
 img_fig2
 ```
 
@@ -925,9 +932,9 @@ p2 <- orchard_plot(model1.4, mod = "type", at = list(c_accl_time = 0, habitat = 
 p3 <- orchard_plot(model1.4, mod = "type", at = list(c_accl_time = 0, habitat = "t"), group = "record_num", xlab = TeX("$lnRR_{Q_{10}}$"), condition.lab = "Life Stage", by = "life.hist", data = lnRRQ10_data, g = FALSE, k = FALSE)+ labs(title = "Terrestrial")+ theme(legend.position = "none", axis.text.y = element_blank())
 
 fig3 <- (p1 | p2 | p3) + plot_annotation(tag_levels = "A", tag_suffix = ")")
-ggsave(fig3, filename = "./output/figures/fig3_lh.pdf", width = 8, height = 4.5)
+ggsave(fig3, filename = "./output/figures/fig3_lh.png", width = 14, height = 4.5)
 
-fig3 <- magick::image_read("./output/figures/fig3_lh.pdf")
+fig3 <- magick::image_read("./output/figures/fig3_lh.png")
 fig3
 
 ```
@@ -1035,7 +1042,7 @@ if(rerun){
   #  acclim 
 ####################################################
   rerun = FALSE
-  if(rerun){
+if(rerun){
   # More realistic model with 
   model3.3          <- metafor::rma.mv(effect_size ~ c_accl_time + cv_c + type + type:cv_c, V = V,
                                        random = list(~1 | record_num,
@@ -1055,12 +1062,12 @@ if(rerun){
   } else{
         model3.3 <- readRDS("./output/models/lnRRQ10_3.3")
   model3.3_bayes <- readRDS("./output/models/lnRRQ10_3.3_bayes")
-  }
+}
   
 ################################################################
   # Model 3.7: Environmental autocorrelation model by acute/acclim
 ################################################################
-  if(rerun){
+if(rerun){
   # More realistic model with 
   model3.4          <- metafor::rma.mv(effect_size ~ c_accl_time + acf_all_c + type + type:acf_all_c, V = V,
                                        random = list(~1 | record_num,
@@ -1080,12 +1087,12 @@ if(rerun){
   } else{
         model3.4 <- readRDS("./output/models/lnRRQ10_3.4")
   model3.4_bayes <- readRDS("./output/models/lnRRQ10_3.4_bayes")
-  }
+}
   
 ################################################################
   # Model 3.5: Environmental variability  model
 ################################################################
-  if(rerun){
+if(rerun){
   # More realistic model with 
   model3.5          <- metafor::rma.mv(effect_size ~ c_accl_time + cv_c + type, V = V,
                                        random = list(~1 | record_num,
@@ -1105,12 +1112,12 @@ if(rerun){
   } else{
         model3.5 <- readRDS("./output/models/lnRRQ10_3.5")
   model3.5_bayes <- readRDS("./output/models/lnRRQ10_3.5_bayes")
-  }
+}
   
 ################################################################
   # Model 3.6: Environmental autocorrelation model
 ################################################################
-  if(rerun){
+if(rerun){
   # More realistic model with 
   model3.6          <- metafor::rma.mv(effect_size ~ c_accl_time + acf_all_c + type, V = V,
                                        random = list(~1 | record_num,
@@ -1130,13 +1137,13 @@ if(rerun){
   } else{
         model3.6 <- readRDS("./output/models/lnRRQ10_3.6")
   model3.6_bayes <- readRDS("./output/models/lnRRQ10_3.6_bayes")
-  }
+}
   
 ################################################################
   # Model 3.7: Environmental variability and autocorrelation model
 ################################################################
   
-  if(rerun){
+if(rerun){
   # More realistic model with 
   model3.7          <- metafor::rma.mv(effect_size ~ c_accl_time + acf_all_c + cv_c + type, V = V,
                                        random = list(~1 | record_num,
@@ -1156,7 +1163,7 @@ if(rerun){
   } else{
         model3.7 <- readRDS("./output/models/lnRRQ10_3.7")
   model3.7_bayes <- readRDS("./output/models/lnRRQ10_3.7_bayes")
-  }
+}
   
 ############################################################################################
 # Model 3.8: Acclimatization lnRRQ10 only. Test if environmental predictability explains 
@@ -1173,8 +1180,7 @@ tree_checks(data = lnRRQ10_data_wild_acclim, tree = tree_lnrr_wild_acclim, dataC
 phylo_cor_wild_acclim <- vcv(tree_lnrr_wild_acclim, cor = TRUE)
         A_wild_acclim <- vcv(tree_lnrr_wild_acclim, cor = FALSE) # For bayes, need cov matrix
   
-  
-  if(rerun){
+if(rerun){
   # More realistic model with 
   model3.8  <- metafor::rma.mv(effect_size ~ c_accl_time + acf_all_c + habitat + habitat:acf_all_c, V = V,
                                        random = list(~1 | record_num,
@@ -1249,6 +1255,7 @@ if(rerun){
     lnRRQ10_data_wild_acclim_f <- lnRRQ10_data_wild_acclim %>% filter(habitat == "f")
     lnRRQ10_data_wild_acclim_m <- lnRRQ10_data_wild_acclim %>% filter(habitat == "m")
 
+if(rerun){
     # Terrestrial Models
     model3.8_t  <- metafor::rma.mv(effect_size ~ c_accl_time + acf_all_c, V = V,
                                        random = list(~1 | record_num,
@@ -1258,7 +1265,8 @@ if(rerun){
                                             ~1 | obs),
                               R = list(species_full = phylo_cor_wild_acclim), dfs = "contain", 
                               test = "t", data = lnRRQ10_data_wild_acclim_t)
-    
+    saveRDS(model3.8_t, "./output/models/model3.8_t")
+
     model3.9_t  <- metafor::rma.mv(effect_size ~ c_accl_time + cv_c, V = V,
                                        random = list(~1 | record_num,
                                             ~1 | species_full,
@@ -1267,7 +1275,7 @@ if(rerun){
                                             ~1 | obs),
                               R = list(species_full = phylo_cor_wild_acclim), dfs = "contain", 
                               test = "t", data = lnRRQ10_data_wild_acclim_t)
-
+    saveRDS(model3.9_t, "./output/models/model3.9_t")
        r2_t <- r2_ml(model3.9_t)[1]                       
         # Model just quickly tests if we are missing an important interaction. It may not necessarily be just about the variability. We could have variable sites, but a variance site that has some predictability vs a variable site without predictability are two different things. We want predictability AND variance
     model3.10_t  <- metafor::rma.mv(effect_size ~ c_accl_time + cv_c + acf_all_c + acf_all_c:cv_c, V = V,
@@ -1278,6 +1286,7 @@ if(rerun){
                                             ~1 | obs),
                               R = list(species_full = phylo_cor_wild_acclim), dfs = "contain", 
                               test = "t", data = lnRRQ10_data_wild_acclim_t)
+     saveRDS(model3.10_t, "./output/models/model3.10_t")
     # Freshwater Models
     model3.8_f  <- metafor::rma.mv(effect_size ~ c_accl_time + acf_all_c, V = V,
                                        random = list(~1 | record_num,
@@ -1287,6 +1296,7 @@ if(rerun){
                                             ~1 | obs),
                               R = list(species_full = phylo_cor_wild_acclim), dfs = "contain", 
                               test = "t", data = lnRRQ10_data_wild_acclim_f)
+    saveRDS(model3.8_f, "./output/models/model3.8_f")
     
     model3.9_f  <- metafor::rma.mv(effect_size ~ c_accl_time + cv_c, V = V,
                                        random = list(~1 | record_num,
@@ -1296,6 +1306,9 @@ if(rerun){
                                             ~1 | obs),
                               R = list(species_full = phylo_cor_wild_acclim), dfs = "contain", 
                               test = "t", data = lnRRQ10_data_wild_acclim_f)
+
+    saveRDS(model3.9_f, "./output/models/model3.9_f")
+
        # Model just quickly tests if we are missing an important interaction. It may not necessarily be just about the variability. We could have variable sites, but a variance site that has some predictability vs a variable site without predictability are two different things. We want predictability AND variance 
     
      model3.10_f  <- metafor::rma.mv(effect_size ~ c_accl_time + cv_c + acf_all_c + acf_all_c:cv_c, V = V,
@@ -1306,7 +1319,7 @@ if(rerun){
                                             ~1 | obs),
                               R = list(species_full = phylo_cor_wild_acclim), dfs = "contain", 
                               test = "t", data = lnRRQ10_data_wild_acclim_f)
-    
+      saveRDS(model3.10_f, "./output/models/model3.10_f")
     # Marine Models
       model3.8_m  <- metafor::rma.mv(effect_size ~ c_accl_time + acf_all_c, V = V,
                                        random = list(~1 | record_num,
@@ -1316,7 +1329,8 @@ if(rerun){
                                             ~1 | obs),
                               R = list(species_full = phylo_cor_wild_acclim), dfs = "contain", 
                               test = "t", data = lnRRQ10_data_wild_acclim_m)
-    
+        saveRDS(model3.8_m, "./output/models/model3.8_m")
+
     model3.9_m  <- metafor::rma.mv(effect_size ~ c_accl_time + cv_c, V = V,
                                        random = list(~1 | record_num,
                                             ~1 | species_full,
@@ -1325,6 +1339,7 @@ if(rerun){
                                             ~1 | obs),
                               R = list(species_full = phylo_cor_wild_acclim), dfs = "contain", 
                               test = "t", data = lnRRQ10_data_wild_acclim_m)
+    saveRDS(model3.9_m, "./output/models/model3.9_m")
     # Model just quickly tests if we are missing an important interaction. It may not necessarily be just about the variability. We could have variable sites, but a variance site that has some predictability vs a variable site without predictability are two different things. We want predictability AND variance
     
     model3.10_m  <- metafor::rma.mv(effect_size ~ c_accl_time + cv_c + acf_all_c + acf_all_c:cv_c, V = V,
@@ -1335,7 +1350,18 @@ if(rerun){
                                             ~1 | obs),
                               R = list(species_full = phylo_cor_wild_acclim), dfs = "contain", 
                               test = "t", data = lnRRQ10_data_wild_acclim_m)
-  
+    saveRDS(model3.10_m, "./output/models/model3.10_m")
+  } else {
+     model3.8_t <- readRDS("./output/models/model3.8_t")
+     model3.9_t <- readRDS("./output/models/model3.9_t")
+    model3.10_t <- readRDS("./output/models/model3.10_t")
+     model3.8_f <- readRDS("./output/models/model3.8_f")
+     model3.9_f <- readRDS("./output/models/model3.9_f")
+    model3.10_f <- readRDS("./output/models/model3.10_f")
+     model3.9_m <- readRDS("./output/models/model3.9_m")
+    model3.10_m <- readRDS("./output/models/model3.10_m")
+     model3.8_m <- readRDS("./output/models/model3.8_m")
+}
 ```
 
 ```{r wildlncvr}
@@ -1438,7 +1464,7 @@ if(rerun){
 ####################################################
   # Model 4.3: Model environmental variability by acute/acclim
 ####################################################
-  rerun = FALSE
+rerun = FALSE
 if(rerun){
   # More realistic model with 
   model4.3          <- metafor::rma.mv(effect_size ~ c_accl_time + cv_c + type + type:cv_c, V = V,
@@ -1459,12 +1485,12 @@ if(rerun){
   } else{
         model4.3 <- readRDS("./output/models/lnCVRQ10_4.3")
   model4.3_bayes <- readRDS("./output/models/lnCVRQ10_4.3_bayes")
-  }
+}
   
 ################################################################
   # Model 4.4: Environmental autocorrelation model by acute/acclim
 ################################################################
-  if(rerun){
+if(rerun){
   # More realistic model with 
   model4.4          <- metafor::rma.mv(effect_size ~ c_accl_time + acf_all_c + type + type:acf_all_c, V = V,
                                        random = list(~1 | record_num,
@@ -1484,7 +1510,7 @@ if(rerun){
   } else{
         model4.4 <- readRDS("./output/models/lnCVRQ10_4.4")
   model4.4_bayes <- readRDS("./output/models/lnCVRQ10_4.4_bayes")
-  }
+}
   
 ################################################################
   # Model 4.5: Environmental variability
@@ -1509,12 +1535,12 @@ if(rerun){
   } else{
         model4.5 <- readRDS("./output/models/lnCVRQ10_4.5")
   model4.5_bayes <- readRDS("./output/models/lnCVRQ10_4.5_bayes")
-  }
+}
   
 ################################################################
   # Model 4.6: Environmental autocorrelation model 
 ################################################################
-  if(rerun){
+if(rerun){
   # More realistic model with 
   model4.6          <- metafor::rma.mv(effect_size ~ c_accl_time + acf_all_c + type, V = V,
                                        random = list(~1 | record_num,
@@ -1534,12 +1560,12 @@ if(rerun){
   } else{
         model4.6 <- readRDS("./output/models/lnCVRQ10_4.6")
   model4.6_bayes <- readRDS("./output/models/lnCVRQ10_4.6_bayes")
-  }
+}
   
 ################################################################
   # Model 4.7: Environmental autocorrelation and variability
 ################################################################
- if(rerun){
+if(rerun){
   # More realistic model with 
   model4.7          <- metafor::rma.mv(effect_size ~ c_accl_time + acf_all_c + cv_c + type, V = V,
                                        random = list(~1 | record_num,
@@ -1559,7 +1585,7 @@ if(rerun){
   } else{
         model4.7 <- readRDS("./output/models/lnCVRQ10_4.7")
   #model4.7_bayes <- readRDS("./output/models/lnCVRQ10_4.7_bayes")
-  }
+}
   
 ############################################################################################
   # Model 4.8: Acclimatization lnCVRQ10 only. Test if environmental predictability explains 
@@ -1577,7 +1603,7 @@ phylo_cor_wild_acclim <- vcv(tree_lncvr_wild_acclim, cor = TRUE)
         A_wild_acclim <- vcv(tree_lncvr_wild_acclim, cor = FALSE) # For bayes, need cov matrix
   
   
-  if(rerun){
+if(rerun){
   # More realistic model with 
   model4.8  <- metafor::rma.mv(effect_size ~ c_accl_time + acf_all_c + habitat + habitat:acf_all_c, V = V,
                                        random = list(~1 | record_num,
@@ -1825,7 +1851,7 @@ if(rerun){
 } else{ 
         model3.1 <- readRDS("./output/models/lnVRQ10_3.1")
   model3.1_bayes <- readRDS("./output/models/lnVRQ10_3.1_bayes")
-  }
+}
 
 # Heterogeneity analysis
    w_VR <- with(lnVRQ10_data, 1/V) # weights
@@ -1885,8 +1911,7 @@ if(rerun){
         model3.2 <- readRDS("./output/models/lnVRQ10_3.2")
   model3.2_bayes <- readRDS("./output/models/lnVRQ10_3.2_bayes")
 }
-str(summary(model3.2_bayes)
-)
+
 ######################################################
   # Bayesian Contrasts
 ######################################################
@@ -1958,7 +1983,6 @@ Analysis of $lnVR_{Q_{10}}$ suggested that variance increases with higher temper
 
 ```{r}
 #| label: tbl-tabs1
-#| echo: false
 #| tbl-cap: Model estimates, standard error, and 95% credible intervals comparing changes in acute and acclimation $lnVR_{Q_{10}}$ across habitat types. Models estimates are based off 1253 effect sizes from 139 studies.
  
  # Extract the fixed / population-level effect summaries of the posterior
@@ -1972,8 +1996,9 @@ Analysis of $lnVR_{Q_{10}}$ suggested that variance increases with higher temper
 
 # Create the table
     tabs1 <- rbind(fixed, random)
-   
-    flextable(tabs1)   %>% autofit()
+   tabs1$Parameter <- c("Intercept", "Acclimation Time (z scaled)", "Acclimation Effect", "Habitat (Marine)", "Habitat (Terrestrial)", "Acclimation*Marine", "Acclimation*Terrestrial", "Study", "Phylogeny", "Species", "Trait")
+    
+    flextable(tabs1) %>% bold(part = "header") %>% autofit() %>% add_body_row(values = as_paragraph(as_b("Fixed Effects")), top = TRUE, colwidths = 5) %>% compose(value = as_paragraph(as_b(c(("Random Effects"), rep("", 4)))), i = 8)
 ```
 
 #### Plots of $I^2$ for multi-level models

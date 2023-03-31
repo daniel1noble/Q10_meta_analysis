@@ -603,28 +603,31 @@ if(rerun){
         f_ad <- 4
         f_adult <- pred[2+f_ad,] - pred[3+f_ad,] # Posterior contrast between acclimation and acute effects for adult, freshwater species
         f_jeuv <-  pred[4+f_ad,] - pred[1+f_ad,] # Posterior contrast between acclimation and acute effects for j, freshwater species
-    # terrestrial
+    # Terrestrial
         t_ad <- 8
         t_adult <- pred[2+t_ad,] - pred[3+t_ad,] # Posterior contrast between acclimation and acute effects for adult, terrestrial species
         t_jeuv <-  pred[4+t_ad,] - pred[1+t_ad,] # Posterior contrast between acclimation and acute effects for j, terrestrial species
 
 # Now, lets calculate the contrasts between acute a and j as well as acclim a and j within each habitat. We need to use pred for that because it's the entire posterior distribution
     # Marine 
-         m_acute <-  pred[1,] - pred[3,] 
-        m_acclim <-  pred[4,] - pred[2,] 
+         m_acute <-  pred[1,] - pred[3,] # Contrasts acute a and acute j values for marine species
+        m_acclim <-  pred[4,] - pred[2,] # Contrasts acclim a and acute j values for marine species
     # Freshwater
             f_ad <- 4
-        f_acute <- pred[1+f_ad,] - pred[3+f_ad,] 
-        f_acclim <-  pred[4+f_ad,] - pred[2+f_ad,] 
-    # terrestrial
+        f_acute <- pred[1+f_ad,] - pred[3+f_ad,] # Contrasts acute a and acute j values for freshwater species
+        f_acclim <-  pred[4+f_ad,] - pred[2+f_ad,] # Contrasts acclim a and acute j values for freshwater species
+    # Terrestrial
         t_ad <- 8
-        t_acute <- pred[1+t_ad,] - pred[3+t_ad,] 
-        t_acclim <-  pred[4+t_ad,] - pred[2+t_ad,]  
+        t_acute <- pred[1+t_ad,] - pred[3+t_ad,] # Contrasts acute a and acute j values for terrestrial species
+        t_acclim <-  pred[4+t_ad,] - pred[2+t_ad,]  # Contrasts acclim a and acute j values for terrestrial species
 
-# Now lets do a quick. Note that I fixed up some design matrix issues which made acclim the ref level, which was wrong
+  # Acute differences between a and j across all habitats
+    acute_all <- c(m_acute, f_acute, t_acute); mean(acute_all); quantile(acute_all, c(0.025, 0.975)); pmcmc(acute_all)
+    acclim_all <- c(m_acclim, f_acclim, t_acclim)
+
+# Now lets do a quick. Note that I fixed up some design matrix issues which made acclim the ref level, which was wrong. These two lines of code should roughly match
 #  mod_results(model1.4, mod = "type", at = list(c_accl_time = 0, habitat = "t"), group = "record_num",  by = "life.hist", data = lnRRQ10_data)
 #  newdata %>% arrange(habitat, life.hist, type) %>% filter(habitat == "t")
-
 
 ####################################################
 # Sensitivity analysis -- Do Acute Q10's (hot / cold) differ?
@@ -656,7 +659,7 @@ Most of the effect size estimates came from measurements of metabolic rates (bot
 
 ### *Terrestrial and aquatic ectotherms differ in their capacity to acclimate but acclimation does not depend on life-history stage*
 
-Overall, $lnRR_{Q_{10}}_{acclimation}$ and $lnRR_{Q_{10}}_{acute}$ differed by only `r mean(avg_change)`% across all habitats (95%CI: `r quantile(avg_change, c(0.025, 0.975))[1]` to `r quantile(avg_change, c(0.025, 0.975))[2]`%). Ectotherms in marine and freshwater environments showed partial compensation of physiological rates (@fig-1 B) amounting to reduced $lnRR_{Q_{10}}_{acclimation}$ of `r mean(change_f)`% (95% CI: `r quantile(change_f, c(0.025, 0.975))[1]` to `r quantile(change_f, c(0.025, 0.975))[2]`) in freshwater and `r mean(change_m)`% (95% CI: `r quantile(change_m, c(0.025, 0.975))[1]` to `r quantile(change_m, c(0.025, 0.975))[2]`) in marine environments. In contrast, terrestrial ectotherms showed no acclimation (possibly even inverse acclimation) -- showing a `r mean(change_t)`% increase in $lnRR_{Q_{10}}_{acclimation}$ (95% CI: `r quantile(change_t, c(0.025, 0.975))[1]` to `r quantile(change_t, c(0.025, 0.975))[2]`, [@fig-1]B). While different trait categories showed different accclimation responses across habitat types, overall, they mirrored patterns seen overall (@fig-2). Acclimation capacity did not vary by life-stage given that there were no differences between $lnRR_{Q_{10}}_{acclimation}$ and $lnRR_{Q_{10}}_{acute}$ between adult and jeuveniles (@fig-3).
+Overall, $lnRR_{Q_{10}}_{acclimation}$ and $lnRR_{Q_{10}}_{acute}$ differed by only `r mean(avg_change)`% across all habitats (95%CI: `r quantile(avg_change, c(0.025, 0.975))[1]` to `r quantile(avg_change, c(0.025, 0.975))[2]`%). Ectotherms in marine and freshwater environments showed partial compensation of physiological rates (@fig-1 B) amounting to reduced $lnRR_{Q_{10}}_{acclimation}$ of `r mean(change_f)`% (95% CI: `r quantile(change_f, c(0.025, 0.975))[1]` to `r quantile(change_f, c(0.025, 0.975))[2]`) in freshwater and `r mean(change_m)`% (95% CI: `r quantile(change_m, c(0.025, 0.975))[1]` to `r quantile(change_m, c(0.025, 0.975))[2]`) in marine environments. In contrast, terrestrial ectotherms showed no acclimation (possibly even inverse acclimation) -- showing a `r mean(change_t)`% increase in $lnRR_{Q_{10}}_{acclimation}$ (95% CI: `r quantile(change_t, c(0.025, 0.975))[1]` to `r quantile(change_t, c(0.025, 0.975))[2]`, [@fig-1]B). While different trait categories showed different accclimation responses across habitat types, overall, they mirrored patterns seen overall (@fig-2). Acclimation capacity did not vary by life-stage given that there were no differences between $lnRR_{Q_{10}}_{acclimation}$ and $lnRR_{Q_{10}}_{acute}$ between adult and jeuveniles (@fig-3) (Adult-Jeuvenile (Acute): `r mean(acute_all)`, 95% CI: `r quantile(acute_all, 0.025)[1]` to `r quantile(acute_all, 0.975)[1]`, $p_{mcmc}$ = `r pmcmc(acute_all)`; Adult-Jeuvenile (Acclimation): `r mean(acclim_all)`, 95% CI: `r quantile(acclim_all, 0.025)[1]` to `r quantile(acclim_all, 0.975)[1]`, $p_{mcmc}$ = `r pmcmc(acclim_all)`).
 
 Considering acute responses of animals acclimated to high temperatures are generally slightly elevated compared to cold acclimated animals (~7%; $\beta$ = `r model1.s1$b[3]`, 95% CI: `r model1.s1$ci.lb[3]` to `r model1.s1$ci.ub[3]`, p `r p_value(model1.s1$pval[3])`), acclimatization is not likely going to provide adaptive benefits under climate change. Nonetheless, effect heterogeneity was high (only `r mean(tot_i2)`% of the variance was the resulting of sampling varianbility, 95% CI: `r quantile(tot_i2, 0.025)[1]` to `r quantile(tot_i2, 0.975)[1]`%), with most variance being explained by the specific study and type of trait (Study: `r mean(stdy_i2)`% , 95% CI: `r quantile(stdy_i2, 0.025)[1]` to `r quantile(stdy_i2, 0.975)[1]`%; Trait Type: `r mean(trait_i2)`% , 95% CI: `r quantile(trait_i2, 0.025)[1]` to `r quantile(trait_i2, 0.975)[1]`%). Evolutionary and species specific ecoloogy explained little variation in acute and acclimation repsonses (Species: `r mean(spp_i2)`% , 95% CI: `r quantile(spp_i2, 0.025)[1]` to `r quantile(spp_i2, 0.975)[1]`%; Phylogeny: `r mean(phylo_i2)`% , 95% CI: `r quantile(phylo_i2, 0.025)[1]` to `r quantile(phylo_i2, 0.975)[1]`%).
 

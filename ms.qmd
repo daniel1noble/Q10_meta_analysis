@@ -1,5 +1,5 @@
 ---
-title: "Reduced plasticity and opportunity for selection in terrestrial ectotherm populations under climate change"
+title: "Reduced plasticity and opportunity for selection in terrestrial ectotherm populations"
 bibliography: ./bib/refs.bib
 csl: ./bib/ecology-letters.csl
 format:
@@ -569,6 +569,62 @@ if(rerun){
         model1.4 <- readRDS("./output/models/lnRRQ10_1.4")
   model1.4_bayes <- readRDS("./output/models/lnRRQ10_1.4_bayes")
 }
+ 
+#######################################################################
+# Bayesian posteriors from model 1.4
+#######################################################################
+ # Create the data we want to make predcitions for. Just more intuitive
+  newdata <- data.frame( c_accl_time = 0, 
+                                type = as.factor(rep(c("acute", "acclim"))), 
+                             habitat = as.factor(rep(c("m", "f", "t"), each = 4)), 
+                           life.hist = as.factor(c("j", "a", "a", "j")))
+  newdata$type  <- relevel(newdata$type, ref = "acute")
+
+# Calculate the design matrix using this new data. Need to be careful here to check that the levels are set up the same as the posterior.
+  X <- model.matrix(~c_accl_time + type*habitat*life.hist, data = newdata) 
+
+# Extract posteriors
+  posteriors_1_4 <- posterior_samples(model1.4_bayes, pars = "^b")
+
+# Now we can do all the calculations in one shot.
+         pred <- apply(t(posteriors_1_4), 2, function(x) as.matrix(X)%*%x)
+     sum_pred <- apply(pred, 1, function(x) mean(x))
+  sum_predL95 <- apply(pred, 1, function(x) quantile(x, 0.025))
+  sum_predU95 <- apply(pred, 1, function(x) quantile(x, 0.975))
+
+# Create a summary dataset. 
+  newdata <- cbind(newdata, est = sum_pred, L = sum_predL95, u = sum_predU95)  
+
+# Now, lets calculate the contrasts between acute and acclim for a and j within each habitat. We need to use pred for that because it's the entire posterior distribution
+    # Marine 
+        m_adult <- pred[2,] - pred[3,] # Posterior contrast between acclimation and acute effects for adult, marine species
+        m_jeuv <-  pred[4,] - pred[1,] # Posterior contrast between acclimation and acute effects for j, marine species
+    # Freshwater
+        f_ad <- 4
+        f_adult <- pred[2+f_ad,] - pred[3+f_ad,] # Posterior contrast between acclimation and acute effects for adult, freshwater species
+        f_jeuv <-  pred[4+f_ad,] - pred[1+f_ad,] # Posterior contrast between acclimation and acute effects for j, freshwater species
+    # terrestrial
+        t_ad <- 8
+        t_adult <- pred[2+t_ad,] - pred[3+t_ad,] # Posterior contrast between acclimation and acute effects for adult, terrestrial species
+        t_jeuv <-  pred[4+t_ad,] - pred[1+t_ad,] # Posterior contrast between acclimation and acute effects for j, terrestrial species
+
+# Now, lets calculate the contrasts between acute a and j as well as acclim a and j within each habitat. We need to use pred for that because it's the entire posterior distribution
+    # Marine 
+         m_acute <-  pred[1,] - pred[3,] 
+        m_acclim <-  pred[4,] - pred[2,] 
+    # Freshwater
+            f_ad <- 4
+        f_acute <- pred[1+f_ad,] - pred[3+f_ad,] 
+        f_acclim <-  pred[4+f_ad,] - pred[2+f_ad,] 
+    # terrestrial
+        t_ad <- 8
+        t_acute <- pred[1+t_ad,] - pred[3+t_ad,] 
+        t_acclim <-  pred[4+t_ad,] - pred[2+t_ad,]  
+
+# Now lets do a quick. Note that I fixed up some design matrix issues which made acclim the ref level, which was wrong
+#  mod_results(model1.4, mod = "type", at = list(c_accl_time = 0, habitat = "t"), group = "record_num",  by = "life.hist", data = lnRRQ10_data)
+#  newdata %>% arrange(habitat, life.hist, type) %>% filter(habitat == "t")
+
 
 ####################################################
 # Sensitivity analysis -- Do Acute Q10's (hot / cold) differ?
@@ -600,7 +656,9 @@ Most of the effect size estimates came from measurements of metabolic rates (bot
 
 ### *Terrestrial and aquatic ectotherms differ in their capacity to acclimate but acclimation does not depend on life-history stage*
 
-Overall, $lnRR_{Q_{10}}_{acclimation}$ and $lnRR_{Q_{10}}_{acute}$ differed by only `r mean(avg_change)`% across all habitats (95%CI: `r quantile(avg_change, c(0.025, 0.975))[1]` to `r quantile(avg_change, c(0.025, 0.975))[2]`%). Ectotherms in marine and freshwater environments showed partial compensation of physiological rates (@fig-1 B) amounting to reduced $lnRR_{Q_{10}}_{acclimation}$ of `r mean(change_f)`% (95% CI: `r quantile(change_f, c(0.025, 0.975))[1]` to `r quantile(change_f, c(0.025, 0.975))[2]`) in freshwater and `r mean(change_m)`% (95% CI: `r quantile(change_m, c(0.025, 0.975))[1]` to `r quantile(change_m, c(0.025, 0.975))[2]`) in marine environments. In contrast, terrestrial ectotherms showed no acclimation (possibly even inverse acclimation) -- showing a `r mean(change_t)`% increase in $lnRR_{Q_{10}}_{acclimation}$ (95% CI: `r quantile(change_t, c(0.025, 0.975))[1]` to `r quantile(change_t, c(0.025, 0.975))[2]`, @fig-1 B). Considering acute responses of animals acclimated to high temperatures are generally slightly elevated compared to cold acclimated animals (~7%; $\beta$ = `r model1.s1$b[3]`, 95% CI: `r model1.s1$ci.lb[3]` to `r model1.s1$ci.ub[3]`, p `r p_value(model1.s1$pval[3])`), acclimatization is not likely going to provide adaptive benefits under climate change. Effect heterogeneity was nontheless high (only `r mean(tot_i2)`% of the variance was the resulting of sampling varianbility, 95% CI: `r quantile(tot_i2, 0.025)[1]` to `r quantile(tot_i2, 0.975)[1]`%), with most variance being explained by the specific study and type of trait (Study: `r mean(stdy_i2)`% , 95% CI: `r quantile(stdy_i2, 0.025)[1]` to `r quantile(stdy_i2, 0.975)[1]`%; Trait Type: `r mean(trait_i2)`% , 95% CI: `r quantile(trait_i2, 0.025)[1]` to `r quantile(trait_i2, 0.975)[1]`%). Evolutionary and species specific ecoloogy explained little variation in acute and acclimation repsonses (Species: `r mean(spp_i2)`% , 95% CI: `r quantile(spp_i2, 0.025)[1]` to `r quantile(spp_i2, 0.975)[1]`%; Phylogeny: `r mean(phylo_i2)`% , 95% CI: `r quantile(phylo_i2, 0.025)[1]` to `r quantile(phylo_i2, 0.975)[1]`%)
+Overall, $lnRR_{Q_{10}}_{acclimation}$ and $lnRR_{Q_{10}}_{acute}$ differed by only `r mean(avg_change)`% across all habitats (95%CI: `r quantile(avg_change, c(0.025, 0.975))[1]` to `r quantile(avg_change, c(0.025, 0.975))[2]`%). Ectotherms in marine and freshwater environments showed partial compensation of physiological rates (@fig-1 B) amounting to reduced $lnRR_{Q_{10}}_{acclimation}$ of `r mean(change_f)`% (95% CI: `r quantile(change_f, c(0.025, 0.975))[1]` to `r quantile(change_f, c(0.025, 0.975))[2]`) in freshwater and `r mean(change_m)`% (95% CI: `r quantile(change_m, c(0.025, 0.975))[1]` to `r quantile(change_m, c(0.025, 0.975))[2]`) in marine environments. In contrast, terrestrial ectotherms showed no acclimation (possibly even inverse acclimation) -- showing a `r mean(change_t)`% increase in $lnRR_{Q_{10}}_{acclimation}$ (95% CI: `r quantile(change_t, c(0.025, 0.975))[1]` to `r quantile(change_t, c(0.025, 0.975))[2]`, [@fig-1]B). While different trait categories showed different accclimation responses across habitat types, overall, they mirrored patterns seen overall (@fig-2). Acclimation capacity did not vary by life-stage given that there were no differences between $lnRR_{Q_{10}}_{acclimation}$ and $lnRR_{Q_{10}}_{acute}$ between adult and jeuveniles (@fig-3).
+
+Considering acute responses of animals acclimated to high temperatures are generally slightly elevated compared to cold acclimated animals (~7%; $\beta$ = `r model1.s1$b[3]`, 95% CI: `r model1.s1$ci.lb[3]` to `r model1.s1$ci.ub[3]`, p `r p_value(model1.s1$pval[3])`), acclimatization is not likely going to provide adaptive benefits under climate change. Nonetheless, effect heterogeneity was high (only `r mean(tot_i2)`% of the variance was the resulting of sampling varianbility, 95% CI: `r quantile(tot_i2, 0.025)[1]` to `r quantile(tot_i2, 0.975)[1]`%), with most variance being explained by the specific study and type of trait (Study: `r mean(stdy_i2)`% , 95% CI: `r quantile(stdy_i2, 0.025)[1]` to `r quantile(stdy_i2, 0.975)[1]`%; Trait Type: `r mean(trait_i2)`% , 95% CI: `r quantile(trait_i2, 0.025)[1]` to `r quantile(trait_i2, 0.975)[1]`%). Evolutionary and species specific ecoloogy explained little variation in acute and acclimation repsonses (Species: `r mean(spp_i2)`% , 95% CI: `r quantile(spp_i2, 0.025)[1]` to `r quantile(spp_i2, 0.975)[1]`%; Phylogeny: `r mean(phylo_i2)`% , 95% CI: `r quantile(phylo_i2, 0.025)[1]` to `r quantile(phylo_i2, 0.975)[1]`%).
 
 
 ```{r, lncvrq10}
@@ -746,7 +804,7 @@ if(rerun){
 
 ```
 
-```{r}
+```{r, fig-1}
 #| label: fig-1
 #| fig-cap: "Taxonomic distribution of acute and acclimation Q10 estimates across major habitats. **A)** Phylogenetic distribution of taxa contained within the data. The total number of acute and acclimation type Q10 effect sizes are highlighted as well as whether the taxa is marine, freshwater or terrestrial. Silouettes are representative taxa of major clades within the tree. **B)** Acute and Acclimation lnRR Q10 across marine, freshwater, and terrestrial environments. **C)** lnCVR Q10 across traits for marine, freshwater and terrestrial systems. Note there were no differences between acute and acclimation Q10 types. k = total number of effect size estimates while the numbers in brackets indicate the number of species."
 #| warning: false
@@ -884,8 +942,7 @@ annotate("text", x = 3.01, y = 4.60,
   
 ```
 
-
-```{r}
+```{r, fig-2}
 #| label: fig-2
 #| fig-cap: Acute and Acclimation lnRR q10 across traits for A) marine, B) freshwater and C) terrestrial systems
 #| echo: false
@@ -921,8 +978,8 @@ img_fig2 <- magick::image_read("./output/figures/fig2_trait.png")
 img_fig2
 ```
 
-```{r}
-#| label: fig-fig3
+```{r, fig-3}
+#| label: fig-3
 #| fig-cap: Predicted mean acclimation and acute "$lnRR_{Q_{10}}$" for adult and juevenile life-history stages for A) Marine, B) Freshwater and C) Terrestrial ectotherms. 
 
 p1 <- orchard_plot(model1.4, mod = "type", at = list(c_accl_time = 0, habitat = "m"), group = "record_num", xlab = TeX("$lnRR_{Q_{10}}$"), condition.lab = "Life Stage", by = "life.hist", data = lnRRQ10_data, g = FALSE, k = FALSE, legend.pos = "top.left", angle = 45) + labs(title = "Marine") + ylim(c(-2, 2.2))
@@ -938,6 +995,7 @@ fig3 <- magick::image_read("./output/figures/fig3_lh.png")
 fig3
 
 ```
+
 ### *The opportunity for selection is reduced in terrestrial ectotherms*
 
 The opportunity for selection, as captured by $lnCVR_{Q_{10}}$, showed a decrease across all habitat types but were especially pronouced in terrestrial and marine ectotherms. Overall, there was a `r mean(t_cvr_mean_ef)`% (95% CI: `r quantile(t_cvr_mean_ef, 0.025)[1]` to `r quantile(t_cvr_mean_ef, 0.975)[1]`, $p_{mcmc}$ = `r pmcmc(t_cvr_mean)`) reduction in variation in physiological rates for terrestrial ectotherms and a `r mean(m_cvr_mean_ef)`% (95% CI: `r quantile(m_cvr_mean_ef, 0.025)[1]` to `r quantile(m_cvr_mean_ef, 0.975)[1]`, $p_{mcmc}$ = `r pmcmc(m_cvr_mean)`) reduction in variation for marine ectotherms when temperatures increase by 10$\deg$C. In contrast, freshwater ectotherms exhibited a much smaller reduction in physiologiocal rate variance at high temperatures (`r mean(f_cvr_mean_ef)`%, 95% CI: `r quantile(f_cvr_mean_ef, 0.025)[1]` to `r quantile(f_cvr_mean_ef, 0.975)[1]`, $p_{mcmc}$ = `r pmcmc(f_cvr_mean)`). 
@@ -1276,7 +1334,7 @@ if(rerun){
                               R = list(species_full = phylo_cor_wild_acclim), dfs = "contain", 
                               test = "t", data = lnRRQ10_data_wild_acclim_t)
     saveRDS(model3.9_t, "./output/models/model3.9_t")
-       r2_t <- r2_ml(model3.9_t)[1]                       
+                   
         # Model just quickly tests if we are missing an important interaction. It may not necessarily be just about the variability. We could have variable sites, but a variance site that has some predictability vs a variable site without predictability are two different things. We want predictability AND variance
     model3.10_t  <- metafor::rma.mv(effect_size ~ c_accl_time + cv_c + acf_all_c + acf_all_c:cv_c, V = V,
                                        random = list(~1 | record_num,
@@ -1362,6 +1420,8 @@ if(rerun){
     model3.10_m <- readRDS("./output/models/model3.10_m")
      model3.8_m <- readRDS("./output/models/model3.8_m")
 }
+
+       r2_t <- r2_ml(model3.9_t)[1]    
 ```
 
 ```{r wildlncvr}
@@ -1674,12 +1734,12 @@ if(rerun){
 
 ### *Climate variability predicts acclimation capacity for terrestrial ectotherms*
 
-Thermal variability (i.e., $CV$) explained variation in acclimation capacity among terrestrial ectotherms, but not for marine or freshwater populations (@fig-fig8). Terrestrial ectotherm populations with a history of greater thermal variability were more likely to show greater capacity for thermal acclimation compared to populations with lower thermal variability (`r mean(slope_t)`, 95%CI: `r quantile(slope_t, 0.025)[1]` to `r quantile(slope_t, 0.975)[1]`, $p_{mcmc}$ = `r pmcmc(slope_t)`; $R^2$ = `r r2_t*100`%). In contrast, thermal predcitability did not explain much variation across marine, freshwater or terrestrial ectotherm populations (@fig-fig8). 
+Thermal variability (i.e., $CV$) explained variation in acclimation capacity among terrestrial ectotherms, but not for marine or freshwater populations (@fig-4). Terrestrial ectotherm populations with a history of greater thermal variability were more likely to show greater capacity for thermal acclimation compared to populations with lower thermal variability (`r mean(slope_t)`, 95%CI: `r quantile(slope_t, 0.025)[1]` to `r quantile(slope_t, 0.975)[1]`, $p_{mcmc}$ = `r pmcmc(slope_t)`; $R^2$ = `r r2_t*100`%). In contrast, thermal predcitability did not explain much variation across marine, freshwater or terrestrial ectotherm populations (@fig-4). 
 
-In contrast, the opportunity for selection (i.e., the change in physiological variability) did not depend on a populations thermal variability or predictability (@fig-fig9). 
+In contrast, the opportunity for selection (i.e., the change in physiological variability) did not depend on a populations thermal variability or predictability (@fig-5). 
 
-```{r}
-#| label: fig-fig8
+```{r, fig-4}
+#| label: fig-4
 #| fig-align: center
 #| fig-cap: Bubble plot environment $lnRR_{Q_{10}}$ for wild populations by habitat.
 
@@ -1733,8 +1793,8 @@ ggsave(p8.1.2, width = 8.2, height = 8.7, filename = "./output/figures/fig8.png"
   p8.1.2 
 ```
 
-```{r}
-#| label: fig-fig9
+```{r, fig-5}
+#| label: fig-5
 #| fig-align: center
 #| fig-cap: Bubble plot environment $lnCVR_{Q_{10}}$ for wild populations by habitat.
 
@@ -1941,10 +2001,10 @@ if(rerun){
 ```
 
 
-Analysis of $lnVR_{Q_{10}}$ suggested that variance increases with higher temperatures across all habitat types, with terrestrial ectotherms having the smallest increase in variance (@fig-figs1). @tbl-tabs1
+Analysis of $lnVR_{Q_{10}}$ suggested that variance increases with higher temperatures across all habitat types, with terrestrial ectotherms having the smallest increase in variance (@fig-s1). @tbl-s1
 
-```{r}
-#| label: fig-figs1
+```{r, fig-s1}
+#| label: fig-s1
 #| fig-align: center
 #| fig-cap: lnVR
 
@@ -1981,8 +2041,8 @@ Analysis of $lnVR_{Q_{10}}$ suggested that variance increases with higher temper
   figs1
 ```
 
-```{r}
-#| label: tbl-tabs1
+```{r, tbl-s1}
+#| label: tbl-s1
 #| tbl-cap: Model estimates, standard error, and 95% credible intervals comparing changes in acute and acclimation $lnVR_{Q_{10}}$ across habitat types. Models estimates are based off 1253 effect sizes from 139 studies.
  
  # Extract the fixed / population-level effect summaries of the posterior
@@ -2002,8 +2062,8 @@ Analysis of $lnVR_{Q_{10}}$ suggested that variance increases with higher temper
 ```
 
 #### Plots of $I^2$ for multi-level models
-```{r}
-#| label: fig-figs3
+```{r, fig-s3}
+#| label: fig-s3
 #| fig-cap: I2 estimates
 #| fig-align: center
 
@@ -2023,7 +2083,7 @@ figs3
 
 #### Publicaton Bias Analysis
 
-Funnel plots did not show any noticable deviation from the typical funnel shape for any of the effect size estimates (@fig-figs2). 
+Funnel plots did not show any noticable deviation from the typical funnel shape for any of the effect size estimates (@fig-s2). 
 
 ```{r, pubias}
 #| label: pubias
@@ -2046,11 +2106,10 @@ if(rerun){
   model_full_lnvr_pb <- readRDS(file = "./output/models/lnVRQ10_pubbias")
 }
 
-summary(model_full_lnrr_pb)
 ```
 
-```{r}
-#| label: fig-figs2
+```{r, fig-s2}
+#| label: fig-s2
 #| fig-cap: Funnel plot of precision (1/sampling standard error) against effect size for A) log response ratio $Q_{10}$ ($lnRR_{Q_{10}}$), B)log coefficient of variance ratio $Q_{10}$ ($lnCVR_{Q_{10}}$) and C) log variance ratio $Q_{10}$ ($lnVR_{Q_{10}}$). Both acute ('green') and acclimation ('orange') effect sizes are plotted.
 cols <- c("#303234", "#D3D3D3")
 ps2_1 <- ggplot(lnRRQ10_data, aes(y = 1/sqrt(V), x = effect_size, color = type)) + geom_point() + theme_classic() + labs(y = TeX("Precision\\ $\\left( \\frac{1}{\\sqrt{V}} \\right)$"), x = TeX("$lnRR_{Q_{10}}$"))+geom_vline(xintercept = 0, linetype = 3) + theme(legend.title  = element_text(size = 15), legend.text = element_text(size = 15), axis.title = element_text(size = 15), axis.text = element_text(size = 15), legend.position = "none") + scale_color_manual(name = "Type", values = cols)

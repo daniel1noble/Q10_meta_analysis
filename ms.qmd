@@ -2064,7 +2064,7 @@ Analysis of $lnVR_{Q_{10}}$ suggested that variance increases with higher temper
 
     flextable(tabs1) %>% flextable::bold(part = "header") %>% flextable::autofit() %>% flextable::add_body_row(values = as_paragraph(as_b("Fixed Effects")), top = TRUE, colwidths = 5) %>% flextable::compose(value = as_paragraph(as_b(c(("Random Effects"), rep("", 4)))), i = 8)
 ```
-install.packages("flextable")
+
 #### Plots of $I^2$ for multi-level models
 ```{r, fig-s3}
 #| label: fig-s3

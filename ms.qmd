@@ -1965,7 +1965,7 @@ if(rerun){
                               test = "t", data = lnVRQ10_data)
   
    model3.2_bayes <- brms::brm(effect_size | se(sqrt(V), sigma = TRUE) ~  c_accl_time + type + habitat + type:habitat + (~1 | record_num) + (1 | gr(species_full, cov = A_VR)) + (1 | spp) + (1|trait), data2 = list(A_VR=A_VR), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 4, data = lnVRQ10_data)
-      summary(model3.2_bayes)                            
+                              
   # Save model1.2
   saveRDS(model3.2, file = "./output/models/lnVRQ10_3.2")
   saveRDS(model3.2_bayes, file = "./output/models/lnVRQ10_3.2_bayes")
@@ -2050,19 +2050,19 @@ Analysis of $lnVR_{Q_{10}}$ suggested that variance increases with higher temper
 #| tbl-cap: Model estimates, standard error, and 95% credible intervals comparing changes in acute and acclimation $lnVR_{Q_{10}}$ across habitat types. Models estimates are based off 1253 effect sizes from 139 studies.
  
  # Extract the fixed / population-level effect summaries of the posterior
-    fixed <- summary(model3.2_bayes)$fixed[,1:4]
-    fixed <- cbind(Parameter = rownames(fixed), fixed)
+    fixed <- do.call(rbind, apply(posterior_samples(model3.2_bayes, pars = "^b"), 2,  function(x) post_summary(x)))
+    fixed <- cbind(Parameter = c("Intercept", "Acclimation Time (z scaled)", "Acclimation Effect", "Habitat (Marine)", "Habitat (Terrestrial)", "Acclimation*Marine", "Acclimation*Terrestrial"), fixed)
     rownames(fixed) <- NULL
 
  # Extract the random effect summaries of the posteriors (SDs)
-    random <- plyr::ldply(summary(model3.2_bayes)$random)[,1:5]
-    colnames(random)[1] <- "Parameter"
+    random <- do.call(rbind, apply(posterior_samples(model3.2_bayes, pars = "^sd"), 2,  function(x) post_summary(x)))
+    random <- cbind(Parameter = c( "Study", "Phylogeny", "Species", "Trait"), random)
+    rownames(random) <- NULL
 
 # Create the table
     tabs1 <- rbind(fixed, random)
-   tabs1$Parameter <- c("Intercept", "Acclimation Time (z scaled)", "Acclimation Effect", "Habitat (Marine)", "Habitat (Terrestrial)", "Acclimation*Marine", "Acclimation*Terrestrial", "Study", "Phylogeny", "Species", "Trait")
 
-    flextable(tabs1) %>% flextable::bold(part = "header") %>% flextable::autofit() %>% flextable::add_body_row(values = as_paragraph(as_b("Fixed Effects")), top = TRUE, colwidths = 5) %>% flextable::compose(value = as_paragraph(as_b(c(("Random Effects"), rep("", 4)))), i = 8)
+    flextable(tabs1) %>% bold(part = "header") %>% autofit() %>% add_body_row(values = as_paragraph(as_b("Fixed Effects")), top = TRUE, colwidths = 5) %>% compose(value = as_paragraph(as_b(c(("Random Effects"), rep("", 4)))), i = 8)
 ```
 
 #### Plots of $I^2$ for multi-level models

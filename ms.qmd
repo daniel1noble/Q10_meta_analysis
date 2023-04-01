@@ -614,15 +614,15 @@ if(rerun){
         m_acclim <-  pred[4,] - pred[2,] # Contrasts acclim a and acute j values for marine species
     # Freshwater
             f_ad <- 4
-        f_acute <- pred[1+f_ad,] - pred[3+f_ad,] # Contrasts acute a and acute j values for freshwater species
+         f_acute <- pred[1+f_ad,] - pred[3+f_ad,] # Contrasts acute a and acute j values for freshwater species
         f_acclim <-  pred[4+f_ad,] - pred[2+f_ad,] # Contrasts acclim a and acute j values for freshwater species
     # Terrestrial
-        t_ad <- 8
-        t_acute <- pred[1+t_ad,] - pred[3+t_ad,] # Contrasts acute a and acute j values for terrestrial species
+            t_ad <- 8
+         t_acute <- pred[1+t_ad,] - pred[3+t_ad,] # Contrasts acute a and acute j values for terrestrial species
         t_acclim <-  pred[4+t_ad,] - pred[2+t_ad,]  # Contrasts acclim a and acute j values for terrestrial species
 
   # Acute differences between a and j across all habitats
-    acute_all <- c(m_acute, f_acute, t_acute); mean(acute_all); quantile(acute_all, c(0.025, 0.975)); pmcmc(acute_all)
+     acute_all <- c(m_acute, f_acute, t_acute); mean(acute_all); quantile(acute_all, c(0.025, 0.975)); pmcmc(acute_all)
     acclim_all <- c(m_acclim, f_acclim, t_acclim)
 
 # Now lets do a quick. Note that I fixed up some design matrix issues which made acclim the ref level, which was wrong. These two lines of code should roughly match
@@ -2060,10 +2060,10 @@ Analysis of $lnVR_{Q_{10}}$ suggested that variance increases with higher temper
 # Create the table
     tabs1 <- rbind(fixed, random)
    tabs1$Parameter <- c("Intercept", "Acclimation Time (z scaled)", "Acclimation Effect", "Habitat (Marine)", "Habitat (Terrestrial)", "Acclimation*Marine", "Acclimation*Terrestrial", "Study", "Phylogeny", "Species", "Trait")
-    
+
     flextable(tabs1) %>% bold(part = "header") %>% autofit() %>% add_body_row(values = as_paragraph(as_b("Fixed Effects")), top = TRUE, colwidths = 5) %>% compose(value = as_paragraph(as_b(c(("Random Effects"), rep("", 4)))), i = 8)
 ```
-
+install.packages("flextable")
 #### Plots of $I^2$ for multi-level models
 ```{r, fig-s3}
 #| label: fig-s3

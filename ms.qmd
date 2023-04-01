@@ -1854,7 +1854,7 @@ ggsave(p9.1.2, width = 8.2, height = 8.7, filename = "./output/figures/fig9.png"
 
 ## **Discussion**
 
-One explanation for why terrestrial ectotherms show minimal acclimation capacity may be related to the fact that terrestrial ectotherms, were, on average acclimated for significantly less time than ectotherms from aquatic habitats . Rates of acclimation have been shown to be faster for many terrestrial groups compared to aquatic organisms [e.g., amphibians and reptiles have higher rates of acclimation than fishes; See @Einum2023-lz]. However, faster rates of acclimation would result in opposite patterns to those we observed -- in other words, terrestrial species would be more likely to exhibit lower $lnRR_{Q_{10_{acclimation}}}$ compared to $lnRR_{Q_{10}}_{acute}$ when controlling for acclimation time. 
+One explanation for why terrestrial ectotherms show minimal acclimation capacity may be related to the fact that terrestrial ectotherms, were, on average acclimated for significantly less time than ectotherms from aquatic habitats . Rates of acclimation have been shown to be faster for many terrestrial groups compared to aquatic organisms [e.g., amphibians and reptiles have higher rates of acclimation than fishes; See @Einum2023-lz]. However, faster rates of acclimation would result in opposite patterns to those we observed -- in other words, terrestrial species would be more likely to exhibit lower $lnRR_{Q_{10_{acclimation}}}$ compared to $lnRR_{Q_{10_{acute}}}$ when controlling for acclimation time. 
 
 
 ## References

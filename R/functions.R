@@ -431,3 +431,16 @@ p_value <- function(x){
 p_text <- function(post){
    paste0("p = ", round(pmcmc(post), 2))
 }
+
+
+post_summary <- function(x){
+         Est <- mean(x)
+         se <- sd(x)
+         l95 <- quantile(x, 0.025)[1]
+         u95 <- quantile(x, 0.975)[1]
+
+         return(data.frame(Estimate = Est,
+                    Est.Error = se,
+                    `l-95% CI` = l95,
+                    `u-95% CI` = u95, check.names = FALSE, row.names = NULL))
+}

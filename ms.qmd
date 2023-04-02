@@ -25,6 +25,7 @@ crossref:
 ```{r}
 #| label: setup
 #| echo: false
+#| include: false
 ##################################
 # Clean workspace
 ##################################
@@ -33,7 +34,7 @@ crossref:
 ##################################
 # Loading packages & Functions
 ##################################
-    pacman::p_load(tidyverse,  metafor, flextable, raster, rasterVis,  patchwork, RColorBrewer, ggtree, ape, phytools, viridis, MCMCglmm, brms, latex2exp, orchaRd, multcomp, ggbeeswarm, magick, ggimage, gt)
+    pacman::p_load(tidyverse,  metafor, flextable, raster, rasterVis,  patchwork, RColorBrewer, ggtree, ape, phytools, viridis, MCMCglmm, brms, latex2exp, orchaRd, multcomp, ggbeeswarm, magick, ggimage, gt, update = TRUE)
 
 #devtools::install_github(repo = "ErikKusch/KrigR")
 ## Function to produce colour palette
@@ -809,7 +810,7 @@ if(rerun){
 
 ```{r, fig-1}
 #| label: fig-1
-#| fig-cap: "Taxonomic distribution of acute and acclimation Q10 estimates across major habitats. **A)** Phylogenetic distribution of taxa contained within the data. The total number of acute and acclimation type Q10 effect sizes are highlighted as well as whether the taxa is marine, freshwater or terrestrial. Silouettes are representative taxa of major clades within the tree. **B)** Acute and Acclimation lnRR Q10 across marine, freshwater, and terrestrial environments. **C)** lnCVR Q10 across traits for marine, freshwater and terrestrial systems. Note there were no differences between acute and acclimation Q10 types. k = total number of effect size estimates while the numbers in brackets indicate the number of species."
+#| fig-cap: "Taxonomic distribution of acute and acclimation $Q_{10}$ estimates across major habitats. **A)** Phylogenetic distribution of taxa contained within the data. The total number of acute and acclimation type Q10 effect sizes are highlighted as well as whether the taxa is marine, freshwater or terrestrial. Silouettes are representative taxa of major clades within the tree. **B)** Acute and Acclimation $lnRR_{Q_{10}}$ across marine, freshwater, and terrestrial environments. **C)** $lnCVR_{Q_{10}}$ across traits for marine, freshwater and terrestrial systems. Note there were no differences between acute and acclimation $Q_{10}$ types. k = total number of effect size estimates while the numbers in brackets indicate the number of species."
 #| warning: false
 #| echo: false
 

@@ -1740,7 +1740,7 @@ if(rerun){
 
 Thermal variability (i.e., $CV$) explained variation in acclimation capacity among terrestrial ectotherms, but not for marine or freshwater populations (@fig-4). Terrestrial ectotherm populations with a history of greater thermal variability were more likely to show greater capacity for thermal acclimation compared to populations with lower thermal variability (`r mean(slope_t)`, 95%CI: `r quantile(slope_t, 0.025)[1]` to `r quantile(slope_t, 0.975)[1]`, $p_{mcmc}$ = `r pmcmc(slope_t)`; $R^2$ = `r r2_t*100`%). In contrast, thermal predcitability did not explain much variation across marine, freshwater or terrestrial ectotherm populations (@fig-4). 
 
-In contrast, the opportunity for selection (i.e., the change in physiological variability) did not depend on a populations thermal variability or predictability (@fig-5). 
+In contrast, the opportunity for selection (i.e., the change in physiological variability) did not depend on a populations thermal variability or predictability across any of the habitats (@fig-5). 
 
 ```{r, fig-4}
 #| label: fig-4

@@ -34,7 +34,7 @@ crossref:
 ##################################
 # Loading packages & Functions
 ##################################
-    pacman::p_load(tidyverse,  metafor, flextable, raster, rasterVis,  patchwork, RColorBrewer, ggtree, ape, phytools, viridis, MCMCglmm, brms, latex2exp, orchaRd, multcomp, ggbeeswarm, magick, ggimage, gt, update = TRUE)
+    pacman::p_load(tidyverse,  metafor, flextable, raster, rasterVis,  patchwork, RColorBrewer, ggtree, ape, phytools, viridis, MCMCglmm, brms, latex2exp, orchaRd, multcomp, ggbeeswarm, magick, ggimage, gt)
 
 #devtools::install_github(repo = "ErikKusch/KrigR")
 ## Function to produce colour palette
@@ -1852,6 +1852,31 @@ ggsave(p9.1.2, width = 8.2, height = 8.7, filename = "./output/figures/fig9.png"
   p9.1.2 
 ```
 
+### Global change in opportunity for selection
+
+```{r, global}
+#| label: global
+#| echo: false
+
+# Here, we want to make global predcitions, at the lat/long in the data for how the opportunity of selection is expected to change with climate change. How can we do this? Q10 effects already have temperature controls within the effect size. So, what we want is to be able to understand how Q10 changes with latitude and longitude. Once we know that, we an extarct how temperature is expected to change from our current levels to future levels. This will be in degrees C. Then, assuming no plasticty and evolution (big assumption) we can get a baseline change in variance for each site. We first need to adjust the predcited Q10 value so that it's at 1C temperaure, not 10, we can do this through this formula Qt = (Q10 / 10)*T, where T is the temperature change in C. This will adjust the predcited Q10 value to the change in 1 degree C. We can then multiply this by the temperature change expected at that location to get the % change in variance or acure/acclim response. We can then plot these globally. 
+
+#############################
+rerun = FALSE
+if(rerun){
+  
+  # Model lat and long....
+    
+   model5_bayes <- brms::brm(effect_size | se(sqrt(V), sigma = TRUE) ~  c_accl_time + type + habitat + type:habitat +s(lat.y, long.x) + s(lat.y, long.x, by = habitat) + (~1 | record_num) + (1 | gr(species_full, cov = A_wild_cvr)) + (1 | spp) + (1|trait), data2 = list(A_wild_cvr=A_wild_cvr), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.99, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 8, data = lnCVRQ10_data_wild)
+         
+  
+  saveRDS(model5_bayes, file = "./output/models/lnCVRQ10_5_bayes")
+
+  } else{
+          model5_bayes <- readRDS("./output/models/lnCVRQ10_4.2_bayes")
+}
+
+lnCVRQ10_data_wild
+```
 
 ## **Discussion**
 

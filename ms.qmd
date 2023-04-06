@@ -34,7 +34,7 @@ crossref:
 ##################################
 # Loading packages & Functions
 ##################################
-    pacman::p_load(tidyverse,  metafor, flextable, raster, rasterVis,  patchwork, RColorBrewer, ggtree, ape, phytools, viridis, MCMCglmm, brms, latex2exp, orchaRd, multcomp, ggbeeswarm, magick, ggimage, gt)
+    pacman::p_load(tidyverse,  metafor, flextable, raster, rasterVis,  patchwork, RColorBrewer, ggtree, ape, phytools, viridis, MCMCglmm, brms, latex2exp, orchaRd, multcomp, ggbeeswarm, magick, ggimage, gt, performance)
 
 #devtools::install_github(repo = "ErikKusch/KrigR")
 ## Function to produce colour palette
@@ -1866,16 +1866,19 @@ if(rerun){
   
   # Model lat and long....
     
-   model5_bayes <- brms::brm(effect_size | se(sqrt(V), sigma = TRUE) ~  c_accl_time + type + habitat + type:habitat +s(lat.y, long.x) + s(lat.y, long.x, by = habitat) + (~1 | record_num) + (1 | gr(species_full, cov = A_wild_cvr)) + (1 | spp) + (1|trait), data2 = list(A_wild_cvr=A_wild_cvr), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.99, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 8, data = lnCVRQ10_data_wild)
+   model5_bayes <- brms::brm(effect_size | se(sqrt(V), sigma = TRUE) ~  c_accl_time + habitat + type + type:habitat + s(long.x, lat.y, by = habitat) + (~1 | record_num) + (1 | gr(species_full, cov = A_wild_cvr)) + (1 | spp) + (1|trait), data2 = list(A_wild_cvr=A_wild_cvr), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.99, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 8, data = lnCVRQ10_data_wild)
          
   
   saveRDS(model5_bayes, file = "./output/models/lnCVRQ10_5_bayes")
 
   } else{
-          model5_bayes <- readRDS("./output/models/lnCVRQ10_4.2_bayes")
+  model5_bayes <- readRDS("./output/models/lnCVRQ10_5_bayes")
 }
 
-lnCVRQ10_data_wild
+# Lets now make some predictions 
+
+pred <- posterior_epred(model5_bayes, re_formula = 'NA')
+
 ```
 
 ## **Discussion**

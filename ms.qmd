@@ -247,6 +247,10 @@ We first tested the degree to which acute and acclimation $lnRR_{Q_{10}}$ and $l
 
 Second, we tested whether different life-stages are more or less likely to acclimate by fitting a model for each habitat type and including an interaction between life-stage ('adult' or 'juvenile') and effect type. We predicted that acclimation responses would be more likely early in development compared to later in development, but that this should depend on the habitat type given the different constraints faced by different early life stages across major habitat types. 
 
+#### Modelling how climate change will impact on opportunity for selection
+
+To understand the consequences of human-induced climate change on the potential to impact the opportunity for selection on physiogical traits we fit a model that included an interaction between acclimation type, habitat type, latitude and longitude. We assumed that any change in $lnCVR_{Q_{10}}$ across latitude and longitude could vary by habitat type (i.e., an interaction between habitat). We used cubic splines for latitude and longitude (and their interaction) as any response could be complicated by local factors. Our model included random effects of species, trait, phylogeny and study. We predcited the expected change in $lnCVR_{Q_{10}}$ for each wild population in our dataset at the specific populations latitude and longitude. 
+
 ### *Publication Bias*
 
 We explored the possibility for publication bias graphically, using funnel plots, and more formally by including in our meta-regression models sampling variance (or sampling standard error) [@Nakagawa2022-gy]. Funnel plot asymmetry may suggest a form of publication bias called the 'file-drawer' effect whereby low-powered studies are less likely to be published. To test whether sampling variance covaried with effect size we included it in a multi-level meta-regression model that acounted for all the random effects (study, species, trait) and fixed effects (acclimation time, type of effect, habitat, trait category and the interaction between habitat type and trait category). 
@@ -1866,7 +1870,7 @@ if(rerun){
   
   # Model lat and long....
     
-   model5_bayes <- brms::brm(effect_size | se(sqrt(V)) ~  c_accl_time + habitat + type + type:habitat + s(long.x, lat.y, by = habitat) + (~1 | record_num) + (1 | gr(species_full, cov = A_wild_cvr)) + (1 | spp) + (1|trait) + (1|obs), data2 = list(A_wild_cvr=A_wild_cvr), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.99, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 8, data = lnCVRQ10_data_wild)
+   model5_bayes <- brms::brm(effect_size | se(sqrt(V)) ~  c_accl_time + habitat + type + type:habitat + t2(long.x, lat.y, by = habitat) + (~1 | record_num) + (1 | gr(species_full, cov = A_wild_cvr)) + (1 | spp) + (1|trait) + (1|obs), data2 = list(A_wild_cvr=A_wild_cvr), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.99, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 8, data = lnCVRQ10_data_wild)
          
   
   saveRDS(model5_bayes, file = "./output/models/lnCVRQ10_5_bayes")
@@ -1878,8 +1882,8 @@ if(rerun){
 # Lets now make some predictions 
 #conditional_effects(model5_bayes)
 
-#pred <- posterior_epred(model5_bayes, re_formula = 'NA')
-
+pred <- conditional_smooths(model5_bayes)
+pp_check(model5_bayes)
 ```
 
 ## **Discussion**

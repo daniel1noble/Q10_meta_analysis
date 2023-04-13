@@ -1868,24 +1868,34 @@ ggsave(p9.1.2, width = 8.2, height = 8.7, filename = "./output/figures/fig9.png"
 rerun = FALSE
 if(rerun){
   
-  # Model lat and long....
+  # Model lat and long. Need to exclude missing acclimdation data. That will make it easier to create predcitions and explore the model fit.
     
-   model5_bayes <- brms::brm(effect_size | se(sqrt(V)) ~  c_accl_time + type*habitat + s(long.x) + s(lat.y) + (~1 | record_num) + (1 | gr(species_full, cov = A_wild_cvr)) + (1 | spp) + (1|trait) + (1|obs), data2 = list(A_wild_cvr=A_wild_cvr), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.99, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 8, data = lnCVRQ10_data_wild[complete.cases(lnCVRQ10_data_wild$c_accl_time),])
+   model5_bayes <- brms::brm(effect_size | se(sqrt(V)) ~  c_accl_time + type*habitat + t2(long.x, lat.y) + (~1 | record_num) + (1 | gr(species_full, cov = A_wild_cvr)) + (1 | spp) + (1|trait) + (1|obs), data2 = list(A_wild_cvr=A_wild_cvr), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.99, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 8, data = lnCVRQ10_data_wild[complete.cases(lnCVRQ10_data_wild$c_accl_time),])
          
-  
   saveRDS(model5_bayes, file = "./output/models/lnCVRQ10_5_bayes")
 
   } else{
   model5_bayes <- readRDS("./output/models/lnCVRQ10_5_bayes")
 }
 
-# Lets now make some predictions 
-#conditional_effects(model5_bayes)
+# Lets explore the model and how it's predciting the real data
+  data_w_pred <- cbind(lnCVRQ10_data_wild[complete.cases(lnCVRQ10_data_wild$c_accl_time),], predict(model5_bayes))
+  head(data_w_pred)
 
-pred <- conditional_effects(model5_bayes)
-pp_check(model5_bayes)
+# Fitted vs actual data
+  ggplot(data = data_w_pred, aes(x = Estimate, y = effect_size)) + geom_point() + geom_smooth(method = "lm") + labs(x = "Predicted Effect Size", y = "Observed Effect Size") + theme_classic() + 
+  geom_abline(intercept = 0, slope = 1)
 
-predictions <- cbind(lnCVRQ10_data_wild, predict(model5_bayes))
+# Fitted by Lat/long
+  ggplot(data = data_w_pred, aes(y = Estimate, x = lat.y)) + geom_point() + geom_smooth(method = "loess") + labs(x = "Latitude", y = "Predicted Effect Size") + theme_classic() 
+
+  ggplot(data = data_w_pred, aes(y = Estimate, x = long.x)) + geom_point() + geom_smooth(method = "loess") + labs(x = "Longitude", y = "Predicted Effect Size") + theme_classic() 
+
+# Observed by Lat/long
+  ggplot(data = data_w_pred, aes(y = effect_size, x = lat.y)) + geom_point() + geom_smooth(method = "loess") + labs(x = "Latitude", y = "Predicted Effect Size") + theme_classic() 
+
+  ggplot(data = data_w_pred, aes(y = effect_size, x = long.x)) + geom_point() + geom_smooth(method = "loess") + labs(x = "Longitude", y = "Predicted Effect Size") + theme_classic() 
+
 ```
 
 ## **Discussion**

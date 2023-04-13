@@ -1892,9 +1892,29 @@ if(rerun){
   ggplot(data = data_w_pred, aes(y = Estimate, x = long.x)) + geom_point() + geom_smooth(method = "loess") + labs(x = "Longitude", y = "Predicted Effect Size") + theme_classic() 
 
 # Observed by Lat/long
-  ggplot(data = data_w_pred, aes(y = effect_size, x = lat.y)) + geom_point() + geom_smooth(method = "loess") + labs(x = "Latitude", y = "Predicted Effect Size") + theme_classic() 
+  ggplot(data = data_w_pred, aes(y = effect_size, x = lat.y)) + geom_point() + geom_smooth(method = "loess") + labs(x = "Latitude", y = "Observed Effect Size") + theme_classic() 
 
-  ggplot(data = data_w_pred, aes(y = effect_size, x = long.x)) + geom_point() + geom_smooth(method = "loess") + labs(x = "Longitude", y = "Predicted Effect Size") + theme_classic() 
+  ggplot(data = data_w_pred, aes(y = effect_size, x = long.x)) + geom_point() + geom_smooth(method = "loess") + labs(x = "Longitude", y = "Observed Effect Size") + theme_classic() 
+
+# How much variation does this model explain. Need to do this manually because function doesn't seme to work on the model object. We need to remember that predcit will include random effect variances so we may need to exclude this
+  re_post <- posterior_samples(model5_bayes, pars = "^sd_")
+  v_fix <- apply(predict(model5_bayes, summary = FALSE), 1, function(x) var(x))
+  
+# Extract the random effect variances
+  v_trait <- re_post$sd_trait__Intercept^2
+    v_spp <- re_post$sd_spp__Intercept^2
+    v_phy <- re_post$sd_species_full__Intercept^2
+    v_std <- re_post$sd_record_num__Intercept^2
+      v_r <- re_post$sd_obs__Intercept^2
+
+# Lets get the total variance for the random effects only
+  tot_re <- v_trait + v_spp + v_phy + v_std + v_r
+
+# Now, calculate r2 marginal, by subtracting the random effect variance from the fixed effect variance (which includes random effects). Need to check this as it may not be this intuitive
+  r2 <- (v_fix - tot_re) / (v_fix)
+  
+  mean(r2) # Seems a bit high 
+  quantile(r2, probs = c(0.025, 0.975))
 
 ```
 

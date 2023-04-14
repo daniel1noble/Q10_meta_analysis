@@ -1861,6 +1861,7 @@ ggsave(p9.1.2, width = 8.2, height = 8.7, filename = "./output/figures/fig9.png"
 ```{r, global}
 #| label: global
 #| echo: false
+#| include: false
 
 # Here, we want to make global predcitions, at the lat/long in the data for how the opportunity of selection is expected to change with climate change. How can we do this? Q10 effects already have temperature controls within the effect size. So, what we want is to be able to understand how Q10 changes with latitude and longitude. Once we know that, we an extarct how temperature is expected to change from our current levels to future levels. This will be in degrees C. Then, assuming no plasticty and evolution (big assumption) we can get a baseline change in variance for each site. We first need to adjust the predcited Q10 value so that it's at 1C temperaure, not 10, we can do this through this formula Qt = (Q10 / 10)*T, where T is the temperature change in C. This will adjust the predcited Q10 value to the change in 1 degree C. We can then multiply this by the temperature change expected at that location to get the % change in variance or acure/acclim response. We can then plot these globally. 
 
@@ -1898,8 +1899,16 @@ if(rerun){
 
 # How much variation does this model explain. Need to do this manually because function doesn't seme to work on the model object. We need to remember that predcit will include random effect variances so we may need to exclude this
   re_post <- posterior_samples(model5_bayes, pars = "^sd_")
-  v_fix <- apply(predict(model5_bayes, summary = FALSE), 1, function(x) var(x))
-  
+  v_fix <- apply(predict(model5_bayes, summary = FALSE), 1, function(x) var(x)) # 0.71 (but remember includes random effect variances)
+
+# sigma2_v = typical sampling error variance**NEW STEP**
+sub_data <- lnCVRQ10_data_wild[complete.cases(lnCVRQ10_data_wild$c_accl_time),]
+  sigma2_v <- sum(1 / sub_data$V) * (dim(sub_data)[1] - 1) /
+              (sum(1 / sub_data$V)^2 - sum((1 / sub_data$V)^2))
+
+# Now check that var fix from raw data and remove sampling variance. **NEW STEP**
+  v_fix2 <- var(sub_data$effect_size) - sigma2_v  #0.58
+
 # Extract the random effect variances
   v_trait <- re_post$sd_trait__Intercept^2
     v_spp <- re_post$sd_spp__Intercept^2
@@ -1911,10 +1920,16 @@ if(rerun){
   tot_re <- v_trait + v_spp + v_phy + v_std + v_r
 
 # Now, calculate r2 marginal, by subtracting the random effect variance from the fixed effect variance (which includes random effects). Need to check this as it may not be this intuitive
-  r2 <- (v_fix - tot_re) / (v_fix)
+    r2 <- (v_fix - tot_re - sigma2_v) / (v_fix - sigma2_v) # Need to remove sampling variance too
+
+    mean(r2) # Seems a bit high 0.5
+  quantile(r2, probs = c(0.025, 0.975)); #0.27-0.69
+
+# Now lets check with our different method. This should be close to the above. Which it is, so I think we're ok in our intuition.
+  r2_2 <- (v_fix2 - tot_re) / (v_fix2) # Already removed sampling variance from v_fix2
   
-  mean(r2) # Seems a bit high 
-  quantile(r2, probs = c(0.025, 0.975))
+  mean(r2_2) #  0.48
+  quantile(r2_2, probs = c(0.025, 0.975)); #0.31-0.60
 
 ```
 

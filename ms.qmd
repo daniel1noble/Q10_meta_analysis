@@ -1931,7 +1931,12 @@ sub_data <- lnCVRQ10_data_wild[complete.cases(lnCVRQ10_data_wild$c_accl_time),]
   mean(r2_2) #  0.48
   quantile(r2_2, probs = c(0.025, 0.975)); #0.31-0.60
 
+######################################################################
+# Model predcitions for terrestrial, marine and freshwater ectotherms
+######################################################################
 # Now we need to make predictions for new data. We first need to create new data. We need to do this for each habitat type because they are all a little different. Lets do terrestrial first.
+
+## Terrestrial Ectotherms
   terrest_data <- sub_data  %>% filter(habitat == "t")
     new_data_t <- data.frame(
       spp = terrest_data$spp,
@@ -1939,15 +1944,39 @@ sub_data <- lnCVRQ10_data_wild[complete.cases(lnCVRQ10_data_wild$c_accl_time),]
       habitat = terrest_data$habitat,
       c_accl_time = 0,
       V = 0,
-      effect_size = 0,
       lat = terrest_data$lat.y,
       long = terrest_data$long.x
     )
 
 terre_pred <- predict(model5_bayes, newdata = new_data_t, summary = FALSE)
   
-  
+## Marine ectotherms  
+  marine_data <- sub_data  %>% filter(habitat == "m")
+    new_data_m <- data.frame(
+      spp = marine_data$spp,
+      trait = marine_data$trait,
+      habitat = marine_data$habitat,
+      c_accl_time = 0,
+      V = 0,
+      lat = marine_data$lat.y,
+      long = marine_data$long.x
+    )
 
+marine_pred <- predict(model5_bayes, newdata = new_data_m, summary = FALSE)
+
+## Freshwater ectotherms
+  fresh_data <- sub_data  %>% filter(habitat == "f")
+    new_data_f <- data.frame(
+      spp = fresh_data$spp,
+      trait = fresh_data$trait,
+      habitat = fresh_data$habitat,
+      c_accl_time = 0,
+      V = 0,
+      lat = fresh_data$lat.y,
+      long = fresh_data$long.x
+    )
+
+fresh_pred <- predict(model5_bayes, newdata = new_data_f, summary = FALSE)
 
 ```
 

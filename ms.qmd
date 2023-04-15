@@ -1931,6 +1931,24 @@ sub_data <- lnCVRQ10_data_wild[complete.cases(lnCVRQ10_data_wild$c_accl_time),]
   mean(r2_2) #  0.48
   quantile(r2_2, probs = c(0.025, 0.975)); #0.31-0.60
 
+# Now we need to make predictions for new data. We first need to create new data. We need to do this for each habitat type because they are all a little different. Lets do terrestrial first.
+  terrest_data <- sub_data  %>% filter(habitat == "t")
+    new_data_t <- data.frame(
+      spp = terrest_data$spp,
+      trait = terrest_data$trait,
+      habitat = terrest_data$habitat,
+      c_accl_time = 0,
+      V = 0,
+      effect_size = 0,
+      lat = terrest_data$lat.y,
+      long = terrest_data$long.x
+    )
+
+terre_pred <- predict(model5_bayes, newdata = new_data_t, summary = FALSE)
+  
+  
+
+
 ```
 
 ## **Discussion**

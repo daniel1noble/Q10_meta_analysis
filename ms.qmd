@@ -1935,21 +1935,32 @@ sub_data <- lnCVRQ10_data_wild[complete.cases(lnCVRQ10_data_wild$c_accl_time),]
 # Model predcitions for terrestrial, marine and freshwater ectotherms
 ######################################################################
 # Now we need to make predictions for new data. We first need to create new data. We need to do this for each habitat type because they are all a little different. Lets do terrestrial first.
+test <- sub_data  %>% filter(habitat == "t") %>% distinct(spp, lat.y, long.x)
+length(unique(test$spp))
 
 ## Terrestrial Ectotherms
-  terrest_data <- sub_data  %>% filter(habitat == "t")
-    new_data_t <- data.frame(
-      spp = terrest_data$spp,
-      trait = terrest_data$trait,
-      habitat = terrest_data$habitat,
+  terrest_data <- sub_data  %>% filter(habitat == "t")  %>% distinct(spp, habitat, lat.y, long.x)
+  new_data_t <- data.frame(
       c_accl_time = 0,
       V = 0,
-      lat = terrest_data$lat.y,
-      long = terrest_data$long.x
+      trait = 0,
+      obs = 0, 
+      type = "acute",
+      record_num = 0,
+      species_full = terrest_data$spp
     )
 
-terre_pred <- predict(model5_bayes, newdata = new_data_t, summary = FALSE)
-  
+  # Create new dataframe with only unique values for predcition.
+  new_data_t2  <- cbind(terrest_data, new_data_t)
+
+  # We'll now make the predcitions from the model object using the new dataframe
+  terre_pred <- predict(model5_bayes, newdata = new_data_t2, summary = TRUE, allow_new_levels = TRUE, robust = FALSE)
+
+  # Test manual calculations. We can also set summary = FALSE and then do the calculations ourselves. Note we want robust = FALSE to make the comparisons more similar as otherwise the calculation are different when using summary TRUE/FALSE  
+  terre_pred2 <- predict(model5_bayes, newdata = new_data_t2, summary = FALSE, allow_new_levels = TRUE, robust = FALSE)
+  plyr::ldply(apply(terre_pred2, 2, function(x) post_summary(x)))
+
+
 ## Marine ectotherms  
   marine_data <- sub_data  %>% filter(habitat == "m")
     new_data_m <- data.frame(

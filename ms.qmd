@@ -34,7 +34,7 @@ crossref:
 ##################################
 # Loading packages & Functions
 ##################################
-    pacman::p_load(tidyverse,  metafor, flextable, raster, rasterVis,  patchwork, RColorBrewer, ggtree, ape, phytools, viridis, MCMCglmm, brms, latex2exp, orchaRd, multcomp, ggbeeswarm, magick, ggimage, gt, performance)
+    pacman::p_load(tidyverse,  metafor, flextable, raster, rasterVis,  patchwork, RColorBrewer, ggtree, ape, phytools, viridis, MCMCglmm, brms, latex2exp, orchaRd, multcomp, ggbeeswarm, magick, ggimage, gt, performance, ggthemes)
 
 #devtools::install_github(repo = "ErikKusch/KrigR")
 ## Function to produce colour palette
@@ -1960,7 +1960,10 @@ sub_data <- lnCVRQ10_data_wild[complete.cases(lnCVRQ10_data_wild$c_accl_time),]
   # We'll now make the predcitions from the model object using the new dataframe
   terre_pred <- predict(model5_bayes, newdata = new_data_t2, summary = TRUE, allow_new_levels = TRUE, sample_new_levels = "uncertainty", robust = FALSE, intervals = "confidence")
 
-  # Test manual calculations. We can also set summary = FALSE and then do the calculations ourselves. Note we want robust = FALSE to make the comparisons more similar as otherwise the calculation are different when using summary TRUE/FALSE . These are extremely close. Maybe just a rounding isuse or a slight change in what summary stat is used...not clear if I supressed robust or not.
+  # Lets merge predictions with the original data
+  terrest_data <- cbind(terrest_data, terre_pred)
+
+  # Test manual calculations. We can also set summary = FALSE and then do the calculations ourselves. Note we want robust = FALSE to make the comparisons more similar as otherwise the calculation are different when using summary TRUE/FALSE . These are extremely close, and I suspect are only different because sample_new_levels is sampling differently each time predict is run, so will be slightly different from run-to-run
   terre_pred2 <- predict(model5_bayes, newdata = new_data_t2, summary = FALSE, allow_new_levels = TRUE, sample_new_levels = "uncertainty", robust = FALSE)
   plyr::ldply(apply(terre_pred2, 2, function(x) post_summary(x)))
 
@@ -1983,6 +1986,9 @@ sub_data <- lnCVRQ10_data_wild[complete.cases(lnCVRQ10_data_wild$c_accl_time),]
   # We'll now make the predcitions from the model object using the new dataframe
   marine_pred <- predict(model5_bayes, newdata = new_data_m, summary = TRUE, allow_new_levels = TRUE, sample_new_levels = "uncertainty", robust = FALSE, intervals = "confidence")
 
+  # Lets merge predictions with the original data
+  marine_data <- cbind(marine_data, marine_pred)
+
 #############################
 ## Freshwater ectotherms
 #############################
@@ -2001,6 +2007,35 @@ sub_data <- lnCVRQ10_data_wild[complete.cases(lnCVRQ10_data_wild$c_accl_time),]
 
   # We'll now make the predcitions from the model object using the new dataframe
   fresh_pred <- predict(model5_bayes, newdata = new_data_f, summary = TRUE, allow_new_levels = TRUE, sample_new_levels = "uncertainty", robust = FALSE, intervals = "confidence")
+
+  # Lets merge predictions with the original data
+  fresh_data <- cbind(fresh_data, fresh_pred)
+
+
+# Now that we have all the predictions we can merge the data together. Note that species itself is not really that useful because each prediction at each latitude and longitude should incoperate the species effect. So we'll remove it. While I retain spp, it's still not totally specific to the species, but left it there so it's clear how these data match with the wild data. Note there are only 134 species because this is subset of the wild data.
+  all_pred <- rbind(terrest_data, marine_data, fresh_data) %>% dplyr::select(-species_full)
+
+```
+
+
+```{r}
+#| label: fig-preds
+#| fig-cap: Predictions
+
+world_map = map_data("world")
+
+ggplot() +
+  geom_map(
+    data = world_map, map = world_map,
+    aes(long, lat, map_id = region),
+    color = "black", fill = "lightgray") +
+  geom_point(
+    data = all_pred,
+    aes(long.x, lat.y, color = Estimate),
+    alpha = 0.7
+  ) +
+  theme_void() +
+  theme(legend.position = "none")
 
 
 ```

@@ -1881,11 +1881,16 @@ if(rerun){
 
 # Lets explore the model and how it's predciting the real data
   data_w_pred <- cbind(lnCVRQ10_data_wild[complete.cases(lnCVRQ10_data_wild$c_accl_time),], predict(model5_bayes))
-  head(data_w_pred)
 
 # Fitted vs actual data
   ggplot(data = data_w_pred, aes(x = Estimate, y = effect_size)) + geom_point() + geom_smooth(method = "lm") + labs(x = "Predicted Effect Size", y = "Observed Effect Size") + theme_classic() + 
   geom_abline(intercept = 0, slope = 1)
+
+# Seems to be OK, but over and under-predciting at times. Lets explore the data for odd ball predictions to see if there are any obvious reasons why. T here are very few for the most part but lets see why sign changes occur which are most stricking differences. Sign changes indicate the observed data is completely opposite in sign to the predcited data
+
+#  Spot check of a bunch of studies doesn't show any obvious issues with the data. Note that data is repeated because acute and acclimated rates are calculated. We expect the rows of raw data for acute and acclim to be repeated even though these data are NOT all used to make the calculation.
+  sign_change_dat <- data_w_pred  %>% filter(sign(Estimate) != sign(effect_size))
+  #View(sign_change_dat)
 
 # Fitted by Lat/long
   ggplot(data = data_w_pred, aes(y = Estimate, x = lat.y)) + geom_point() + geom_smooth(method = "loess") + labs(x = "Latitude", y = "Predicted Effect Size") + theme_classic() 
@@ -1935,19 +1940,18 @@ sub_data <- lnCVRQ10_data_wild[complete.cases(lnCVRQ10_data_wild$c_accl_time),]
 # Model predcitions for terrestrial, marine and freshwater ectotherms
 ######################################################################
 # Now we need to make predictions for new data. We first need to create new data. We need to do this for each habitat type because they are all a little different. Lets do terrestrial first.
-test <- sub_data  %>% filter(habitat == "t") %>% distinct(spp, lat.y, long.x)
-length(unique(test$spp))
 
+#############################
 ## Terrestrial Ectotherms
-  terrest_data <- sub_data  %>% filter(habitat == "t")  %>% distinct(spp, habitat, lat.y, long.x)
+#############################
+
+  terrest_data <- sub_data  %>% filter(habitat == "t")  %>% distinct(spp, species_full, habitat, type, lat.y, long.x)
   new_data_t <- data.frame(
       c_accl_time = 0,
       V = 0,
       trait = 0,
       obs = 0, 
-      type = "acute",
-      record_num = 0,
-      species_full = terrest_data$spp
+      record_num = 0
     )
 
   # Create new dataframe with only unique values for predcition.
@@ -1956,11 +1960,13 @@ length(unique(test$spp))
   # We'll now make the predcitions from the model object using the new dataframe
   terre_pred <- predict(model5_bayes, newdata = new_data_t2, summary = TRUE, allow_new_levels = TRUE, sample_new_levels = "uncertainty", robust = FALSE, intervals = "confidence")
 
-  # Test manual calculations. We can also set summary = FALSE and then do the calculations ourselves. Note we want robust = FALSE to make the comparisons more similar as otherwise the calculation are different when using summary TRUE/FALSE  
+  # Test manual calculations. We can also set summary = FALSE and then do the calculations ourselves. Note we want robust = FALSE to make the comparisons more similar as otherwise the calculation are different when using summary TRUE/FALSE . These are extremely close. Maybe just a rounding isuse or a slight change in what summary stat is used...not clear if I supressed robust or not.
   terre_pred2 <- predict(model5_bayes, newdata = new_data_t2, summary = FALSE, allow_new_levels = TRUE, sample_new_levels = "uncertainty", robust = FALSE)
   plyr::ldply(apply(terre_pred2, 2, function(x) post_summary(x)))
 
+#############################
 ## Marine ectotherms  
+#############################
   marine_data <- sub_data  %>% filter(habitat == "m")
     new_data_m <- data.frame(
       spp = marine_data$spp,
@@ -1974,7 +1980,9 @@ length(unique(test$spp))
 
 marine_pred <- predict(model5_bayes, newdata = new_data_m, summary = FALSE)
 
+#############################
 ## Freshwater ectotherms
+#############################
   fresh_data <- sub_data  %>% filter(habitat == "f")
     new_data_f <- data.frame(
       spp = fresh_data$spp,

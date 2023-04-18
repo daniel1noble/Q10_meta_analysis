@@ -48,7 +48,6 @@ colfunc <- colorRampPalette(rev(brewer.pal(10,"RdBu")))
   options(digits = 2, scipen = 3)
 ```
 
-
 ```{r data_setup_summary}
 
 ##########################
@@ -2032,10 +2031,8 @@ ggplot() +
   geom_point(
     data = all_pred,
     aes(long.x, lat.y, color = Estimate),
-    alpha = 0.7
-  ) +
-  theme_void() +
-  theme(legend.position = "none")
+    alpha = 0.7, size = 6
+  ) + labs(x = "Longitude", y = "Latitude", color = TeX("$lnCVR_{Q_{10}}$")) 
 
 
 ```

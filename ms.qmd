@@ -2034,8 +2034,8 @@ map1_current <- ggplot() +
   geom_point(
     data = all_pred,
     aes(long.x, lat.y, color = Estimate),
-    alpha = 0.7, size = 6
-  ) + labs(x = "Longitude", y = "Latitude", color = TeX("$lnCVR_{Q_{10}}$")) +
+    alpha = 0.7, size = 5
+  ) + labs(x = "Longitude", y = "Latitude", color = TeX("$lnCVR_{Q_{10}}$")) + scale_color_viridis() +
    theme_map()
 map1_current
 

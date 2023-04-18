@@ -2039,6 +2039,25 @@ map1_current <- ggplot() +
    theme_map()
 map1_current
 
+zoom_areas <- data.frame(
+     x = c(-130,  -10, 130),
+     y = c(  25, 30, -25),
+  xend = c( -50, 45, 170),
+  yend = c(  55,  70, -5),
+  label = c("North America", "Europe", "Asia")
+)
+
+zoom_plots <- lapply(1:nrow(zoom_areas), function(i) {
+  map1_current +
+    geom_polygon(fill = "gray80", color = "black") +
+    coord_cartesian(xlim = c(zoom_areas[i, "x"], zoom_areas[i, "xend"]), 
+                    ylim = c(zoom_areas[i, "y"], zoom_areas[i, "yend"])) +
+                    theme(legend.position = "none")
+})
+
+p <- map1_current / (zoom_plots[[1]] | zoom_plots[[2]] | zoom_plots[[3]])
+
+
 ```
 
 ## **Discussion**

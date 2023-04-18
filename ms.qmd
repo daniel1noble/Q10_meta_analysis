@@ -2021,18 +2021,22 @@ sub_data <- lnCVRQ10_data_wild[complete.cases(lnCVRQ10_data_wild$c_accl_time),]
 #| label: fig-preds
 #| fig-cap: Predictions
 
-world_map = map_data("world")
+world_map = map_data("world") %>% 
+  filter(! long > 180)
 
 ggplot() +
   geom_map(
     data = world_map, map = world_map,
     aes(long, lat, map_id = region),
     color = "black", fill = "lightgray") +
+  expand_limits(x = world_map$long, y = world_map$lat) +
+  coord_map("moll") +
   geom_point(
     data = all_pred,
     aes(long.x, lat.y, color = Estimate),
     alpha = 0.7, size = 6
-  ) + labs(x = "Longitude", y = "Latitude", color = TeX("$lnCVR_{Q_{10}}$")) 
+  ) + labs(x = "Longitude", y = "Latitude", color = TeX("$lnCVR_{Q_{10}}$")) +
+   theme_map()
 
 
 ```

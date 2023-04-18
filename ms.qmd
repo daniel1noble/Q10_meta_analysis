@@ -2010,7 +2010,6 @@ sub_data <- lnCVRQ10_data_wild[complete.cases(lnCVRQ10_data_wild$c_accl_time),]
   # Lets merge predictions with the original data
   fresh_data <- cbind(fresh_data, fresh_pred)
 
-
 # Now that we have all the predictions we can merge the data together. Note that species itself is not really that useful because each prediction at each latitude and longitude should incoperate the species effect. So we'll remove it. While I retain spp, it's still not totally specific to the species, but left it there so it's clear how these data match with the wild data. Note there are only 134 species because this is subset of the wild data.
   all_pred <- rbind(terrest_data, marine_data, fresh_data) %>% dplyr::select(-species_full)
 
@@ -2055,7 +2054,16 @@ zoom_plots <- lapply(1:nrow(zoom_areas), function(i) {
                     theme(legend.position = "none")
 })
 
-p <- map1_current / (zoom_plots[[1]] | zoom_plots[[2]] | zoom_plots[[3]])
+# Make a multipanel plot. Make teh world_map plot the biggest, and then add the zoomed in plots arond it using pactchwork
+
+p <- (zoom_plots[[1]] | zoom_plots[[2]]) /map1_current / (zoom_plots[[3]]) + plot_layout(
+  nrow = 3, # 3 rows of plots,
+  ncol = 3, # 3 columns of plots,
+  heights = c(1, 2, 1), # The first plot is half the size of the second and thrid plot
+  widths = c(1, 1, 1) # all plots have equal width
+)
+
+map1_current + inset_element(zoom_plots[[1]], left = 0, bottom = 0.95, right = 0.4, top = 1.4, align_to = 'full') + inset_element(zoom_plots[[2]], left = 0.7, bottom =0.95, right = 1, top = 1.4, align_to = 'full') + plot_annotation(tag_levels = "A", tag_suffix = ")")
 
 
 ```
@@ -2336,4 +2344,5 @@ ggsave(figs2, width = 11.5, height = 4.8, filename = "./output/figures/figS2.png
 figs2 <- image_read("./output/figures/figS2.png")
 figs2
 ```
+
 

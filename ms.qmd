@@ -2024,7 +2024,7 @@ sub_data <- lnCVRQ10_data_wild[complete.cases(lnCVRQ10_data_wild$c_accl_time),]
 world_map = map_data("world") %>% 
   filter(! long > 180)
 
-ggplot() +
+map1_current <- ggplot() +
   geom_map(
     data = world_map, map = world_map,
     aes(long, lat, map_id = region),
@@ -2037,7 +2037,7 @@ ggplot() +
     alpha = 0.7, size = 6
   ) + labs(x = "Longitude", y = "Latitude", color = TeX("$lnCVR_{Q_{10}}$")) +
    theme_map()
-
+map1_current
 
 ```
 

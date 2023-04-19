@@ -2012,8 +2012,10 @@ sub_data <- lnCVRQ10_data_wild[complete.cases(lnCVRQ10_data_wild$c_accl_time),]
 
 # Now that we have all the predictions we can merge the data together. Note that species itself is not really that useful because each prediction at each latitude and longitude should incoperate the species effect. So we'll remove it. While I retain spp, it's still not totally specific to the species, but left it there so it's clear how these data match with the wild data. Note there are only 134 species because this is subset of the wild data.
   all_pred <- rbind(terrest_data, marine_data, fresh_data) %>% dplyr::select(-species_full)
-
+  spp_wild  <- length(unique(sub_data$spp))
 ```
+
+Measurements of acute and acclimation responses for wild ectotherms was much less common than studies done on captive populations ($N_{species}$ = `r spp_wild`). Globally, there was a clear bias towards spiecies in the Northern Hemiphere (@fig-preds). Predictions of current global changes in the opportunity for selection were generally conservative with our model explaining ~ 50% of the variation in the observed data ($R^2$ = `r round(mean(r2_2), 2)`, 95% CI: `r round(quantile(r2_2, 0.025)[1], 2)` to `r round(quantile(r2_2, 0.975)[1], 2)`). 
 
 
 ```{r}
@@ -2034,9 +2036,8 @@ map1_current <- ggplot() +
     data = all_pred,
     aes(long.x, lat.y, color = Estimate),
     alpha = 0.7, size = 5
-  ) + labs(x = "Longitude", y = "Latitude", color = TeX("$lnCVR_{Q_{10}}$")) + scale_color_viridis() +
-   theme_map()
-map1_current
+  ) + labs(x = "Longitude", y = "Latitude", color = TeX("$lnCVR_{Q_{10}}$")) + scale_color_viridis() + theme_map(base_size = 22)
+
 
 zoom_areas <- data.frame(
      x = c(-130, -10, -60, 145),
@@ -2054,12 +2055,14 @@ zoom_plots <- lapply(1:nrow(zoom_areas), function(i) {
                     theme(legend.position = "none")
 })
 
-# Make a multipanel plot. Make teh world_map plot the biggest, and then add the zoomed in plots arond it using pactchwork
+# Make a multipanel plot. Make the world_map plot the biggest, and then add the zoomed in plots arond it using pactchwork
 
-p <- (zoom_plots[[1]] | plot_spacer() | zoom_plots[[2]]) / map1_current  + plot_layout(heights  = c(1, 2.5)) + plot_annotation(tag_levels = "A", tag_suffix = ")")
+p <- (zoom_plots[[1]] | plot_spacer() | zoom_plots[[2]]) / map1_current  + plot_layout(heights  = c(1, 2.5)) + plot_annotation(tag_levels = "A", tag_suffix = ")") & theme(plot.tag = element_text(size = 20, face = "bold"))
 
-p
+ggsave(p, filename = "./output/figures/fig-preds.png", width = 9.1, height = 7.2)
 
+image_read("./output/figures/fig-preds.png")
+```
 ```
 
 ## **Discussion**

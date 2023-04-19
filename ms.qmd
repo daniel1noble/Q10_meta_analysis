@@ -2056,15 +2056,9 @@ zoom_plots <- lapply(1:nrow(zoom_areas), function(i) {
 
 # Make a multipanel plot. Make teh world_map plot the biggest, and then add the zoomed in plots arond it using pactchwork
 
-p <- (zoom_plots[[1]] | zoom_plots[[2]]) /map1_current / (zoom_plots[[3]]) + plot_layout(
-  nrow = 3, # 3 rows of plots,
-  ncol = 3, # 3 columns of plots,
-  heights = c(1, 2, 1), # The first plot is half the size of the second and thrid plot
-  widths = c(1, 1, 1) # all plots have equal width
-)
+p <- (zoom_plots[[1]] | plot_spacer() | zoom_plots[[2]]) / map1_current  / (plot_spacer() | plot_spacer() |zoom_plots[[3]]) + plot_layout(heights  = c(1, 2.5, 1)) + plot_annotation(tag_levels = "A", tag_suffix = ")")
 
-map1_current + inset_element(zoom_plots[[1]], left = 0, bottom = 0.95, right = 0.4, top = 1.4, align_to = 'full') + inset_element(zoom_plots[[2]], left = 0.7, bottom =0.95, right = 1, top = 1.4, align_to = 'full') + plot_annotation(tag_levels = "A", tag_suffix = ")")
-
+p
 
 ```
 

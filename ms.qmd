@@ -2039,11 +2039,11 @@ map1_current <- ggplot() +
 map1_current
 
 zoom_areas <- data.frame(
-     x = c(-130,  -10, 130),
-     y = c(  25, 30, -25),
-  xend = c( -50, 45, 170),
-  yend = c(  55,  70, -5),
-  label = c("North America", "Europe", "Asia")
+     x = c(-130, -10, -60, 145),
+  xend = c( -50, 48, -35, 155),
+     y = c(  25, 30, 0, -45),
+  yend = c(  55,  70, -60, -10),
+  label = c("North America", "Europe", "South America", "Australia")
 )
 
 zoom_plots <- lapply(1:nrow(zoom_areas), function(i) {
@@ -2056,7 +2056,7 @@ zoom_plots <- lapply(1:nrow(zoom_areas), function(i) {
 
 # Make a multipanel plot. Make teh world_map plot the biggest, and then add the zoomed in plots arond it using pactchwork
 
-p <- (zoom_plots[[1]] | plot_spacer() | zoom_plots[[2]]) / map1_current  / (plot_spacer() | plot_spacer() |zoom_plots[[3]]) + plot_layout(heights  = c(1, 2.5, 1)) + plot_annotation(tag_levels = "A", tag_suffix = ")")
+p <- (zoom_plots[[1]] | plot_spacer() | zoom_plots[[2]]) / map1_current  + plot_layout(heights  = c(1, 2.5)) + plot_annotation(tag_levels = "A", tag_suffix = ")")
 
 p
 

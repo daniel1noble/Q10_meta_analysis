@@ -1,5 +1,5 @@
 ---
-title: "Reduced plasticity and opportunity for selection in terrestrial ectotherm populations"
+title: "Reduced plasticity and opportunity for selection in terrestrial ectotherm populations under climate change"
 bibliography: ./bib/refs.bib
 csl: ./bib/ecology-letters.csl
 format:
@@ -224,9 +224,9 @@ We recorded or derived a series of moderator variables from each study that are 
 
 ### *Climate Data*
 
-To understand how climate has impacted species’ physiological acclimation abilities we used the coordinates reported by each study to extract temperature data from terrestrial and aquatic environments. It was unclear whether climate at the locations of captive reared organisms would be representative of a population's climate history - particularly for species reared under captive condition for many generations. Given that we were interested in understanding climate driven effects on acclimation capacity we only used studies on wild populations were used for climate analyses. 
+To understand how climate has impacted species’ physiological acclimation abilities we used the coordinates reported by each study to extract temperature data from terrestrial and aquatic environments. It was unclear whether climate at the locations of captive reared organisms would be representative of a population's climate history - particularly for species reared under captive condition for many generations. Given that we were interested in understanding climate driven effects on acclimation capacity we only used studies on wild populations for climate analyses. 
 
-Temperature data was extracted using the monthly averages provided by the ERA5 climate model, available from the Copernicus climate data store [@Hersbach2020-hx]. For each population and species in the dataset we extracted a 30-year period (1958-2022) of either surface temperature at 2 meters for both terrestrial and freshwater taxa, or sea surface temperature for the marine taxa using the *ncdf4* R package [vers. `r utils::packageVersion("ncdf4")`, @Pierce2021-lc]. We chose a 2-meter resolution because we believed that it more likely to reflects the micro-thermal environment experienced by terrestrial and freshwater ectotherms at those locations. 
+ Monthly average temperature data were extracted from the ERA5 climate model, available from the Copernicus climate data store [@Hersbach2020-hx]. For each population and species in the dataset we extracted a 30-year period (1950-2022) of either surface temperature at 2 meters (0.01 resolution) for both terrestrial and freshwater taxa, or sea surface temperature for the marine taxa (at 0.25 resolution) using the *ncdf4* R package [vers. `r utils::packageVersion("ncdf4")`, @Pierce2021-lc]. We chose a 2-meter resolution because we believed that it more likely to reflects the micro-thermal environment experienced by terrestrial and freshwater ectotherms at those locations. 
 
 Using the thermal time-series data for each location we summarised various metrics of thermal variability across months and years as well as estimates of thermal predictability (i.e., autocorrelation). To estimate thermal variability, we calculated the coefficient of variation ($\frac{SD}{M}$, where SD = standard deviation in temperature and M = the mean temperature for each year). To estimate thermal predictability, we calculated the auto-regressive time lag across the entire dataset. Theoretical and empirical studies of plasticity evolution have emphasised the importance of both climate variability and predictability in plasticity evolution.
 
@@ -246,7 +246,7 @@ We first tested the degree to which acute and acclimation $lnRR_{Q_{10}}$ and $l
 
 Second, we tested whether different life-stages are more or less likely to acclimate by fitting a model for each habitat type and including an interaction between life-stage ('adult' or 'juvenile') and effect type. We predicted that acclimation responses would be more likely early in development compared to later in development, but that this should depend on the habitat type given the different constraints faced by different early life stages across major habitat types. 
 
-#### Modelling how climate change will impact on opportunity for selection
+#### *Modelling how climate change will impact on opportunity for selection*
 
 To understand the consequences of human-induced climate change on the potential to impact the opportunity for selection on physiogical traits we fit a model that included an interaction between acclimation type, habitat type, latitude and longitude. We assumed that any change in $lnCVR_{Q_{10}}$ across latitude and longitude could vary by habitat type (i.e., an interaction between habitat). We used cubic splines for latitude and longitude (and their interaction) as any response could be complicated by local factors. Our model included random effects of species, trait, phylogeny and study. We predcited the expected change in $lnCVR_{Q_{10}}$ for each wild population in our dataset at the specific populations latitude and longitude. 
 
@@ -2015,12 +2015,12 @@ sub_data <- lnCVRQ10_data_wild[complete.cases(lnCVRQ10_data_wild$c_accl_time),]
   spp_wild  <- length(unique(sub_data$spp))
 ```
 
-Measurements of acute and acclimation responses for wild ectotherms was much less common than studies done on captive populations ($N_{species}$ = `r spp_wild`). Globally, there was a clear bias towards spiecies in the Northern Hemiphere (@fig-preds). Predictions of current global changes in the opportunity for selection were generally conservative with our model explaining ~ 50% of the variation in the observed data ($R^2$ = `r round(mean(r2_2), 2)`, 95% CI: `r round(quantile(r2_2, 0.025)[1], 2)` to `r round(quantile(r2_2, 0.975)[1], 2)`). 
+Acute and acclimation responses for wild ectotherms were much less common than studies done on captive populations ($N_{species}$ = `r spp_wild`). Globally, there was a clear bias towards spiecies in the Northern Hemiphere (@fig-preds). Predictions of current global changes in the opportunity for selection were generally conservative with our model explaining ~ 50% of the variation in the observed data ($R^2$ = `r round(mean(r2_2), 2)`, 95% CI: `r round(quantile(r2_2, 0.025)[1], 2)` to `r round(quantile(r2_2, 0.975)[1], 2)`). 
 
 
 ```{r}
 #| label: fig-preds
-#| fig-cap: Predictions
+#| fig-cap: Model predictions for the expected change in acclimation $lnCVR_{Q_{10}}$ across the globe for terrestrial, marine and freshwater ecthotherms. Predictions consider the uncertainty in random effects (i.e., species, phylogeny, study).  
 
 world_map = map_data("world") %>% 
   filter(! long > 180)
@@ -2033,17 +2033,17 @@ map1_current <- ggplot() +
   expand_limits(x = world_map$long, y = world_map$lat) +
   coord_map("moll") +
   geom_point(
-    data = all_pred,
+    data = all_pred  %>% filter(type == "acclim"),
     aes(long.x, lat.y, color = Estimate),
     alpha = 0.7, size = 5
   ) + labs(x = "Longitude", y = "Latitude", color = TeX("$lnCVR_{Q_{10}}$")) + scale_color_viridis() + theme_map(base_size = 22)
 
 
 zoom_areas <- data.frame(
-     x = c(-130, -10, -60, 145),
+     x = c(-130, -15, -60, 145),
   xend = c( -50, 48, -35, 155),
-     y = c(  25, 30, 0, -45),
-  yend = c(  55,  70, -60, -10),
+     y = c(  25, 34, 0, -45),
+  yend = c(  55,  69.8, -60, -10),
   label = c("North America", "Europe", "South America", "Australia")
 )
 
@@ -2057,13 +2057,13 @@ zoom_plots <- lapply(1:nrow(zoom_areas), function(i) {
 
 # Make a multipanel plot. Make the world_map plot the biggest, and then add the zoomed in plots arond it using pactchwork
 
-p <- (zoom_plots[[1]] | plot_spacer() | zoom_plots[[2]]) / map1_current  + plot_layout(heights  = c(1, 2.5)) + plot_annotation(tag_levels = "A", tag_suffix = ")") & theme(plot.tag = element_text(size = 20, face = "bold"))
+p <- (zoom_plots[[1]] | zoom_plots[[2]]) / map1_current  + plot_layout(heights  = c(1, 2)) + plot_annotation(tag_levels = "A", tag_suffix = ")") & theme(plot.tag = element_text(size = 20, face = "bold"), plot.margin = unit(c(0, 0, 0, 0), "cm"))
 
 ggsave(p, filename = "./output/figures/fig-preds.png", width = 9.1, height = 7.2)
 
 image_read("./output/figures/fig-preds.png")
 ```
-```
+
 
 ## **Discussion**
 
@@ -2071,6 +2071,7 @@ One explanation for why terrestrial ectotherms show minimal acclimation capacity
 
 
 ## References
+
 <br>
 <div id="refs"></div>
 <br> 

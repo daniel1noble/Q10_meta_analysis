@@ -23,3 +23,4 @@ ms_files
 ms.rmarkdown
 ms.html
 output/models/
+data/climate_data/ERA5_LAND/

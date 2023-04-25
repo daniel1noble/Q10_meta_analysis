@@ -1,31 +1,263 @@
-###################################################################################
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
-#                       ERA5 Reanalysis 1 CLIMATE DATA
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
-###################################################################################
-
-# This version doesn't actively download point estimates of temperature. 
-# Instead a NetCDF for ERA5 was downloaded for 1979-present.
-
-# See Word doc: Data/Downloading ERA5 historic climate data.docx
-
-# Note that the data is stored in Kelvin and transformed.
-# 2m surface temperature
-#     scale_factor: 0.00176319797961702
-#     add_offset: 257.703670097788
-# Sea Surface Temperature
-#     scale_factor: 0.00061697729459776
-#     add_offset: 289.46490147229
-
-# Time is recorded in hours since 1900-01-01 00:00:00.0
-
 rm(list=ls())
-library(ncdf4)
+library(tidyr)
+library(ecmwfr)
+library(terra)
+#library(ncdf4)
+library(maps)
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
+# SURVEY LOCATIONS
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
 
 geo_data = read.csv("./data/climate_data/Species_LatLong_plusHabitat.csv")
 
 # First remove missing lat and long
 geo_data <- geo_data %>% dplyr::filter(!is.na(lat) & !is.na(long))
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
+# SETUP API
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
+
+### SET KEYRING USER DETAILS TO CONNECT TO CLIMATE DATA STORE ACCOUNT
+### Note: this is my personal CDS account so if you have your own
+### its possible to change the details, but mine should work for you too.
+wf_set_key(user="89307", key="e661d59a-c4f0-4e9e-9da4-476fa0a9536e", service='cds')
+#wf_user_info("89307")
+
+# This page had a really helpful instructions. In particular, you can copy and
+# paste the API code from the CDS website, and then use an RStudio plugin to 
+# convert the text to an R-relevant command!
+#   https://cran.r-project.org/web/packages/ecmwfr/vignettes/cds_vignette.html
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
+# HISTORIC CLIMATIC DATA
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
+
+# Cycle through each surveyed point in the table and extract a record monthly mean
+# temperature (2m and skin for land, SST for marine) between 1950 and 2022.
+# The outputs are saved as NetCDFs, but can also be read by the terra package (see below)
+# and easily converted to a vector.
+# Two points to note:
+#         > LAND: because I have hesitated on which temperature to use, I have 
+#           downloaded both air and ground temperature. Hence when this is spat
+#           out as a vector its double the length of the time series, and you 
+#           can see a clear jump in values where it switches to skin temperature.
+#         > MARINE: extraction of SST at the precise location of the record often
+#           throws errors because the dataset essentially considers that 0.1 x 0.1
+#           cell to be land. As a result I have expanded the extent of the 
+#           request for marine species so that its much more likely to include 
+#           some cells with values, and then we can take a median of those at 
+#           each time.
+
+
+for(i in which(geo_data$source=="w") ){  #nrow(geo_data)){
+  
+  filelist = unlist(lapply(list.files("./Data/ERA5_LAND/",pattern="point"),FUN=function(x) strsplit(x,"point")[[1]][2]))
+  filelist = as.numeric(gsub("\\.nc","",filelist))
+  
+  if( !i %in% filelist ){
+    
+    Habitat= geo_data$habitat[i] %in% c("t","f")
+    
+    if(Habitat){
+      # If the species is Terrestrial or Freshwater we refer our request to the ERA5-LAND dataset
+      
+      # Maintain a tightly focused spatial extent
+      Xlim   = round(round(geo_data$long[i],2) + c(-0.01,0.01),2)
+      Ylim   = round(round(geo_data$lat[i],2) + c(-0.01,0.01),2)
+      
+      if(i==253){ Ylim=c(21.44,21.46) }
+      
+      # If we want every hour of every day
+      # "ERA5-Land hourly data from 1950 to present"
+      # >> https://cds.climate.copernicus.eu/cdsapp#!/dataset/reanalysis-era5-land?tab=form
+      #
+      #request <- list(
+      #  variable = "2m_temperature",
+      #  year = as.character(seq(1950,2022,1)),
+      #  month = c("01","02","03","04","05","06","07","08","09","10","11","12"),
+      #  day=c("01","02","03","04","05","06","07","08","09","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24","25","26","27","28","29","30","31"),
+      #  time=c("00:00","01:00","02:00","03:00","04:00","05:00","06:00","07:00","08:00","09:00","10:00","11:00","12:00","13:00","14:00","15:00","16:00","17:00","18:00","19:00","20:00","21:00","22:00","23:00"),
+      #  format="netcdf",
+      #  area = c(Ylim[1], Xlim[1], Ylim[2], Xlim[2]),
+      #  dataset_short_name = "reanalysis-era5-land",
+      #  target = paste0("era5land.hourly.point",i,".nc")
+      #)
+      
+      # If monthly averages are OK
+      # "ERA5-Land monthly averaged data from 1950 to present"
+      # >> https://cds.climate.copernicus.eu/cdsapp#!/dataset/reanalysis-era5-land-monthly-means?tab=form
+      request <- list(
+        product_type = "monthly_averaged_reanalysis",
+        variable = c("2m_temperature", "skin_temperature"),
+        year     = as.character(seq(1950,2022,1)),
+        month    = c("01","02","03","04","05","06","07","08","09","10","11","12"),
+        time     = "00:00",
+        format   = "netcdf",
+        area = c(Ylim[1], Xlim[1], Ylim[2], Xlim[2]),
+        dataset_short_name = "reanalysis-era5-land-monthly-means",
+        target   = paste0("era5land.monthlymean.point",i,".nc")
+      )
+      
+      
+    } else {
+      # If the species is MARINE we extract from
+      # "ERA5 monthly averaged data on single levels from 1940 to present"
+      # >> https://cds.climate.copernicus.eu/cdsapp#!/dataset/reanalysis-era5-single-levels-monthly-means?tab=form
+      
+      # NOTE
+      # Here we include a broader spatial extent (because many coastal margins don't have
+      # an SST value). Suggest we later take the median of available values.
+      Xlim   = round(round(geo_data$long[i],2) + c(-0.5,0.5),2)
+      Ylim   = round(round(geo_data$lat[i],2) + c(-0.5,0.5),2)
+      
+      request <- list(
+        variable = "sea_surface_temperature",
+        product_type = "monthly_averaged_reanalysis",
+        year     = as.character(seq(1950,2022,1)),
+        month    = c("01","02","03","04","05","06","07","08","09","10","11","12"),
+        time     = "00:00",
+        format   = "netcdf",
+        area = c(Ylim[1], Xlim[1], Ylim[2], Xlim[2]),
+        dataset_short_name = "reanalysis-era5-single-levels-monthly-means",
+        target = paste0("era5.sst.point",i,".nc")
+      )
+      
+    }
+
+      # Start downloading the data, the path of the file will be returned as a variable (ncfile)
+    ncfile = wf_request(
+      user     = "89307",
+      request  = request,   
+      transfer = TRUE,  
+      path     = "./Data/ERA5_LAND",
+      verbose  = FALSE
+    )
+    
+    
+    # Check (every 5 minutes) if the data has been downloaded before submitting another request
+    repeat{
+      if(file.exists(ncfile)){ 
+        # Plot the data
+        r =  try(terra::rast(ncfile))
+        plot(as.vector(r), type="o", main=paste("Point ",i))
+        break() 
+      } else { sleep(300) }
+    }
+    
+  }
+} 
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
+# FUTURE CLIMATIC PROJECTIONS
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
+
+# This is much more complicated than the choices above. There are so many 
+# options to choose from.
+# This data portal is useful because all the same parameters (2m temp, skin temp
+# and SST) are all provided and at a 0.125 resolution.
+#  > CMIP5 monthly data on single levels
+#    https://cds.climate.copernicus.eu/cdsapp#!/dataset/projections-cmip5-monthly-single-levels?tab=overview
+
+# For future climate scenarios its generally worth considering:
+#   multiple RCPs - 4.5 and 8.5
+#   multiple GCMs - e.g. CSIRO-Mk3, HadGEM, CCSM, GFDL-CM3, IPSL-CM5A
+
+#   THE PROBLEM IS THE FUTURE DATES AVAILABLE ARE DIFFERENT FOR EACH COMBINATION
+#   OF RCP & GCM SO I'M FINDING IT HARD TO IDENTIFY WHICH MODELS CAN BE COMPARED
+
+
+
+for(i in 1:nrow(geo_data)){
+  
+  filelist = unlist(lapply(dir("./Data/ERA5_LAND/",pattern="proj"),FUN=function(x) strsplit(x,"proj")[[1]][2]))
+  filelist = as.numeric(gsub("\\.zip","",filelist))
+  
+  if( !i %in% filelist ){
+    
+    Habitat= geo_data$habitat[i] %in% c("t","f")
+    
+    if(Habitat){
+      # If the species is Terrestrial or Freshwater we refer our request to the ERA5-LAND dataset
+      
+      # Maintain a tightly focused spatial extent
+      Xlim   = round(round(geo_data$long[i],2) + c(-0.01,0.01),2)
+      Ylim   = round(round(geo_data$lat[i],2) + c(-0.01,0.01),2)
+
+      request <- list(
+        ensemble_member = "r1i1p1",
+        format = "zip",
+        area = c(Ylim[1], Xlim[1], Ylim[2], Xlim[2]),
+        experiment = "rcp_4_5",
+        variable = c("2m_temperature", "skin_temperature"),
+        model = "gfdl_esm2m",
+        period = "208101-208512",
+        dataset_short_name = "projections-cmip5-monthly-single-levels",
+        target = paste0("gfdl2080.proj",i,".zip") 
+      )
+      
+      
+    } else {
+      # Still broader spatial extent
+      Xlim   = round(round(geo_data$long[i],2) + c(-0.5,0.5),2)
+      Ylim   = round(round(geo_data$lat[i],2) + c(-0.5,0.5),2)
+      
+      request <- list(
+        ensemble_member = "r1i1p1",
+        format = "zip",
+        area = c(Ylim[1], Xlim[1], Ylim[2], Xlim[2]),
+        experiment = "rcp_4_5",
+        variable = c("sea_surface_temperature"),
+        model = "gfdl_esm2m",
+        period = "208101-208512",
+        dataset_short_name = "projections-cmip5-monthly-single-levels",
+        target = paste0("gfdl2080.proj",i,".zip") 
+      )
+      
+    }
+    
+    # Start downloading the data, the path of the file will be returned as a variable (ncfile)
+    ncfile = wf_request(
+      user     = "89307",
+      request  = request,   
+      transfer = TRUE,  
+      path     = "./Data/ERA5_LAND",
+      verbose  = FALSE
+    )
+    
+    
+    # Check (every 5 minutes) if the data has been downloaded before submitting another request
+    #repeat{
+    #  if(file.exists(ncfile)){ 
+    #    # Plot the data
+    #    r =  try(terra::rast(ncfile))
+    #    plot(as.vector(r), type="o", main=paste("Projection ",i))
+    #    break() 
+    #  } else { sleep(300) }
+    #}
+    
+  }
+} # Loop over sampled points
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
+# REFORMAT 
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
+
+# Open NetCDF
+
+# Take Median of SST values
+
+
+# UNZIP PROJECTION FILES
+
+# Read NetCDF
+
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
+# Previous Projections
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
+
+# Loop over sampled points
 
 # Identify which coarse ERA5 cell these lat/longs fall within:
 geo_data$ERA5col     = geo_data$long

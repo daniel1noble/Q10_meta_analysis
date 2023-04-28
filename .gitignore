@@ -24,3 +24,4 @@ ms.rmarkdown
 ms.html
 output/models/
 data/climate_data/ERA5_LAND/
+.vscode/settings.json

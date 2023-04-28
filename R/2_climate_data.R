@@ -252,6 +252,7 @@ for(i in 1:nrow(geo_data)){
 
 # Read NetCDF
 
+########################### **ALEX. BELOW IS THE CODE WE USED TO EXTRACT THE CLIMATE DATA AND CALCULATE the 1) variance and autocorrelation from past to current and then 2) get the future climate projections. ** I guess you just need to modify below. The path name to the data on GitHub is: "data/climate_data/ERA5_LAND/" which is the folder where all teh files you shared live. 
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
 # Previous Projections

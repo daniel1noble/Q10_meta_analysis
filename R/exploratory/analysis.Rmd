@@ -1,0 +1,321 @@
+---
+title: "Q10 Exploratory Analysis"
+output: html_document
+#df_print: paged
+#toc: yes
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+runtime: shiny
+---
+
+## Install packages
+You will need to install a couple packages for loading data:
+
+```{r, echo = TRUE, eval = FALSE, message = FALSE}
+	install.packages("googlesheets")
+	install.packages("rmarkdown")
+	install.packages("phytools")
+	install.packages("ape")
+	install.packages("rotl")
+	install.packages("tidyverse")
+```
+
+
+```{r, echo = TRUE, eval = TRUE, message = FALSE}
+	library("googlesheets")
+	library("rmarkdown")
+	library("phytools")
+	library("ape")
+	library("rotl")
+	library("tidyverse")
+```
+
+## Load the google spreadsheet
+We can load the dataset using the google sheets 
+
+	
+```{r, echo = TRUE, eval = TRUE, message = FALSE, error = FALSE}
+	  gs <- gs_title("q10_newdata")
+	data <- as.data.frame(gs_read(ss = gs))
+
+```
+
+## Explore the data
+
+The data consists of a total of **`r length(unique(data$record_num))`** studies, including a total of **`r length(unique(data[-grep("_o", data$record_num), "record_num"]))`** new studies that we extracted over the last few months. This is already a fairly large increase in the total number of studies, and represents a fairly significant update to the previous dataset.
+
+###Plots of various variables in the data
+
+```{r, echo = FALSE, eval = TRUE, message = FALSE, error = FALSE}
+	 data2 <- dplyr::select_if(data, is.numeric)
+	 ui1 <-  fluidPage(
+		  sidebarLayout(
+		  	sidebarPanel(selectInput("variable1", "Variable on Y-axis for plotting", names(data2)),
+		  selectInput("variable2", "Variable on X-axis for plotting", names(data2)),
+		  selectInput("transformY", "Transformation of Y", c("none", "log")), 
+		  selectInput("transformX", "Transformation of X", c("none", "log"))),
+		  mainPanel(plotOutput("plot",  height = "400px", width = "400px"))
+	 	 )
+		)
+	  server1 <-function(input,output){
+		  output$plot <- renderPlot({
+		  	if(input$transformY == "log" & input$transformX == "none"){
+				var1 <- log(data[,input$variable1])
+		  		var2 <- data[,input$variable2]		  		
+		  	}
+
+		  	if(input$transformX == "log" & input$transformY == "none"){
+				var1 <- data[,input$variable1]
+		  		var2 <- log(data[,input$variable2])		  		
+		  	}
+
+		  	if(input$transformX == "log" & input$transformY == "log"){
+				var1 <- log(data[,input$variable1])
+		  		var2 <- log(data[,input$variable2])		  		
+		  	}
+
+			if(input$transformX == "none" & input$transformY == "none"){
+				var1 <- data[,input$variable1]
+		  		var2 <- data[,input$variable2]		  		
+		  	}
+		  	par(mar=c(4,4,1,1))
+		  	plot(var1 ~ var2, pch = 16, cex = 1.5, ylab = input$variable1, xlab = input$variable2)	
+		  })
+		}
+
+	  shinyApp(ui1, server1)
+```
+
+### Categorical variables and amount of data in levels
+
+This section is really for checking the categorical variables. Mainly for making sure the levels in the variables are correct, and for us to make note of some of the problems that might arise if we modeled with these as categorical variables. 
+
+```{r, echo = FALSE, eval = TRUE}
+
+	data6 <- dplyr::select_if(data, is.character)
+	
+	ui6 <- fluidPage(
+		sidebarLayout(
+			sidebarPanel(
+				selectInput("var1", "Variable", names(data6))) ,
+		mainPanel(tableOutput("table_sum"))
+		))
+	
+	server6 <- function(input, output){
+		
+		output$table_sum <- renderTable({
+			table( Variable = data6[,input$var1])
+		})
+
+	}
+
+	shinyApp(ui6, server6)
+```
+
+###Plot of SE and N
+
+Check that the standard error (SE) for a set of variables correlates with sample size, and look for outliers in SE.
+
+```{r, echo = FALSE, eval = TRUE, message = FALSE, error = FALSE}
+	ui2<- fluidPage(
+	 	sidebarLayout(
+	 		sidebarPanel(selectInput("se", "Standard Error Variable", c("r1.1_CV", "r1.1_logCV", "r1.2_CV", "r1.2_logCV", "r2.1_CV", "r2.1_logCV", "r2.2_CV", "r2.2_logCV")),
+	  		selectInput("N", "Sample size", c("r1.1_N", "r1.2_N", "r2.1_N", "r2.2_N"))),
+	  		mainPanel(plotOutput("plot2", height = "400px", width = "400px"))
+	  		)
+		)
+	server2 <- function(input, output){
+	  output$plot2 <- renderPlot({
+	  	selectedData <- reactive({data[,c(input$se, input$N)]})
+	  	par(mar = c(4.1,4.1,1,1))
+	  	plot(selectedData(), pch = 16, cex = 1.5)	
+	  })
+	  }
+
+	shinyApp(ui2, server2)  
+```
+
+### Rows with large SE
+
+So, there are clearly some problems with the data still. These SE's are way to large for many rows. Probably these were mistakenly entered as SD, so we will check these:
+
+```{r, echo = FALSE, eval = TRUE, message = FALSE, error = FALSE}
+	data2 <- as.data.frame(data)
+
+	ui3 <- fluidPage(
+		selectInput("se", "Standard Error Variable", c("r1.1_CV", "r1.1_logCV", "r1.2_CV", "r1.2_logCV", "r2.1_CV", "r2.1_logCV", "r2.2_CV", "r2.2_logCV")),
+		numericInput("val", "Cutoff of SE", 30),
+		tableOutput("table2")
+		)
+	
+	server3 <- function(input, output){
+		
+		output$table2 <- renderTable({	
+		cols <-  c(1:3, 18, 21)
+		colInput <- which(names(data2) == input$se, TRUE)
+		rows <-  which((data2[, input$se]*-1) >= input$val, TRUE)
+		data2[rows, c(cols, colInput)]
+		})
+	}
+
+	shinyApp(ui3, server3)
+
+```
+
+## Species in the dataset
+
+```{r, echo = FALSE, eval = TRUE, message = FALSE, error = FALSE}
+	data$binom_species <- paste0(data$genus, "_", data$species) 	
+```
+We have a total of **`r length(unique(data$binom_species))`** unique species in the data set. We can get a sense of the phylogenetic relationships between species using time tree. To do this we can export the unique species names from [Time Tree](http://www.timetree.org/). First we can load a txt file of the list of species and then upload them to time tree to generate a nexus file that we can use to bring in the phylogenetic relationships among the species. 
+
+Looking at many of these we can see that they are subspecies that need to be resolved. This shouldn't take too much work to sort. The question then becomes what is the best way to deal with uncertain taxonomic positions of existing taxa?
+
+Here is the tree with the phylogenetic relationships of the taxa identified in time tree:
+
+```{r, echo = TRUE, eval = TRUE, warning = FALSE, message = FALSE, fig.height = 8, fig.width = 8}
+	# First bring in the newick file
+		tree <- read.tree(file = "./phylogeny/species.nwk")
+
+	# We can then plot the tree to have a look
+		par(mar = c(1,1,1,1))
+		plot(tree, type = "fan", cex = 0.65)
+```
+```{r, echo = FALSE, eval = TRUE, message = FALSE, error = FALSE}
+	
+	ui7<- fluidPage(
+	 	sidebarLayout(
+	 		sidebarPanel(selectInput("order1", "Choose Order:", unique(data$order))),
+	  		mainPanel(plotOutput("plot_phylo", height = "400px", width = "400px"))
+		))
+	
+	server7 <- function(input, output){
+	  output$plot_phylo <- renderPlot({
+	  	species <- as.character(unique(data[grep(input$order1, data$order), "binom_species"]))
+	  	pruned.tree<-drop.tip(tree, tree$tip.label[!tree$tip.label %in% species])
+		plot(pruned.tree, type = "phylogram", show.tip.label = TRUE, cex = 0.6, main = input$order1)	
+	  })
+	}
+
+	shinyApp(ui7, server7)  
+```
+
+The tree currently contains `r length(tree$tip.label)` taxa, all identified in time tree, which doesn't match the current list of species in the dataset given that 83 were identified as "unresolved" so there are other synonymous names we need to look at, probably best to use with rotl. 
+
+Often when we do this there are quite a few taxonomic uncertainties we need to deal with. In our data specifically, we have a total of 83 unresolved tips. The list of taxa we should have a look for to resolve uncertainty are as follows, along with the corresponding rows in the data that match these species:
+
+```{r, echo = FALSE, eval = TRUE}
+
+data_species <- read.csv("./phylogeny/species_notFound.csv")
+data_species$binomial <- paste0(data_species$genus, "_", data_species$species)
+data_species <- dplyr::arrange(data_species, binomial) 
+data_species$letter <- substr(data_species$binomial, 1, 1)
+
+	ui5 <- fluidPage(
+		sidebarLayout(
+			sidebarPanel(
+				selectInput("Genus", "Alphabetical Order", unique(data_species$letter)),
+				tableOutput("tablespp")),
+		mainPanel(tableOutput("table_rows"))
+		))
+	
+	server5 <- function(input, output){
+		
+		output$tablespp <- renderTable({	
+			data_species[data_species$letter == input$Genus,"binomial"]
+		})
+
+		output$table_rows <- renderTable({	
+			cols <-  c(1:3,  36)
+			rows <-  which(data$binom_species %in% data_species[data_species$letter == input$Genus,"binomial"], TRUE)
+			data[rows, cols]
+			})
+	}
+
+	shinyApp(ui5, server5)
+```
+
+We can also see if we can improve on the matching using rotl, but we could also use to identify synonyms and sort out relationships where taxa don't match
+
+```{r, echo = TRUE, eval = FALSE, message = FALSE, error = FALSE}
+	
+	# Unfortunately, we have to do this in 2 steps as it can only search 250 taxa at once, and we have 252
+		chunk2 <- function(x,n) split(x, cut(seq_along(x), n, labels = FALSE))
+	      size <- 1:length(unique(data$binom_species))
+	      vecs <- chunk2(size,7)
+	
+	   tree_rotl_names <- data.frame()
+	
+	for(i in 1:7){
+		tree_rotl_tmp <- tnrs_match_names(names = unique(data$binom_species)[vecs[[i]]])
+		    tree_rotl_names <- rbind(tree_rotl_names, tree_rotl_tmp)
+	}
+
+	# Grab the tree, where phylogeny is informed 
+	tree_rotln <- tol_induced_subtree(ott_ids=na.omit(tree_rotl$ott_id)) 
+
+	# Omit any unknown taxa
+	taxonomy_taxon(na.omit(tree_rotl$ott_id))
+
+	# Write the tree
+	write.tree(file = paste0("output/data/tree_rotl.", date(), ".txt"), tree_rotl)
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+```{r, echo = FALSE, eval = FALSE, message = FALSE, error = FALSE}
+	data2 <- as.data.frame(data)#
+
+	ui3 <- fluidPage(
+		selectInput("se", "Standard Error Variable", c("r1.1_se", "r1.2_se", "r2.1_se", "r2.2_se")),
+		numericInput("val", "Cutoff of SE", 30),
+		verbatimTextOutput("table")
+		)
+	
+	server3 <- function(input, output){
+		
+		output$table <- renderPrint({	
+		cols <-  c(1:3, 20, 21)
+		colInput <- which(names(data2) == input$se, TRUE)
+		rows <-  which(data2[, input$se] >= input$val, TRUE)
+		data2[rows, c(cols, colInput)]
+		})
+	}
+
+	shinyApp(ui3, server3)
+```
+
+
+

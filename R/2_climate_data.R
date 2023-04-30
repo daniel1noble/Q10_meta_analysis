@@ -52,7 +52,7 @@ wf_set_key(user="89307", key="e661d59a-c4f0-4e9e-9da4-476fa0a9536e", service='cd
 
 for(i in which(geo_data$source=="w") ){  #nrow(geo_data)){
   
-  filelist = unlist(lapply(list.files("./Data/ERA5_LAND/",pattern="point"),FUN=function(x) strsplit(x,"point")[[1]][2]))
+  filelist = unlist(lapply(list.files("./data/climate_data/ERA5_LAND/",pattern="point"),FUN=function(x) strsplit(x,"point")[[1]][2]))
   filelist = as.numeric(gsub("\\.nc","",filelist))
   
   if( !i %in% filelist ){
@@ -130,7 +130,7 @@ for(i in which(geo_data$source=="w") ){  #nrow(geo_data)){
       user     = "89307",
       request  = request,   
       transfer = TRUE,  
-      path     = "./Data/ERA5_LAND",
+      path     = "./data/climate_data/ERA5_LAND",
       verbose  = FALSE
     )
     
@@ -170,7 +170,7 @@ for(i in which(geo_data$source=="w") ){  #nrow(geo_data)){
 
 for(i in 1:nrow(geo_data)){
   
-  filelist = unlist(lapply(dir("./Data/ERA5_LAND/",pattern="proj"),FUN=function(x) strsplit(x,"proj")[[1]][2]))
+  filelist = unlist(lapply(dir("./data/climate_data/ERA5_LAND/",pattern="proj"),FUN=function(x) strsplit(x,"proj")[[1]][2]))
   filelist = as.numeric(gsub("\\.zip","",filelist))
   
   if( !i %in% filelist ){
@@ -221,7 +221,7 @@ for(i in 1:nrow(geo_data)){
       user     = "89307",
       request  = request,   
       transfer = TRUE,  
-      path     = "./Data/ERA5_LAND",
+      path     = "./data/climate_data/ERA5_LAND",
       verbose  = FALSE
     )
     

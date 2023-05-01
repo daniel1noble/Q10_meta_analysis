@@ -337,3 +337,22 @@ write.csv(clim_data_matrix, "./output/climate_data/temp_timeseries.csv")
 r1 <- acf(as.numeric(clim_data_matrix[1,4:522]), lag.max = 522 - 4, plot = FALSE, na.action = na.pass)$acf[-1]
 lag <- c(1:518)
 plot(r1 ~ lag)
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
+# Merge together SST and Land projections as loop separated them out
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
+
+# Read in the updated time series data
+   sst <- read.csv("./output/climate_data/ERA5_air_and_SST_timeseries.csv")
+  land <- read.csv("./output/climate_data/ERA5_landsurface_timeseries.csv")
+
+# Clear missing data from each sheet, merge sheets together and then re-arrange
+
+ sst <- sst %>% filter(!is.na(mean))
+land <- land %>% filter(!is.na(mean))
+
+# Rbind
+    clim_data_matrix <- rbind(sst, land)  %>% arrange(Species)
+
+# Write out
+write.csv(clim_data_matrix, "./output/climate_data/temp_timeseries.csv", row.names = FALSE)

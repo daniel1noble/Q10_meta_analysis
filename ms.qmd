@@ -1449,7 +1449,7 @@ if(rerun){
 climate <- read.csv("./output/climate_data/temp_timeseries.csv")
 
 # Create a match column.
-climate2 <- climate %>% mutate(match = interaction(species, lat, long)) %>% dplyr::select(-c(5:523))
+climate2 <- climate %>% mutate(match = interaction(Species, Longitude, Latitude)) %>% dplyr::select(-c(5:523))
 
 # Subset the data
 lnCVRQ10_data_wild <- data_long2 %>% filter(grepl("lnCVR", name) & !is.na(effect_size) & !is.na(V) & !V == 0 & source == "w") %>% 
@@ -2021,6 +2021,8 @@ Acute and acclimation responses for wild ectotherms were much less common than s
 ```{r}
 #| label: fig-preds
 #| fig-cap: Model predictions for the expected change in acclimation $lnCVR_{Q_{10}}$ across the globe for terrestrial, marine and freshwater ecthotherms. Predictions consider the uncertainty in random effects (i.e., species, phylogeny, study).  
+
+devtools::install_github("hughjonesd/ggmagnify") #https://github.com/hughjonesd/ggmagnify
 
 world_map = map_data("world") %>% 
   filter(! long > 180)

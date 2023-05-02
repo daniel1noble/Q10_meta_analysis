@@ -339,20 +339,17 @@ lag <- c(1:518)
 plot(r1 ~ lag)
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
-# Merge together SST and Land projections as loop separated them out
+# New Climate Projections - Cleanup and export
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
 
 # Read in the updated time series data
-   sst <- read.csv("./output/climate_data/ERA5_air_and_SST_timeseries.csv")
-  land <- read.csv("./output/climate_data/ERA5_landsurface_timeseries.csv")
+   sst <- read.csv("./output/climate_data/ERA5_air_and_SST_timeseries.csv") # Climate data includes SST and air temperature for terrestrial
+  land <- read.csv("./output/climate_data/ERA5_landsurface_timeseries.csv") # Climate data includes SST and soil temperature for terrestrial
 
 # Clear missing data from each sheet, merge sheets together and then re-arrange
 
  sst <- sst %>% filter(!is.na(mean))
 land <- land %>% filter(!is.na(mean))
-
-# Rbind
-    clim_data_matrix <- rbind(sst, land)  %>% arrange(Species)
 
 # Write out
 write.csv(clim_data_matrix, "./output/climate_data/temp_timeseries.csv", row.names = FALSE)

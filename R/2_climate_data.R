@@ -1,3 +1,4 @@
+
 rm(list=ls())
 library(tidyr)
 library(ecmwfr)
@@ -8,11 +9,10 @@ library(maps)
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
 # SURVEY LOCATIONS
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
+geo_data = read.csv("Data/Species_LatLong_plusHabitat.csv")  # ./data/climate_data/Species_LatLong_plusHabitat.csv
+# Remove missing lat and long
+geo_data = geo_data %>% dplyr::filter(!is.na(lat) & !is.na(long))
 
-geo_data = read.csv("./data/climate_data/Species_LatLong_plusHabitat.csv")
-
-# First remove missing lat and long
-geo_data <- geo_data %>% dplyr::filter(!is.na(lat) & !is.na(long))
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
 # SETUP API
@@ -28,6 +28,7 @@ wf_set_key(user="89307", key="e661d59a-c4f0-4e9e-9da4-476fa0a9536e", service='cd
 # paste the API code from the CDS website, and then use an RStudio plugin to 
 # convert the text to an R-relevant command!
 #   https://cran.r-project.org/web/packages/ecmwfr/vignettes/cds_vignette.html
+
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
 # HISTORIC CLIMATIC DATA
@@ -52,7 +53,7 @@ wf_set_key(user="89307", key="e661d59a-c4f0-4e9e-9da4-476fa0a9536e", service='cd
 
 for(i in which(geo_data$source=="w") ){  #nrow(geo_data)){
   
-  filelist = unlist(lapply(list.files("./data/climate_data/ERA5_LAND/",pattern="point"),FUN=function(x) strsplit(x,"point")[[1]][2]))
+  filelist = unlist(lapply(list.files("./Data/ERA5_LAND/",pattern="point"),FUN=function(x) strsplit(x,"point")[[1]][2]))
   filelist = as.numeric(gsub("\\.nc","",filelist))
   
   if( !i %in% filelist ){
@@ -66,7 +67,11 @@ for(i in which(geo_data$source=="w") ){  #nrow(geo_data)){
       Xlim   = round(round(geo_data$long[i],2) + c(-0.01,0.01),2)
       Ylim   = round(round(geo_data$lat[i],2) + c(-0.01,0.01),2)
       
-      if(i==253){ Ylim=c(21.44,21.46) }
+      #if(i==253){ Ylim=c(21.44,21.46) }
+      if(i %in% c(9,110,150,175,228,253,262)){ 
+        Xlim   = round(round(geo_data$long[i],2) + c(-0.1,0.1),2)
+        Ylim   = round(round(geo_data$lat[i],2) + c(-0.1,0.1),2)
+      }
       
       # If we want every hour of every day
       # "ERA5-Land hourly data from 1950 to present"
@@ -124,13 +129,13 @@ for(i in which(geo_data$source=="w") ){  #nrow(geo_data)){
       )
       
     }
-
-      # Start downloading the data, the path of the file will be returned as a variable (ncfile)
+    
+    # Start downloading the data, the path of the file will be returned as a variable (ncfile)
     ncfile = wf_request(
       user     = "89307",
       request  = request,   
       transfer = TRUE,  
-      path     = "./data/climate_data/ERA5_LAND",
+      path     = "./Data/ERA5_LAND",
       verbose  = FALSE
     )
     
@@ -146,7 +151,8 @@ for(i in which(geo_data$source=="w") ){  #nrow(geo_data)){
     }
     
   }
-} 
+} # Loop over sampled points
+
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
 # FUTURE CLIMATIC PROJECTIONS
@@ -167,189 +173,405 @@ for(i in which(geo_data$source=="w") ){  #nrow(geo_data)){
 #   OF RCP & GCM SO I'M FINDING IT HARD TO IDENTIFY WHICH MODELS CAN BE COMPARED
 
 
+rm(list=ls())
+library(tidyr)
+library(ecmwfr)
+library(terra)
+library(maps)
+library(ncdf4)
+library(raster)
 
-for(i in 1:nrow(geo_data)){
-  
-  filelist = unlist(lapply(dir("./data/climate_data/ERA5_LAND/",pattern="proj"),FUN=function(x) strsplit(x,"proj")[[1]][2]))
-  filelist = as.numeric(gsub("\\.zip","",filelist))
-  
-  if( !i %in% filelist ){
-    
-    Habitat= geo_data$habitat[i] %in% c("t","f")
-    
-    if(Habitat){
-      # If the species is Terrestrial or Freshwater we refer our request to the ERA5-LAND dataset
-      
-      # Maintain a tightly focused spatial extent
-      Xlim   = round(round(geo_data$long[i],2) + c(-0.01,0.01),2)
-      Ylim   = round(round(geo_data$lat[i],2) + c(-0.01,0.01),2)
+geo_data = read.csv("Data/Species_LatLong_plusHabitat.csv")  # ./data/climate_data/Species_LatLong_plusHabitat.csv
+geo_data = geo_data %>% dplyr::filter(!is.na(lat) & !is.na(long))
+# SETUP API
+wf_set_key(user="89307", key="e661d59a-c4f0-4e9e-9da4-476fa0a9536e", service='cds')
 
-      request <- list(
-        ensemble_member = "r1i1p1",
-        format = "zip",
-        area = c(Ylim[1], Xlim[1], Ylim[2], Xlim[2]),
-        experiment = "rcp_4_5",
-        variable = c("2m_temperature", "skin_temperature"),
-        model = "gfdl_esm2m",
-        period = "208101-208512",
-        dataset_short_name = "projections-cmip5-monthly-single-levels",
-        target = paste0("gfdl2080.proj",i,".zip") 
-      )
-      
-      
-    } else {
-      # Still broader spatial extent
-      Xlim   = round(round(geo_data$long[i],2) + c(-0.5,0.5),2)
-      Ylim   = round(round(geo_data$lat[i],2) + c(-0.5,0.5),2)
-      
-      request <- list(
-        ensemble_member = "r1i1p1",
-        format = "zip",
-        area = c(Ylim[1], Xlim[1], Ylim[2], Xlim[2]),
-        experiment = "rcp_4_5",
-        variable = c("sea_surface_temperature"),
-        model = "gfdl_esm2m",
-        period = "208101-208512",
-        dataset_short_name = "projections-cmip5-monthly-single-levels",
-        target = paste0("gfdl2080.proj",i,".zip") 
-      )
-      
-    }
+
+### TERRESTRIAL/ FRESHWATER
+request <- list(
+  ensemble_member = "r1i1p1",
+  format = "zip",
+  experiment = "rcp_4_5",
+  variable = c("2m_temperature"),  #, "skin_temperature"
+  model = "gfdl_esm2m",
+  period = "208101-208512",
+  dataset_short_name = "projections-cmip5-monthly-single-levels",
+  target = paste0("gfdl2080.airtemp.zip") 
+)
+
+# Start downloading the data, the path of the file will be returned as a variable (ncfile)
+ncfile = wf_request(
+  user     = "89307",
+  request  = request,   
+  transfer = TRUE,  
+  path     = "./Data/Projections",
+  verbose  = FALSE
+)
+
+#--------------------------------------------------#
+
+request <- list(
+  ensemble_member = "r1i1p1",
+  format = "zip",
+  experiment = "rcp_4_5",
+  variable = c("skin_temperature"),  #, 
+  model = "gfdl_esm2m",
+  period = "208101-208512",
+  dataset_short_name = "projections-cmip5-monthly-single-levels",
+  target = paste0("gfdl2080.skintemp.zip") 
+)
+
+# Start downloading the data, the path of the file will be returned as a variable (ncfile)
+ncfile = wf_request(
+  user     = "89307",
+  request  = request,   
+  transfer = TRUE,  
+  path     = "./Data/Projections",
+  verbose  = FALSE
+)
+
+#--------------------------------------------------#
+  
+### MARINE  
+request <- list(
+    ensemble_member = "r1i1p1",
+    format = "zip",
+    experiment = "rcp_4_5",
+    variable = c("sea_surface_temperature"),
+    model = "gfdl_esm2m",
+    period = "208101-208512",
+    dataset_short_name = "projections-cmip5-monthly-single-levels",
+    target = paste0("gfdl2080.SST.zip") 
+)
+
+# Start downloading the data, the path of the file will be returned as a variable (ncfile)
+ncfile = wf_request(
+  user     = "89307",
+  request  = request,   
+  transfer = TRUE,  
+  path     = "./Data/Projections",
+  verbose  = FALSE
+)
+
+
+
+#--------------------------------------------------#
+#--------------------------------------------------#
+
+for(i in which(geo_data$source=="w") ){  #nrow(geo_data)){
+  
+  Habitat= geo_data$habitat[i] %in% c("t","f")
+  
+  ### TERRESTRIAL/ FRESHWATER
+  if(Habitat){
     
-    # Start downloading the data, the path of the file will be returned as a variable (ncfile)
-    ncfile = wf_request(
-      user     = "89307",
-      request  = request,   
-      transfer = TRUE,  
-      path     = "./data/climate_data/ERA5_LAND",
-      verbose  = FALSE
-    )
+    tempdat = data.frame("Year"        = rep(seq(2081,2085,1),e=12),
+                         "Month"       = rep(seq(2081,2085,1),e=12),
+                         "Temp"     = NA)
     
+    #ncfname   = paste0("./Data/Projections/gfdl2080.proj",i,"/tos_Omon_GFDL-ESM2M_rcp45_r1i1p1_208101-208512.nc")
+    ncfname   = paste0("./Data/Projections/gfdl2080.airtemp.zip")
+    Proj      = nc_open(unzip(ncfname))   # 'tas' is "Near-Surface Air Temperature"
+    dname     = "tas"   
+    lon       = ncvar_get(Proj, "lon") 
+    nlon      = length(lon)                  # number of columns
+    lat       = ncvar_get(Proj, "lat") 
+    nlat      = length(lat)                  # number of rows
+    t         = ncvar_get(Proj, "time")      # units: hours since 1900-01-01 00:00:00.0
+    nt        = dim(t)                       # monthly averages: seq(as.Date("2081/01/01"), as.Date("2085/12/01"), "months"
     
-    # Check (every 5 minutes) if the data has been downloaded before submitting another request
-    #repeat{
-    #  if(file.exists(ncfile)){ 
-    #    # Plot the data
-    #    r =  try(terra::rast(ncfile))
-    #    plot(as.vector(r), type="o", main=paste("Projection ",i))
-    #    break() 
-    #  } else { sleep(300) }
-    #}
+    #map = ncvar_get(Proj, 'tas',start= c(1,1,1),count= c(nlon,nlat,1) )
+    #image(map)
+    
+    M = raster(map)
+    ###  plot(M) # wrong way around
+    ###  Y = cellFromCol(M, length(lat))  # add columns working from right to left
+    ###  summary(M[Y])
+    ###  Y = cellFromCol(M, 100) # example of middle column
+    ###  summary(M[Y])
+    
+    Y = unlist(lapply(c(nlat:1), FUN=function(x){ cellFromCol(M,x)} ))
+    M2 = matrix(M[Y], ncol=nlon, nrow=nlat, byrow = TRUE)
+    #plot(raster(M2))
+    # Which grid cells contain the search limits
+    Xlim   = round(round(geo_data$long[i],2) + c(-0.1,0.1),2)
+    Ylim   = round(round(geo_data$lat[i],2) + c(-0.1,0.1),2)
+    # Convert coordinates betrween 80 and 180 to ncdf grid
+    XXlim = Xlim
+    XXlim[XXlim<0] = 180+abs(XXlim[XXlim<0])
+    lon.col = c(max(which(lon <= XXlim[1])):min(which(lon >= XXlim[2])))
+    lat.row = c(min(which(rev(lat) <= Ylim[1] )):max(which(rev(lat) >= Ylim[2] )))
+    
+    cellFromRowCol(raster(M2), row=lat.row, col=lon.col)
+    xyFromCell(raster(M2),cellFromRowCol(raster(M2), row=lat.row, col=lon.col))
+    
+    #points(xyFromCell(raster(M2),cellFromRowCol(raster(M2), row=lat.row, col=lon.col)))
+    
+    # Get the values for the right cells for all months
+    tas = ncvar_get(Proj, 'tas', 
+                    start= c(min(lon.col),min(lat.row),1),       
+                    count= c(length(lon.col),length(lat.row),nt) )
+    # Take the median within each time step
+    tempdat$Temp = apply(tas, length(dim(tas)), median, na.rm=TRUE) #ncvar_get(Proj, dname, start= c(1,1,1), count= c(nlon,nlat,nt) )
+    #plot(tempdat$Temp, type="o")
+    
+    save(tempdat, file=paste0("./Data/Projections/gfdl2080_airtemp_",i,".RData"))
+    
+    ##############################################################################
+    
+    tempdat = data.frame("Year"        = rep(seq(2081,2085,1),e=12),
+                         "Month"       = rep(seq(2081,2085,1),e=12),
+                         "Temp"     = NA)
+    
+    #ncfname   = paste0("./Data/Projections/gfdl2080.proj",i,"/tos_Omon_GFDL-ESM2M_rcp45_r1i1p1_208101-208512.nc")
+    ncfname   = paste0("./Data/Projections/gfdl2080.skintemp.zip")
+    Proj      = nc_open(unzip(ncfname))    # "ts" is Surface Temperature"
+    dname     = "ts"   
+    lon       = ncvar_get(Proj, "lon") 
+    nlon      = length(lon)                  # number of columns
+    lat       = ncvar_get(Proj, "lat") 
+    nlat      = length(lat)                  # number of rows
+    t         = ncvar_get(Proj, "time")      # units: hours since 1900-01-01 00:00:00.0
+    nt        = dim(t)                       # monthly averages: seq(as.Date("2081/01/01"), as.Date("2085/12/01"), "months"
+    
+    #map = ncvar_get(Proj, 'ts',start= c(1,1,1),count= c(nlon,nlat,1) )
+    #image(map)
+    
+    M = raster(map)
+    Y = unlist(lapply(c(nlat:1), FUN=function(x){ cellFromCol(M,x)} ))
+    M2 = matrix(M[Y], ncol=nlon, nrow=nlat, byrow = TRUE)
+    #plot(raster(M2))
+    # Which grid cells contain the search limits
+    Xlim   = round(round(geo_data$long[i],2) + c(-0.1,0.1),2)
+    Ylim   = round(round(geo_data$lat[i],2) + c(-0.1,0.1),2)
+    # Convert coordinates betrween 80 and 180 to ncdf grid
+    XXlim = Xlim
+    XXlim[XXlim<0] = 180+abs(XXlim[XXlim<0])
+    lon.col = c(max(which(lon <= XXlim[1])):min(which(lon >= XXlim[2])))
+    lat.row = c(min(which(rev(lat) <= Ylim[1] )):max(which(rev(lat) >= Ylim[2] )))
+    
+    cellFromRowCol(raster(M2), row=lat.row, col=lon.col)
+    xyFromCell(raster(M2),cellFromRowCol(raster(M2), row=lat.row, col=lon.col))
+    
+    #points(xyFromCell(raster(M2),cellFromRowCol(raster(M2), row=lat.row, col=lon.col)))
+    
+    # Get the values for the right cells for all months
+    ts = ncvar_get(Proj, 'ts', 
+                    start= c(min(lon.col),min(lat.row),1),       
+                    count= c(length(lon.col),length(lat.row),nt) )
+    # Take the median within each time step
+    tempdat$Temp = apply(ts, length(dim(tas)), median, na.rm=TRUE)
+    #lines(tempdat$Temp ~ c(1:nt), type="o", col="red")
+    
+    save(tempdat, file=paste0("./Data/Projections/gfdl2080_skintemp_",i,".RData"))
+    
+    #############################################################################
+    
+    ### MARINE
+  } else {
+    tempdat = data.frame("Year"    = rep(seq(2081,2085,1),e=12),
+                         "Month"   = rep(seq(2081,2085,1),e=12),
+                         "SST"     = NA)
+    
+    #ncfname   = paste0("./Data/Projections/gfdl2080.proj",i,"/tos_Omon_GFDL-ESM2M_rcp45_r1i1p1_208101-208512.nc")
+    ncfname   = paste0("./Data/Projections/gfdl2080.SST.zip")
+    Proj      = nc_open(unzip(ncfname))
+    dname     = "sst"  #Sea Surface Temperature"
+    lon       = ncvar_get(Proj, "rlon") 
+    nlon      = length(lon) # number of columns
+    lat       = ncvar_get(Proj, "rlat") 
+    nlat      = length(lat) # number of rows
+    t         = ncvar_get(Proj, "time")              # units: hours since 1900-01-01 00:00:00.0
+    nt        = dim(t)                                  # monthly averages: seq(as.Date("2081/01/01"), as.Date("2085/12/01"), "months")
+    
+    ## Multiply 't' by 3600 so it becomes seconds since 1900 instead of hours.
+    #t.Date    = as.POSIXct(as.numeric(t)*3600, origin="1900-01-01 00:00:00") 
+    #
+    
+    # The SST layers are on a grid rotated to suit NOAA. So they go from -270 to +80
+    map = ncvar_get(Proj, 'tos', 
+                    start= c(1,1,1),       # 4 dimensions: longitude, latitude, 'expver' (variable), time
+                    count= c(nlon,nlat,1) )
+    image(map)
+    
+    M = raster(map)
+    ###  plot(M) # wrong way around
+    ###  Y = cellFromCol(M, length(lat))  # add columns working from right to left
+    ###  summary(M[Y])
+    ###  Y = cellFromCol(M, 100) # example of middle column
+    ###  summary(M[Y])
+    
+    Y = unlist(lapply(c(nlat:1), FUN=function(x){ cellFromCol(M,x)} ))
+    M2 = matrix(M[Y], ncol=nlon, nrow=nlat, byrow = TRUE)
+    plot(raster(M2))
+    # Which grid cells contain the search limits
+    Xlim   = round(round(geo_data$long[i],2) + c(-0.5,0.5),2)
+    Ylim   = round(round(geo_data$lat[i],2) + c(-0.5,0.5),2)
+    # Convert coordinates betrween 80 and 180 to ncdf grid
+    XXlim = Xlim
+    XXlim[XXlim>80] = -180-(180-XXlim[XXlim>80])
+    lon.col = c(max(which(lon <= XXlim[1])):min(which(lon >= XXlim[2])))
+    lat.row = c(min(which(rev(lat) <= Ylim[1] )):max(which(rev(lat) >= Ylim[2] )))
+    
+    cellFromRowCol(raster(M2), row=lat.row, col=lon.col)
+    xyFromCell(raster(M2),cellFromRowCol(raster(M2), row=lat.row, col=lon.col))
+    
+    points(xyFromCell(raster(M2),cellFromRowCol(raster(M2), row=lat.row, col=lon.col)))
+    
+    # Get the values for the right cells for all months
+    sst = ncvar_get(Proj, 'tos', 
+                    start= c(min(lon.col),min(lat.row),1),       
+                    count= c(length(lon.col),length(lat.row),nt) )
+    # Take the median within each time step
+    tempdat$SST = apply(sst, 3, median, na.rm=TRUE)
+    # plot(tempdat[,3], type="o")
+    
+    save(tempdat, file=paste0("./Data/Projections/gfdl2080_sst_",i,".RData"))
     
   }
-} # Loop over sampled points
+  
+}
+
+
+
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
 # REFORMAT 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
 
-# Open NetCDF
+rm(list=ls())
+library(ncdf4)
+library(tidyr)
+library(terra)
 
-# Take Median of SST values
+# Survey Locations
+geo_data = read.csv("Data/Species_LatLong_plusHabitat.csv") 
+# Remove missing lat and long
+geo_data = geo_data %>% dplyr::filter(!is.na(lat) & !is.na(long))
+# Add columns for temp data
+time.steps = seq(as.Date("1950/01/01"), as.Date("2022/12/01"), "months")
+nT         = length(time.steps)
 
-
-# UNZIP PROJECTION FILES
-
-# Read NetCDF
-
-########################### **ALEX. BELOW IS THE CODE WE USED TO EXTRACT THE CLIMATE DATA AND CALCULATE the 1) variance and autocorrelation from past to current and then 2) get the future climate projections. ** I guess you just need to modify below. The path name to the data on GitHub is: "data/climate_data/ERA5_LAND/" which is the folder where all teh files you shared live. 
-
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
-# Previous Projections
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
-
-# Loop over sampled points
-
-# Identify which coarse ERA5 cell these lat/longs fall within:
-geo_data$ERA5col     = geo_data$long
-xid                  = which((!is.na(geo_data$ERA5col)) & (geo_data$ERA5col<0) )
-geo_data$ERA5col[xid]= (180-abs(geo_data$ERA5col[xid]))+180   # Longitude is stored only as positive degrees east, no negatives for west.
-geo_data$ERA5col     = cut(geo_data$ERA5col, seq(0,360,0.25), labels=c(1:1440))
-
-geo_data$ERA5row     = geo_data$lat                                          # Curiously latitude does have negatives
-geo_data$ERA5row     = as.numeric(cut(geo_data$ERA5row, seq(-90,90,0.25), labels=c(1:720)))
-
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
-# Open NETCDF file
-ncfname   = paste0("./data/climate_data/ERA5/ERA5_LST_and_SST_1979-present.nc")
-ERA5      = nc_open(ncfname)
-dname     = "t2m"
-lon       = ncvar_get(ERA5, "longitude") # ncvar_get(ERA5.air, "lon")
-nlon      = length(lon) # number of columns
-lat       = ncvar_get(ERA5, "latitude") # ncvar_get(ERA5.air, "lat", verbose = F)
-nlat      = length(lat) # number of rows
-t         = ncvar_get(ERA5, "time")                 # units: hours since 1900-01-01 00:00:00.0
-nt        = dim(t)                                  # monthly averages
-
-# Multiply 't' by 3600 so it becomes seconds since 1900 instead of hours.
-t.Date    = as.POSIXct(as.numeric(t)*3600, origin="1900-01-01 00:00:00") 
-
-# Full layer, at first time step
-map = ncvar_get(ERA5, dname, 
-                start= c(1,1,1,1),       # 4 dimensions: longitude, latitude, 'expver' (variable), time
-                count= c(nlon,nlat,1,1) )
-image(map)                               # Its both, upside down, back to front, and centered on 180' west...
-
-# Convert to raster for somewhat easier plotting
-library(raster)
-map2 = t(map)
-# Suffle the "WEST" to the left
-map2 = cbind(map2[,721:1440],map2[,1:720])
-map.raster = raster(map2, xmn=-180, xmx=180, ymn=-90, ymx=90, crs=4326)
-plot(map.raster)
-
-# Note in the SST version the land is masked out, but air temperature is global.
-  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-
-geo_data <- na.omit(geo_data)
-
-# Create unique col that will take rowname because of repeat species
-geo_data$row <- paste0(geo_data$species_full, "_",geo_data$lat, ",", geo_data$long)
-clim_data_matrix <- data.frame(matrix(NA, nrow = dim(geo_data)[1], ncol = 522))
-names <- gsub("* [10][10].+", "", t.Date)
-colnames(clim_data_matrix) <- c("species", "lat", "long", names)
-
-for(i in 1:nrow(geo_data)){
-  
-  # Annual time series in one cell:
-  point.timeseries = ncvar_get(ERA5, dname, 
-                               start= c(geo_data$ERA5col[i],geo_data$ERA5row[i],1,1),
-                               count= c(1,1,1,nt) )
-  clim_data_matrix[i,1] <- geo_data$species_full[i]
-  clim_data_matrix[i,2] <- geo_data$lat[i]
-  clim_data_matrix[i,3] <- geo_data$long[i]
-  clim_data_matrix[i,c(4:522)] <- point.timeseries
-  plot(point.timeseries ~ t.Date, type="l")   # point.timeseries ~ c(1:nt)
+# Climate data matrix
+clim_data = as.matrix(geo_data[,c(4,5)])
+clim_data = cbind(c(1:nrow(clim_data)),clim_data, matrix(NA,nrow=nrow(geo_data),ncol=nT))
+clim_data2=clim_data
+for(i in which(geo_data$source=="w") ){
+  Habitat= geo_data$habitat[i] %in% c("t","f")
+  if(Habitat){
+    # Extract NCDF as vector
+    if(dim(terra::rast(paste0("./Data/ERA5_LAND/era5land.monthlymean.point",i,".nc")))[1]==1){
+      r =  as.vector(terra::rast(paste0("./Data/ERA5_LAND/era5land.monthlymean.point",i,".nc")))
+    } else {
+      r = terra::rast(paste0("./Data/ERA5_LAND/era5land.monthlymean.point",i,".nc"))
+      r = apply(as.array(r),c(3), median, na.rm=T)
+    }
+    # Add to matrix
+    clim_data[i,-c(1:3)] = r[1:nT]     # air temperature
+    clim_data2[i,-c(1:3)]= r[-c(1:nT)] # skin temperature
+  } else {
+    # Marine
+    # Extract NCDF as array
+    r =  as.array(terra::rast(paste0("./Data/ERA5_LAND/era5.sst.point",i,".nc")))
+    # Median of each time point
+    r = apply(r, 3, median, na.rm=TRUE)
+    # Add to matrix
+    clim_data[i,-c(1:3)] = r
+    clim_data2[i,-c(1:3)] = r
+  }
+  if(exists('r')){rm(r)}
 }
-
+clim_data          = as.data.frame(clim_data)
+clim_data[,1]      = geo_data$species_full
+names(clim_data)   = c('Species','Longitude','Latitude',time.steps)
 # Now we can do some simple summaries, like CV
-cv <- function(x){
-  sd(x, na.rm = TRUE) / mean(x, na.rm = TRUE)
+cv                 = function(x){ sd(x, na.rm = TRUE) / mean(x, na.rm = TRUE) }
+clim_data$cv       = apply(clim_data[,c(1:nT)+3], 1, function(x) cv(x)) # Coefficient of variation
+clim_data$sd       = apply(clim_data[,c(1:nT)+3], 1, function(x) sd(x, na.rm = TRUE)) # sd
+clim_data$mean     = apply(clim_data[,c(1:nT)+3], 1, function(x) mean(x, na.rm = TRUE)) # mean
+clim_data$acf_lag1 = apply(clim_data[,c(1:nT)+3], 1, function(x) acf(as.numeric(x), lag.max = 1, plot = FALSE, na.action = na.pass)$acf[2,1,1]) # autocorrelation for lag w
+clim_data$acf_all  = apply(clim_data[,c(1:nT)+3], 1, function(x) sd(acf(as.numeric(x), plot = FALSE, na.action = na.pass)$acf)) # deviation in autocorrelation values...this is probably not that useful
+
+which( is.na(clim_data[,5]) & (geo_data$source=="w")) 
+
+write.csv(clim_data, "./output/climate_data/ERA5_air_and_SST_timeseries.csv")
+
+clim_data2          = as.data.frame(clim_data2)
+clim_data2[,1]      = geo_data$species_full
+names(clim_data2)   = c('Species','Longitude','Latitude',paste0('Y',time.steps))
+clim_data2$cv       = apply(clim_data2[,c(1:nT)+3], 1, function(x) cv(x)) # Coefficient of variation
+clim_data2$sd       = apply(clim_data2[,c(1:nT)+3], 1, function(x) sd(x, na.rm = TRUE)) # sd
+clim_data2$mean     = apply(clim_data2[,c(1:nT)+3], 1, function(x) mean(x, na.rm = TRUE)) # mean
+clim_data2$acf_lag1 = apply(clim_data2[,c(1:nT)+3], 1, function(x) acf(as.numeric(x), lag.max = 1, plot = FALSE, na.action = na.pass)$acf[2,1,1]) # autocorrelation for lag w
+clim_data2$acf_all  = apply(clim_data2[,c(1:nT)+3], 1, function(x) sd(acf(as.numeric(x), plot = FALSE, na.action = na.pass)$acf)) # deviation in autocorrelation values...this is probably not that useful
+
+write.csv(clim_data2, "./output/climate_data/ERA5_landsurface_timeseries.csv")
+
+table(complete.cases(clim_data))
+table(complete.cases(clim_data2))
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
+# REFORMAT PROJECTIONS 
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
+
+rm(list=ls())
+library(ncdf4)
+library(tidyr)
+library(terra)
+
+# Survey Locations
+geo_data = read.csv("./data/climate_data/Species_LatLong_plusHabitat.csv") 
+# Remove missing lat and long
+geo_data = geo_data %>% dplyr::filter(!is.na(lat) & !is.na(long))
+# Add columns for temp data
+time.steps = seq(as.Date("2081/01/01"), as.Date("2085/12/01"), "months")
+nT         = length(time.steps)
+
+# Climate data matrix
+clim_data = as.matrix(geo_data[,c(4,5)])
+clim_data = cbind(c(1:nrow(clim_data)),clim_data, matrix(NA,nrow=nrow(geo_data),ncol=nT))
+clim_data2=clim_data
+
+for(i in which(geo_data$source=="w") ){
+  Habitat= geo_data$habitat[i] %in% c("t","f")
+  if(Habitat){
+    # Extract NCDF as vector
+    r =  load(paste0("./Data/Projections/gfdl2080_airtemp_",i,".RData"))
+    # Add to matrix
+    clim_data[i,-c(1:3)] = tempdat$Temp    # air temperature
+    r =  load(paste0("./Data/Projections/gfdl2080_skintemp_",i,".RData"))
+    # Add to matrix
+    clim_data2[i,-c(1:3)] = tempdat$Temp    # skin temperature
+  } else {
+    # Extract NCDF as array
+    load(paste0("./Data/Projections/gfdl2080_sst_",i,".RData"))
+    # Add to matrix
+    clim_data[i,-c(1:3)] = tempdat$SST
+    clim_data2[i,-c(1:3)] = tempdat$SST
+  }
+  if(exists('r')){rm(r)}
 }
-clim_data_matrix$cv <- apply(clim_data_matrix[,4:522], 1, function(x) cv(x)) # Coefficient of variation
-clim_data_matrix$sd <- apply(clim_data_matrix[,4:522], 1, function(x) sd(x, na.rm = TRUE)) # sd
-clim_data_matrix$mean <- apply(clim_data_matrix[,4:522], 1, function(x) mean(x, na.rm = TRUE)) # mean
-clim_data_matrix$acf_lag1 <- apply(clim_data_matrix[,4:522], 1, function(x) acf(as.numeric(x), lag.max = 1, plot = FALSE, na.action = na.pass)$acf[2,1,1]) # autocorrelation for lag w
-clim_data_matrix$acf_all <- apply(clim_data_matrix[,4:522], 1, function(x) sd(acf(as.numeric(x), plot = FALSE, na.action = na.pass)$acf)) # deviation in autocorrelation values...this is probably not that useful
+clim_data          = as.data.frame(clim_data)
+clim_data[,1]      = geo_data$species_full
+names(clim_data)   = c('Species','Longitude','Latitude',time.steps)
+# Now we can do some simple summaries, like CV
+cv                 = function(x){ sd(x, na.rm = TRUE) / mean(x, na.rm = TRUE) }
+clim_data$cv       = apply(clim_data[,c(1:nT)+3], 1, function(x) cv(x)) # Coefficient of variation
+clim_data$sd       = apply(clim_data[,c(1:nT)+3], 1, function(x) sd(x, na.rm = TRUE)) # sd
+clim_data$mean     = apply(clim_data[,c(1:nT)+3], 1, function(x) mean(x, na.rm = TRUE)) # mean
+clim_data$acf_lag1 = apply(clim_data[,c(1:nT)+3], 1, function(x) acf(as.numeric(x), lag.max = 1, plot = FALSE, na.action = na.pass)$acf[2,1,1]) # autocorrelation for lag w
+clim_data$acf_all  = apply(clim_data[,c(1:nT)+3], 1, function(x) sd(acf(as.numeric(x), plot = FALSE, na.action = na.pass)$acf)) # deviation in autocorrelation values...this is probably not that useful
 
-write.csv(clim_data_matrix, "./output/climate_data/temp_timeseries.csv")
+write.csv(clim_data, "./output/climate_data/gfdl2081-2085_air_and_SST_timeseries.csv")
 
-r1 <- acf(as.numeric(clim_data_matrix[1,4:522]), lag.max = 522 - 4, plot = FALSE, na.action = na.pass)$acf[-1]
-lag <- c(1:518)
-plot(r1 ~ lag)
+clim_data2          = as.data.frame(clim_data2)
+clim_data2[,1]      = geo_data$species_full
+names(clim_data2)   = c('Species','Longitude','Latitude',paste0('Y',time.steps))
+clim_data2$cv       = apply(clim_data2[,c(1:nT)+3], 1, function(x) cv(x)) # Coefficient of variation
+clim_data2$sd       = apply(clim_data2[,c(1:nT)+3], 1, function(x) sd(x, na.rm = TRUE)) # sd
+clim_data2$mean     = apply(clim_data2[,c(1:nT)+3], 1, function(x) mean(x, na.rm = TRUE)) # mean
+clim_data2$acf_lag1 = apply(clim_data2[,c(1:nT)+3], 1, function(x) acf(as.numeric(x), lag.max = 1, plot = FALSE, na.action = na.pass)$acf[2,1,1]) # autocorrelation for lag w
+clim_data2$acf_all  = apply(clim_data2[,c(1:nT)+3], 1, function(x) sd(acf(as.numeric(x), plot = FALSE, na.action = na.pass)$acf)) # deviation in autocorrelation values...this is probably not that useful
 
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
-# New Climate Projections - Cleanup and export
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
+write.csv(clim_data2, "./output/climate_data/Projections/gfdl2081-2085_landsurface_and_SST_timeseries.csv")
 
-# Read in the updated time series data
-   sst <- read.csv("./output/climate_data/ERA5_air_and_SST_timeseries.csv") # Climate data includes SST and air temperature for terrestrial
-  land <- read.csv("./output/climate_data/ERA5_landsurface_timeseries.csv") # Climate data includes SST and soil temperature for terrestrial
-
-# Clear missing data from each sheet, merge sheets together and then re-arrange
-
- sst <- sst %>% filter(!is.na(mean))
-land <- land %>% filter(!is.na(mean))
-
-# Write out
-write.csv(clim_data_matrix, "./output/climate_data/temp_timeseries.csv", row.names = FALSE)

@@ -1031,7 +1031,7 @@ The opportunity for selection, as captured by $lnCVR_{Q_{10}}$, showed a decreas
 climate <- read.csv("./output/climate_data/ERA5_air_and_SST_timeseries.csv")
 
 # Create a match column.
-climate2 <- climate %>% mutate(match = interaction(Species, Latitude, Longitude)) %>% dplyr::select(Species, Latitude, Longitude, match, cv, sd, mean, acf_lag1, acf_all)
+climate2 <- climate %>% mutate(match = interaction(Species, Longitude, Latitude)) %>% dplyr::select(Species, Latitude, Longitude, match, cv, sd, mean, acf_lag1, acf_all)
 
 # Subset the data
 lnRRQ10_data_wild <- data_long2 %>% filter(grepl("lnRR", name) & !is.na(effect_size) & !is.na(V) & !V == 0 & source == "w") %>% 

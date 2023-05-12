@@ -464,7 +464,7 @@ if(rerun){
     # Clear support for this model. We'll go with this.
     AICc1.3_m - AICc1.3_m_het
   
-  orchard_plot(model1.3_m_het, mod = "trait_category", at = list(type = c("acclim", "acute")), by = "type", xlab = TeX("$lnRR_{Q_{10}}$"), group = "spp", data = lnRRQ10_data_m, angle = 0)
+  orchard_plot(model1.3_m_het, mod = "trait_category", at = list(type = c("acclim", "acute")), by = "type", xlab = TeX("$lnRR_{Q_{10}}$"), group = "spp", angle = 0)
   
   # Cannot model heterogeneous variance across traits if use sigma + TRUE, so just use obs.
    model1.3_m_bayes <- brms::brm(effect_size | se(sqrt(V)) ~  c_accl_time + type + trait_category + type:trait_category + (~1 | record_num) + (1 | gr(species_full, cov = A_m)) + (1 | spp) +(1|trait) + (1 + trait_category |gr(obs, cor = FALSE)),  data2 = list(A_m=A_m), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 8, data = lnRRQ10_data_m)
@@ -883,7 +883,7 @@ ggsave(filename = "fig1a_unedited.pdf", path = "./output/figures/", phylo, devic
   # Figure 1b plot
 ##################
 col <- c("#0871B9", "#F3B40D", "#1BB908")
-p1.2 <- orchaRd::orchard_plot(model1.2, mod = "habitat", group  = "record_num", at = list(type = c("acute", "acclim")), by = "type", weights = "prop", data = lnRRQ10_data, xlab = TeX("$lnRR_{Q_{10}}$"), angle = 45, legend.pos = "top.left", trunk.size = 5) + scale_x_discrete(labels = c("T" = "Terrestrial","M" = "Marine" ,"F" = "Freshwater")) +
+p1.2 <- orchaRd::orchard_plot(model1.2, mod = "habitat", group  = "record_num", at = list(type = c("acute", "acclim")), by = "type", weights = "prop", xlab = TeX("$lnRR_{Q_{10}}$"), angle = 45, legend.pos = "top.left", trunk.size = 5) + scale_x_discrete(labels = c("T" = "Terrestrial","M" = "Marine" ,"F" = "Freshwater")) +
   theme(legend.direction = "vertical") +
   geom_segment(aes(x = 2.92, y = 2, xend = 3.07, yend = 2), 
                             arrow = arrow(angle = 90, ends = "both", length = unit(0.01, "npc"))) +
@@ -929,7 +929,7 @@ annotate("text", x = 3.01, y = 4.60,
   # Figure 1c plot
 ################## 
   # Clear from the model that there really is no difference between the change in variance for acute or acclimation CVR. But, there is a clear reduction in between individual variance for terrestrial species. As temperature get hotter then the variance in physiological rates decreases. This is not true of aquatic systems. 
-  p2 <- orchard_plot(model2.2, xlab = TeX("$lnCVR_{Q_{10}}$"), mod = "habitat", group  = "record_num", weights = "prop", data = lnCVRQ10_data, angle = 45, trunk.size = 5) +
+  p2 <- orchard_plot(model2.2, xlab = TeX("$lnCVR_{Q_{10}}$"), mod = "habitat", group  = "record_num", weights = "prop", angle = 45, trunk.size = 5) +
               scale_x_discrete(labels = c("T" = "Terrestrial","M" = "Marine" ,"F" = "Freshwater")) + annotate("text", x = 1.3, y = -5.2, 
            label =TeX(paste0("$\\mu = $", round(mean(f_cvr_mean), 2), "[", round(quantile(f_cvr_mean, 0.025), 2)," to ", round(quantile(f_cvr_mean, 0.975),2), "] ")), hjust = 0, size = 6) + 
   annotate("text", x = 1.15, y = -3.7, label = paste0("P = ", round(pmcmc(f_cvr_mean), digit = 2)), hjust = 0, size = 6) + 
@@ -960,7 +960,7 @@ annotate("text", x = 3.01, y = 4.60,
 #| fig-cap: Acute and Acclimation lnRR q10 across traits for A) marine, B) freshwater and C) terrestrial systems
 #| echo: false
 
-ptm <- orchard_plot(model1.3_m_het, mod = "trait_category", at = list(type = c("acute", "acclim")), by = "type", group = "record_num", weights = "prop", data = lnRRQ10_data_m, xlab = TeX("$lnRR_{Q_{10}}$"), angle = 0, condition.lab = "Type") +
+ptm <- orchard_plot(model1.3_m_het, mod = "trait_category", at = list(type = c("acute", "acclim")), by = "type", group = "record_num", weights = "prop",  xlab = TeX("$lnRR_{Q_{10}}$"), angle = 0, condition.lab = "Type") +
   scale_x_discrete(labels = c("Mito_leak" = "Proton Leak",
                               "Metabolic_enzyme" = "Metabolic Enzymes",
                               "Rest_MR" = "Resting Metabolic Rate",
@@ -969,7 +969,7 @@ ptm <- orchard_plot(model1.3_m_het, mod = "trait_category", at = list(type = c("
 #ptm$layers[[1]] <- NULL # Lets just remove the data point geom layer as it's too busy
 
 
-ptf <- orchard_plot(model1.3_f_het, mod = "trait_category", at = list(type = c("acute", "acclim")), by = "type", group = "record_num", weights = "prop", data = lnRRQ10_data_f, xlab = TeX("$lnRR_{Q_{10}}$"), angle = 0, condition.lab = "Type") +
+ptf <- orchard_plot(model1.3_f_het, mod = "trait_category", at = list(type = c("acute", "acclim")), by = "type", group = "record_num", weights = "prop",  xlab = TeX("$lnRR_{Q_{10}}$"), angle = 0, condition.lab = "Type") +
   scale_x_discrete(labels = c("Mito_leak" = "Proton Leak",
                               "Metabolic_enzyme" = "Metabolic Enzymes",
                               "Rest_MR" = "Resting Metabolic Rate",
@@ -978,7 +978,7 @@ ptf <- orchard_plot(model1.3_f_het, mod = "trait_category", at = list(type = c("
 #ptf$layers[[1]] <- NULL # Lets just remove the data point geom layer as it's too busy
 
 
-ptt <- orchard_plot(model1.3_t_het, mod = "trait_category", at = list(type = c("acute", "acclim")), by = "type", group = "record_num", weights = "prop", data = lnRRQ10_data_t, xlab = TeX("$lnRR_{Q_{10}}$"), angle = 0, condition.lab = "Type") +
+ptt <- orchard_plot(model1.3_t_het, mod = "trait_category", at = list(type = c("acute", "acclim")), by = "type", group = "record_num", weights = "prop",  xlab = TeX("$lnRR_{Q_{10}}$"), angle = 0, condition.lab = "Type") +
   scale_x_discrete(labels = c("Metabolic_enzyme" = "Metabolic Enzymes",
                               "Rest_MR" = "Resting Metabolic Rate")) + theme_classic() + labs(legend = "Type")
 #ptt$layers[[1]] <- NULL # Lets just remove the data point geom layer as it's too busy
@@ -995,11 +995,11 @@ img_fig2
 #| label: fig-3
 #| fig-cap: Predicted mean acclimation and acute "$lnRR_{Q_{10}}$" for adult and juevenile life-history stages for A) Marine, B) Freshwater and C) Terrestrial ectotherms. 
 
-p1 <- orchard_plot(model1.4, mod = "type", at = list(c_accl_time = 0, habitat = "m"), group = "record_num", xlab = TeX("$lnRR_{Q_{10}}$"), condition.lab = "Life Stage", by = "life.hist", data = lnRRQ10_data, g = FALSE, k = FALSE, legend.pos = "top.left", angle = 45) + labs(title = "Marine") + ylim(c(-2, 2.2))
+p1 <- orchard_plot(model1.4, mod = "type", at = list(c_accl_time = 0, habitat = "m"), group = "record_num", xlab = TeX("$lnRR_{Q_{10}}$"), condition.lab = "Life Stage", by = "life.hist",  g = FALSE, k = FALSE, legend.pos = "top.left", angle = 45) + labs(title = "Marine") + ylim(c(-2, 2.2))
 
-p2 <- orchard_plot(model1.4, mod = "type", at = list(c_accl_time = 0, habitat = "f"), group = "record_num", xlab = TeX("$lnRR_{Q_{10}}$"), condition.lab = "Life Stage", by = "life.hist", data = lnRRQ10_data, g = FALSE, k = FALSE)+ labs(title = "Freshwater") + theme(legend.position = "none", axis.text.y = element_blank())
+p2 <- orchard_plot(model1.4, mod = "type", at = list(c_accl_time = 0, habitat = "f"), group = "record_num", xlab = TeX("$lnRR_{Q_{10}}$"), condition.lab = "Life Stage", by = "life.hist",  g = FALSE, k = FALSE)+ labs(title = "Freshwater") + theme(legend.position = "none", axis.text.y = element_blank())
 
-p3 <- orchard_plot(model1.4, mod = "type", at = list(c_accl_time = 0, habitat = "t"), group = "record_num", xlab = TeX("$lnRR_{Q_{10}}$"), condition.lab = "Life Stage", by = "life.hist", data = lnRRQ10_data, g = FALSE, k = FALSE)+ labs(title = "Terrestrial")+ theme(legend.position = "none", axis.text.y = element_blank())
+p3 <- orchard_plot(model1.4, mod = "type", at = list(c_accl_time = 0, habitat = "t"), group = "record_num", xlab = TeX("$lnRR_{Q_{10}}$"), condition.lab = "Life Stage", by = "life.hist",  g = FALSE, k = FALSE)+ labs(title = "Terrestrial")+ theme(legend.position = "none", axis.text.y = element_blank())
 
 fig3 <- (p1 | p2 | p3) + plot_annotation(tag_levels = "A", tag_suffix = ")")
 ggsave(fig3, filename = "./output/figures/fig3_lh.png", width = 14, height = 4.5)
@@ -1056,7 +1056,7 @@ phylo_cor_wild <- vcv(tree_lnrr_wild, cor = TRUE)
   # Model 3.2: Model controlling for acclimation time, 
   # type and habitat assuming type can vary by habitat
 ###################################################
-rerun = TRUE
+rerun = FALSE
 if(rerun){
   # More realistic model with 
   model3.2          <- metafor::rma.mv(effect_size ~ c_accl_time + type + habitat + type:habitat, V = V,
@@ -1136,7 +1136,7 @@ if(rerun){
 }
   
 ################################################################
-  # Model 3.7: Environmental autocorrelation model by acute/acclim
+  # Model 3.4: Environmental autocorrelation model by acute/acclim
 ################################################################
 if(rerun){
   # More realistic model with 
@@ -1452,10 +1452,10 @@ if(rerun){
 ##################################################
 
 # Bring in Climate data
-climate <- read.csv("./output/climate_data/temp_timeseries.csv")
+climate <- read.csv("./output/climate_data/ERA5_air_and_SST_timeseries.csv")
 
 # Create a match column.
-climate2 <- climate %>% mutate(match = interaction(Species, Latitude, Longitude)) %>% dplyr::select(-c(5:523))
+climate2 <- climate %>% mutate(match = interaction(Species, Latitude, Longitude)) %>% dplyr::select(Species, Latitude, Longitude, match, cv, sd, mean, acf_lag1, acf_all)
 
 # Subset the data
 lnCVRQ10_data_wild <- data_long2 %>% filter(grepl("lnCVR", name) & !is.na(effect_size) & !is.na(V) & !V == 0 & source == "w") %>% 
@@ -1656,7 +1656,7 @@ if(rerun){
   saveRDS(model4.7_bayes, file = "./output/models/lnCVRQ10_4.7_bayes")
 
   } else{
-        model4.7 <- readRDS("./output/models/lnCVRQ10_4.7")
+        model4.7 <- readRDS("./output/models/lnCVRQ10_4.7")   ### DIFFERENT 
   #model4.7_bayes <- readRDS("./output/models/lnCVRQ10_4.7_bayes")
 }
   
@@ -2239,7 +2239,7 @@ Analysis of $lnVR_{Q_{10}}$ suggested that variance increases with higher temper
 ################## 
   # Sensitivity analysis that looks at how variance changes but not controlling for the mean.
   col <- c("#0871B9", "#F3B40D", "#1BB908")
-  p3 <- orchard_plot(model3.2, xlab = TeX("$lnVR_{Q_{10}}$"), mod = "habitat", group  = "record_num", weights = "prop", data = lnVRQ10_data, angle = 45, trunk.size = 5) +
+  p3 <- orchard_plot(model3.2, xlab = TeX("$lnVR_{Q_{10}}$"), mod = "habitat", group  = "record_num", weights = "prop", angle = 45, trunk.size = 5) +
               scale_x_discrete(labels = c("T" = "Terrestrial","M" = "Marine" ,"F" = "Freshwater")) + annotate("text", x = 1.3, y = -5.2, 
            label =TeX(paste0("$\\mu = $", round(mean(f_VR_mean), 2), " [", round(quantile(f_VR_mean, 0.025), 2)," to ", round(quantile(f_VR_mean, 0.975),2), "] ")), hjust = 0, size = 6) + 
   annotate("text", x = 1.15, y = -3.5, label = TeX(paste0("$\\italic(p)$ ", p_value(round(pmcmc(f_VR_mean), digit = 2)))), hjust = 0, size = 6) + 

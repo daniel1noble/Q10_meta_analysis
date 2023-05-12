@@ -1056,7 +1056,7 @@ phylo_cor_wild <- vcv(tree_lnrr_wild, cor = TRUE)
   # Model 3.2: Model controlling for acclimation time, 
   # type and habitat assuming type can vary by habitat
 ###################################################
-rerun = FALSE
+rerun = TRUE
 if(rerun){
   # More realistic model with 
   model3.2          <- metafor::rma.mv(effect_size ~ c_accl_time + type + habitat + type:habitat, V = V,
@@ -1455,7 +1455,7 @@ if(rerun){
 climate <- read.csv("./output/climate_data/temp_timeseries.csv")
 
 # Create a match column.
-climate2 <- climate %>% mutate(match = interaction(Species, Longitude, Latitude)) %>% dplyr::select(-c(5:523))
+climate2 <- climate %>% mutate(match = interaction(Species, Latitude, Longitude)) %>% dplyr::select(-c(5:523))
 
 # Subset the data
 lnCVRQ10_data_wild <- data_long2 %>% filter(grepl("lnCVR", name) & !is.na(effect_size) & !is.na(V) & !V == 0 & source == "w") %>% 
@@ -1857,7 +1857,7 @@ p9.1.2 <- (p9.1 / p9.2) + plot_annotation(tag_levels = "A", tag_suffix = ")") & 
 
 ggsave(p9.1.2, width = 8.2, height = 8.7, filename = "./output/figures/fig9.png")
 
-  p9.1.2 <- image_read("./output/figures/fig8.png")
+  p9.1.2 <- image_read("./output/figures/fig9.png")
   p9.1.2 
 ```
 

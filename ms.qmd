@@ -298,7 +298,7 @@ sum_life <- lnRRQ10_data %>% group_by(life.hist, type, habitat) %>% summarise(n=
 ##################################################
 # Model 1.1: Intercept only model. 
 ##################################################
-rerun = TRUE
+rerun = FALSE
 if(rerun){
   model1.1 <- metafor::rma.mv(effect_size ~ 1, V = V, 
                               random = list(~1 | record_num,
@@ -556,7 +556,7 @@ if(rerun){
 ###########################################################
 ## Model 1.4 - whether chance between q10 depends on life stage and habita
 ###########################################################
-rerun = TRUE
+rerun = FALSE
 if(rerun){
   # More realistic model with 
   model1.4 <- metafor::rma.mv(effect_size ~  c_accl_time + type*habitat*life.hist, V = V, 
@@ -709,7 +709,7 @@ Considering acute responses of animals acclimated to high temperatures are gener
   # Model 2.1: Intercept only model.
   # Used for heterogeneity analysis
 ###################################################
-rerun = TRUE
+rerun = FALSE
 if(rerun){
   model2.1 <- metafor::rma.mv(effect_size ~ 1, V = V, 
                               random = list(~1 | record_num,
@@ -1056,7 +1056,7 @@ phylo_cor_wild <- vcv(tree_lnrr_wild, cor = TRUE)
   # Model 3.2: Model controlling for acclimation time, 
   # type and habitat assuming type can vary by habitat
 ###################################################
-rerun = TRUE
+rerun = FALSE
 if(rerun){
   # More realistic model with 
   model3.2          <- metafor::rma.mv(effect_size ~ c_accl_time + type + habitat + type:habitat, V = V,
@@ -1112,7 +1112,7 @@ if(rerun){
   # Model 3.3: Model environmental variability by acute 
   #  acclim 
 ####################################################
-  rerun = TRUE
+  rerun = FALSE
 if(rerun){
   # More realistic model with 
   model3.3          <- metafor::rma.mv(effect_size ~ c_accl_time + cv_c + type + type:cv_c, V = V,
@@ -1482,7 +1482,7 @@ phylo_cor_wild_cvr <- vcv(tree_lncvr_wild, cor = TRUE)
   # Model 4.2: Model controlling for acclimation time, 
   # type and habitat assuming type can vary by habitat
 ###################################################
-rerun = TRUE
+rerun = FALSE
 if(rerun){
   # More realistic model with 
   model4.2          <- metafor::rma.mv(effect_size ~ c_accl_time + type + habitat + type:habitat, V = V,
@@ -1537,7 +1537,7 @@ if(rerun){
 ####################################################
   # Model 4.3: Model environmental variability by acute/acclim
 ####################################################
-rerun = TRUE
+rerun = FALSE
 if(rerun){
   # More realistic model with 
   model4.3          <- metafor::rma.mv(effect_size ~ c_accl_time + cv_c + type + type:cv_c, V = V,
@@ -1784,7 +1784,7 @@ dat_text2 <- data.frame(label = c(text(slope_f_3.8), text(slope_m_3.8), text(slo
                       x = rep(-2.8, 3),
                       y = rep(-1.2, 3))
 
-p8.2 <- bubble_plot(model3.8, mod = "acf_all_c", group = "record_num", by = "habitat", data = lnRRQ10_data_wild_acclim, ylab = TeX("$lnRR_{Q_{10}}$"), xlab = "Thermal Predictability", condition.nrow = 1, k = FALSE) + 
+p8.2 <- bubble_plot(model3.8, mod = "acf_all_c", group = "record_num", by = "habitat",  ylab = TeX("$lnRR_{Q_{10}}$"), xlab = "Thermal Predictability", condition.nrow = 1, k = FALSE) + 
 theme_classic() + 
 scale_fill_manual(values = c(col)) + 
 geom_text(data = dat_text2, aes(x = x, y = y, label = label), size = 5) + 
@@ -1871,7 +1871,7 @@ ggsave(p9.1.2, width = 8.2, height = 8.7, filename = "./output/figures/fig9.png"
 # Here, we want to make global predcitions, at the lat/long in the data for how the opportunity of selection is expected to change with climate change. How can we do this? Q10 effects already have temperature controls within the effect size. So, what we want is to be able to understand how Q10 changes with latitude and longitude. Once we know that, we an extarct how temperature is expected to change from our current levels to future levels. This will be in degrees C. Then, assuming no plasticty and evolution (big assumption) we can get a baseline change in variance for each site. We first need to adjust the predcited Q10 value so that it's at 1C temperaure, not 10, we can do this through this formula Qt = (Q10 / 10)*T, where T is the temperature change in C. This will adjust the predcited Q10 value to the change in 1 degree C. We can then multiply this by the temperature change expected at that location to get the % change in variance or acure/acclim response. We can then plot these globally. 
 
 #############################
-rerun = TRUE
+rerun = FALSE
 if(rerun){
   
   # Model lat and long. Need to exclude missing acclimdation data. That will make it easier to create predcitions and explore the model fit.
@@ -2117,7 +2117,7 @@ One explanation for why terrestrial ectotherms show minimal acclimation capacity
   # Model 3.1: Intercept only model.
   # Used for heterogeneity analysis
 ###################################################
-rerun = TRUE
+rerun = FALSE
 if(rerun){
   model3.1 <- metafor::rma.mv(effect_size ~ 1, V = V, 
                               random = list(~1 | record_num,

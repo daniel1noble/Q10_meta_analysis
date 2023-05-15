@@ -2021,7 +2021,7 @@ sub_data <- lnCVRQ10_data_wild[complete.cases(lnCVRQ10_data_wild$c_accl_time),]
   spp_wild  <- length(unique(sub_data$spp))
 ```
 
-Acute and acclimation responses for wild ectotherms were much less common than studies done on captive populations ($N_{species}$ = `r spp_wild`). Globally, there was a clear bias towards spiecies in the Northern Hemiphere (@fig-preds). Predictions of current global changes in the opportunity for selection were generally conservative with our model explaining ~ 50% of the variation in the observed data ($R^2$ = `r round(mean(r2_2), 2)`, 95% CI: `r round(quantile(r2_2, 0.025)[1], 2)` to `r round(quantile(r2_2, 0.975)[1], 2)`). 
+Acute and acclimation responses for wild ectotherms were much less common than studies done on captive populations ($N_{species}$ = `r spp_wild`, from XX populations). Globally, there was a clear bias towards spiecies in the Northern Hemiphere (@fig-preds). Predictions of current global changes in the opportunity for selection were generally conservative with our model explaining ~ 50% of the variation in the observed data ($R^2$ = `r round(mean(r2_2), 2)`, 95% CI: `r round(quantile(r2_2, 0.025)[1], 2)` to `r round(quantile(r2_2, 0.975)[1], 2)`). 
 
 
 ```{r}

@@ -1457,6 +1457,9 @@ climate <- read.csv("./output/climate_data/ERA5_air_and_SST_timeseries.csv")
 # Create a match column.
 climate2 <- climate %>% mutate(match = interaction(Species, Latitude, Longitude)) %>% dplyr::select(Species, Latitude, Longitude, match, cv, sd, mean, acf_lag1, acf_all)
 
+# Populations and species?
+pop_spp_w <- climate2[complete.cases(climate2),]
+
 # Subset the data
 lnCVRQ10_data_wild <- data_long2 %>% filter(grepl("lnCVR", name) & !is.na(effect_size) & !is.na(V) & !V == 0 & !is.na(acclim_period) & source == "w") %>% 
                               mutate(spp = species_full, 
@@ -1885,7 +1888,10 @@ if(rerun){
 }
 
 # Lets explore the model and how it's predciting the real data
-  data_w_pred <- cbind(lnCVRQ10_data_wild[complete.cases(lnCVRQ10_data_wild$c_accl_time),], predict(model5_bayes))
+  data_w <- lnCVRQ10_data_wild[complete.cases(lnCVRQ10_data_wild$c_accl_time),]
+
+# combine with predictions
+  data_w_pred <- cbind(data_w, predict(model5_bayes))
 
 # Fitted vs actual data
   ggplot(data = data_w_pred, aes(x = Estimate, y = effect_size)) + geom_point() + geom_smooth(method = "lm") + labs(x = "Predicted Effect Size", y = "Observed Effect Size") + theme_classic() + 
@@ -2021,7 +2027,7 @@ sub_data <- lnCVRQ10_data_wild[complete.cases(lnCVRQ10_data_wild$c_accl_time),]
   spp_wild  <- length(unique(sub_data$spp))
 ```
 
-Acute and acclimation responses for wild ectotherms were much less common than studies done on captive populations ($N_{species}$ = `r spp_wild`, from XX populations). Globally, there was a clear bias towards spiecies in the Northern Hemiphere (@fig-preds). Predictions of current global changes in the opportunity for selection were generally conservative with our model explaining ~ 50% of the variation in the observed data ($R^2$ = `r round(mean(r2_2), 2)`, 95% CI: `r round(quantile(r2_2, 0.025)[1], 2)` to `r round(quantile(r2_2, 0.975)[1], 2)`). 
+Acute and acclimation responses for wild ectotherms were much less common than studies done on captive populations ($N_{species}$ = `r length(unique(pop_spp_w$Species))`, from `r dim(pop_spp_w)[1]` populations). Globally, there was a clear bias towards spiecies in the Northern Hemiphere (@fig-preds). Predictions of current global changes in the opportunity for selection were generally conservative with our model explaining ~ 50% of the variation in the observed data ($R^2$ = `r round(mean(r2_2), 2)`, 95% CI: `r round(quantile(r2_2, 0.025)[1], 2)` to `r round(quantile(r2_2, 0.975)[1], 2)`). 
 
 
 ```{r}
@@ -2117,7 +2123,7 @@ One explanation for why terrestrial ectotherms show minimal acclimation capacity
   # Model 3.1: Intercept only model.
   # Used for heterogeneity analysis
 ###################################################
-rerun = TRUE
+rerun = FALSE
 if(rerun){
   model3.1 <- metafor::rma.mv(effect_size ~ 1, V = V, 
                               random = list(~1 | record_num,
@@ -2315,7 +2321,7 @@ Funnel plots did not show any noticable deviation from the typical funnel shape 
 #| label: pubias
 #| echo: false
 #| include: false
-
+rerun = FALSE
 if(rerun){
   model_full_lnrr_pb <- brms::brm(effect_size | se(sqrt(V)) ~  c_accl_time + V + habitat*life.hist*type + trait_category + habitat:type + habitat:life.hist + habitat:life.hist:type + (~1 | record_num) + (1 | gr(species_full, cov = A)) + (1 | spp) + (1 | trait) + (1  | obs),  data2 = list(A=A), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 8, data = lnRRQ10_data)
 

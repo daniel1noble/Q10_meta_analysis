@@ -2032,6 +2032,9 @@ Acute and acclimation responses for wild ectotherms were much less common than s
 
 ```{r}
 #| label: fig-preds
+#| echo: false
+#| warning: false
+#| message: false
 #| fig-cap: Model predictions for the expected change in acclimation $lnCVR_{Q_{10}}$ across the globe for terrestrial, marine and freshwater ecthotherms. Predictions consider the uncertainty in random effects (i.e., species, phylogeny, study).  
 
 devtools::install_github("hughjonesd/ggmagnify") #https://github.com/hughjonesd/ggmagnify

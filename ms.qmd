@@ -2029,65 +2029,14 @@ sub_data <- lnCVRQ10_data_wild[complete.cases(lnCVRQ10_data_wild$c_accl_time),]
 
 Acute and acclimation responses for wild ectotherms were much less common than studies done on captive populations ($N_{species}$ = `r length(unique(pop_spp_w$Species))`, from `r dim(pop_spp_w)[1]` populations). Globally, there was a clear bias towards spiecies in the Northern Hemiphere (@fig-preds). Predictions of current global changes in the opportunity for selection were generally conservative with our model explaining ~ 50% of the variation in the observed data ($R^2$ = `r round(mean(r2_2), 2)`, 95% CI: `r round(quantile(r2_2, 0.025)[1], 2)` to `r round(quantile(r2_2, 0.975)[1], 2)`). 
 
-Projected changes in the opportunity for selection were highly variable across the globe, with some regions showing a decrease in the opportunity for selection, while others showed an increase (@fig-future). Overall, there was a net decrease in the opportunity for selection across the globe ()
-
-
-```{r}
-#| label: fig-preds
-#| echo: false
-#| warning: false
-#| message: false
-#| fig-cap: Model predictions for the expected change in acclimation $lnCVR_{Q_{10}}$ across the globe for terrestrial, marine and freshwater ecthotherms. Predictions consider the uncertainty in random effects (i.e., species, phylogeny, study).  
-
-#devtools::install_github("hughjonesd/ggmagnify") #https://github.com/hughjonesd/ggmagnify
-
-world_map = map_data("world") %>% 
-  filter(! long > 180)
-
-map1_current <- ggplot() +
-  geom_map(
-    data = world_map, map = world_map,
-    aes(long, lat, map_id = region),
-    color = "black", fill = "lightgray") +
-  expand_limits(x = world_map$long, y = world_map$lat) +
-  coord_map("moll") +
-  geom_point(
-    data = all_pred  %>% filter(type == "acclim"),
-    aes(Longitude, Latitude, color = Estimate),
-    alpha = 0.7, size = 5
-  ) + labs(x = "Longitude", y = "Latitude", color = TeX("$lnCVR_{Q_{10}}$")) + scale_color_viridis() + theme_map(base_size = 22)
-
-
-zoom_areas <- data.frame(
-     x = c(-130, -15, -60, 145),
-  xend = c( -50, 48, -35, 155),
-     y = c(  25, 34, 0, -45),
-  yend = c(  55,  69.8, -60, -10),
-  label = c("North America", "Europe", "South America", "Australia")
-)
-
-zoom_plots <- lapply(1:nrow(zoom_areas), function(i) {
-  map1_current +
-    geom_polygon(fill = "gray80", color = "black") +
-    coord_cartesian(xlim = c(zoom_areas[i, "x"], zoom_areas[i, "xend"]), 
-                    ylim = c(zoom_areas[i, "y"], zoom_areas[i, "yend"])) +
-                    theme(legend.position = "none")
-})
-
-# Make a multipanel plot. Make the world_map plot the biggest, and then add the zoomed in plots arond it using pactchwork
-
-p <- (zoom_plots[[1]] | zoom_plots[[2]]) / map1_current  + plot_layout(heights  = c(1, 2)) + plot_annotation(tag_levels = "A", tag_suffix = ")") & theme(plot.tag = element_text(size = 20, face = "bold"), plot.margin = unit(c(0, 0, 0, 0), "cm"))
-
-ggsave(p, filename = "./output/figures/fig-preds.png", width = 9.1, height = 7.2)
-
-image_read("./output/figures/fig-preds.png")
-```
+Projected changes in the opportunity for selection were highly variable across the globe, with some regions showing a decrease in the opportunity for selection, while others showing an increase (@fig-preds D). Overall, there was a net decrease in the opportunity for selection across the globe ()
 
 
 ```{r}
 #| label: future_clim
 #| echo: false
 #| warning: false
+#| include: false
 
 # Now we want to take the predictions from `global` and use this for future climate sceneios. We have the future temperatures expected for each location. We can then use the predicted Q10 values to calculate the expected change in variance. We can then plot these globally.
 
@@ -2104,7 +2053,10 @@ image_read("./output/figures/fig-preds.png")
   climate <- read.csv("./output/climate_data/ERA5_air_and_SST_timeseries.csv")
 
 # Clean up and create a match column. We need to get the last 5 years current to average temp and then convert this to Celcius
-  climate2_future <- climate %>% mutate(match = interaction(Species, Latitude, Longitude)) %>% dplyr::select(match, Species, Latitude, Longitude, grep("X2018|X2019|X2020|X2021|X2022", colnames(climate)))  %>% mutate(mean = apply(.[, grep("X2018|X2019|X2020|X2021|X2022", colnames(.))], 1, function(x) mean(x, na.rm = TRUE)), Celc_curr = mean - 273.15) %>% dplyr::select(-grep("X2018|X2019|X2020|X2021|X2022", colnames(.)))
+  climate2_future <- climate %>% mutate(match = interaction(Species, Latitude, Longitude)) %>% 
+                                dplyr::select(match, Species, Latitude, Longitude, grep("X2018|X2019|X2020|X2021|X2022", colnames(climate)))  %>% 
+                                mutate(mean = apply(.[, grep("X2018|X2019|X2020|X2021|X2022", colnames(.))], 1, function(x) mean(x, na.rm = TRUE)), Celc_curr = mean - 273.15) %>% 
+                                dplyr::select(-grep("X2018|X2019|X2020|X2021|X2022", colnames(.)))
 
 # Now we can merge teh climate datasets together so that we have the species, lat and long, current and future climate. Then we can calculate the expected 'increase' in T into the future
 
@@ -2114,6 +2066,10 @@ image_read("./output/figures/fig-preds.png")
   ggplot(data = climate_data, aes(x = Celc_curr, y = Celc_future)) + geom_point() + geom_smooth(method = "lm") + labs(x = "Current Temperature (C)", y = "Future Temperature (C)") + theme_classic() + geom_abline(intercept = 0, slope = 1)
 
 # Lets have a global plot of temperature changes to see it sptially 
+
+world_map = map_data("world") %>% 
+  filter(! long > 180)
+
   map2_temp_proj <- ggplot() +
     geom_map(
       data = world_map, map = world_map,
@@ -2153,10 +2109,49 @@ tables_future <- all_pred2 %>% group_by(habitat) %>% summarise(mean = mean(per_c
 ```
 
 
+
 ```{r}
-#| label: fig-future
+#| label: fig-preds
 #| echo: false
 #| warning: false
+#| message: false
+#| fig-cap: Model predictions for the expected change in acclimation $lnCVR_{Q_{10}}$ across the globe for terrestrial, marine and freshwater ecthotherms. Predictions consider the uncertainty in random effects (i.e., species, phylogeny, study).  
+
+#devtools::install_github("hughjonesd/ggmagnify") #https://github.com/hughjonesd/ggmagnify
+
+world_map = map_data("world") %>% 
+  filter(! long > 180)
+
+map1_current <- ggplot() +
+  geom_map(
+    data = world_map, map = world_map,
+    aes(long, lat, map_id = region),
+    color = "black", fill = "lightgray") +
+  expand_limits(x = world_map$long, y = world_map$lat) +
+  coord_map("moll") +
+  geom_point(
+    data = all_pred  %>% filter(type == "acclim"),
+    aes(Longitude, Latitude, color = Estimate),
+    alpha = 0.7, size = 5
+  ) + labs(x = "Longitude", y = "Latitude", color = TeX("$lnCVR_{Q_{10}}$"), title = "Current (2018-2022)") + scale_color_viridis() + theme_map(base_size = 22) +  theme(plot.title = element_text(hjust = 0.5))
+
+
+zoom_areas <- data.frame(
+     x = c(-130, -15, -60, 145),
+  xend = c( -50, 48, -35, 155),
+     y = c(  25, 34, 0, -45),
+  yend = c(  55,  69.8, -60, -10),
+  label = c("North America", "Europe", "South America", "Australia")
+)
+
+zoom_plots <- lapply(1:nrow(zoom_areas), function(i) {
+  map1_current +
+    geom_polygon(fill = "gray80", color = "black") +
+    coord_cartesian(xlim = c(zoom_areas[i, "x"], zoom_areas[i, "xend"]), 
+                    ylim = c(zoom_areas[i, "y"], zoom_areas[i, "yend"])) +
+                    theme(legend.position = "none",
+                        plot.title = element_blank())
+})
 
 map2_future <- ggplot() +
     geom_map(
@@ -2170,7 +2165,17 @@ map2_future <- ggplot() +
       aes(Longitude, Latitude, color = per_change),
       alpha = 0.7, size = 5
     ) + labs(x = "Longitude", y = "Latitude", color = TeX("% $\\Delta$"), title = "Future (2080-2085)") + scale_colour_viridis() + theme_map(base_size = 22) + theme(plot.title = element_text(hjust = 0.5))
+
+# Make a multipanel plot. Make the world_map plot the biggest, and then add the zoomed in plots arond it using pactchwork
+
+p <- (((zoom_plots[[1]] | zoom_plots[[2]]) / map1_current) + map2_future) + plot_layout(heights  = c(1, 2, 2)) + plot_annotation(tag_levels = "A", tag_suffix = ")") & theme(plot.tag = element_text(size = 20, face = "bold"), plot.margin = unit(c(0, 0, 0, 0), "cm"))
+
+ggsave(p, filename = "./output/figures/fig-preds.png", width = 9.1, height = 7.2)
+
+image_read("./output/figures/fig-preds.png")
 ```
+
+
 ## **Discussion**
 
 One explanation for why terrestrial ectotherms show minimal acclimation capacity may be related to the fact that terrestrial ectotherms, were, on average acclimated for significantly less time than ectotherms from aquatic habitats . Rates of acclimation have been shown to be faster for many terrestrial groups compared to aquatic organisms [e.g., amphibians and reptiles have higher rates of acclimation than fishes; See @Einum2023-lz]. However, faster rates of acclimation would result in opposite patterns to those we observed -- in other words, terrestrial species would be more likely to exhibit lower $lnRR_{Q_{10_{acclimation}}}$ compared to $lnRR_{Q_{10_{acute}}}$ when controlling for acclimation time. 

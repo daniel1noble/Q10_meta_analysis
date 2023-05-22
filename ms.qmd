@@ -1971,6 +1971,9 @@ sub_data <- lnCVRQ10_data_wild[complete.cases(lnCVRQ10_data_wild$c_accl_time),]
   # We'll now make the predcitions from the model object using the new dataframe
   terre_pred <- predict(model5_bayes, newdata = new_data_t2, summary = TRUE, allow_new_levels = TRUE, sample_new_levels = "uncertainty", robust = FALSE, intervals = "confidence")
 
+  # We'll also keep the whole postriopr which we'll use later on. We need to transpose so that the data match. Each numbered columns is one sample of the posterior.
+  terre_pred_no_sum <- cbind(new_data_t2, t(predict(model5_bayes, newdata = new_data_t2, summary = FALSE, allow_new_levels = TRUE, sample_new_levels = "uncertainty")))
+  
   # Lets merge predictions with the original data
   terrest_data <- cbind(terrest_data, terre_pred)
 
@@ -1997,6 +2000,9 @@ sub_data <- lnCVRQ10_data_wild[complete.cases(lnCVRQ10_data_wild$c_accl_time),]
   # We'll now make the predcitions from the model object using the new dataframe
   marine_pred <- predict(model5_bayes, newdata = new_data_m, summary = TRUE, allow_new_levels = TRUE, sample_new_levels = "uncertainty", robust = FALSE, intervals = "confidence")
 
+  # We'll also keep the whole postriopr which we'll use later on. We need to transpose so that the data match. Each numbered columns is one sample of the posterior.
+  marine_pred_no_sum <- cbind(new_data_m, t(predict(model5_bayes, newdata = new_data_m, summary = FALSE, allow_new_levels = TRUE, sample_new_levels = "uncertainty")))
+
   # Lets merge predictions with the original data
   marine_data <- cbind(marine_data, marine_pred)
 
@@ -2019,11 +2025,15 @@ sub_data <- lnCVRQ10_data_wild[complete.cases(lnCVRQ10_data_wild$c_accl_time),]
   # We'll now make the predcitions from the model object using the new dataframe
   fresh_pred <- predict(model5_bayes, newdata = new_data_f, summary = TRUE, allow_new_levels = TRUE, sample_new_levels = "uncertainty", robust = FALSE, intervals = "confidence")
 
+  # We'll also keep the whole postriopr which we'll use later on. We need to transpose so that the data match. Each numbered columns is one sample of the posterior.
+  fresh_pred_non_sum <- cbind(new_data_f, t(predict(model5_bayes, newdata = new_data_f, summary = FALSE, allow_new_levels = TRUE, sample_new_levels = "uncertainty")))
+
   # Lets merge predictions with the original data
   fresh_data <- cbind(fresh_data, fresh_pred)
 
 # Now that we have all the predictions we can merge the data together. Note that species itself is not really that useful because each prediction at each latitude and longitude should incoperate the species effect. So we'll remove it. While I retain spp, it's still not totally specific to the species, but left it there so it's clear how these data match with the wild data. Note there are only 134 species because this is subset of the wild data.
   all_pred <- rbind(terrest_data, marine_data, fresh_data) %>% dplyr::select(-species_full)
+  all_pred_no_sum <- rbind(terre_pred_no_sum, marine_pred_no_sum, fresh_pred_non_sum) %>% dplyr::select(-species_full)
   spp_wild  <- length(unique(sub_data$spp))
 ```
 

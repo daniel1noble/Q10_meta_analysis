@@ -1917,12 +1917,12 @@ if(rerun){
   re_post <- posterior_samples(model5_bayes, pars = "^sd_")
   v_fix <- apply(predict(model5_bayes, summary = FALSE), 1, function(x) var(x)) # 0.71 (but remember includes random effect variances)
 
-# sigma2_v = typical sampling error variance**NEW STEP**
+# sigma2_v = typical sampling error variance
 sub_data <- lnCVRQ10_data_wild[complete.cases(lnCVRQ10_data_wild$c_accl_time),]
   sigma2_v <- sum(1 / sub_data$V) * (dim(sub_data)[1] - 1) /
               (sum(1 / sub_data$V)^2 - sum((1 / sub_data$V)^2))
 
-# Now check that var fix from raw data and remove sampling variance. **NEW STEP**
+# Now check that var fix from raw data and remove sampling variance. 
   v_fix2 <- var(sub_data$effect_size) - sigma2_v  #0.58
 
 # Extract the random effect variances
@@ -2029,6 +2029,8 @@ sub_data <- lnCVRQ10_data_wild[complete.cases(lnCVRQ10_data_wild$c_accl_time),]
 
 Acute and acclimation responses for wild ectotherms were much less common than studies done on captive populations ($N_{species}$ = `r length(unique(pop_spp_w$Species))`, from `r dim(pop_spp_w)[1]` populations). Globally, there was a clear bias towards spiecies in the Northern Hemiphere (@fig-preds). Predictions of current global changes in the opportunity for selection were generally conservative with our model explaining ~ 50% of the variation in the observed data ($R^2$ = `r round(mean(r2_2), 2)`, 95% CI: `r round(quantile(r2_2, 0.025)[1], 2)` to `r round(quantile(r2_2, 0.975)[1], 2)`). 
 
+Projected changes in the opportunity for selection were highly variable across the globe, with some regions showing a decrease in the opportunity for selection, while others showed an increase (@fig-future). Overall, there was a net decrease in the opportunity for selection across the globe ()
+
 
 ```{r}
 #| label: fig-preds
@@ -2037,7 +2039,7 @@ Acute and acclimation responses for wild ectotherms were much less common than s
 #| message: false
 #| fig-cap: Model predictions for the expected change in acclimation $lnCVR_{Q_{10}}$ across the globe for terrestrial, marine and freshwater ecthotherms. Predictions consider the uncertainty in random effects (i.e., species, phylogeny, study).  
 
-devtools::install_github("hughjonesd/ggmagnify") #https://github.com/hughjonesd/ggmagnify
+#devtools::install_github("hughjonesd/ggmagnify") #https://github.com/hughjonesd/ggmagnify
 
 world_map = map_data("world") %>% 
   filter(! long > 180)
@@ -2082,6 +2084,93 @@ image_read("./output/figures/fig-preds.png")
 ```
 
 
+```{r}
+#| label: future_clim
+#| echo: false
+#| warning: false
+
+# Now we want to take the predictions from `global` and use this for future climate sceneios. We have the future temperatures expected for each location. We can then use the predicted Q10 values to calculate the expected change in variance. We can then plot these globally.
+
+# First, lets get the current and future temperature data for 2081-2085. We'll use the mean. 
+  future_temp <- read.csv("./output/climate_data/gfdl2081-2085_air_and_SST_timeseries.csv")
+
+# Lets clean this data up. We only need the mean temperature here, but this needs to be converted to Celcius as right now it's in Kelvins
+  future_temp  <- future_temp  %>% 
+                  dplyr::select(Species, Latitude, Longitude, mean)  %>% 
+                  mutate(Celc_future = mean - 273.15,
+                          match = interaction(Species, Latitude, Longitude))
+
+# Current climate data
+  climate <- read.csv("./output/climate_data/ERA5_air_and_SST_timeseries.csv")
+
+# Clean up and create a match column. We need to get the last 5 years current to average temp and then convert this to Celcius
+  climate2_future <- climate %>% mutate(match = interaction(Species, Latitude, Longitude)) %>% dplyr::select(match, Species, Latitude, Longitude, grep("X2018|X2019|X2020|X2021|X2022", colnames(climate)))  %>% mutate(mean = apply(.[, grep("X2018|X2019|X2020|X2021|X2022", colnames(.))], 1, function(x) mean(x, na.rm = TRUE)), Celc_curr = mean - 273.15) %>% dplyr::select(-grep("X2018|X2019|X2020|X2021|X2022", colnames(.)))
+
+# Now we can merge teh climate datasets together so that we have the species, lat and long, current and future climate. Then we can calculate the expected 'increase' in T into the future
+
+  climate_data <- left_join(climate2_future, future_temp, by = "match")  %>% dplyr::select(match, Latitude.x, Longitude.x, Species.x, Celc_curr, Celc_future)  %>% mutate(T_change = Celc_future - Celc_curr)  %>% rename(Species = Species.x, Latitude = Latitude.x, Longitude = Longitude.x)
+
+# Lets look at future and current. Most, I would expect, should be above the line indicating higher future temperatures.
+  ggplot(data = climate_data, aes(x = Celc_curr, y = Celc_future)) + geom_point() + geom_smooth(method = "lm") + labs(x = "Current Temperature (C)", y = "Future Temperature (C)") + theme_classic() + geom_abline(intercept = 0, slope = 1)
+
+# Lets have a global plot of temperature changes to see it sptially 
+  map2_temp_proj <- ggplot() +
+    geom_map(
+      data = world_map, map = world_map,
+      aes(long, lat, map_id = region),
+      color = "black", fill = "lightgray") +
+    expand_limits(x = world_map$long, y = world_map$lat) +
+    coord_map("moll") +
+    geom_point(
+      data = climate_data[complete.cases(climate_data$T_change),],
+      aes(Longitude, Latitude, color = T_change),
+      alpha = 0.7, size = 5
+    ) + labs(x = "Longitude", y = "Latitude", color = TeX("$\\Delta$ Temp. ($^\\circ$C)"), title = "Current (2018-2022) vs Future (2080-2085)") + scale_colour_gradient2(trans = "reverse") + theme_map(base_size = 22) + theme(plot.title = element_text(hjust = 0.5))
+
+# Now lets merge all_pred with the climate projections
+  # Simplify columns 
+  climate_data_new <- climate_data  %>% dplyr::select(-Latitude, -Longitude, -Species)
+
+  # Mereg with model predcitions. This is the predcited lnCVRq10 for 10C change AT the specific latitude and longitude. We must assume that there is no plasticty or adaptation at each site to make projections
+  all_pred2 <- all_pred %>% mutate(match = interaction(spp, Latitude, Longitude)) %>% 
+              left_join(., climate_data_new, by = "match")  %>% 
+              mutate(lnCVR_future = (Estimate / 10) * T_change,
+                      lnCVR_F_l95 = (Q2.5 / 10) * T_change,
+                      lnCVR_F_u95 = (Q97.5 / 10) * T_change, 
+                      per_change = (exp(lnCVR_future) - 1) * 100,
+                      per_change_l95 = (exp(lnCVR_F_l95) - 1) * 100,
+                      per_change_u95 = (exp(lnCVR_F_u95) - 1) * 100)
+
+# Need to take a step back
+  # 1. Why do we have NA in this data set? 
+  # 2. Why are l95 and u95 for marine not working
+  # 3. Apply to the posteriors, rather than summary.
+
+tables_future <- all_pred2 %>% group_by(habitat) %>% summarise(mean = mean(per_change, na.rm = TRUE), 
+                                                                l95 = mean(per_change_l95, na.rm = TRUE), 
+                                                                u95 = mean(per_change_u95, na.rm = TRUE))
+
+```
+
+
+```{r}
+#| label: fig-future
+#| echo: false
+#| warning: false
+
+map2_future <- ggplot() +
+    geom_map(
+      data = world_map, map = world_map,
+      aes(long, lat, map_id = region),
+      color = "black", fill = "lightgray") +
+    expand_limits(x = world_map$long, y = world_map$lat) +
+    coord_map("moll") +
+    geom_point(
+      data = all_pred2[complete.cases(all_pred2$per_change),],
+      aes(Longitude, Latitude, color = per_change),
+      alpha = 0.7, size = 5
+    ) + labs(x = "Longitude", y = "Latitude", color = TeX("% $\\Delta$"), title = "Future (2080-2085)") + scale_colour_viridis() + theme_map(base_size = 22) + theme(plot.title = element_text(hjust = 0.5))
+```
 ## **Discussion**
 
 One explanation for why terrestrial ectotherms show minimal acclimation capacity may be related to the fact that terrestrial ectotherms, were, on average acclimated for significantly less time than ectotherms from aquatic habitats . Rates of acclimation have been shown to be faster for many terrestrial groups compared to aquatic organisms [e.g., amphibians and reptiles have higher rates of acclimation than fishes; See @Einum2023-lz]. However, faster rates of acclimation would result in opposite patterns to those we observed -- in other words, terrestrial species would be more likely to exhibit lower $lnRR_{Q_{10_{acclimation}}}$ compared to $lnRR_{Q_{10_{acute}}}$ when controlling for acclimation time. 

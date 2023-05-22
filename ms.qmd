@@ -2032,14 +2032,10 @@ sub_data <- lnCVRQ10_data_wild[complete.cases(lnCVRQ10_data_wild$c_accl_time),]
   fresh_data <- cbind(fresh_data, fresh_pred)
 
 # Now that we have all the predictions we can merge the data together. Note that species itself is not really that useful because each prediction at each latitude and longitude should incoperate the species effect. So we'll remove it. While I retain spp, it's still not totally specific to the species, but left it there so it's clear how these data match with the wild data. Note there are only 134 species because this is subset of the wild data.
-  all_pred <- rbind(terrest_data, marine_data, fresh_data) %>% dplyr::select(-species_full)
+  all_pred <- rbind(terrest_data, marine_data, fresh_data) %>% dplyr::select(-species_full)  %>% mutate(uniques = interaction(spp, Latitude, Longitude))
   all_pred_no_sum <- rbind(terre_pred_no_sum, marine_pred_no_sum, fresh_pred_non_sum) %>% dplyr::select(-species_full)
   spp_wild  <- length(unique(sub_data$spp))
 ```
-
-Acute and acclimation responses for wild ectotherms were much less common than studies done on captive populations ($N_{species}$ = `r length(unique(pop_spp_w$Species))`, from `r dim(pop_spp_w)[1]` populations). Globally, there was a clear bias towards spiecies in the Northern Hemiphere (@fig-preds). Predictions of current global changes in the opportunity for selection were generally conservative with our model explaining ~ 50% of the variation in the observed data ($R^2$ = `r round(mean(r2_2), 2)`, 95% CI: `r round(quantile(r2_2, 0.025)[1], 2)` to `r round(quantile(r2_2, 0.975)[1], 2)`). 
-
-Projected changes in the opportunity for selection were highly variable across the globe, with some regions showing a decrease in the opportunity for selection, while others showing an increase (@fig-preds D). Overall, there was a net decrease in the opportunity for selection across the globe ()
 
 
 ```{r}
@@ -2119,8 +2115,14 @@ tables_future <- all_pred2 %>% group_by(habitat) %>% summarise(mean = mean(per_c
                                                                 l95 = mean(per_change_l95, na.rm = TRUE), 
                                                                 u95 = mean(per_change_u95, na.rm = TRUE))
 
+# Check on how many to decrease
+  all_pred2 %>% filter(type == "acclim") %>% mutate(d = if_else(per_change < 0, 1, 0 ))
+
 ```
 
+Acute and acclimation responses for wild ectotherms were much less common than studies done on captive populations ($N_{species}$ = `r length(unique(all_pred$spp))`, from `r length(unique(all_pred$uniques))` populations). Globally, there was a clear bias towards spiecies in the Northern Hemiphere (@fig-preds). Predictions of current global changes in the opportunity for selection were generally conservative with our model explaining ~ 50% of the variation in the observed data ($R^2$ = `r round(mean(r2_2), 2)`, 95% CI: `r round(quantile(r2_2, 0.025)[1], 2)` to `r round(quantile(r2_2, 0.975)[1], 2)`). 
+
+Projected changes in the opportunity for selection were highly variable across the globe, with some regions showing a decrease in the opportunity for selection, while others showing an increase (@fig-preds D). Out of the `r length(unique(all_pred2$match))` populations variance was predicted to decrease in `r `
 
 
 ```{r}

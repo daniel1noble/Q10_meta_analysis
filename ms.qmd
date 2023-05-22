@@ -2068,9 +2068,10 @@ Projected changes in the opportunity for selection were highly variable across t
                                 mutate(mean = apply(.[, grep("X2018|X2019|X2020|X2021|X2022", colnames(.))], 1, function(x) mean(x, na.rm = TRUE)), Celc_curr = mean - 273.15) %>% 
                                 dplyr::select(-grep("X2018|X2019|X2020|X2021|X2022", colnames(.)))
 
-# Now we can merge teh climate datasets together so that we have the species, lat and long, current and future climate. Then we can calculate the expected 'increase' in T into the future
+# Now we can merge the climate datasets together so that we have the species, lat and long, current and future climate. Then we can calculate the expected 'increase' in T into the future
 
   climate_data <- left_join(climate2_future, future_temp, by = "match")  %>% dplyr::select(match, Latitude.x, Longitude.x, Species.x, Celc_curr, Celc_future)  %>% mutate(T_change = Celc_future - Celc_curr)  %>% rename(Species = Species.x, Latitude = Latitude.x, Longitude = Longitude.x)
+
 
 # Lets look at future and current. Most, I would expect, should be above the line indicating higher future temperatures.
   ggplot(data = climate_data, aes(x = Celc_curr, y = Celc_future)) + geom_point() + geom_smooth(method = "lm") + labs(x = "Current Temperature (C)", y = "Future Temperature (C)") + theme_classic() + geom_abline(intercept = 0, slope = 1)
@@ -2095,7 +2096,7 @@ world_map = map_data("world") %>%
 
 # Now lets merge all_pred with the climate projections
   # Simplify columns 
-  climate_data_new <- climate_data  %>% dplyr::select(-Latitude, -Longitude, -Species)
+  climate_data_new <- climate_data  %>% dplyr::select(-Latitude, -Longitude)
 
   # Mereg with model predcitions. This is the predcited lnCVRq10 for 10C change AT the specific latitude and longitude. We must assume that there is no plasticty or adaptation at each site to make projections
   all_pred2 <- all_pred %>% mutate(match = interaction(spp, Latitude, Longitude)) %>% 
@@ -2106,6 +2107,8 @@ world_map = map_data("world") %>%
                       per_change = (exp(lnCVR_future) - 1) * 100,
                       per_change_l95 = (exp(lnCVR_F_l95) - 1) * 100,
                       per_change_u95 = (exp(lnCVR_F_u95) - 1) * 100)
+
+  all_pred2_no_sum <-  all_pred_no_sum %>% mutate(match = interaction(spp, Latitude, Longitude))  %>% left_join(., climate_data_new, by = "match")
 
 # Need to take a step back
   # 1. Why do we have NA in this data set? 
@@ -2180,7 +2183,7 @@ map2_future <- ggplot() +
 
 p <- (((zoom_plots[[1]] | zoom_plots[[2]]) / map1_current) + map2_future) + plot_layout(heights  = c(1, 2, 2)) + plot_annotation(tag_levels = "A", tag_suffix = ")") & theme(plot.tag = element_text(size = 20, face = "bold"), plot.margin = unit(c(0, 0, 0, 0), "cm"))
 
-ggsave(p, filename = "./output/figures/fig-preds.png", width = 9.1, height = 7.2)
+ggsave(p, filename = "./output/figures/fig-preds.png", width = 7.8, height = 10.1)
 
 image_read("./output/figures/fig-preds.png")
 ```

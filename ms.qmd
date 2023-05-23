@@ -2120,6 +2120,21 @@ world_map = map_data("world") %>%
   # Third, lets multiply each estimate by the temperature change at that location. I've checked 4 different cells and they are calculated correctly.
     all_pred2_no_sum2[,cols_select]  <- all_pred2_no_sum2[,cols_select] * all_pred2_no_sum2$T_change
 
+  # Fourth, we can calculate the percentage change on the posterior
+    all_pred2_no_sum2[,paste0("perc", c(1:3200))]  <- (exp(all_pred2_no_sum2[,cols_select]) - 1)*100
+
+  # Now we can summarise each. Here, what we are doing is taking the mean for each column. Effectively pooling across all the iterations for each dataset. This gives us an estimation of the mean change in variance across all locations/species., but it gives us 3200 point estimates of this mean. We can then use this to calculate the 95% CI's.
+    mean_perc <-  apply(all_pred2_no_sum2[,paste0("perc", c(1:3200))], 2, mean, na.rm = TRUE)
+    mean(mean_perc)
+    quantile(mean_perc, 0.025)
+    quantile(mean_perc, 0.975)
+    hist(mean_perc)
+
+  # We can summarise this across the habitat types
+    all_pred2_no_sum2  %>% group_by(habitat) %>% summarise(mean = mean(est_per, na.rm = TRUE), 
+                                                            l95 = mean(est_perl95, na.rm = TRUE), 
+                                                            u95 = mean(est_peru95, na.rm = TRUE))
+
 # Need to take a step back
   # 1. Why do we have NA in this data set? Thats because some species in the Future projections don't have data!
   # 2. Why are l95 and u95 for marine not working...no idea
@@ -2130,13 +2145,11 @@ tables_future <- all_pred2 %>% group_by(habitat) %>% summarise(mean = mean(per_c
                                                                 u95 = mean(per_change_u95, na.rm = TRUE))
 
 # Check on how many to decrease
-  all_pred2 %>% filter(type == "acclim") %>% mutate(d = if_else(per_change < 0, 1, 0 ))
-
+  decreases <- all_pred2 %>% group_by(match)  %>% summarise(n = if_else(any(per_change < 0), 1, 0))
+    
 ```
 
-Acute and acclimation responses for wild ectotherms were much less common than studies done on captive populations ($N_{species}$ = `r length(unique(all_pred$spp))`, from `r length(unique(all_pred$uniques))` populations). Globally, there was a clear bias towards spiecies in the Northern Hemiphere (@fig-fig6). Predictions of current global changes in the opportunity for selection were generally conservative with our model explaining ~ 50% of the variation in the observed data ($R^2$ = `r round(mean(r2_2), 2)`, 95% CI: `r round(quantile(r2_2, 0.025)[1], 2)` to `r round(quantile(r2_2, 0.975)[1], 2)`). 
-
-Projected changes in the opportunity for selection were highly variable across the globe, with some regions showing a decrease in the opportunity for selection, while others showing an increase (@fig-fig6 D). Out of the `r length(unique(all_pred2$match))` populations variance was predicted to decrease in `r `
+Acute and acclimation responses for wild ectotherms were much less common than studies done on captive populations ($N_{species}$ = `r length(unique(all_pred$spp))`, from `r length(unique(all_pred$uniques))` populations). Globally, there was a clear bias towards spiecies in the Northern Hemiphere (@fig-fig6 A-C). Projected changes in the opportunity for selection were highly variable across the globe, with some regions showing a decrease in the opportunity for selection, while others showing an increase (@fig-fig6 D). Out of the `r length(unique(all_pred2$match))` populations variance was predicted to decrease in `r (sum(decreases$n, na.rm = TRUE) / length(decreases$n[complete.cases(decreases$n)]))*100`% of the locations. Predictions of current global changes in the opportunity for selection were generally conservative with our model explaining ~ 50% of the variation in the observed data ($R^2$ = `r round(mean(r2_2), 2)`, 95% CI: `r round(quantile(r2_2, 0.025)[1], 2)` to `r round(quantile(r2_2, 0.975)[1], 2)`). 
 
 
 ```{r, fig-fig6}

@@ -2038,7 +2038,7 @@ sub_data <- lnCVRQ10_data_wild[complete.cases(lnCVRQ10_data_wild$c_accl_time),]
 ```
 
 
-```{r}
+```{r, future_clim}
 #| label: future_clim
 #| echo: false
 #| warning: false
@@ -2104,12 +2104,26 @@ world_map = map_data("world") %>%
                       per_change_l95 = (exp(lnCVR_F_l95) - 1) * 100,
                       per_change_u95 = (exp(lnCVR_F_u95) - 1) * 100)
 
-  all_pred2_no_sum <-  all_pred_no_sum %>% mutate(match = interaction(spp, Latitude, Longitude))  %>% left_join(., climate_data_new, by = "match")
+  # Lets now use the whole posterior distribtion instead. This is a little hacky because the object is complicated
+  
+  # First, lets merge the climate data with the predcitions, but here predcitions are not summarised. We have the entire posteior
+    cols_select <- colnames(all_pred2_no_sum) %in% c(1:3200)
+   
+    all_pred2_no_sum <-  all_pred_no_sum %>% 
+                        mutate(match = interaction(spp, Latitude, Longitude))  %>% 
+                        left_join(., climate_data_new, by = "match") 
+   
+  # Second, lets convert each estimate to lncvr 1 degree C insteda of 10
+   all_pred2_no_sum2 <- all_pred2_no_sum %>%  
+                        mutate_if(cols_select, lncvr_1c) 
+
+  # Third, lets multiply each estimate by the temperature change at that location. I've checked 4 different cells and they are calculated correctly.
+    all_pred2_no_sum2[,cols_select]  <- all_pred2_no_sum2[,cols_select] * all_pred2_no_sum2$T_change
 
 # Need to take a step back
-  # 1. Why do we have NA in this data set? 
-  # 2. Why are l95 and u95 for marine not working
-  # 3. Apply to the posteriors, rather than summary.
+  # 1. Why do we have NA in this data set? Thats because some species in the Future projections don't have data!
+  # 2. Why are l95 and u95 for marine not working...no idea
+  # 3. Apply to the posteriors, rather than summary. Working on this....
 
 tables_future <- all_pred2 %>% group_by(habitat) %>% summarise(mean = mean(per_change, na.rm = TRUE), 
                                                                 l95 = mean(per_change_l95, na.rm = TRUE), 
@@ -2120,13 +2134,13 @@ tables_future <- all_pred2 %>% group_by(habitat) %>% summarise(mean = mean(per_c
 
 ```
 
-Acute and acclimation responses for wild ectotherms were much less common than studies done on captive populations ($N_{species}$ = `r length(unique(all_pred$spp))`, from `r length(unique(all_pred$uniques))` populations). Globally, there was a clear bias towards spiecies in the Northern Hemiphere (@fig-preds). Predictions of current global changes in the opportunity for selection were generally conservative with our model explaining ~ 50% of the variation in the observed data ($R^2$ = `r round(mean(r2_2), 2)`, 95% CI: `r round(quantile(r2_2, 0.025)[1], 2)` to `r round(quantile(r2_2, 0.975)[1], 2)`). 
+Acute and acclimation responses for wild ectotherms were much less common than studies done on captive populations ($N_{species}$ = `r length(unique(all_pred$spp))`, from `r length(unique(all_pred$uniques))` populations). Globally, there was a clear bias towards spiecies in the Northern Hemiphere (@fig-fig6). Predictions of current global changes in the opportunity for selection were generally conservative with our model explaining ~ 50% of the variation in the observed data ($R^2$ = `r round(mean(r2_2), 2)`, 95% CI: `r round(quantile(r2_2, 0.025)[1], 2)` to `r round(quantile(r2_2, 0.975)[1], 2)`). 
 
-Projected changes in the opportunity for selection were highly variable across the globe, with some regions showing a decrease in the opportunity for selection, while others showing an increase (@fig-preds D). Out of the `r length(unique(all_pred2$match))` populations variance was predicted to decrease in `r `
+Projected changes in the opportunity for selection were highly variable across the globe, with some regions showing a decrease in the opportunity for selection, while others showing an increase (@fig-fig6 D). Out of the `r length(unique(all_pred2$match))` populations variance was predicted to decrease in `r `
 
 
-```{r}
-#| label: fig-preds
+```{r, fig-fig6}
+#| label: fig-fig6
 #| echo: false
 #| warning: false
 #| message: false

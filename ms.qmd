@@ -2130,12 +2130,12 @@ world_map = map_data("world") %>%
     quantile(mean_perc, 0.975)
     hist(mean_perc)
 
-  # Now, lets do this but for each habitat, the good old fashioned way
+  # Now, lets do this but for each habitat, the good old fashioned way. I think that these are so variable because the expected change in the future is quite dramatic, so the variability is high.
   mean_perc_habitat <-  lapply(split(all_pred2_no_sum2,  all_pred2_no_sum2$habitat), function(x) apply(x[,paste0("perc", c(1:3200))], 2, mean, na.rm = TRUE))
   lapply(mean_perc_habitat, mean)
   lapply(mean_perc_habitat, function(x) quantile(x, c(0.025, 0.975)))
   #lapply(mean_perc_habitat, hist)
-  
+
   # We can summarise this across the habitat types
     all_pred2_no_sum2  %>% group_by(habitat) %>% summarise(mean = mean(est_per, na.rm = TRUE), 
                                                             l95 = mean(est_perl95, na.rm = TRUE), 

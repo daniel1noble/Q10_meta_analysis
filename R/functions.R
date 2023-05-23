@@ -444,3 +444,9 @@ post_summary <- function(x){
                     `l-95% CI` = l95,
                     `u-95% CI` = u95, check.names = FALSE, row.names = NULL))
 }
+
+#' @title lncvr_1c
+#' @description Converts a single estimate of lnCVR10 into a 1 degree Celsius estimate
+ lncvr_1c <-  function(x){
+        return(x/10)
+    }

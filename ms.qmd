@@ -2136,15 +2136,10 @@ world_map = map_data("world") %>%
   lapply(mean_perc_habitat, function(x) quantile(x, c(0.025, 0.975)))
   #lapply(mean_perc_habitat, hist)
 
-  # We can summarise this across the habitat types
-    all_pred2_no_sum2  %>% group_by(habitat) %>% summarise(mean = mean(est_per, na.rm = TRUE), 
-                                                            l95 = mean(est_perl95, na.rm = TRUE), 
-                                                            u95 = mean(est_peru95, na.rm = TRUE))
-
 # Need to take a step back
   # 1. Why do we have NA in this data set? Thats because some species in the Future projections don't have data!
-  # 2. Why are l95 and u95 for marine not working...no idea
-  # 3. Apply to the posteriors, rather than summary. Working on this....
+  # 2. Why are l95 and u95 for marine not working...Fixed
+  # 3. Apply to the posteriors, rather than summary. Done
 
 tables_future <- all_pred2 %>% group_by(habitat) %>% summarise(mean = mean(per_change, na.rm = TRUE), 
                                                                 l95 = mean(per_change_l95, na.rm = TRUE), 

@@ -226,7 +226,7 @@ We recorded or derived a series of moderator variables from each study that are 
 
 To understand how climate has impacted species’ physiological acclimation abilities we used the coordinates reported by each study to extract temperature data from terrestrial and aquatic environments. It was unclear whether climate at the locations of captive reared organisms would be representative of a population's climate history - particularly for species reared under captive condition for many generations. Given that we were interested in understanding climate driven effects on acclimation capacity we only used studies on wild populations for climate analyses. 
 
-Monthly average temperature data were extracted from the ERA5 climate model, available from the Copernicus climate data store [@Hersbach2020-hx]. For each population and species in the dataset we extracted a 30-year period (1950-2022) of either surface air temperature at 2 meters (0.01 resolution) for both terrestrial and freshwater taxa, or sea surface temperature for the marine taxa (at 0.25 resolution) using the *ncdf4* R package [vers. `r utils::packageVersion("ncdf4")`, @Pierce2021-lc]. We chose a 2-meter resolution because we believed that it more likely to reflects the micro-thermal environment experienced by terrestrial and freshwater ectotherms at those locations. For terrestrial species we also collected soil temperature as for many species this maybe more representative of microhabitat choice compared to air temperature. We fit models using both air and soil temperature and found that the results were qualitatively similar. As such, we only present results for air temperature (See Supplementary Materials).
+Monthly average temperature data were extracted from the CanESM2 climate model, available from the Copernicus climate data store [@Hersbach2020-hx]. For each population and species in the dataset we extracted a 30-year period (1950-2022) of either surface air temperature at 2 meters (0.01 resolution) for both terrestrial and freshwater taxa, or sea surface temperature for the marine taxa (at 0.25 resolution) using the *ncdf4* R package [vers. `r utils::packageVersion("ncdf4")`, @Pierce2021-lc]. We chose a 2-meter resolution because we believed that it more likely to reflects the micro-thermal environment experienced by terrestrial and freshwater ectotherms at those locations. For terrestrial species we also collected soil temperature as for many species this maybe more representative of microhabitat choice compared to air temperature. We fit models using both air and soil temperature and found that the results were qualitatively similar. As such, we only present results for air temperature (See Supplementary Materials).
 
 Using the thermal time-series data for each location we summarised various metrics of thermal variability across months and years as well as estimates of thermal predictability (i.e., autocorrelation). To estimate thermal variability, we calculated the coefficient of variation ($\frac{SD}{M}$, where SD = standard deviation in temperature and M = the mean temperature for each year). To estimate thermal predictability, we calculated the auto-regressive time lag across the entire dataset. Theoretical and empirical studies of plasticity evolution have emphasised the importance of both climate variability and predictability in plasticity evolution.
 
@@ -2047,26 +2047,21 @@ sub_data <- lnCVRQ10_data_wild[complete.cases(lnCVRQ10_data_wild$c_accl_time),]
 # Now we want to take the predictions from `global` and use this for future climate sceneios. We have the future temperatures expected for each location. We can then use the predicted Q10 values to calculate the expected change in variance. We can then plot these globally.
 
 # First, lets get the current and future temperature data for 2081-2085. We'll use the mean. 
-  future_temp <- read.csv("./output/climate_data/gfdl2081-2085_air_and_SST_timeseries.csv")
+  future_temp <- read.csv("./output/climate_data/CanESM2_air_and_SST_timeseries.csv")
 
-# Lets clean this data up. We only need the mean temperature here, but this needs to be converted to Celcius as right now it's in Kelvins
-  future_temp  <- future_temp  %>% 
-                  dplyr::select(Species, Latitude, Longitude, mean)  %>% 
-                  mutate(Celc_future = mean - 273.15,
-                          match = interaction(Species, Latitude, Longitude))
+# Now, lets summarise the mean for the current temps (i.e., 2018-2022)
+current_temps <-   future_temp  %>% 
+                   dplyr::select(Species, Latitude, Longitude, grep("X2018|X2019|X2020|X2021|X2022", colnames(future_temp)))  %>% 
+                                mutate(mean = apply(.[, grep("X2018|X2019|X2020|X2021|X2022", colnames(.))], 1, function(x) mean(x, na.rm = TRUE)), Celc_curr = mean - 273.15, match = interaction(Species, Latitude, Longitude))
 
-# Current climate data
-  climate <- read.csv("./output/climate_data/ERA5_air_and_SST_timeseries.csv")
-
-# Clean up and create a match column. We need to get the last 5 years current to average temp and then convert this to Celcius
-  climate2_future <- climate %>% mutate(match = interaction(Species, Latitude, Longitude)) %>% 
-                                dplyr::select(match, Species, Latitude, Longitude, grep("X2018|X2019|X2020|X2021|X2022", colnames(climate)))  %>% 
-                                mutate(mean = apply(.[, grep("X2018|X2019|X2020|X2021|X2022", colnames(.))], 1, function(x) mean(x, na.rm = TRUE)), Celc_curr = mean - 273.15) %>% 
-                                dplyr::select(-grep("X2018|X2019|X2020|X2021|X2022", colnames(.)))
+# Lets clean this data up. We only need the mean temperature here, but this needs to be converted to Celcius as right now it's in Kelvins. We'll now take the last 5 years of the future temperature 2096-2100
+  future_temps  <- future_temp  %>% 
+                  dplyr::select(Species, Latitude, Longitude,  grep("X2096|X2097|X2098|X2099|X2100", colnames(future_temp)))  %>% 
+                  mutate(mean = apply(.[, grep("X2096|X2097|X2098|X2099|X2100", colnames(.))], 1, function(x) mean(x, na.rm = TRUE)), Celc_future = mean - 273.15,  match = interaction(Species, Latitude, Longitude))
 
 # Now we can merge the climate datasets together so that we have the species, lat and long, current and future climate. Then we can calculate the expected 'increase' in T into the future
 
-  climate_data <- left_join(climate2_future, future_temp, by = "match")  %>% dplyr::select(match, Latitude.x, Longitude.x, Species.x, Celc_curr, Celc_future)  %>% mutate(T_change = Celc_future - Celc_curr)  %>% rename(Species = Species.x, Latitude = Latitude.x, Longitude = Longitude.x)
+  climate_data <- left_join(current_temps, future_temps, by = "match")  %>% dplyr::select(match, Latitude.x, Longitude.x, Species.x, Celc_curr, Celc_future)  %>% mutate(T_change = Celc_future - Celc_curr)  %>% rename(Species = Species.x, Latitude = Latitude.x, Longitude = Longitude.x)
 
 
 # Lets look at future and current. Most, I would expect, should be above the line indicating higher future temperatures.
@@ -2088,7 +2083,7 @@ world_map = map_data("world") %>%
       data = climate_data[complete.cases(climate_data$T_change),],
       aes(Longitude, Latitude, color = T_change),
       alpha = 0.7, size = 5
-    ) + labs(x = "Longitude", y = "Latitude", color = TeX("$\\Delta$ Temp. ($^\\circ$C)"), title = "Current (2018-2022) vs Future (2080-2085)") + scale_colour_gradient2(trans = "reverse") + theme_map(base_size = 22) + theme(plot.title = element_text(hjust = 0.5))
+    ) + labs(x = "Longitude", y = "Latitude", color = TeX("$\\Delta$ Temp. ($^\\circ$C)"), title = "Current (2018-2022) vs Future (2096-2100)") + scale_colour_gradient2(trans = "reverse") + theme_map(base_size = 22) + theme(plot.title = element_text(hjust = 0.5))
 
 # Now lets merge all_pred with the climate projections
   # Simplify columns 

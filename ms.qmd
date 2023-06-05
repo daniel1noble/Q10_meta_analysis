@@ -1451,7 +1451,7 @@ if(rerun){
   # Organise the data and prune tree
 ##################################################
 
-# Bring in Climate data
+# Bring in  historial climate data
 climate <- read.csv("./output/climate_data/ERA5_air_and_SST_timeseries.csv")
 
 # Create a match column.
@@ -2089,7 +2089,7 @@ world_map = map_data("world") %>%
   # Simplify columns 
   climate_data_new <- climate_data  %>% dplyr::select(-Latitude, -Longitude)
 
-  # Mereg with model predcitions. This is the predcited lnCVRq10 for 10C change AT the specific latitude and longitude. We must assume that there is no plasticty or adaptation at each site to make projections
+  # Merge with model predcitions. This is the predcited lnCVRq10 for 10C change AT the specific latitude and longitude. We must assume that there is no plasticty or adaptation at each site to make projections
   all_pred2 <- all_pred %>% mutate(match = interaction(spp, Latitude, Longitude)) %>% 
               left_join(., climate_data_new, by = "match")  %>% 
               mutate(lnCVR_future = (Estimate / 10) * T_change,
@@ -2101,32 +2101,33 @@ world_map = map_data("world") %>%
 
   # Lets now use the whole posterior distribtion instead. This is a little hacky because the object is complicated
   
+######## *** THE CODE BELOW NEEDS SOME NEW CHECKING AS ABOVE WAS MODIFIED! ****
+
   # First, lets merge the climate data with the predcitions, but here predcitions are not summarised. We have the entire posteior
-    cols_select <- colnames(all_pred2_no_sum) %in% c(1:3200)
    
     all_pred2_no_sum <-  all_pred_no_sum %>% 
                         mutate(match = interaction(spp, Latitude, Longitude))  %>% 
                         left_join(., climate_data_new, by = "match") 
    
-  # Second, lets convert each estimate to lncvr 1 degree C insteda of 10
+  # Second, lets convert each estimate to lncvr 1 degree C instead of 10...
    all_pred2_no_sum2 <- all_pred2_no_sum %>%  
-                        mutate_if(cols_select, lncvr_1c) 
+                        mutate_if(colnames(.) %in% c(1:3200), lncvr_1c) 
 
   # Third, lets multiply each estimate by the temperature change at that location. I've checked 4 different cells and they are calculated correctly.
-    all_pred2_no_sum2[,cols_select]  <- all_pred2_no_sum2[,cols_select] * all_pred2_no_sum2$T_change
+    all_pred2_no_sum2[,colnames(all_pred2_no_sum2) %in% c(1:3200)]  <- all_pred2_no_sum2[,colnames(all_pred2_no_sum2) %in% c(1:3200)] * all_pred2_no_sum2$T_change
 
   # Fourth, we can calculate the percentage change on the posterior
-    all_pred2_no_sum2[,paste0("perc", c(1:3200))]  <- (exp(all_pred2_no_sum2[,cols_select]) - 1)*100
+    all_pred2_no_sum2[,paste0("perc", c(1:3200))]  <- (exp(all_pred2_no_sum2[,colnames(all_pred2_no_sum2) %in% c(1:3200)]) - 1)*100
 
   # Now we can summarise each. Here, what we are doing is taking the mean for each column. Effectively pooling across all the iterations for each dataset. This gives us an estimation of the mean change in variance across all locations/species., but it gives us 3200 point estimates of this mean. We can then use this to calculate the 95% CI's.
-    mean_perc <-  apply(all_pred2_no_sum2[,paste0("perc", c(1:3200))], 2, mean, na.rm = TRUE)
+    mean_perc <-  apply(all_pred2_no_sum2[,paste0("perc", c(1:3200))], 1, mean, na.rm = TRUE) # Fixed an error here. It was applying the mean across columns, not rows!
     mean(mean_perc)
     quantile(mean_perc, 0.025)
     quantile(mean_perc, 0.975)
     hist(mean_perc)
 
   # Now, lets do this but for each habitat, the good old fashioned way. I think that these are so variable because the expected change in the future is quite dramatic, so the variability is high.
-  mean_perc_habitat <-  lapply(split(all_pred2_no_sum2,  all_pred2_no_sum2$habitat), function(x) apply(x[,paste0("perc", c(1:3200))], 2, mean, na.rm = TRUE))
+  mean_perc_habitat <-  lapply(split(all_pred2_no_sum2,  all_pred2_no_sum2$habitat), function(x) apply(x[,paste0("perc", c(1:3200))], 1, mean, na.rm = TRUE))
   lapply(mean_perc_habitat, mean)
   lapply(mean_perc_habitat, function(x) quantile(x, c(0.025, 0.975)))
   #lapply(mean_perc_habitat, hist)

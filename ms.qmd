@@ -34,7 +34,7 @@ crossref:
 ##################################
 # Loading packages & Functions
 ##################################
-    pacman::p_load(tidyverse,  metafor, flextable, raster, rasterVis,  patchwork, RColorBrewer, ggtree, ape, phytools, viridis, MCMCglmm, brms, latex2exp, orchaRd, multcomp, ggbeeswarm, magick, ggimage, gt, performance, ggthemes)
+    pacman::p_load(tidyverse,  metafor, flextable, raster, rasterVis,  patchwork, RColorBrewer, ggtree, ape, phytools, viridis, MCMCglmm, brms, latex2exp, orchaRd, multcomp, ggbeeswarm, magick, ggimage, gt, performance, ggthemes, mapproj)
 
 #devtools::install_github(repo = "ErikKusch/KrigR")
 ## Function to produce colour palette

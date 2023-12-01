@@ -154,6 +154,11 @@ $^4$ Department of Biology, Lancaster University, Liverpool, UK
 
 ## **Introduction**
 
+1. Phenotypic plasticity and evolutionary adatation to novel environments
+2. Capacity for plasticity and adaptation differ between aqautic and terrestrial ectotherms
+3. Climate change is expected to impact on the capacity for plasticity and adaptation
+4. We test whether climate variability and predictability explain a populations acclimation capacity and affect changes in trait variance.
+
 Variable thermal environments are expected to result in strong selection pressures that lead to adaptation or the evolution of phenotypic plasticity -- both of which are considered critical for population resilience to human-induced climate change [@Seebacher2015-wi]. Phenotypic plasticity is predicted to evolve when environmental variability is high but predictable. Despite this theoretical expectation, empirical support for this prediction is scant [], likely because many organisms can behaviorally adjust micro-habitat selection to offset thermal stress, the costs of plasticity are high [], and/or the prediction is likely only supported for specific plastic responses (i.e., active and developmental plasticity). Reversible forms of phenotypic plasticity, such as acclimatization, may not be expected to adhere to such predictions. 
 
 Periods of past climatic change have had disproportionate impacts on some ecosystems over others leading to debates over which ecosystems will be most vulnerable to contemporary climate change. Studies have highlighted species occupying terrestrial ecosystems as being particularly vulnerable given their weak acclimation abilities and greater probability of experiencing thermal extremes that overwhelm physiological homeostasis [@Seebacher2015-wi; @Gunderson2015-hz; @Pinsky2019-fn]. Despite marine and freshwater ecosystems appearing to have greater physiological acclimation capacity [e.g., see @Seebacher2015-wi], it is unclear if the magnitude of physiological adjustment is sufficient. In addition, low oxygen availability has been suggested as a major factor influencing the vulnerability of aquatic ecosystems. 

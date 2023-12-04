@@ -145,9 +145,9 @@ data_long2 <- data_long %>% mutate(type = factor(type, levels = c("acute", "accl
 
 
 #### Affliations:
-$^1$ Division of Ecology and Evolution, Research School of Biology, The Australian National University, Canberra, ACT 2600, Australia <br />
-$^2$ Ecology and Evolution Research Centre, School of Biological, Earth and Environmental Sciences, University of New South Wales, Sydney, NSW, Australia <br />
-$^3$ SOLES, University of Sydney, Sydney, NSW, Australia <br />
+$^1$ Division of Ecology and Evolution, Research School of Biology, The Australian National University, Canberra, ACT 2600, Australia &NewLine;  
+$^2$ Ecology and Evolution Research Centre, School of Biological, Earth and Environmental Sciences, University of New South Wales, Sydney, NSW, Australia &NewLine;  
+$^3$ SOLES, University of Sydney, Sydney, NSW, Australia &NewLine;  
 $^4$ Department of Biology, Lancaster University, Liverpool, UK
 
 ## **Abstract**

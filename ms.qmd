@@ -2230,7 +2230,7 @@ image_read("./output/figures/fig-preds.png")
 
 ## **Discussion**
 
-Understanding how the acclimation capacity and the opportunity for selection will change across populations and species is important for predicting the impacts of climate change. Here, we show that the opportunity for selection is expected to decrease for wild ectotherms under climate change. This is because the acute and acclimation responses of wild ectotherms are expected to be lower in warmer environments.
+Understanding how the acclimation capacity and the opportunity for selection will change across populations and species is important for predicting the impacts of climate change. Here, we show that the opportunity for selection is expected to decrease for wild ectotherms under climate change, but particularly so for terrestrial ectotherms. Decreases in variance are larger than the expected benefits from acclimation. 
 
 ### **Acute and acclimation responses of wild ectotherms are lower in warmer environments**
 One explanation for why terrestrial ectotherms show minimal acclimation capacity may be related to the fact that terrestrial ectotherms, were, on average acclimated for significantly less time than ectotherms from aquatic habitats . Rates of acclimation have been shown to be faster for many terrestrial groups compared to aquatic organisms [e.g., amphibians and reptiles have higher rates of acclimation than fishes; See @Einum2023-lz]. However, faster rates of acclimation would result in opposite patterns to those we observed -- in other words, terrestrial species would be more likely to exhibit lower $lnRR_{Q_{10_{acclimation}}}$ compared to $lnRR_{Q_{10_{acute}}}$ when controlling for acclimation time. 

@@ -684,7 +684,6 @@ Overall, $lnRR_{Q_{10_{acclimation}}}$ and $lnRR_{Q_{10_{acute}}}$ differed by o
 
 Considering acute responses of animals acclimated to high temperatures are generally slightly elevated compared to cold acclimated animals (~7%; $\beta$ = `r model1.s1$b[3]`, 95% CI: `r model1.s1$ci.lb[3]` to `r model1.s1$ci.ub[3]`, p `r p_value(model1.s1$pval[3])`), acclimatization is not likely going to provide adaptive benefits under climate change. Nonetheless, effect heterogeneity was high (only `r mean(tot_i2)`% of the variance was the resulting of sampling varianbility, 95% CI: `r quantile(tot_i2, 0.025)[1]` to `r quantile(tot_i2, 0.975)[1]`%), with most variance being explained by the specific study and type of trait (Study: `r mean(stdy_i2)`% , 95% CI: `r quantile(stdy_i2, 0.025)[1]` to `r quantile(stdy_i2, 0.975)[1]`%; Trait Type: `r mean(trait_i2)`% , 95% CI: `r quantile(trait_i2, 0.025)[1]` to `r quantile(trait_i2, 0.975)[1]`%). Evolutionary relationships among taxa and species ecology explained little variation in acute and acclimation repsonses (Species: `r mean(spp_i2)`% , 95% CI: `r quantile(spp_i2, 0.025)[1]` to `r quantile(spp_i2, 0.975)[1]`%; Phylogeny: `r mean(phylo_i2)`% , 95% CI: `r quantile(phylo_i2, 0.025)[1]` to `r quantile(phylo_i2, 0.975)[1]`%).
 
-
 ```{r, lncvrq10}
 #| label: lncvrq10
 #| echo: false
@@ -825,6 +824,60 @@ if(rerun){
     f_cvr_mean_ef  <- abs((exp(f_cvr_mean) - 1)*100) # ~8.4% reduction
     m_cvr_mean_ef  <- abs((exp(m_cvr_mean) - 1)*100) # ~15% reduction
     t_cvr_mean_ef  <- abs((exp(t_cvr_mean) - 1)*100) # ~30% reduction
+
+###################################################
+  # Model 2.3: Model controlling for acclimation time, 
+  # type and trait category assuming type can vary by habitat
+###################################################
+
+if(rerun){
+  # More realistic model 
+  model2.3 <- metafor::rma.mv(effect_size ~  c_accl_time + type + trait_category + type:trait_category, V = V, 
+                              random = list(~1 | record_num,
+                                            ~1 | species_full,
+                                            ~1 | spp,
+                                            ~1 | trait,
+                                            ~1 | obs),
+                              R = list(species_full = phylo_cor_CVR), dfs = "contain", 
+                              test = "t", data = lnCVRQ10_data)
+  
+   model2.3_bayes <- brms::brm(effect_size | se(sqrt(V), sigma = TRUE) ~  c_accl_time + type + trait_category + type:trait_category + (~1 | record_num) + (1 | gr(species_full, cov = A_CVR)) + (1 | spp) + (1|trait), data2 = list(A_CVR=A_CVR), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 4, data = lnCVRQ10_data)
+                                  
+  # Save model1.2
+  saveRDS(model2.3, file = "./output/models/lnCVRQ10_2.3")
+  saveRDS(model2.3_bayes, file = "./output/models/lnCVRQ10_2.3_bayes")
+
+  } else{
+        model2.3 <- readRDS("./output/models/lnCVRQ10_2.3")
+  model2.3_bayes <- readRDS("./output/models/lnCVRQ10_2.3_bayes")
+}
+
+###################################################
+  # Model 2.4: Model controlling for acclimation time, 
+  # type and life history stage assuming type can vary by habitat
+###################################################
+
+if(rerun){
+  # More realistic model 
+  model2.4 <- metafor::rma.mv(effect_size ~  c_accl_time + type*habitat*life.hist, V = V, 
+                              random = list(~1 | record_num,
+                                            ~1 | species_full,
+                                            ~1 | spp,
+                                            ~1 | trait,
+                                            ~1 | obs),
+                              R = list(species_full = phylo_cor_CVR), dfs = "contain", 
+                              test = "t", data = lnCVRQ10_data)
+  
+   model2.4_bayes <- brms::brm(effect_size | se(sqrt(V), sigma = TRUE) ~  c_accl_time + type*habitat*life.hist + (~1 | record_num) + (1 | gr(species_full, cov = A_CVR)) + (1 | spp) + (1|trait), data2 = list(A_CVR=A_CVR), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 4, data = lnCVRQ10_data)
+                                  
+  # Save model
+  saveRDS(model2.4, file = "./output/models/lnCVRQ10_2.4")
+  saveRDS(model2.4_bayes, file = "./output/models/lnCVRQ10_2.4_bayes")
+
+  } else{
+        model2.4 <- readRDS("./output/models/lnCVRQ10_2.4")
+  model2.4_bayes <- readRDS("./output/models/lnCVRQ10_2.4_bayes")
+}
 
 ```
 
@@ -2230,12 +2283,23 @@ image_read("./output/figures/fig-preds.png")
 
 Understanding acclimation capacity and how the opportunity for selection will change across populations and species is important for predicting the impacts of climate change [@Chevin2017; @Chevin2010]. Here, we show that the opportunity for selection is expected to decrease for wild ectotherms, but particularly so for terrestrial ectotherms (~28%). Decreases in variance in physiological rates is larger than the expected benefits from acclimation in marine and terrestrial ectotherms (marine: 9% acclimation vs. 15% reduction in variance; terrestrial: no acclimation vs 28% reduction in variance). Such effects are expected to result in a decrease in the opportunity for selection for marine and terrestrial ectotherms (between 4-13% reduction in total variance) under climate change assuming a fraction of this variation is heritable and/or it weakens selection.
 
-### **Acclimation capacity is limited in ectotherms**
+### **Acclimation capacity and opportunity for selection is limited in response to climate change**
+One explanation for why terrestrial ectotherms show minimal acclimation capacity may be related to the fact that terrestrial ectotherms, were, on average acclimated for significantly less time than ectotherms from aquatic habitats. However, rates of acclimation have been shown to be faster for many terrestrial groups compared to aquatic organisms [e.g., amphibians and reptiles have higher rates of acclimation than fishes; See @Einum2023-lz]. Faster rates of acclimation would therefore result in the opposite patterns to those we observed -- in other words, terrestrial species would be more likely to exhibit lower $lnRR_{Q_{10_{acclimation}}}$ compared to $lnRR_{Q_{10_{acute}}}$ when controlling for acclimation time. 
+
+
+### **No signature of past climate on capacity for acclimation or opportunity for selection**
+
+### ***Ecological consequences of reduced variation in physiological Rates***
+- need analysis of traits for lnCVR.
+
+
 
 ### **Acute and acclimation responses of wild ectotherms are lower in warmer environments**
-One explanation for why terrestrial ectotherms show minimal acclimation capacity may be related to the fact that terrestrial ectotherms, were, on average acclimated for significantly less time than ectotherms from aquatic habitats . Rates of acclimation have been shown to be faster for many terrestrial groups compared to aquatic organisms [e.g., amphibians and reptiles have higher rates of acclimation than fishes; See @Einum2023-lz]. However, faster rates of acclimation would result in opposite patterns to those we observed -- in other words, terrestrial species would be more likely to exhibit lower $lnRR_{Q_{10_{acclimation}}}$ compared to $lnRR_{Q_{10_{acute}}}$ when controlling for acclimation time. 
 
 ### **The opportunity for selection is expected to decrease for wild ectotherms under climate change**
+
+
+
 
 ### **Limitations and future directions**
 

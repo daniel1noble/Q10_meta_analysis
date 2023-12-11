@@ -2314,7 +2314,8 @@ Theoretical models predict that plasticity should evolve in populatons experienc
 
 ### ***Ecological consequences of reduced variation in physiological Rates***
 The ecological consequences of changes in physiological rate variance across aquatic and terrestrial ecosystems remains unclear. The dearth of empirical data demonstrating changes in variance paired with a lack of theoretical models 
-- buckley 2014, - Lawton 1991, - Nisbet
+- buckley 2014, - Lawton 1991, - Nisbet 
+especailly see @kooijman1989population given that they "introduce some small spread" and it results in oscillatinos dapeming..
 
 
 ### **Acute and acclimation responses of wild ectotherms are lower in warmer environments**

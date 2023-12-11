@@ -2310,10 +2310,10 @@ assuming a fraction of this variation is heritable and/or it weakens selection
 
 ### **No signature of past climate on capacity for acclimation or opportunity for selection**
 
-Theoretical models predict that plasticity should evolve in populatons experiencing greater environmental variability, particularly if oscillations are predictable over time [@Chevin2017; @Lande2009; @Chevin2010; @Nunney2016]. Empirical evidence properly testing these predictions, however, is scant. @Leung2020 recently showed that greater plasticty in morphological traits did evolve in experimental algae populations, however, work in seed beetles. Our results suggest that such theretical explanations may not be general but rather specific to the population, context and trait in question. 
+Theoretical models predict that plasticity should evolve in populatons experiencing greater environmental variability, particularly if oscillations are predictable over time [@Chevin2017; @Lande2009; @Chevin2010; @Nunney2016]. Empirical evidence properly testing these predictions, however, is scant. @Leung2020 recently showed that greater plasticty in morphological traits did evolve in experimental algae populations, however, work in seed beetles. Our results suggest that such theoretical explanations may not be general but rather specific to the population, context and trait in question; a point emphaised by others. 
 
 ### ***Ecological consequences of reduced variation in physiological Rates***
-The ecological consequences of changes in physiological rate variance across aquatic and terrestrial ecosystems remains unclear. The dearth of empirical data demonstrating changes in variance paired with a lack of theoretical models 
+Variance in physiological rates decreases substantially at high temperatures with effects being especially pronouced in terrestrial ecosystems. The ecological consequences of changes in physiological rate variance across aquatic and terrestrial ecosystems remains unclear. The dearth of empirical data demonstrating changes in variance paired with a lack of theoretical models 
 - buckley 2014, - Lawton 1991, - Nisbet 
 especailly see @kooijman1989population given that they "introduce some small spread" and it results in oscillatinos dapeming..
 

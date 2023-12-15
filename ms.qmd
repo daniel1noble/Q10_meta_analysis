@@ -1100,7 +1100,7 @@ img_fig2
 
 ```{r, fig-3}
 #| label: fig-3
-#| fig-cap: "Predicted mean acclimation and acute $lnRR_{Q_{10}}$ for adult and juevenile life-history stages for A) Marine, B) Freshwater and C) Terrestrial ectotherms. k = total number of effect size estimates while the numbers in brackets indicate the number of species. Thick bars indicate 95% confidence intervals and thin bars indicate 95% prediction intervals."" 
+#| fig-cap: "Predicted mean acclimation and acute $lnRR_{Q_{10}}$ for adult and juevenile life-history stages for A) Marine, B) Freshwater and C) Terrestrial ectotherms. k = total number of effect size estimates while the numbers in brackets indicate the number of species. Thick bars indicate 95% confidence intervals and thin bars indicate 95% prediction intervals."
 
 p1 <- orchard_plot(model1.4, mod = "type", at = list(c_accl_time = 0, habitat = "m"), group = "record_num", xlab = TeX("$lnRR_{Q_{10}}$"), condition.lab = "Life Stage", by = "life.hist",  g = FALSE, k = FALSE, legend.pos = "top.left", angle = 45) + labs(title = "Marine") + ylim(c(-2, 2.2))
 
@@ -1124,7 +1124,7 @@ The total proportion of heterogeneity in $lnCVR_{Q_{10}}$ was lower compared to 
 
 ```{r, fig-cvrlh}
 #| label: fig-cvrlh
-#| fig-cap: "Predicted mean $lnCVR_{Q_{10}}$ for adult and juevenile life-history stages for A) Marine, B) Freshwater and C) Terrestrial ectotherms. k = total number of effect size estimates while the numbers in brackets indicate the number of species. Thick bars indicate 95% confidence intervals and thin bars indicate 95% prediction intervals.""
+#| fig-cap: "Predicted mean $lnCVR_{Q_{10}}$ for adult and juevenile life-history stages for A) Marine, B) Freshwater and C) Terrestrial ectotherms. k = total number of effect size estimates while the numbers in brackets indicate the number of species. Thick bars indicate 95% confidence intervals and thin bars indicate 95% prediction intervals."
 #| echo: false
 #| warning: false
 
@@ -1143,7 +1143,7 @@ fig4
 
 ```{r, fig-cvrtrait}
 #| label: fig-cvrtrait
-#| fig-cap: "Acute and Acclimation $lnCVR_{Q_{10}}$ across traits for A) marine, B) freshwater and C) terrestrial systems. k = total number of effect size estimates while the numbers in brackets indicate the number of species. Thick bars indicate 95% confidence intervals and thin bars indicate 95% prediction intervals.""
+#| fig-cap: "Acute and Acclimation $lnCVR_{Q_{10}}$ across traits for A) marine, B) freshwater and C) terrestrial systems. k = total number of effect size estimates while the numbers in brackets indicate the number of species. Thick bars indicate 95% confidence intervals and thin bars indicate 95% prediction intervals."
 #| echo: false
 
 ptm <- orchard_plot(model2.3m, mod = "trait_category", group = "record_num", weights = "prop",  xlab = TeX("$lnCVR_{Q_{10}}$"), angle = 0, condition.lab = "Type") +

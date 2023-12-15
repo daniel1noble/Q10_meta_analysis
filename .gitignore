@@ -22,8 +22,8 @@ ms_files
 *pdf
 ms.rmarkdown
 ms.html
-output/models/
 data/climate_data/ERA5_LAND/
 .vscode/settings.json
 climate_model_summary.md
 papers/
+output/models/old/

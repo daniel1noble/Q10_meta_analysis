@@ -3,6 +3,4 @@ climate_data/ filter=lfs diff=lfs merge=lfs -text
 output/models/ filter=lfs diff=lfs merge=lfs -text
 *.rds filter=lfs diff=lfs merge=lfs -text
 *_bayes filter=lfs diff=lfs merge=lfs -text
-*_ filter=lfs diff=lfs merge=lfs -text
-lnRR* filter=lfs diff=lfs merge=lfs -text
-model* filter=lfs diff=lfs merge=lfs -text
+*_* filter=lfs diff=lfs merge=lfs -text

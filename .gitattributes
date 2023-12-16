@@ -4,3 +4,4 @@ output/models/ filter=lfs diff=lfs merge=lfs -text
 *.rds filter=lfs diff=lfs merge=lfs -text
 *_bayes filter=lfs diff=lfs merge=lfs -text
 *_* filter=lfs diff=lfs merge=lfs -text
+model1.s1 filter=lfs diff=lfs merge=lfs -text

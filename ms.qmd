@@ -139,14 +139,16 @@ data_long2 <- data_long %>% mutate(type = factor(type, levels = c("acute", "accl
       tree_p0.7$node.label <- NULL # We don't use nodes and will cause a warning so create null node names
 ```
 
-<p style="text-align: center;">Daniel W.A. Noble^1^, Fonti Kar^2^, Frank Seebacher^3^, Alex Bush^4^, & Shinichi Nakagawa^2^</p>
+<p style="text-align: center;">Daniel W.A. Noble^1^, Fonti Kar^2^,  Alex Bush^4^, Frank Seebacher^3^, & Shinichi Nakagawa^2^</p>
 
 
 #### Affliations:
 ^1^ Division of Ecology and Evolution, Research School of Biology, The Australian National University, Canberra, ACT 2600, Australia &NewLine;  
 ^2^ Ecology and Evolution Research Centre, School of Biological, Earth and Environmental Sciences, University of New South Wales, Sydney, NSW, Australia &NewLine;  
 ^3^ SOLES, University of Sydney, Sydney, NSW, Australia &NewLine;  
-^4^ Department of Biology, Lancaster University, Liverpool, UK
+^4^ Department of Biology, Lancaster University, Liverpool, UK &NewLine;
+^*^ Shared senior authorship &NewLine;
+^**^ corresponding author, daniel.noble@anu.edu.au &NewLine;
 
 ## **Abstract**
  will write this later...should take me 20 minutes

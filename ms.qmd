@@ -151,7 +151,8 @@ $\dagger$ contributed equally &NewLine;
 $\ddagger$ corresponding author, daniel.noble@anu.edu.au &NewLine;  
 
 ## **Abstract**
- will write this later...should take me 20 minutes
+
+Climate change is expected to result in warmer and more variable thermal environments globally. Greater thermal variability is expeced to result in strong selection pressures leading to genetic adaptation and/or the evolution of adaptive phenotypic plasticity. However, such responses depend on the extent of genetic and phenotypic variability, yet most work has focused on mean responses to climate warming ignoring how temperature changes variability. Here, we collect data on marine, freshwater and terrestrial ectotherms to quantify their capacity for acclimation and the extent to which variance in physiological rates change in response to higher temperatures. We use new effect size measures and meta-analysis to understand 
 
 ## **Introduction**
 

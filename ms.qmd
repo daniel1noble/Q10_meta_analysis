@@ -1075,7 +1075,7 @@ ptm <- orchard_plot(model1.3_m_het, mod = "trait_category", at = list(type = c("
                               "Metabolic_enzyme" = "Metabolic Enzymes",
                               "Rest_MR" = "Resting Metabolic Rate",
                               "Max_MR" = "Maximum Metabolic Rate",
-                              "Mito_oxidation" = "OXPHOS")) + theme_classic() 
+                              "Mito_oxidation" = "OXPHOS")) + theme_classic() + theme(legend.position = "none")
 #ptm$layers[[1]] <- NULL # Lets just remove the data point geom layer as it's too busy
 
 
@@ -1084,7 +1084,7 @@ ptf <- orchard_plot(model1.3_f_het, mod = "trait_category", at = list(type = c("
                               "Metabolic_enzyme" = "Metabolic Enzymes",
                               "Rest_MR" = "Resting Metabolic Rate",
                               "Max_MR" = "Maximum Metabolic Rate",
-                              "Mito_oxidation" = "OXPHOS")) + theme_classic()
+                              "Mito_oxidation" = "OXPHOS")) + theme_classic() + theme(legend.position = "none")
 #ptf$layers[[1]] <- NULL # Lets just remove the data point geom layer as it's too busy
 
 

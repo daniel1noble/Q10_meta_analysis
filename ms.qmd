@@ -1069,13 +1069,17 @@ annotate("text", x = 3.01, y = 4.60,
 #| label: fig-2
 #| fig-cap: "Acute and Acclimation $lnRR_{Q_{10}}$ across traits for A) marine, B) freshwater and C) terrestrial systems. k = total number of effect size estimates while the numbers in brackets indicate the number of species. Thick bars indicate 95% confidence intervals and thin bars indicate 95% prediction intervals."
 #| echo: false
+k_marine=manual_extract(model1.3_m_het, mod = "trait_category", group = "record_num", exclude = "Antiox")
+
 
 ptm <- orchard_plot(model1.3_m_het, mod = "trait_category", at = list(type = c("acute", "acclim")), by = "type", group = "record_num", weights = "prop",  xlab = TeX("$lnRR_{Q_{10}}$"), angle = 0, condition.lab = "Type") +
   scale_x_discrete(labels = c("Mito_leak" = "Proton Leak",
                               "Metabolic_enzyme" = "Metabolic Enzymes",
                               "Rest_MR" = "Resting Metabolic Rate",
                               "Max_MR" = "Maximum Metabolic Rate",
-                              "Mito_oxidation" = "OXPHOS")) + theme_classic() + theme(legend.position = "none")
+                              "Mito_oxidation" = "OXPHOS")) + theme_classic() + theme(legend.position = "none",
+                              axis.text = element_text(size=12)) + ylim(-1.5, 2.5) +
+                            annotate("text", label= paste0(k_marine$k, " (", k_marine$sdy, ")"), x = k_marine$moderator, y = 2.4)
 #ptm$layers[[1]] <- NULL # Lets just remove the data point geom layer as it's too busy
 
 

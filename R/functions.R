@@ -416,6 +416,17 @@ p_value <- function(x){
   return(tmp)
 }
 
+#' @title manual_extract
+#' @description Extracts the k and number of groups manually from a model object using mod_results
+#' @param model The model of interest
+#' @param mod The moderator of interest
+#' @param group The grouping variable
+#' @param exclude The moderator level to exclude (optional)
+#' 
+manual_extract  <- function(model, mod = "trait_category", group = "record_num", exclude = NULL){
+  orchaRd::mod_results(model, mod = mod, group = group)$data  %>% group_by(moderator) %>% summarise(k = n(), sdy = length(unique(stdy)))  %>% filter(!moderator == exclude)
+}
+
 #' @title text
 #' @description Converts posterior distribution into a text statement for plotting
 #' @param post the posterior distribution as a vector

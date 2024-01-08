@@ -404,12 +404,12 @@ if(rerun){
    t_acute_Q10 <- exp(t_acute) ; mean(t_acute_Q10); quantile(t_acute_Q10, c(0.025, 0.975))
   t_acclim_Q10 <- exp(t_acclim); mean(t_acclim_Q10); quantile(t_acclim_Q10, c(0.025, 0.975))
 
-# % change in acclimation on log scale
-  change_f <- (f_acclim - f_acute)*100; quantile(change_f, c(0.025, 0.975))
-  change_m <- (m_acclim - m_acute)*100; quantile(change_m, c(0.025, 0.975))
-  change_t <- (t_acclim - t_acute)*100; quantile(change_t, c(0.025, 0.975))
+# % change in mean acclimation relative to acute
+  change_f <- (exp(f_acclim - f_acute)-1)*100; quantile(change_f, c(0.025, 0.975)) 
+  change_m <- (exp(m_acclim - m_acute)-1)*100; quantile(change_m, c(0.025, 0.975))
+  change_t <- (exp(t_acclim - t_acute)-1)*100; quantile(change_t, c(0.025, 0.975))
   avg_change <- (change_f + change_m + change_t) / 3; quantile(avg_change, c(0.025, 0.975)) # Could use weighted mean, but for now this seems fine.
-  
+  (f_acclim - f_acute) / mean(c(f_acclim, f_acute))
 # % change on Q10 scale
   p_change_f_q10 <- exp(f_acclim - f_acute)-1; quantile(p_change_f_q10, c(0.025, 0.975))
   p_change_m_q10 <- exp(m_acclim - m_acute)-1; quantile(p_change_m_q10, c(0.025, 0.975))
@@ -675,7 +675,7 @@ Most of the effect size estimates came from measurements of metabolic rates (bot
 
 ### *Terrestrial and aquatic ectotherms differ in their capacity to acclimate but acclimation does not depend on life-history stage*
 
-Overall, $lnRR_{Q_{10_{acclimation}}}$ and $lnRR_{Q_{10_{acute}}}$ differed by only `r mean(avg_change)`% across all habitats (95%CI: `r quantile(avg_change, c(0.025, 0.975))[1]` to `r quantile(avg_change, c(0.025, 0.975))[2]`%). Ectotherms in marine and freshwater environments showed partial compensation of physiological rates ([@fig-1]B) amounting to reduced $lnRR_{Q_{10_{acclimation}}}$ of `r mean(abs(change_f))`% (95% CI: `r quantile(abs(change_f), c(0.025, 0.975))[1]` to `r quantile(abs(change_f), c(0.025, 0.975))[2]`) in freshwater and `r mean(abs(change_m))`% (95% CI: `r quantile(mean(abs(change_m), c(0.025, 0.975))[1]` to `r quantile(mean(abs(change_m), c(0.025, 0.975))[2]`) in marine environments. In contrast, terrestrial ectotherms showed no acclimation (possibly even inverse acclimation) -- showing a `r mean(abs(change_t))`% increase in $lnRR_{Q_{10_{acclimation}}}$ (95% CI: `r quantile(abs(change_t), c(0.025, 0.975))[1]` to `r quantile(abs(change_t), c(0.025, 0.975))[2]`, [@fig-1]B). Considering acute responses of animals acclimated to high temperatures are generally slightly elevated compared to cold acclimated animals (~7%; $\beta$ = `r model1.s1$b[3]`, 95% CI: `r model1.s1$ci.lb[3]` to `r model1.s1$ci.ub[3]`, p `r p_value(model1.s1$pval[3])`), acclimatization is not likely going to provide adaptive benefits under climate change.
+Overall, $lnRR_{Q_{10_{acclimation}}}$ and $lnRR_{Q_{10_{acute}}}$ differed by only `r mean(abs(avg_change))`% across all habitats (95%CI: `r quantile(abs(avg_change), c(0.025, 0.975))[1]` to `r quantile(abs(avg_change), c(0.025, 0.975))[2]`%). Ectotherms in marine and freshwater environments showed partial compensation of physiological rates ([@fig-1]B) amounting to reduced $lnRR_{Q_{10_{acclimation}}}$ of `r mean(abs(change_f))`% (95% CI: `r quantile(abs(change_f), c(0.025, 0.975))[1]` to `r quantile(abs(change_f), c(0.025, 0.975))[2]`) in freshwater and `r mean(abs(change_m))`% (95% CI: `r quantile(mean(abs(change_m), c(0.025, 0.975))[1]` to `r quantile(mean(abs(change_m), c(0.025, 0.975))[2]`) in marine environments. In contrast, terrestrial ectotherms showed no acclimation (possibly even inverse acclimation) -- showing a `r mean(abs(change_t))`% increase in $lnRR_{Q_{10_{acclimation}}}$ (95% CI: `r quantile(abs(change_t), c(0.025, 0.975))[1]` to `r quantile(abs(change_t), c(0.025, 0.975))[2]`, [@fig-1]B). Considering acute responses of animals acclimated to high temperatures are generally slightly elevated compared to cold acclimated animals (~7%; $\beta$ = `r model1.s1$b[3]`, 95% CI: `r model1.s1$ci.lb[3]` to `r model1.s1$ci.ub[3]`, p `r p_value(model1.s1$pval[3])`), acclimatization is not likely going to provide adaptive benefits under climate change.
 
 Nonetheless, effect heterogeneity was high (only `r mean(tot_i2)`% of the variance was the result of sampling variability, 95% CI: `r quantile(tot_i2, 0.025)[1]` to `r quantile(tot_i2, 0.975)[1]`%), with most variance being explained by the specific study and type of trait (Study: `r mean(stdy_i2)`% , 95% CI: `r quantile(stdy_i2, 0.025)[1]` to `r quantile(stdy_i2, 0.975)[1]`%; Trait Type: `r mean(trait_i2)`% , 95% CI: `r quantile(trait_i2, 0.025)[1]` to `r quantile(trait_i2, 0.975)[1]`%). Evolutionary relationships among taxa and species ecology explained little variation in acute and acclimation repsonses (Species: `r mean(spp_i2)`% , 95% CI: `r quantile(spp_i2, 0.025)[1]` to `r quantile(spp_i2, 0.975)[1]`%; Phylogeny: `r mean(phylo_i2)`% , 95% CI: `r quantile(phylo_i2, 0.025)[1]` to `r quantile(phylo_i2, 0.975)[1]`%).
 

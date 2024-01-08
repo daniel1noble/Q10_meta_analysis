@@ -424,7 +424,13 @@ p_value <- function(x){
 #' @param exclude The moderator level to exclude (optional)
 #' 
 manual_extract  <- function(model, mod = "trait_category", group = "record_num", exclude = NULL){
-  orchaRd::mod_results(model, mod = mod, group = group)$data  %>% group_by(moderator) %>% summarise(k = n(), sdy = length(unique(stdy)))  %>% filter(!moderator == exclude)
+  
+  if(is.null(exclude)){
+    orchaRd::mod_results(model, mod = mod, group = group)$data  %>% group_by(moderator) %>% summarise(k = n(), sdy = length(unique(stdy)))
+  } else{
+    orchaRd::mod_results(model, mod = mod, group = group)$data  %>% group_by(moderator) %>% summarise(k = n(), sdy = length(unique(stdy)))  %>% filter(!moderator == exclude)
+  }
+  
 }
 
 #' @title text

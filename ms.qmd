@@ -405,9 +405,9 @@ if(rerun){
   t_acclim_Q10 <- exp(t_acclim); mean(t_acclim_Q10); quantile(t_acclim_Q10, c(0.025, 0.975))
 
 # % change in acclimation on log scale
-  change_f <- abs(f_acclim - f_acute)*100; quantile(change_f, c(0.025, 0.975))
-  change_m <- abs(m_acclim - m_acute)*100; quantile(change_m, c(0.025, 0.975))
-  change_t <- abs(t_acclim - t_acute)*100; quantile(change_t, c(0.025, 0.975))
+  change_f <- (f_acclim - f_acute)*100; quantile(change_f, c(0.025, 0.975))
+  change_m <- (m_acclim - m_acute)*100; quantile(change_m, c(0.025, 0.975))
+  change_t <- (t_acclim - t_acute)*100; quantile(change_t, c(0.025, 0.975))
   avg_change <- (change_f + change_m + change_t) / 3; quantile(avg_change, c(0.025, 0.975)) # Could use weighted mean, but for now this seems fine.
   
 # % change on Q10 scale
@@ -675,7 +675,7 @@ Most of the effect size estimates came from measurements of metabolic rates (bot
 
 ### *Terrestrial and aquatic ectotherms differ in their capacity to acclimate but acclimation does not depend on life-history stage*
 
-Overall, $lnRR_{Q_{10_{acclimation}}}$ and $lnRR_{Q_{10_{acute}}}$ differed by only `r mean(avg_change)`% across all habitats (95%CI: `r quantile(avg_change, c(0.025, 0.975))[1]` to `r quantile(avg_change, c(0.025, 0.975))[2]`%). Ectotherms in marine and freshwater environments showed partial compensation of physiological rates ([@fig-1]B) amounting to reduced $lnRR_{Q_{10_{acclimation}}}$ of `r mean(change_f)`% (95% CI: `r quantile(change_f, c(0.025, 0.975))[1]` to `r quantile(change_f, c(0.025, 0.975))[2]`) in freshwater and `r mean(change_m)`% (95% CI: `r quantile(change_m, c(0.025, 0.975))[1]` to `r quantile(change_m, c(0.025, 0.975))[2]`) in marine environments. In contrast, terrestrial ectotherms showed no acclimation (possibly even inverse acclimation) -- showing a `r mean(change_t)`% increase in $lnRR_{Q_{10_{acclimation}}}$ (95% CI: `r quantile(change_t, c(0.025, 0.975))[1]` to `r quantile(change_t, c(0.025, 0.975))[2]`, [@fig-1]B). Considering acute responses of animals acclimated to high temperatures are generally slightly elevated compared to cold acclimated animals (~7%; $\beta$ = `r model1.s1$b[3]`, 95% CI: `r model1.s1$ci.lb[3]` to `r model1.s1$ci.ub[3]`, p `r p_value(model1.s1$pval[3])`), acclimatization is not likely going to provide adaptive benefits under climate change.
+Overall, $lnRR_{Q_{10_{acclimation}}}$ and $lnRR_{Q_{10_{acute}}}$ differed by only `r mean(avg_change)`% across all habitats (95%CI: `r quantile(avg_change, c(0.025, 0.975))[1]` to `r quantile(avg_change, c(0.025, 0.975))[2]`%). Ectotherms in marine and freshwater environments showed partial compensation of physiological rates ([@fig-1]B) amounting to reduced $lnRR_{Q_{10_{acclimation}}}$ of `r mean(abs(change_f))`% (95% CI: `r quantile(abs(change_f), c(0.025, 0.975))[1]` to `r quantile(abs(change_f), c(0.025, 0.975))[2]`) in freshwater and `r mean(abs(change_m))`% (95% CI: `r quantile(mean(abs(change_m), c(0.025, 0.975))[1]` to `r quantile(mean(abs(change_m), c(0.025, 0.975))[2]`) in marine environments. In contrast, terrestrial ectotherms showed no acclimation (possibly even inverse acclimation) -- showing a `r mean(abs(change_t))`% increase in $lnRR_{Q_{10_{acclimation}}}$ (95% CI: `r quantile(abs(change_t), c(0.025, 0.975))[1]` to `r quantile(abs(change_t), c(0.025, 0.975))[2]`, [@fig-1]B). Considering acute responses of animals acclimated to high temperatures are generally slightly elevated compared to cold acclimated animals (~7%; $\beta$ = `r model1.s1$b[3]`, 95% CI: `r model1.s1$ci.lb[3]` to `r model1.s1$ci.ub[3]`, p `r p_value(model1.s1$pval[3])`), acclimatization is not likely going to provide adaptive benefits under climate change.
 
 Nonetheless, effect heterogeneity was high (only `r mean(tot_i2)`% of the variance was the result of sampling variability, 95% CI: `r quantile(tot_i2, 0.025)[1]` to `r quantile(tot_i2, 0.975)[1]`%), with most variance being explained by the specific study and type of trait (Study: `r mean(stdy_i2)`% , 95% CI: `r quantile(stdy_i2, 0.025)[1]` to `r quantile(stdy_i2, 0.975)[1]`%; Trait Type: `r mean(trait_i2)`% , 95% CI: `r quantile(trait_i2, 0.025)[1]` to `r quantile(trait_i2, 0.975)[1]`%). Evolutionary relationships among taxa and species ecology explained little variation in acute and acclimation repsonses (Species: `r mean(spp_i2)`% , 95% CI: `r quantile(spp_i2, 0.025)[1]` to `r quantile(spp_i2, 0.975)[1]`%; Phylogeny: `r mean(phylo_i2)`% , 95% CI: `r quantile(phylo_i2, 0.025)[1]` to `r quantile(phylo_i2, 0.975)[1]`%).
 
@@ -1008,22 +1008,16 @@ annotate("text", x = 1, y = 2.10,
          label =TeX(paste0("$\\beta = $", round(model1.2$b[3], 2), "[", round(model1.2$ci.lb[3], 2)," to ", round(model1.2$ci.ub[3], 2), "] ")), hjust = 0, size = 6) + 
 annotate("text", x = 1.01, y = 4.0, 
          label =paste0(round(mean(change_f), 2), "%"), hjust = 0, size = 6) + labs(shape = "Type") +
-  geom_segment(aes(x = 0.92, y = 3.9, xend = 1.07, yend = 3.9), 
-                            arrow = arrow(angle = 45, ends = "first", length = unit(0.01, "npc"))) +
   annotate("text", x = 0.85, y = 3, label = "P < 0.001", hjust = 0, size = 6) + 
   annotate("text", x = 2, y = 2.10, 
          label =TeX(paste0("$\\beta = $", round(mean(m_acclim - m_acute), 2), "[", round(quantile(m_acclim - m_acute, 0.025), 2)," to ", round(quantile(m_acclim - m_acute, 0.975),2), "] ")), hjust = 0, size = 6) + 
 annotate("text", x = 2.01, y = 4.0, 
          label =paste0(round(mean(change_m), 2), "%"), hjust = 0, size = 6) +
-  geom_segment(aes(x = 1.92, y = 3.9, xend = 2.07, yend = 3.9), 
-                            arrow = arrow(angle = 45, ends = "first", length = unit(0.01, "npc"))) +
   annotate("text", x = 1.85, y = 3, label = "P = 0.01", hjust = 0, size = 6) +
   annotate("text", x = 3, y = 2.10, 
          label =TeX(paste0("$\\beta = $", round(mean(t_acclim - t_acute), 2), "[", round(quantile(t_acclim - t_acute, 0.025), 2)," to ", round(quantile(t_acclim - t_acute, 0.975),2), "] ")), hjust = 0, size = 6) + 
 annotate("text", x = 3.01, y = 4.0, 
          label =paste0(round(mean(change_t), 2), "%"), hjust = 0, size = 6) +
-  geom_segment(aes(x = 2.92, y = 3.9, xend = 3.07, yend = 3.9), 
-                            arrow = arrow(angle = 45, ends = "last", length = unit(0.01, "npc"))) +
   annotate("text", x = 2.85, y = 3, label = "P = 0.36", hjust = 0, size = 6) + scale_fill_manual(values = c(col)) + ylim(-0.8, 5.05) +  annotate("text", label= paste0("k = ", k_lnrr$k, " (", k_lnrr$sdy, ")"), x = k_lnrr$moderator, y = 5)
     
   p1.2 <- p1.2 + theme_classic() + theme(axis.title  = element_text(size = 24),
@@ -1047,22 +1041,22 @@ annotate("text", x = 3.01, y = 4.0,
            label =paste0(round(mean(exp(f_cvr_mean)-1)*100, 2), "%"), hjust = 0, size = 6) + 
   annotate("text", x = 2.3, y = -1.8, 
            label =TeX(paste0("$\\mu = $", round(mean(m_cvr_mean), 2), "[", round(quantile(m_cvr_mean, 0.025), 2)," to ", round(quantile(m_cvr_mean, 0.975),2), "] ")), hjust = 0, size = 6) + 
-  annotate("text", x = 2.15, y = -1.5, label = paste0("P = ", round(pmcmc(m_cvr_mean), digit = 2)), hjust = 0, size = 6) + 
+  annotate("text", x = 2.15, y = -1.5, label = paste0("P = ", round(pmcmc(m_cvr_mean), digit = 2)), hjust = 0, size = 6) +
   annotate("text", x = 2.15, y = 1, 
            label =paste0(round(mean(exp(m_cvr_mean)-1)*100, 2), "%"), hjust = 0, size = 6) + annotate("text", x = 3.4, y = -1.8, 
            label =TeX(paste0("$\\mu = $", round(mean(t_cvr_mean), 2), "[", round(quantile(t_cvr_mean, 0.025), 2)," to ", round(quantile(t_cvr_mean, 0.975),2), "] ")), hjust = 0, size = 6) + 
   annotate("text", x = 3.25, y = 1, 
            label =paste0(round(mean(exp(t_cvr_mean)-1)*100, 2), "%"), hjust = 0, size = 6) + labs(shape = "Type") +
-    annotate("text", x = 3.25, y = -1.5, label = paste0("P = ", round(pmcmc(t_cvr_mean), digit = 3)), hjust = 0, size = 6) + scale_fill_manual(values = c(col)) + ylim(-2, 1.8) + 
-    annotate("text", label= paste0("k = ", k_cvr$k, " (", k_cvr$sdy, ")"), x = k_cvr$moderator, y = 2.4)
+    annotate("text", x = 3.25, y = -1.5, label = paste0("P = ", round(pmcmc(t_cvr_mean), digit = 3)), hjust = 0, size = 6) + scale_fill_manual(values = c(col)) + ylim(-2, 2) + 
+    annotate("text", label= paste0("k = ", k_cvr$k, " (", k_cvr$sdy, ")"), x = c(1.15, 2.15, 3.25), y = 1.8)
    
   p2 <- p2 + theme_classic() + theme(axis.title  = element_text(size = 24),
-          axis.text = element_text(size = 15))
+                                       axis.text = element_text(size = 15),
+                                       legend.title = element_text(size = 15),
+                                        legend.text = element_text(size = 15),)
    
      ggsave(p2, filename = "./output/figures/fig2.png", width = 10, height = 9.5)
-    
-  #(phylo) / (p1.2 / p2) + plot_annotation(tag_levels = "A", tag_suffix = ")")
-  
+
 ```
 
 ```{r, fig-2}

@@ -152,7 +152,7 @@ $\ddagger$ corresponding author, daniel.noble@anu.edu.au &NewLine;
 
 ## **Abstract**
 
-Climate change is expected to result in warmer and more variable thermal environments globally. Greater thermal variability is expeced to result in strong selection pressures leading to genetic adaptation and/or the evolution of adaptive phenotypic plasticity. However, such responses depend on the extent of genetic and phenotypic variability, yet most work has focused on mean responses to climate warming ignoring how temperature changes variability. Here, we collect data on marine, freshwater and terrestrial ectotherms to quantify their capacity for acclimation and the extent to which variance in physiological rates change in response to higher temperatures. We use new effect size measures and meta-analysis to understand 
+Climate change is expected to result in warmer and more variable thermal environments globally. Greater thermal variability is expeced to result in strong selection pressures leading to genetic adaptation and/or the evolution of adaptive phenotypic plasticity. However, such responses depend on genetic and phenotypic variability, yet most work has focused on plastic changes in mean responses to climate warming ignoring how temperature changes variability. Here, using a large database of physiological rate data on marine, freshwater and terrestrial ectotherms we quantify the capacity for acclimation and the extent to which relative variance in physiological rates change in response to higher temperatures. Using new effect size measures and meta-analysis we show that physiological acclimation and changes in relative variance do not depend on past temperature variability and predictability experienced by a population or differ between life stages. Across habitats there was a general tendency for relative variation in physiological rates to decrease at higher temperatures. Freshwater ectotherms are capable of acclimating and such responses will likely be beneficial considering that these effects are larger than reductions in relative variance in physiological rates. In contrast, acclimation responses of marine organisms coincide with a nearly equal reduction in relative variance in physiolgical rates, suggesting acclimation may not be as beneficial as previously thought. Relative variance reductions are particularly pronounced for terrestrial ectotherms and this coincides with a general inability to acclimate highlighting the vulnerability of terrestrial ectotherms to climate change. Our results highlight the importance of considering changes in variance in physiological rates when predicting the capacity of populations to persist in and adapt to novel environments.
 
 ## **Introduction**
 
@@ -217,7 +217,7 @@ $$
 s_{lnCVR_{Q_{10}}} = \left[ \frac{(\text{SD}_{1})^2}{N_{1}({R}_{1})^2} + \frac{(\text{SD}_{2})^2}{N_{2} ({R}_{2})^2} + \frac{1}{2\left( N_{1}-1 \right)} + \frac{1}{2\left(N_{2} - 1\right)} \right]{ \left(\ \frac{10^{\circ}C}{T_{2}-T_{1}} \right) }^2
 $$ {#eq-slncvr}
 
-where $CV$ is the coefficient of variation defined as $SD / R$. 
+where $CV$ is the coefficient of variation defined as $SD / R$. We refer to $lnCVR_{Q_{10}}$ as relative variance because variance changes are relative to the mean. 
 
 #### *Calculating acute and acclimation $lnRR_{Q_{10}}$, $lnVR_{Q_{10}}$ and $lnCVR_{Q_{10}}$ estimates*
 Using the mean, standard deviation, and sample size for all acute and acclimation treatments of studies in our databases we derived acute and acclimation $lnRR_{Q_{10}}$, $lnVR_{Q_{10}}$ and $lnCVR_{Q_{10}}$ estimates. For all effect sizes the higher acute or acclimation temperature was in the numerator and the lower of the two temperatures in the denominator. As such, positive effect sizes suggest that the mean or variance is larger at the higher of the two temperatures, standardized to 10&deg;C. 
@@ -671,11 +671,11 @@ Most of the effect size estimates came from measurements of metabolic rates (bot
 
 ### *Terrestrial and aquatic ectotherms differ in their capacity to acclimate but acclimation does not depend on life-history stage*
 
-Overall, $lnRR_{Q_{10_{acclimation}}}$ and $lnRR_{Q_{10_{acute}}}$ differed by only `r mean(avg_change)`% across all habitats (95%CI: `r quantile(avg_change, c(0.025, 0.975))[1]` to `r quantile(avg_change, c(0.025, 0.975))[2]`%). Ectotherms in marine and freshwater environments showed partial compensation of physiological rates ([@fig-1]B) amounting to reduced $lnRR_{Q_{10_{acclimation}}}$ of `r abs(mean(change_f))`% (95% CI: `r quantile(change_f, c(0.025, 0.975))[1]` to `r quantile(change_f, c(0.025, 0.975))[2]`) in freshwater and `r abs(mean(change_m))`% (95% CI: `r quantile(change_m, c(0.025, 0.975))[1]` to `r quantile(change_m, c(0.025, 0.975))[2]`) in marine environments. In contrast, terrestrial ectotherms showed no acclimation (possibly even inverse acclimation) -- showing a `r abs(mean(change_t))`% increase in $lnRR_{Q_{10_{acclimation}}}$ (95% CI: `r quantile(change_t, c(0.025, 0.975))[1]` to `r quantile(change_t, c(0.025, 0.975))[2]`, [@fig-1]B). Considering acute responses of animals acclimated to high temperatures are generally slightly elevated compared to cold acclimated animals (~7%; $\beta$ = `r model1.s1$b[3]`, 95% CI: `r model1.s1$ci.lb[3]` to `r model1.s1$ci.ub[3]`, p `r p_value(model1.s1$pval[3])`), acclimatization is not likely going to provide adaptive benefits under climate change.
+Overall, $lnRR_{Q_{10_{acclimation}}}$ decreased from $lnRR_{Q_{10_{acute}}}$ by only `r abs(mean(avg_change))`% across all habitats (95%CI: `r quantile(avg_change, c(0.025, 0.975))[1]` to `r quantile(avg_change, c(0.025, 0.975))[2]`%). Ectotherms in marine and freshwater environments showed partial compensation of physiological rates ([@fig-1]B) amounting to reduced $lnRR_{Q_{10_{acclimation}}}$ of `r abs(mean(change_f))`% (95% CI: `r quantile(change_f, c(0.025, 0.975))[1]` to `r quantile(change_f, c(0.025, 0.975))[2]`) in freshwater and `r abs(mean(change_m))`% (95% CI: `r quantile(change_m, c(0.025, 0.975))[1]` to `r quantile(change_m, c(0.025, 0.975))[2]`) in marine environments. In contrast, terrestrial ectotherms showed no acclimation (possibly even inverse acclimation) -- showing a `r abs(mean(change_t))`% increase in $lnRR_{Q_{10_{acclimation}}}$ (95% CI: `r quantile(change_t, c(0.025, 0.975))[1]` to `r quantile(change_t, c(0.025, 0.975))[2]`, [@fig-1]B). Considering acute responses of animals acclimated to high temperatures are generally slightly elevated compared to cold acclimated animals (~7%; $\beta$ = `r model1.s1$b[3]`, 95% CI: `r model1.s1$ci.lb[3]` to `r model1.s1$ci.ub[3]`, p `r p_value(model1.s1$pval[3])`), acclimatization is not likely going to provide adaptive benefits under climate change.
 
 Nonetheless, effect heterogeneity was high (only `r mean(tot_i2)`% of the variance was the result of sampling variability, 95% CI: `r quantile(tot_i2, 0.025)[1]` to `r quantile(tot_i2, 0.975)[1]`%), with most variance being explained by the specific study and type of trait (Study: `r mean(stdy_i2)`% , 95% CI: `r quantile(stdy_i2, 0.025)[1]` to `r quantile(stdy_i2, 0.975)[1]`%; Trait Type: `r mean(trait_i2)`% , 95% CI: `r quantile(trait_i2, 0.025)[1]` to `r quantile(trait_i2, 0.975)[1]`%). Evolutionary relationships among taxa and species ecology explained little variation in acute and acclimation repsonses (Species: `r mean(spp_i2)`% , 95% CI: `r quantile(spp_i2, 0.025)[1]` to `r quantile(spp_i2, 0.975)[1]`%; Phylogeny: `r mean(phylo_i2)`% , 95% CI: `r quantile(phylo_i2, 0.025)[1]` to `r quantile(phylo_i2, 0.975)[1]`%).
 
-Different trait categories showed different accclimation responses across habitat types, however, they mirrored patterns seen overall (see Supplement; @fig-2). Acclimation capacity also did not vary by life-stage given that there were no differences between $lnRR_{Q_{10_{acclimation}}}$ and $lnRR_{Q_{10_{acute}}}$ between adult and juveniles (@fig-3) (Adult-Juvenile (Acute): `r mean(acute_all)`, 95% CI: `r quantile(acute_all, 0.025)[1]` to `r quantile(acute_all, 0.975)[1]`, $p_{MCMC}$ = `r pmcmc(acute_all)`; Adult-Juvenile (Acclimation): `r mean(acclim_all)`, 95% CI: `r quantile(acclim_all, 0.025)[1]` to `r quantile(acclim_all, 0.975)[1]`, $p_{MCMC}$ = `r pmcmc(acclim_all)`).
+Different trait categories showed different accclimation responses across habitat types, however, they mirrored patterns seen overall (see Supplement; @fig-2). Acclimation capacity also did not vary by life-stage given that there were no differences between $lnRR_{Q_{10_{acclimation}}}$ and $lnRR_{Q_{10_{acute}}}$ between adult and juveniles (@fig-cvrlh A-C) (Adult-Juvenile (Acute): `r mean(acute_all)`, 95% CI: `r quantile(acute_all, 0.025)[1]` to `r quantile(acute_all, 0.975)[1]`, $p_{MCMC}$ = `r pmcmc(acute_all)`; Adult-Juvenile (Acclimation): `r mean(acclim_all)`, 95% CI: `r quantile(acclim_all, 0.025)[1]` to `r quantile(acclim_all, 0.975)[1]`, $p_{MCMC}$ = `r pmcmc(acclim_all)`).
 
 ```{r, lncvrq10}
 #| label: lncvrq10
@@ -994,35 +994,34 @@ col <- c("#0871B9", "#F3B40D", "#1BB908")
 
 p1.2 <- orchaRd::orchard_plot(model1.2, mod = "habitat", group  = "record_num", at = list(type = c("acute", "acclim")), by = "type", weights = "prop", xlab = TeX("$lnRR_{Q_{10}}$"), angle = 45, legend.pos = "top.left", trunk.size = 8, branch.size = 2) + scale_x_discrete(labels = c("T" = "Terrestrial","M" = "Marine" ,"F" = "Freshwater")) +
   theme(legend.direction = "vertical") +
-  geom_segment(aes(x = 2.92, y = 2, xend = 3.07, yend = 2), 
-                            arrow = arrow(angle = 90, ends = "both", length = unit(0.01, "npc"))) +
-  geom_segment(aes(x = 1.92, y = 2, xend = 2.07, yend = 2), 
-                            arrow = arrow(angle = 90, ends = "both", length = unit(0.01, "npc"))) +
-  geom_segment(aes(x = 0.92, y = 2, xend = 1.07, yend = 2), 
-                            arrow = arrow(angle = 90, ends = "both", length = unit(0.01, "npc"))) +
-annotate("text", x = 1, y = 2.10, 
+  
+  annotate("text", x = 1.5, y = 0, 
          label =TeX(paste0("$\\beta = $", round(model1.2$b[3], 2), "[", round(model1.2$ci.lb[3], 2)," to ", round(model1.2$ci.ub[3], 2), "] ")), hjust = 0, size = 6) + 
-annotate("text", x = 1.01, y = 4.0, 
-         label =paste0(round(mean(change_f), 2), "%"), hjust = 0, size = 6) + labs(shape = "Type") +
-  annotate("text", x = 0.85, y = 3, label = "P < 0.001", hjust = 0, size = 6) + 
-  annotate("text", x = 2, y = 2.10, 
+  annotate("text", x = 1.20, y = 1.4, 
+         label =paste0(round(mean(change_f), 3), "%"), hjust = 0, size = 6) + labs(shape = "Type") +
+  annotate("text", x = 1.20, y = -0.8, label = "P < 0.001", hjust = 0, size = 6) + 
+  
+  annotate("text", x = 2.5, y = 0, 
          label =TeX(paste0("$\\beta = $", round(mean(m_acclim - m_acute), 2), "[", round(quantile(m_acclim - m_acute, 0.025), 2)," to ", round(quantile(m_acclim - m_acute, 0.975),2), "] ")), hjust = 0, size = 6) + 
-annotate("text", x = 2.01, y = 4.0, 
-         label =paste0(round(mean(change_m), 2), "%"), hjust = 0, size = 6) +
-  annotate("text", x = 1.85, y = 3, label = "P = 0.01", hjust = 0, size = 6) +
-  annotate("text", x = 3, y = 2.10, 
+  annotate("text", x = 2.20, y = 1.4, 
+         label =paste0(round(mean(change_m), 3), "%"), hjust = 0, size = 6) +
+  annotate("text", x = 2.20, y = -0.8, label = "P = 0.01", hjust = 0, size = 6) +
+  
+  annotate("text", x = 3.5, y = 0, 
          label =TeX(paste0("$\\beta = $", round(mean(t_acclim - t_acute), 2), "[", round(quantile(t_acclim - t_acute, 0.025), 2)," to ", round(quantile(t_acclim - t_acute, 0.975),2), "] ")), hjust = 0, size = 6) + 
-annotate("text", x = 3.01, y = 4.0, 
-         label =paste0(round(mean(change_t), 2), "%"), hjust = 0, size = 6) +
-  annotate("text", x = 2.85, y = 3, label = "P = 0.36", hjust = 0, size = 6) + scale_fill_manual(values = c(col)) + ylim(-0.8, 5.05) +  annotate("text", label= paste0("k = ", k_lnrr$k, " (", k_lnrr$sdy, ")"), x = k_lnrr$moderator, y = 5)
+  annotate("text", x = 3.20, y = 1.4, 
+         label =paste0(round(mean(change_t), 3), "%"), hjust = 0, size = 6) +
+  annotate("text", x = 3.20, y = -0.8, label = "P = 0.36", hjust = 0, size = 6) + 
+  
+  scale_fill_manual(values = c(col)) + ylim(-0.8, 2) +  annotate("text", label= paste0("k = ", k_lnrr$k, " (", k_lnrr$sdy, ")"), x = c(0.8, 1.8, 2.8), y = 1.7, size = 5)
     
   p1.2 <- p1.2 + theme_classic() + theme(axis.title  = element_text(size = 24),
-        axis.text = element_text(size = 15))
+        axis.text = element_text(size = 15), legend.title = element_text(size = 15),
+                               legend.text = element_text(size = 15),
+                               title = element_text(size = 24))
 
-  pdf("./output/figures/fig1.pdf", useDingbats=FALSE, width = 12, height = 9.6)
-    p1.2
-  dev.off()
-  ggsave(p1.2, filename = "./output/figures/fig1.pdf", width = 12, height = 9.6, device = "pdf")
+
+  ggsave(p1.2, filename = "./output/figures/fig1.png", width = 9.1, height = 9.2, device = "png")
    
 ##################
   # Figure 1c plot
@@ -1031,48 +1030,39 @@ annotate("text", x = 3.01, y = 4.0,
 
   k_cvr <- manual_extract(model2.2, mod = "habitat", group = "record_num", exclude = NULL)
 
+  x1 = 1.4
+  x2 = 2.4
+  x3 = 3.4
 
-  p2 <- orchard_plot(model2.2, xlab = TeX("$lnCVR_{Q_{10}}$"), mod = "habitat", group  = "record_num", weights = "prop", angle = 45, trunk.size = 8, branch.size = 2) +
-              scale_x_discrete(labels = c("T" = "Terrestrial","M" = "Marine" ,"F" = "Freshwater")) + annotate("text", x = 1.3, y = -1.8, 
-           label =TeX(paste0("$\\mu = $", round(mean(f_cvr_mean), 2), "[", round(quantile(f_cvr_mean, 0.025), 2)," to ", round(quantile(f_cvr_mean, 0.975),2), "] ")), hjust = 0, size = 6) + 
-  annotate("text", x = 1.15, y = -1.5, label = paste0("P = ", round(pmcmc(f_cvr_mean), digit = 2)), hjust = 0, size = 6) + 
-  annotate("text", x = 1.15, y = 1, 
+  p2 <- orchard_plot(model2.2, xlab = TeX("$lnCVR_{Q_{10}}$"), mod = "habitat", group  = "record_num", weights = "prop", angle = 45, trunk.size = 8, branch.size = 2, k.pos = "none") +
+              scale_x_discrete(labels = c("T" = "Terrestrial","M" = "Marine" ,"F" = "Freshwater")) + 
+  
+  annotate("text", x = x1, y = -2, 
+           label =TeX(paste0("$\\mu = $", round(mean(f_cvr_mean), 3), "[", round(quantile(f_cvr_mean, 0.025), 2)," to ", round(quantile(f_cvr_mean, 0.975),2), "] ")), hjust = 0, size = 6) + 
+  annotate("text", x = x1-0.15, y = -1.5, label = paste0("P = ", round(pmcmc(f_cvr_mean), digit = 2)), hjust = 0, size = 6) + 
+  annotate("text", x = x1-0.15, y = 1, 
            label =paste0(round(mean(exp(f_cvr_mean)-1)*100, 2), "%"), hjust = 0, size = 6) + 
-  annotate("text", x = 2.3, y = -1.8, 
-           label =TeX(paste0("$\\mu = $", round(mean(m_cvr_mean), 2), "[", round(quantile(m_cvr_mean, 0.025), 2)," to ", round(quantile(m_cvr_mean, 0.975),2), "] ")), hjust = 0, size = 6) + 
-  annotate("text", x = 2.15, y = -1.5, label = paste0("P = ", round(pmcmc(m_cvr_mean), digit = 2)), hjust = 0, size = 6) +
-  annotate("text", x = 2.15, y = 1, 
-           label =paste0(round(mean(exp(m_cvr_mean)-1)*100, 2), "%"), hjust = 0, size = 6) + annotate("text", x = 3.4, y = -1.8, 
-           label =TeX(paste0("$\\mu = $", round(mean(t_cvr_mean), 2), "[", round(quantile(t_cvr_mean, 0.025), 2)," to ", round(quantile(t_cvr_mean, 0.975),2), "] ")), hjust = 0, size = 6) + 
-  annotate("text", x = 3.25, y = 1, 
+  
+  annotate("text", x = x2, y = -2, 
+           label =TeX(paste0("$\\mu = $", round(mean(m_cvr_mean), 3), "[", round(quantile(m_cvr_mean, 0.025), 2)," to ", round(quantile(m_cvr_mean, 0.975),2), "] ")), hjust = 0, size = 6) + 
+  annotate("text", x = x2-0.15, y = -1.5, label = paste0("P = ", round(pmcmc(m_cvr_mean), digit = 2)), hjust = 0, size = 6) +
+  annotate("text", x = x2-0.15, y = 1, 
+           label =paste0(round(mean(exp(m_cvr_mean)-1)*100, 2), "%"), hjust = 0, size = 6) + 
+  
+  annotate("text", x = x3, y = -2, 
+           label =TeX(paste0("$\\mu = $", round(mean(t_cvr_mean), 3), "[", round(quantile(t_cvr_mean, 0.025), 2)," to ", round(quantile(t_cvr_mean, 0.975),2), "] ")), hjust = 0, size = 6) + 
+  annotate("text", x = x3-0.15, y = 1, 
            label =paste0(round(mean(exp(t_cvr_mean)-1)*100, 2), "%"), hjust = 0, size = 6) + labs(shape = "Type") +
-    annotate("text", x = 3.25, y = -1.5, label = paste0("P = ", round(pmcmc(t_cvr_mean), digit = 3)), hjust = 0, size = 6) + scale_fill_manual(values = c(col)) + ylim(-2, 2) + 
-    annotate("text", label= paste0("k = ", k_cvr$k, " (", k_cvr$sdy, ")"), x = c(1.15, 2.15, 3.25), y = 1.8)
+    annotate("text", x = x3-0.15, y = -1.5, label = paste0("P = ", round(pmcmc(t_cvr_mean), digit = 3)), hjust = 0, size = 6) + scale_fill_manual(values = c(col)) + ylim(-2, 2) + 
+    annotate("text", label= paste0("k = ", k_cvr$k, " (", k_cvr$sdy, ")"), x = c(0.8, 1.8, 2.8), y = 1.3, size = 5) 
    
   p2 <- p2 + theme_classic() + theme(axis.title  = element_text(size = 24),
                                        axis.text = element_text(size = 15),
                                        legend.title = element_text(size = 15),
-                                        legend.text = element_text(size = 15))
+                               legend.text = element_text(size = 15),
+                               title = element_text(size = 24))
    
-     ggsave(p2, filename = "./output/figures/fig2.png", width = 10, height = 9.5)
-
-```
-
-```{r, fig-3}
-#| label: fig-3
-#| fig-cap: "Estimated mean acclimation and acute $lnRR_{Q_{10}}$ for adult and juevenile life-history stages for A) Marine, B) Freshwater and C) Terrestrial ectotherms. k = total number of effect size estimates while the numbers in brackets indicate the number of species. Thick bars indicate 95% confidence intervals and thin bars indicate 95% prediction intervals."
-
-p1 <- orchard_plot(model1.4, mod = "type", at = list(c_accl_time = 0, habitat = "m"), group = "record_num", xlab = TeX("$lnRR_{Q_{10}}$"), condition.lab = "Life Stage", by = "life.hist",  g = FALSE, k = FALSE, legend.pos = "top.left", angle = 45) + labs(title = "Marine") + ylim(c(-2, 2.2))
-
-p2 <- orchard_plot(model1.4, mod = "type", at = list(c_accl_time = 0, habitat = "f"), group = "record_num", xlab = TeX("$lnRR_{Q_{10}}$"), condition.lab = "Life Stage", by = "life.hist",  g = FALSE, k = FALSE)+ labs(title = "Freshwater") + theme(legend.position = "none", axis.text.y = element_blank())
-
-p3 <- orchard_plot(model1.4, mod = "type", at = list(c_accl_time = 0, habitat = "t"), group = "record_num", xlab = TeX("$lnRR_{Q_{10}}$"), condition.lab = "Life Stage", by = "life.hist",  g = FALSE, k = FALSE)+ labs(title = "Terrestrial")+ theme(legend.position = "none", axis.text.y = element_blank())
-
-fig3 <- (p1 | p2 | p3) + plot_annotation(tag_levels = "A", tag_suffix = ")")
-ggsave(fig3, filename = "./output/figures/fig3_lh.png", width = 14, height = 4.5)
-
-fig3 <- magick::image_read("./output/figures/fig3_lh.png")
-fig3
+  ggsave(p2, filename = "./output/figures/fig2.png", width = 9.3, height = 8.8)
 
 ```
 
@@ -1084,58 +1074,36 @@ The total proportion of heterogeneity in $lnCVR_{Q_{10}}$ was lower compared to 
 
 ```{r, fig-cvrlh}
 #| label: fig-cvrlh
-#| fig-cap: "Estimated mean $lnCVR_{Q_{10}}$ for adult and juevenile life-history stages for A) Marine, B) Freshwater and C) Terrestrial ectotherms. k = total number of effect size estimates while the numbers in brackets indicate the number of species. Thick bars indicate 95% confidence intervals and thin bars indicate 95% prediction intervals."
+#| fig-cap: "Estimated mean acclimation and acute $lnRR_{Q_{10}}$ (A-C) and $lnCVR_{Q_{10}}$ (D-F) for adult and juevenile life-history stages for Marine (A & D), Freshwater (B & E) and Terrestrial (C & F) ectotherms. k = total number of effect size estimates while the numbers in brackets indicate the number of species. Thick bars indicate 95% confidence intervals and thin bars indicate 95% prediction intervals."
 #| echo: false
 #| warning: false
 
-p1 <- orchard_plot(model2.4, mod = "type", at = list(c_accl_time = 0, habitat = "m"), group = "record_num", xlab = TeX("$lnCVR_{Q_{10}}$"), condition.lab = "Life Stage", by = "life.hist",  g = FALSE, k = FALSE, legend.pos = "top.left", angle = 45) + labs(title = "Marine") + ylim(c(-2, 2.2))
+add_theme  <- function(){theme(axis.title  = element_text(size = 24),
+                               axis.text.y = element_text(size = 15),
+                               axis.text.x = element_text(size = 15),
+                              legend.title = element_text(size = 15),
+                               legend.text = element_text(size = 15),
+                               title = element_text(size = 24))}
+branch.size = 2
+trunk.size = 5
 
-p2 <- orchard_plot(model2.4, mod = "type", at = list(c_accl_time = 0, habitat = "f"), group = "record_num", xlab = TeX("$lnCVR_{Q_{10}}$"), condition.lab = "Life Stage", by = "life.hist",  g = FALSE, k = FALSE)+ labs(title = "Freshwater") + theme(legend.position = "none", axis.text.y = element_blank())
+p1 <- orchard_plot(model1.4, mod = "type", at = list(c_accl_time = 0, habitat = "m"), group = "record_num", xlab = TeX("$lnRR_{Q_{10}}$"), condition.lab = "Life Stage", by = "life.hist",  g = FALSE, k = FALSE, legend.pos = "top.left", angle = 45, branch.size = branch.size, trunk.size = trunk.size) + labs(title = "Marine") + add_theme() + ylim(-1, 1.8)
 
-p3 <- orchard_plot(model2.4, mod = "type", at = list(c_accl_time = 0, habitat = "t"), group = "record_num", xlab = TeX("$lnCVR_{Q_{10}}$"), condition.lab = "Life Stage", by = "life.hist",  g = FALSE, k = FALSE)+ labs(title = "Terrestrial")+ theme(legend.position = "none", axis.text.y = element_blank())
+p2 <- orchard_plot(model1.4, mod = "type", at = list(c_accl_time = 0, habitat = "f"), group = "record_num", xlab = TeX("$lnRR_{Q_{10}}$"), condition.lab = "Life Stage", by = "life.hist",  g = FALSE, k = FALSE, branch.size = branch.size, trunk.size = trunk.size, angle = 45,)+ labs(title = "Freshwater")  + add_theme() + theme(legend.position = "none", axis.text.y = element_blank()) + ylim(-1, 1.8)
 
-fig4 <- (p1 | p2 | p3) + plot_annotation(tag_levels = "A", tag_suffix = ")")
-ggsave(fig4, filename = "./output/figures/fig4_lh.png", width = 14, height = 4.5)
+p3 <- orchard_plot(model1.4, mod = "type", at = list(c_accl_time = 0, habitat = "t"), group = "record_num", xlab = TeX("$lnRR_{Q_{10}}$"), condition.lab = "Life Stage", by = "life.hist",  g = FALSE, k = FALSE, branch.size = branch.size, trunk.size = trunk.size, angle = 45)+ labs(title = "Terrestrial") + add_theme() + theme(legend.position = "none", axis.text.y = element_blank()) +  ylim(-1, 1.8)
 
-fig4 <- magick::image_read("./output/figures/fig4_lh.png")
+p1_cvr <- orchard_plot(model2.4, mod = "type", at = list(c_accl_time = 0, habitat = "m"), group = "record_num", xlab = TeX("$lnCVR_{Q_{10}}$"), condition.lab = "Life Stage", by = "life.hist",  g = FALSE, k = FALSE, legend.pos = "top.left", angle = 45, branch.size = branch.size, trunk.size = trunk.size) + ylim(c(-2, 2.2)) + add_theme() + ylim(-2.5, 2.5)
+
+p2_cvr <- orchard_plot(model2.4, mod = "type", at = list(c_accl_time = 0, habitat = "f"), group = "record_num", xlab = TeX("$lnCVR_{Q_{10}}$"), condition.lab = "Life Stage", by = "life.hist",  g = FALSE, k = FALSE, branch.size = branch.size, trunk.size = trunk.size)  + add_theme() + theme(legend.position = "none", axis.text.y = element_blank()) + ylim(-2.5, 2.5)
+
+p3_cvr <- orchard_plot(model2.4, mod = "type", at = list(c_accl_time = 0, habitat = "t"), group = "record_num", xlab = TeX("$lnCVR_{Q_{10}}$"), condition.lab = "Life Stage", by = "life.hist",  g = FALSE, k = FALSE, branch.size = branch.size, trunk.size = trunk.size)+ add_theme() + theme(legend.position = "none", axis.text.y = element_blank()) + ylim(-2.5, 2.5)
+
+fig4 <-(p1 | p2 | p3) / (p1_cvr | p2_cvr | p3_cvr) + plot_annotation(tag_levels = "A", tag_suffix = ")")
+ggsave(fig4, filename = "./output/figures/fig4_lh.pdf", width = 19, height = 12, device = "pdf")
+
+fig4 <- magick::image_read("./output/figures/fig4_lh.pdf")
 fig4
-```
-
-```{r, fig-cvrtrait}
-#| label: fig-cvrtrait
-#| fig-cap: "Acute and Acclimation $lnCVR_{Q_{10}}$ across traits for A) marine, B) freshwater and C) terrestrial systems. k = total number of effect size estimates while the numbers in brackets indicate the number of species. Thick bars indicate 95% confidence intervals and thin bars indicate 95% prediction intervals."
-#| echo: false
-
-ptm <- orchard_plot(model2.3m, mod = "trait_category", group = "record_num", weights = "prop",  xlab = TeX("$lnCVR_{Q_{10}}$"), angle = 0, condition.lab = "Type") +
-  scale_x_discrete(labels = c("Mito_leak" = "Proton Leak",
-                              "Metabolic_enzyme" = "Metabolic Enzymes",
-                              "Rest_MR" = "Resting Metabolic Rate",
-                              "Max_MR" = "Maximum Metabolic Rate",
-                              "Mito_oxidation" = "OXPHOS")) + theme_classic() 
-#ptm$layers[[1]] <- NULL # Lets just remove the data point geom layer as it's too busy
-
-
-ptf <- orchard_plot(model2.3f, mod = "trait_category",  group = "record_num", weights = "prop",  xlab = TeX("$lnCVR_{Q_{10}}$"), angle = 0, condition.lab = "Type") +
-  scale_x_discrete(labels = c("Mito_leak" = "Proton Leak",
-                              "Metabolic_enzyme" = "Metabolic Enzymes",
-                              "Rest_MR" = "Resting Metabolic Rate",
-                              "Max_MR" = "Maximum Metabolic Rate",
-                              "Mito_oxidation" = "OXPHOS")) + theme_classic()
-#ptf$layers[[1]] <- NULL # Lets just remove the data point geom layer as it's too busy
-
-
-ptt <- orchard_plot(model2.3t, mod = "trait_category",  group = "record_num", weights = "prop",  xlab = TeX("$lnCVR_{Q_{10}}$"), angle = 0, condition.lab = "Type") +
-  scale_x_discrete(labels = c("Metabolic_enzyme" = "Metabolic Enzymes",
-                              "Rest_MR" = "Resting Metabolic Rate",
-                              "Max_MR" = "Maximum Metabolic Rate")) + theme_classic() + labs(legend = "Type")
-#ptt$layers[[1]] <- NULL # Lets just remove the data point geom layer as it's too busy
-
-
-figcvrtrait <- (ptm + ptf + ptt) + plot_annotation(tag_levels = "A", tag_suffix = ")")
-ggsave(figcvrtrait, filename = "./output/figures/figcvrtrait.png", height = 8.5, width = 26)
-
-img_figcvrtrait <- magick::image_read("./output/figures/figcvrtrait.png")
-img_figcvrtrait
 ```
 
 ```{r, wildlnRR10}
@@ -1906,9 +1874,9 @@ dat_text2 <- data.frame(label = c(text(slope_f_3.8), text(slope_m_3.8), text(slo
 p8.2 <- bubble_plot(model3.8, mod = "acf_all_c", group = "record_num", by = "habitat",  ylab = TeX("$lnRR_{Q_{10}}$"), xlab = "Thermal Predictability", condition.nrow = 1, k = FALSE) + 
 theme_classic() + 
 scale_fill_manual(values = c(col)) + 
-geom_text(data = dat_text2, aes(x = x, y = y, label = label), size = 5) + 
-geom_text(data = dat_text2, aes(x = x, y = y-0.3, label = label2), size = 5) +
-geom_text(data = dat_text2, aes(x = x, y = y-0.65, label = p), size = 5) +
+geom_text(data = dat_text2, aes(x = x+1, y = y, label =label), size = 5) + 
+geom_text(data = dat_text2, aes(x = x+1, y = y-0.3, label =label2), size = 5) +
+geom_text(data = dat_text2, aes(x = x+1, y = y-0.65, label = p), size = 5) +
 theme(legend.position = "bottom", 
       strip.background = element_blank(), 
       strip.text = element_blank(), 
@@ -1961,9 +1929,9 @@ dat_text2 <- data.frame(label = c(text(slope_f_4.8), text(slope_m_4.8), text(slo
 p9.2 <- bubble_plot(model4.8, mod = "acf_all_c", group = "record_num", by = "habitat",  ylab = TeX("$lnCVR_{Q_{10}}$"), xlab = "Thermal Predictability", condition.nrow = 1, k = FALSE) + 
 theme_classic() + 
 scale_fill_manual(values = c(col)) + 
-geom_text(data = dat_text2, aes(x = x, y = y, label = label), size = 5) + 
-geom_text(data = dat_text2, aes(x = x, y = y-0.6, label = label2), size = 5) +
-geom_text(data = dat_text2, aes(x = x, y = y-1.2, label = p), size = 5) +
+geom_text(data = dat_text2, aes(x = x+1, y = y, label = label), size = 5) + 
+geom_text(data = dat_text2, aes(x = x+1, y = y-0.6, label = label2), size = 5) +
+geom_text(data = dat_text2, aes(x = x+1, y = y-1.2, label = p), size = 5) +
 theme(legend.position = "bottom", 
       strip.background = element_blank(), 
       strip.text = element_blank(), 
@@ -2265,13 +2233,12 @@ Acute and acclimation responses for wild ectotherms were much less common than s
 
 Predictions of current global changes in physiological rate variance were generally conservative with our model explaining ~ 50% of the variation in the observed data ($R^2$ = `r round(mean(r2_2), 2)`, 95% CI: `r round(quantile(r2_2, 0.025)[1], 2)` to `r round(quantile(r2_2, 0.975)[1], 2)`). Across habitat types climate change is predicted to result in a only a `r abs(lapply(mean_perc_habitat, mean)$f)`% change in variance for freshwater systems (95% CI: `r lapply(mean_perc_habitat, function(x) quantile(x, c(0.025, 0.975)))$f[1]` to `r lapply(mean_perc_habitat, function(x) quantile(x, c(0.025, 0.975)))$f[2]`%, $p_{MCMC}$ = `r pmcmc(mean_perc_habitat$f)`), whereas we expect a `r abs(lapply(mean_perc_habitat, mean)$m)`% reduction in variance for marine systems (95% CI: `r lapply(mean_perc_habitat, function(x) quantile(x, c(0.025, 0.975)))$m[1]` to `r lapply(mean_perc_habitat, function(x) quantile(x, c(0.025, 0.975)))$m[2]`%, $p_{MCMC}$ = `r pmcmc(mean_perc_habitat$m)`) and a `r abs(lapply(mean_perc_habitat, mean)$t)`% reduction in variance for terrestrial systems (95% CI: `r lapply(mean_perc_habitat, function(x) quantile(x, c(0.025, 0.975)))$t[1]` to `r lapply(mean_perc_habitat, function(x) quantile(x, c(0.025, 0.975)))$t[2]`%, $p_{MCMC}$ = `r p_value(pmcmc(mean_perc_habitat$t))`) under a RCP8.5 climate scenerio. 
 
-
 ```{r, fig-fig6}
 #| label: fig-fig6
 #| echo: false
 #| warning: false
 #| message: false
-#| fig-cap: Model predictions for the expected change in acclimation $lnCVR_{Q_{10}}$ across the globe for terrestrial, marine and freshwater ecthotherms. Predictions consider the uncertainty in random effects (i.e., species, phylogeny, study).  
+#| fig-cap: Model predictions for the expected change in acclimation $lnCVR_{Q_{10}}$ across the globe for terrestrial, marine and freshwater ecthotherms. Predictions consider the uncertainty in random effects (i.e., species, phylogeny, study).  Predicted change in physiological rate variance (relative variance) for each population based on current temperatures (average from 2018-2022; A-C) as well as the expected change from current temperatures based on future temperature predictions (average from 2096-2100, D). Future climate predictions are the reduction in relative variance expected under a RCP8.5 climate scenerio relative to current climate conditions (% change).
 
 #devtools::install_github("hughjonesd/ggmagnify") #https://github.com/hughjonesd/ggmagnify
 
@@ -2334,16 +2301,16 @@ image_read("./output/figures/fig-preds.png")
 
 ## **Discussion**
 
-Understanding acclimation capacity and how variation in physiological rates change across populations and species is important for predicting the ecological and evolutionary consequences of climate change [@Chevin2017; @Chevin2010; @Bolnick2011]. Here, we show that the relative variance in physiological rates is expected to decrease for ectotherms as temperatures increase, but particularly so for terrestrial ectotherms (~28%). Decreases in the relative variance of physiological rates are larger than the expected benefits from acclimation in marine and terrestrial ectotherms (*marine*: 9% acclimation vs. 15% reduction in variance; *terrestrial*: no acclimation vs 28% reduction in variance). Such effects are expected to result in a decrease in the variability in physiological rates for marine and terrestrial ectotherms between ~4-13% under future climate change projections. Our results provide a more complete picture of the impacts that climate warming will have on ectotherm populations, with important ecological and evolutionary implications that require further empirical and theoretical attention. We discuss our findings in the context of the current literature and highlight key areas for future research.
+Understanding acclimation capacity and how variation in physiological rates change across populations and species is important for predicting the ecological and evolutionary consequences of climate change [@Chevin2017; @Chevin2010; @Bolnick2011]. Here, we show that the relative variance in physiological rates is expected to decrease for ectotherms as temperatures increase, but particularly so for terrestrial ectotherms (~28%). Decreases in the relative variance of physiological rates are equal to or larger than the expected benefits from acclimation in marine and terrestrial ectotherms (*marine*: 16% acclimation vs. 15% reduction in relative variance; *terrestrial*: no acclimation vs 28% reduction in relative variance; @fig-1). Such effects are expected to result in a decrease in the variability in physiological rates for marine and terrestrial ectotherms between ~4-13% under future climate change projections. Our results provide a more complete picture of the impacts that climate warming will have on ectotherm populations, with important ecological and evolutionary implications that require further empirical and theoretical attention. We discuss our findings in the context of the current literature and highlight key areas for future research.
 
 ### ***Potential evolutionary consequences for reduced plasticity and variance in physiologcial rates across ectotherms***
 
-There is a general interest in understanding the interplay and relative importance of plasticity and genetic adaptation to a population's capacity to mitigate climate change effects [@urban2023and; @Chevin2010; @hoffmann2011climate; @merila2014climate]. Phenotypic plasticity is expected to allow populations to persist in the face of climate extremes by better allowing phenotypes to match fitness optima, however, maladaptive responses can occur [@noble2019plastic; @radersma2020plasticity] and there may be limits / costs to plasticity that may prevent it from evolving [@Dewitt1998; but see @Murren2015]. While there is substantial variation in effects across species, we show that plastic adjustments to physiological rates are, on average, rather small compared to the general reduction variance in physiological rates. Variance reductions are particularly pronounced  for terrestrial ectotherms and there were no major differences between life-stages. While it is unclear the extent to which such changes in variance are heritable, we expect changes in variance of this magnitude to impact the 'opportunity for selection' by reducing the strength of selection and/or impacting underlying genetic variance exposed to selection. Both are predicted to impact the capacity of populations to evolve under climate change [@hoffmann2011climate; @urban2023and]. 
+There is a general interest in understanding the interplay and relative importance of plasticity and genetic adaptation to a population's capacity to mitigate climate change effects [@urban2023and; @Chevin2010; @hoffmann2011climate; @merila2014climate]. Phenotypic plasticity is expected to allow populations to persist in the face of climate extremes by better allowing phenotypes to match fitness optima, however, maladaptive responses can occur [@noble2019plastic; @radersma2020plasticity] and there may be limits / costs to plasticity that may prevent it from evolving [@Dewitt1998; but see @Murren2015]. We show that plastic adjustments in physiological rates and changes in their relative variance differs across habitats. In freshwater habitats, acclimation responses will likely be beneficial considering that these effects are larger than reductions in relative variance in physiological rates. In contrast, acclimation responses of marine organisms coincide with a nearly equal reduction in relative variance in physiolgical rates, suggesting acclimation may not be as beneficial. Relative variance reductions are particularly pronounced for terrestrial ectotherms and this coincides with a general inability to acclimate highlighting the vulnerability of terrestrial ectotherms to climate change. While it is unclear the extent to which such changes in variance are heritable, we expect changes in variance of this magnitude to impact the 'opportunity for selection' by reducing the strength of selection and/or impacting underlying genetic variance exposed to selection. Both are predicted to impact the capacity of populations to evolve under climate change [@hoffmann2011climate; @urban2023and]. 
 
 One explanation for why terrestrial ectotherms show minimal acclimation capacity may be related to the fact that terrestrial ectotherms were, on average, acclimated for significantly less time than ectotherms from aquatic habitats. However, rates of acclimation have been shown to be faster for many terrestrial groups compared to aquatic organisms [e.g., amphibians and reptiles have higher rates of acclimation than fishes; See @Einum2023-lz]. Faster rates of acclimation would therefore result in the opposite patterns to those that we observed -- in other words, terrestrial species would be more likely to exhibit lower $lnRR_{Q_{10_{acclimation}}}$ compared to $lnRR_{Q_{10_{acute}}}$ when controlling for acclimation time. The weak acclimation responses of terrestrial ectotherms suggest that evolving plasticity  in physiological rates may be hard, possibly because terrestrial ectotherms are more likely to experience more variable and unpredictable thermal environments than aquatic ectotherms (see below). Reductions in physiological rate variance for terrestrial ectotherms may be because of selective mortality at higher temperatures reducing intrapopulation variability or populations being pushed closer to their thermal maxima (or a combination of both). Disentangling these hypotheses will require empirical studies to connect survival measures at different temperatures with thermal physiology across individuals (e.g., $CT_{max}$). 
 
 ### ***Plasticity and variance in physiologcial rates do not differ between life-stages***
-Greater plasticity for early life-stages in development may be important for dealing with the effects of climate change because early life-stages are usually particularly vulnerable periods in development [@martin2015age; @stearns1976life]. Evidence across the literature conflicts in terms of the extent to which one life-stage is more or less plastic than another [@carter2020life; @moghadam2019heat]. For example, @moghadam2019heat showed that larvae *Drosophila* were more plastic in their heat hardening responses compared to adults. In contrast, @carter2020life showed greater thermal plasticity in metabolism for adults but little in pupae of *Onthophagus taurus*. Across a diversity of taxa, we show that there were generally similar patterns between early and late life stages -- both in terms of variance changes and the capacity for plasticity. Unsurprisingly, there is much variation in the literature and our findings suggest that patterns will depend on the species and traits in question. However, very few studies measured multiple life-history stages within the same population. As such, we need more studies that explicitly compare, within populations, differences in plasticity among life stages across multiple traits. A better understanding of the microthermal enviroments experienced by different life-stages will also be important in understanding why plasticity (or lack thereof) may differ among life-stages.
+Interestingly, there were no major differences in acclimation or reductions in physiological variance between life-stages across habitat types. Greater plasticity for early life-stages of development is expected to be important for dealing with the effects of climate change because early life-stages are usually particularly vulnerable periods in development [@martin2015age; @stearns1976life]. However, our results highlight that early life stages are not likely to be protected from the impacts of climate change. Evidence across the literature conflicts in terms of the extent to which one life-stage is more or less plastic than another [@carter2020life; @moghadam2019heat]. For example, @moghadam2019heat showed that larvae *Drosophila* were more plastic in their heat hardening responses compared to adults. In contrast, @carter2020life showed greater thermal plasticity in metabolism for adults but little in pupae of *Onthophagus taurus*. Across a diversity of taxa, we show that there were generally similar patterns between early and late life stages -- both in terms of variance changes and the capacity for plasticity. Unsurprisingly, there is much variation in the literature and our findings suggest that patterns will depend on the species and traits in question. However, very few studies measured multiple life-history stages within the same population. As such, we need more studies that explicitly compare, within populations, differences in plasticity among life stages across multiple traits. A better understanding of the microthermal enviroments experienced by different life-stages will also be important in understanding why plasticity (or lack thereof) may differ among life-stages.
 
 ### ***No signature of past climate on capacity for physiological plasticity***
 
@@ -2351,6 +2318,9 @@ Theoretical models predict that plasticity should evolve in populatons experienc
 
 ### ***Ecological consequences of reduced variation in physiological rates***
 While we found that variance in physiological rates decreases at high temperatures, being especially pronouced in terrestrial ectotherms, variance reductions in metabolism and performance were key traits most strongly impacted. Changes in variability in physiological rates, particularly traits governing energy demand, could have important consequences on the flow of energy within and between populations, communities and ecosystems [@hendry2016key]. More variable populations, genetically and/or phenotypically, are predicted to be associated with broader niches, reduced intraspecific competition, increased growth rate, decreased vulnerability to environmental change and lower extinction risk [@forsman2015rethinking; @forsman2014effects; @Bolnick2011; @hendry2016key; @hart2016variation]. Maintaining intrapopulaton variability in physiological rates in a warmer world may therefore be important for population resilience to climate change. Nonetheless, few studies have explored the consequences that variation in physiological traits have for population dynamics. Those studies that have, have shown that such variation can have important implications. For example, @kooijman1989population integrated individual variation in dynamic energy budget (DEB) models developed for *Daphnia magna*. They showed that greater between-individual variation in DEB parameters led to less extreme population oscillations compared to scenarios with no variation [@kooijman1989population]. The differences in variance change across major habitat types suggest that terrestrial ectotherms will likely face an onslaught of ecological and evolutionary challenges which will mean greater rates of extinction and reduced productivity – predictions reinforced by several studies [@hoffmann2013upper; @Gunderson2015-hz; @Pottier2022]. To date, however, an appreciation for the wide-reaching impacts that changes in variance may have on populations and communities remains limited. The ecological consequences of changes in physiological rate variance across aquatic and terrestrial ecosystems remain unclear. What we desperately need now are the development of theoretical models that better integrate intrapopulation variation into mechanistic physiological models or ones that better capture stochasticity such as individual based models. Our meta-analytic findings can help us better position ourselves to start asking questions about the ecological and evolutionary consequences of changes in variance in physiological rates.
+
+### ***Limitations***
+A number of limitations need to be recognised to better contextualise our results. First, and as mentioned above, the evolutionary implications of changes in relative variances in physiological rates is still unclear because we lack a full understanding of how much variation is genetic versus environmental, or how traits are related to fitness. Second, while we found no relationships between historical climate variability / predictability and capacity for plasticity this does not necessarily mean they are not important. There are major challenges to estimating realistic microthermal environments experienced by taxa; it is possible that more fine-scale resolution of the habitats that organisms occupy will elucidate expected patterns. Third, while we show general patterns across taxa and habitats it is important to recognise that this does not mean such patterns apply to all populations. Substantial variation in acclimation responses and changes in variance exist among populations as evidenced by wide prediction intervals. As such, finer scale analyses that look at acclimation responses *and* changes in relative variance will be beneficial for developing a better understanding of their interplay when considering how populations will be impacted by climate change.
 
 ### ***Conclusions and future directions***
 
@@ -2366,47 +2336,87 @@ Enhanced knowledge of how variation in physiological rates vary across populatio
 
 #### Acute and acclimation $lnRR_{Q_{10}}$ for different trait categories across marine, freshwater and terrestrial taxa
 
-
 ```{r, fig-2}
 #| label: fig-2
-#| fig-cap: "Acute and Acclimation $lnRR_{Q_{10}}$ across traits for A) marine, B) freshwater and C) terrestrial systems. k = total number of effect size estimates while the numbers in brackets indicate the number of species. Thick bars indicate 95% confidence intervals and thin bars indicate 95% prediction intervals."
+#| fig-cap: "Acute and Acclimation $lnRR_{Q_{10}}$ across traits for A) marine, B) freshwater and C) terrestrial systems. k = total number of effect size estimates while the numbers in brackets indicate the number of species. Thick bars indicate 95% confidence intervals and thin bars indicate 95% prediction intervals. The x-axis is truncated for ease of visualisation."
 #| echo: false
 k_marine=manual_extract(model1.3_m_het, mod = "trait_category", group = "record_num", exclude = "Antiox")
+k_fresh=manual_extract(model1.3_f_het, mod = "trait_category", group = "record_num")
+k_terrs=manual_extract(model1.3_t_het, mod = "trait_category", group = "record_num")
 
-
-ptm <- orchard_plot(model1.3_m_het, mod = "trait_category", at = list(type = c("acute", "acclim")), by = "type", group = "record_num", weights = "prop",  xlab = TeX("$lnRR_{Q_{10}}$"), angle = 0, condition.lab = "Type") +
+ptm <- orchard_plot(model1.3_m_het, mod = "trait_category", at = list(type = c("acute", "acclim")), by = "type", group = "record_num", weights = "prop", k.pos = "none", xlab = TeX("$lnRR_{Q_{10}}$"), angle = 0, condition.lab = "Type") +
   scale_x_discrete(labels = c("Mito_leak" = "Proton Leak",
                               "Metabolic_enzyme" = "Metabolic Enzymes",
                               "Rest_MR" = "Resting Metabolic Rate",
                               "Max_MR" = "Maximum Metabolic Rate",
-                              "Mito_oxidation" = "OXPHOS")) + theme_classic() + theme(legend.position = "none",
-                              axis.text = element_text(size=12)) + ylim(-1.5, 2.5) +
-                            annotate("text", label= paste0(k_marine$k, " (", k_marine$sdy, ")"), x = k_marine$moderator, y = 2.4)
+                              "Mito_oxidation" = "OXPHOS")) + theme_classic() + theme(axis.text = element_text(size=12)) + ylim(-1.5, 2.5) +
+                            annotate("text", label= paste0("k = ", k_marine$k, " (", k_marine$sdy, ")"), x = k_marine$moderator, y = 2.4) + add_theme()
 #ptm$layers[[1]] <- NULL # Lets just remove the data point geom layer as it's too busy
 
 
-ptf <- orchard_plot(model1.3_f_het, mod = "trait_category", at = list(type = c("acute", "acclim")), by = "type", group = "record_num", weights = "prop",  xlab = TeX("$lnRR_{Q_{10}}$"), angle = 0, condition.lab = "Type") +
+ptf <- orchard_plot(model1.3_f_het, mod = "trait_category", at = list(type = c("acute", "acclim")), by = "type", group = "record_num", weights = "prop", k.pos = "none", xlab = TeX("$lnRR_{Q_{10}}$"), angle = 0, condition.lab = "Type") +
   scale_x_discrete(labels = c("Mito_leak" = "Proton Leak",
                               "Metabolic_enzyme" = "Metabolic Enzymes",
                               "Rest_MR" = "Resting Metabolic Rate",
                               "Max_MR" = "Maximum Metabolic Rate",
-                              "Mito_oxidation" = "OXPHOS")) + theme_classic() + theme(legend.position = "none")
+                              "Mito_oxidation" = "OXPHOS")) + theme_classic() + theme() + 
+                              annotate("text", label= paste0("k = ", k_fresh$k, " (", k_fresh$sdy, ")"), x = k_fresh$moderator, y = 2.4) + add_theme()
 #ptf$layers[[1]] <- NULL # Lets just remove the data point geom layer as it's too busy
 
 
-ptt <- orchard_plot(model1.3_t_het, mod = "trait_category", at = list(type = c("acute", "acclim")), by = "type", group = "record_num", weights = "prop",  xlab = TeX("$lnRR_{Q_{10}}$"), angle = 0, condition.lab = "Type") +
+ptt <- orchard_plot(model1.3_t_het, mod = "trait_category", at = list(type = c("acute", "acclim")), by = "type", group = "record_num", weights = "prop", k.pos = "none",  xlab = TeX("$lnRR_{Q_{10}}$"), angle = 0, condition.lab = "Type") +
   scale_x_discrete(labels = c("Metabolic_enzyme" = "Metabolic Enzymes",
-                              "Rest_MR" = "Resting Metabolic Rate")) + theme_classic() + labs(legend = "Type")
+                              "Rest_MR" = "Resting Metabolic Rate")) + theme_classic() + labs(legend = "Type")+ annotate("text", label= paste0("k = ", k_terrs$k, " (", k_terrs$sdy, ")"), x = k_terrs$moderator, y = 2.4) + add_theme() + ylim(-1,3)
 #ptt$layers[[1]] <- NULL # Lets just remove the data point geom layer as it's too busy
 
 
-fig2 <- (ptm + ptf + ptt) + plot_annotation(tag_levels = "A", tag_suffix = ")")
-ggsave(fig2, filename = "./output/figures/fig2_trait.png", height = 8.5, width = 26)
+fig2 <- (ptm / ptf / ptt) + plot_annotation(tag_levels = "A", tag_suffix = ")")
+ggsave(fig2, filename = "./output/figures/fig2_trait.png", height = 14, width = 10)
 
 img_fig2 <- magick::image_read("./output/figures/fig2_trait.png")
 img_fig2
 ```
 
+```{r, fig-cvrtrait}
+#| label: fig-cvrtrait
+#| fig-cap: "Acute and Acclimation $lnCVR_{Q_{10}}$ across traits for A) marine, B) freshwater and C) terrestrial systems. k = total number of effect size estimates while the numbers in brackets indicate the number of species. Thick bars indicate 95% confidence intervals and thin bars indicate 95% prediction intervals. The x-axis is truncated for ease of visualisation."
+#| echo: false
+
+k_marinecv=manual_extract(model2.3m, mod = "trait_category", group = "record_num", exclude = "Antiox")
+k_freshcv=manual_extract(model2.3f, mod = "trait_category", group = "record_num")
+k_terrscv=manual_extract(model2.3t, mod = "trait_category", group = "record_num")
+
+ptm <- orchard_plot(model2.3m, mod = "trait_category", group = "record_num", weights = "prop",  xlab = TeX("$lnCVR_{Q_{10}}$"), angle = 0, k.pos = "none", condition.lab = "Type") +
+  scale_x_discrete(labels = c("Mito_leak" = "Proton Leak",
+                              "Metabolic_enzyme" = "Metabolic Enzymes",
+                              "Rest_MR" = "Resting Metabolic Rate",
+                              "Max_MR" = "Maximum Metabolic Rate",
+                              "Mito_oxidation" = "OXPHOS")) + theme_classic() + add_theme() + annotate("text", label= paste0("k = ", k_marinecv$k, " (", k_marinecv$sdy, ")"), x = k_marinecv$moderator, y = 2.4) + ylim(-2, 2.6)
+#ptm$layers[[1]] <- NULL # Lets just remove the data point geom layer as it's too busy
+
+
+ptf <- orchard_plot(model2.3f, mod = "trait_category",  group = "record_num", weights = "prop",  xlab = TeX("$lnCVR_{Q_{10}}$"), angle = 0, condition.lab = "Type",  k.pos = "none") +
+  scale_x_discrete(labels = c("Mito_leak" = "Proton Leak",
+                              "Metabolic_enzyme" = "Metabolic Enzymes",
+                              "Rest_MR" = "Resting Metabolic Rate",
+                              "Max_MR" = "Maximum Metabolic Rate",
+                              "Mito_oxidation" = "OXPHOS")) + theme_classic()+ add_theme() + annotate("text", label= paste0("k = ", k_freshcv$k, " (", k_freshcv$sdy, ")"), x = k_freshcv$moderator, y = 2.4) + ylim(-2.5, 2.65)
+#ptf$layers[[1]] <- NULL # Lets just remove the data point geom layer as it's too busy
+
+
+ptt <- orchard_plot(model2.3t, mod = "trait_category",  group = "record_num", weights = "prop",  xlab = TeX("$lnCVR_{Q_{10}}$"), angle = 0,  k.pos = "none", condition.lab = "Type") +
+  scale_x_discrete(labels = c("Metabolic_enzyme" = "Metabolic Enzymes",
+                              "Rest_MR" = "Resting Metabolic Rate",
+                              "Max_MR" = "Maximum Metabolic Rate")) + theme_classic() +  annotate("text", label= paste0("k = ", k_terrscv$k, " (", k_terrscv$sdy, ")"), x = k_terrscv$moderator, y = 2.4) + labs(legend = "Type")+ add_theme() + ylim(-2, 2.65)
+#ptt$layers[[1]] <- NULL # Lets just remove the data point geom layer as it's too busy
+
+
+figcvrtrait <- (ptm / ptf / ptt) + plot_annotation(tag_levels = "A", tag_suffix = ")")
+ggsave(figcvrtrait, filename = "./output/figures/figcvrtrait.png", height = 14, width = 10)
+
+img_figcvrtrait <- magick::image_read("./output/figures/figcvrtrait.png")
+img_figcvrtrait
+```
 
 #### Comparing raw variance changes using $lnVR_{Q_{10}}$
 ```{r, lnvrq10}
@@ -2553,7 +2563,7 @@ Analysis of $lnVR_{Q_{10}}$ suggested that variance increases with higher temper
 ```{r, fig-s1}
 #| label: fig-s1
 #| fig-align: center
-#| fig-cap: lnVR
+#| fig-cap: "Estimated mean $lnVR_{Q_{10}}$ for marine, freshwater and terrestrial systems. Note there were no differences between acute and acclimation $Q_{10}$ types so they were averaged. Thick black bars are 95% confidence intervals (CI's) and thin bars 95% prediction intervals (PI's). The percentage change in variance is also back calculated. Note that these are raw variances and do not account for changes in mean physiological rates. k = total number of effect size estimates while the numbers in brackets indicate the number of species."
 
 
 ##################
@@ -2591,7 +2601,7 @@ Analysis of $lnVR_{Q_{10}}$ suggested that variance increases with higher temper
 ```{r, tbl-s1}
 #| label: tbl-s1
 #| echo: false
-#| tbl-cap: Model estimates, standard error, and 95% credible intervals comparing changes in acute and acclimation $lnVR_{Q_{10}}$ across habitat types. Models estimates are based off 1253 effect sizes from 139 studies.
+#| tbl-cap: Model estimates, standard error, and 95% credible intervals comparing changes in acute and acclimation $lnVR_{Q_{10}}$ across habitat types. Models estimates are based off 1,253 effect sizes from 139 studies.
  
  # Extract the fixed / population-level effect summaries of the posterior
     fixed <- do.call(rbind, apply(posterior_samples(model3.2_bayes, pars = "^b"), 2,  function(x) post_summary(x)))

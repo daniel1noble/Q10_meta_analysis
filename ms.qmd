@@ -2334,7 +2334,7 @@ Enhanced knowledge of how variation in physiological rates vary across populatio
 
 ## Supplemental Results and Figures
 
-### PRISMA Flow Diagram
+#### PRISMA Flow Diagram
 
 ```{r, fig-prisma}
 #| label: fig-prisma

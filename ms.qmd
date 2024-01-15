@@ -171,7 +171,7 @@ We compiled literature on ectothermic animals that measured physiological rates 
 
 Our search resulted in 1,321 papers for screening in Rayyan [@Ouzzani2016-ge]. We also cross-checked papers we found in our searches with a recent paper by @Havird2020-mj, which also updates the dataset of @Seebacher2015-wi's. We included any papers that were missed between our searches and those of @Havird2020-mj from the dates 2013-2017. @Havird2020-mj added 7 new studies between 2013-2017 (mainly because they were focused on metabolic rates), and our searches differed from theirs by only a single paper [i.e., @Bulgarella2015-yl]. Given the physiological traits we included were broader, we had a substantial increase in additional papers that we added to @Seebacher2015-wi's dataset. More specifically, in addition to the `r length(unique(old_papers$record_num))` papers we included from the @Seebacher2015-wi dataset, we extracted data from an extra `r length(unique(new_papers$record_num))` papers (with a total of `r dim(new_papers)[1]` effects) that were published between 2013 - 2017 (a `r  (length(unique(new_papers$record_num)) / length(unique(old_papers$record_num)))*100`% increase in the number of published articles). Note that @Seebacher2015-wi included a total of 205 publications, however, not all these contained the necessary statistics we needed to derive effect sizes and associated sampling variances (see below). While we may have missed papers, our goal was to obtain a large representative (and unbiased) sample of acclimation research rather than a comprehensive dataset. As such, our database represents the most up-to-date dataset used by @Seebacher2015-wi to answer questions on physiological rates across ectotherms. 
 
-We split the screening of titles and abstracts for the 1,321 papers found in our search among all authors evenly. To ensure consistency among authors in title and abstracts that should be included, prior to  screening all authors went through a randomly selected set of papers together - agreeing on those that were relevant and those that were not based on our inclusion criteria (see below). Where any authors were uncertain about whether to include a paper in the sub-sample they screened, we conservatively included the paper for full text screening and discussed uncertain papers among authors to come to a decision on whether to include the paper. After title and abstract screening, we were left with a total of 149 papers for full text screening. Papers were included only if they: 1) measured a physiological rate acutely at two temperatures on a sample of animals chronically exposed to the same two temperatures for at least 1 week; and 2) where physiological rates measured were burst and sustained locomotion, metabolic rates (standard, resting, routine and maximal), heart rates, and/or enzyme activities. 
+We split the screening of titles and abstracts for the 1,321 papers found in our search among all authors evenly. To ensure consistency among authors in title and abstracts that should be included, prior to  screening all authors went through a randomly selected set of papers together - agreeing on those that were relevant and those that were not based on our inclusion criteria (see below). Where any authors were uncertain about whether to include a paper in the sub-sample they screened, we conservatively included the paper for full text screening and discussed uncertain papers among authors to come to a decision on whether to include the paper. After title and abstract screening, we were left with a total of 149 papers for full text screening. Papers were included only if they: 1) measured a physiological rate acutely at two temperatures on a sample of animals chronically exposed to the same two temperatures for at least 1 week; and 2) where physiological rates measured were burst and sustained locomotion, metabolic rates (standard, resting, routine and maximal), heart rates, and/or enzyme activities. We provide a PRISMA flow diagram of our extraction process in the *Supplement* (see @fig-prisma).
 
 ### *Data Compilation*
 
@@ -2333,6 +2333,17 @@ Enhanced knowledge of how variation in physiological rates vary across populatio
 <br> 
 
 ## Supplemental Results and Figures
+
+### PRISMA Flow Diagram
+
+```{r, fig-prisma}
+#| label: fig-prisma
+#| fig-cap: "PRISMA flow diagram of the literature search and screening process."
+#| echo: false
+
+prisma <- magick::image_read("./output/figures/PRISMA.png")
+prisma
+```
 
 #### Acute and acclimation $lnRR_{Q_{10}}$ for different trait categories across marine, freshwater and terrestrial taxa
 

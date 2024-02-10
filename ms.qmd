@@ -2327,7 +2327,7 @@ We explored the possibility for publication bias graphically, using funnel plots
 
 
 ## Funding
-This work was partially supported by an Australian Research Council (ARC) Discovery Early Career Research Award (DE150101774) and ARC Future Fellowship (FT220100276) to DWAN. 
+DWAN is supported by an Australian Research Council (ARC) Future Fellowship (FT220100276) and ARC Discovery Project (DP210101152). SN is supported by ARC Discovery Project Grants (DP210100812 and DP230101248).
 
 ## References
 

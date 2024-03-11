@@ -1,7 +1,7 @@
 ---
 title: "Reduced plasticity and variance in physiological rates of ectotherm populations under climate change"
 bibliography: ./bib/refs.bib
-csl: ./bib/nature.csl
+csl: ./bib/science-advances.csl
 format:
   docx:
     reference-doc: ./bib/template.docx
@@ -139,6 +139,8 @@ data_long2 <- data_long %>% mutate(type = factor(type, levels = c("acute", "accl
       tree_p0.7$node.label <- NULL # We don't use nodes and will cause a warning so create null node names
 ```
 
+## **Short Title**: Reduced physiological rate variation in ectotherms
+
 <p style="text-align: center;">Daniel W.A. Noble^1^ $\ddagger$, Fonti Kar^2^,  Alex Bush^4^, Frank Seebacher^3^ $\dagger$, & Shinichi Nakagawa^2^ $\dagger$</p>
 
 
@@ -149,6 +151,10 @@ data_long2 <- data_long %>% mutate(type = factor(type, levels = c("acute", "accl
 ^4^ Department of Biology, Lancaster University, Liverpool, UK &NewLine;  
 $\dagger$ contributed equally &NewLine;  
 $\ddagger$ corresponding author, daniel.noble@anu.edu.au &NewLine;  
+
+## **Teasor**
+
+Climate change reduces physiological rate variation in ectotherms to impact ecological and evolutionary processes.
 
 ## **Abstract**
 

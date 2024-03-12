@@ -15,10 +15,10 @@ execute:
   error: false
   include: true
 crossref:
-  fig-title: 'Figure'
+  fig-title: '**Fig.**'
   fig-labels: arabic
   title-delim: "-"
-  fig-prefix: "Figure"
+  fig-prefix: "**Fig.**"
   tbl-prefix: "Table"
 ---
 

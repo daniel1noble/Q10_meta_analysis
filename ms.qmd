@@ -443,11 +443,11 @@ if(rerun){
        A_t <- vcv(tree_t, corr = FALSE)
     
 if(rerun){
-   # More realistic model with traits in marine species. Remove antioxidants because there are just too few effects
+   # More realistic model with traits in marine species. Remove antioxidants because there are just too few effects. Note that, for orchardplot we can only fit one random slope, so we'll just use obs as results are unchanged and Bayesian models have it accounted for
    model1.3_m <- metafor::rma.mv(effect_size ~  max_temp_c + c_accl_time + type + trait_category + type:trait_category, V = V, 
                               random = list(~1 | record_num,
                                             ~1 | species_full,
-                                            ~1 + max_temp_c| spp,
+                                            ~1 | spp,
                                             ~1 | trait,
                                             ~1 | obs),
                               R = list(species_full = m_phylo), dfs = "contain", 
@@ -457,11 +457,11 @@ if(rerun){
   model1.3_m_het <- metafor::rma.mv(effect_size ~  max_temp_c + c_accl_time + type + trait_category + type:trait_category, V = V, 
                               random = list(~1 | record_num,
                                             ~1 | species_full,
-                                            ~1 + max_temp_c | spp,
+                                            ~1 | spp,
                                             ~1 | trait,
                                             ~1 + trait_category | obs),
                               R = list(species_full = m_phylo), 
-                              struct = "HCS", rho = 0, phi = 0, dfs = "contain", 
+                              struct = "HCS", rho = 0,  dfs = "contain", 
                               test = "t", data = lnRRQ10_data_m, control = list(iter.max=1000, rel.tol=1e-8))
   
   # Check k is the same for both models (yes) and check which model is best supported
@@ -479,7 +479,7 @@ if(rerun){
   model1.3_f <- metafor::rma.mv(effect_size ~  max_temp_c+c_accl_time + type + trait_category + type:trait_category, V = V, 
                               random = list(~1 | record_num,
                                             ~1 | species_full,
-                                            ~1 + max_temp_c| spp,
+                                            ~1 | spp,
                                             ~1 | trait,
                                             ~1 | obs),
                               R = list(species_full =f_phylo), dfs = "contain", 
@@ -489,7 +489,7 @@ if(rerun){
   model1.3_f_het <- metafor::rma.mv(effect_size ~  max_temp_c + c_accl_time + type + trait_category + type:trait_category, V = V, 
                               random = list(~1 | record_num,
                                             ~1 | species_full,
-                                            ~1 + max_temp_c| spp,
+                                            ~1 | spp,
                                             ~1 | trait,
                                             ~1 + trait_category | obs),
                               R = list(species_full =f_phylo), struct = "HCS", rho = 0, dfs = "contain", 
@@ -507,7 +507,7 @@ if(rerun){
   model1.3_t <- metafor::rma.mv(effect_size ~  max_temp_c + c_accl_time + type + trait_category + type:trait_category, V = V, 
                               random = list(~1 | record_num,
                                             ~1 | species_full,
-                                            ~1 + max_temp_c| spp,
+                                            ~1 | spp,
                                             ~1 | trait,
                                             ~1 | obs),
                               R = list(species_full =t_phylo), dfs = "contain", 
@@ -517,7 +517,7 @@ if(rerun){
   model1.3_t_het <- metafor::rma.mv(effect_size ~  max_temp_c + c_accl_time + type + trait_category + type:trait_category, V = V, 
                               random = list(~1 | record_num,
                                             ~1 | species_full,
-                                            ~1 + max_temp_c| spp,
+                                            ~1 | spp,
                                             ~1 | trait,
                                             ~1 + trait_category | obs),
                               R = list(species_full =t_phylo), struct = "HCS", rho = 0, dfs = "contain", 

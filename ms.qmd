@@ -291,7 +291,8 @@ We explored the possibility for publication bias graphically, using funnel plots
 ##################################################
 # Subset the data
 lnRRQ10_data <- data_long2 %>% filter(grepl("lnRR", name) & !is.na(effect_size) & !is.na(V) & !V == 0 & !is.na(acclim_period)) %>% 
-                              mutate(spp = species_full, c_accl_time = acclim_period - mean(acclim_period, na.rm = TRUE))
+                              mutate(spp = species_full, c_accl_time = acclim_period - mean(acclim_period, na.rm = TRUE),
+                                    max_temp_c = scale(temp_2, scale = FALSE))
 
 # Check and prune tree
 tree_lnrr <- tree_checks(data = lnRRQ10_data, tree = tree_p0.7, dataCol = "species_full", type = "prune")
@@ -300,12 +301,6 @@ tree_checks(data = lnRRQ10_data, tree = tree_lnrr, dataCol = "species_full", typ
 # Create the phylo correlation matrix
 phylo_cor <- vcv(tree_lnrr, cor = TRUE)
         A <- vcv(tree_lnrr, cor = FALSE) # For bayes, need cov matrix
-
-# Found some other data entry problems from old dataset. Sample sizes are decimals. That's not correct. It has to be an integer. These are not the new data that we entered. Data now checked. Seemed to have resulted in a 'frame shift' in some data. Not sure how that happened, but it's now fixed. 
-#hist(lnRRQ10_data$V)
-
-# Studies with big V, why? Check N
-lnRRQ10_data %>% filter(V >= 2)
 
 # have a quick look on habitat, development and type. Mostly looks sensible but there is not too much data in terrestrial realm.
 sum_life <- lnRRQ10_data %>% group_by(life.hist, type, habitat) %>% summarise(n=n()) %>% arrange(habitat)
@@ -373,17 +368,17 @@ model1.1_bayes <- readRDS("./output/models/lnRRQ10_1.1_bayes")
 
 if(rerun){
   # More realistic model with 
-  model1.2 <- metafor::rma.mv(effect_size ~  c_accl_time + type + habitat + type:habitat, V = V, 
+  model1.2 <- metafor::rma.mv(effect_size ~  max_temp_c + c_accl_time + type + habitat + type:habitat, V = V, 
                               random = list(~1 | record_num,
                                             ~1 | species_full,
                                             ~1 | trait,
-                                            ~1 | spp,
+                                            ~1 + max_temp_c| spp,
                                             ~1 | obs),
                               R = list(species_full = phylo_cor), dfs = "contain", 
                               test = "t", data = lnRRQ10_data)
 
   
-   model1.2_bayes <- brms::brm(effect_size | se(sqrt(V), sigma = TRUE) ~  c_accl_time + type + habitat + type:habitat + (~1 | record_num) + (1 | gr(species_full, cov = A)) + (1 | spp) + (1|trait), data2 = list(A=A), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 8, data = lnRRQ10_data)
+   model1.2_bayes <- brms::brm(effect_size | se(sqrt(V), sigma = TRUE) ~  max_temp_c + c_accl_time + type + habitat + type:habitat + (~1 | record_num) + (1 | gr(species_full, cov = A)) + (1 + max_temp_c| spp) + (1|trait), data2 = list(A=A), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 8, data = lnRRQ10_data)
                                   
   # Save model1.2
   saveRDS(model1.2, file = "./output/models/lnRRQ10_1.2")
@@ -449,25 +444,25 @@ if(rerun){
     
 if(rerun){
    # More realistic model with traits in marine species. Remove antioxidants because there are just too few effects
-   model1.3_m <- metafor::rma.mv(effect_size ~  c_accl_time + type + trait_category + type:trait_category, V = V, 
+   model1.3_m <- metafor::rma.mv(effect_size ~  max_temp_c + c_accl_time + type + trait_category + type:trait_category, V = V, 
                               random = list(~1 | record_num,
                                             ~1 | species_full,
-                                            ~1 | spp,
+                                            ~1 + max_temp_c| spp,
                                             ~1 | trait,
                                             ~1 | obs),
                               R = list(species_full = m_phylo), dfs = "contain", 
                               test = "t", 
                               data = lnRRQ10_data_m)
   
-  model1.3_m_het <- metafor::rma.mv(effect_size ~  c_accl_time + type + trait_category + type:trait_category, V = V, 
+  model1.3_m_het <- metafor::rma.mv(effect_size ~  max_temp_c + c_accl_time + type + trait_category + type:trait_category, V = V, 
                               random = list(~1 | record_num,
                                             ~1 | species_full,
-                                            ~1 | spp,
+                                            ~1 + max_temp_c | spp,
                                             ~1 | trait,
                                             ~1 + trait_category | obs),
                               R = list(species_full = m_phylo), 
-                              struct = "HCS", rho = 0, dfs = "contain", 
-                              test = "t", data = lnRRQ10_data_m)
+                              struct = "HCS", rho = 0, phi = 0, dfs = "contain", 
+                              test = "t", data = lnRRQ10_data_m, control = list(iter.max=1000, rel.tol=1e-8))
   
   # Check k is the same for both models (yes) and check which model is best supported
     AICc1.3_m     <- AIC(model1.3_m) + AICc_correction(model1.3_m)
@@ -478,23 +473,23 @@ if(rerun){
   orchard_plot(model1.3_m_het, mod = "trait_category", at = list(type = c("acclim", "acute")), by = "type", xlab = TeX("$lnRR_{Q_{10}}$"), group = "spp", angle = 0)
   
   # Cannot model heterogeneous variance across traits if use sigma + TRUE, so just use obs.
-   model1.3_m_bayes <- brms::brm(effect_size | se(sqrt(V)) ~  c_accl_time + type + trait_category + type:trait_category + (~1 | record_num) + (1 | gr(species_full, cov = A_m)) + (1 | spp) +(1|trait) + (1 + trait_category |gr(obs, cor = FALSE)),  data2 = list(A_m=A_m), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 8, data = lnRRQ10_data_m)
+   model1.3_m_bayes <- brms::brm(effect_size | se(sqrt(V)) ~  max_temp_c + c_accl_time + type + trait_category + type:trait_category + (~1 | record_num) + (1 | gr(species_full, cov = A_m)) + (1 + max_temp_c | spp) +(1|trait) + (1 + trait_category |gr(obs, cor = FALSE)),  data2 = list(A_m=A_m), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 8, data = lnRRQ10_data_m)
   
     # More realistic model with traits in freshwater species
-  model1.3_f <- metafor::rma.mv(effect_size ~  c_accl_time + type + trait_category + type:trait_category, V = V, 
+  model1.3_f <- metafor::rma.mv(effect_size ~  max_temp_c+c_accl_time + type + trait_category + type:trait_category, V = V, 
                               random = list(~1 | record_num,
                                             ~1 | species_full,
-                                            ~1 | spp,
+                                            ~1 + max_temp_c| spp,
                                             ~1 | trait,
                                             ~1 | obs),
                               R = list(species_full =f_phylo), dfs = "contain", 
                               test = "t", data = lnRRQ10_data_f)
   
   # Heteroscedastic variance model for freshwater
-  model1.3_f_het <- metafor::rma.mv(effect_size ~  c_accl_time + type + trait_category + type:trait_category, V = V, 
+  model1.3_f_het <- metafor::rma.mv(effect_size ~  max_temp_c + c_accl_time + type + trait_category + type:trait_category, V = V, 
                               random = list(~1 | record_num,
                                             ~1 | species_full,
-                                            ~1 | spp,
+                                            ~1 + max_temp_c| spp,
                                             ~1 | trait,
                                             ~1 + trait_category | obs),
                               R = list(species_full =f_phylo), struct = "HCS", rho = 0, dfs = "contain", 
@@ -506,23 +501,23 @@ if(rerun){
   delat_AICc_model1.3_f <- AICc_model1.3_f - AICc_model1.3_f_het
   
   # Run the Bayesian equivalent of the top supported model. 
-   model1.3_f_bayes <- brms::brm(effect_size | se(sqrt(V)) ~  c_accl_time + type + trait_category + type:trait_category + (~1 | record_num) + (1 | gr(species_full, cov = A_f)) + (1 | spp) + (1|trait) + (1+trait_category|gr(obs, cor = FALSE)), data2 = list(A_f=A_f), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 8, data = lnRRQ10_data_f)
+   model1.3_f_bayes <- brms::brm(effect_size | se(sqrt(V)) ~  max_temp_c + c_accl_time + type + trait_category + type:trait_category + (~1 | record_num) + (1 | gr(species_full, cov = A_f)) + (1 + max_temp_c| spp) + (1|trait) + (1+trait_category|gr(obs, cor = FALSE)), data2 = list(A_f=A_f), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 8, data = lnRRQ10_data_f)
    
     # More realistic model with traits in terrestrial species
-  model1.3_t <- metafor::rma.mv(effect_size ~  c_accl_time + type + trait_category + type:trait_category, V = V, 
+  model1.3_t <- metafor::rma.mv(effect_size ~  max_temp_c + c_accl_time + type + trait_category + type:trait_category, V = V, 
                               random = list(~1 | record_num,
                                             ~1 | species_full,
-                                            ~1 | spp,
+                                            ~1 + max_temp_c| spp,
                                             ~1 | trait,
                                             ~1 | obs),
                               R = list(species_full =t_phylo), dfs = "contain", 
                               test = "t", data = lnRRQ10_data_t)
   
   # Heteroscedastic variance model for terrestrial
-  model1.3_t_het <- metafor::rma.mv(effect_size ~  c_accl_time + type + trait_category + type:trait_category, V = V, 
+  model1.3_t_het <- metafor::rma.mv(effect_size ~  max_temp_c + c_accl_time + type + trait_category + type:trait_category, V = V, 
                               random = list(~1 | record_num,
                                             ~1 | species_full,
-                                            ~1 | spp,
+                                            ~1 + max_temp_c| spp,
                                             ~1 | trait,
                                             ~1 + trait_category | obs),
                               R = list(species_full =t_phylo), struct = "HCS", rho = 0, dfs = "contain", 
@@ -537,7 +532,7 @@ if(rerun){
     
     
   # Bayesian model
-   model1.3_t_bayes <- brms::brm(effect_size | se(sqrt(V)) ~  c_accl_time + type + trait_category + type:trait_category + (~1 | record_num) + (1 | gr(species_full, cov = A_t)) + (1 | spp) + (1 | trait) + (1 + trait_category | gr(obs, cor = FALSE)), data2 = list(A_t=A_t), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 8, thin = 5, iter = 3000, warmup = 1000, cores = 8, data = lnRRQ10_data_t)
+   model1.3_t_bayes <- brms::brm(effect_size | se(sqrt(V)) ~ max_temp_c + c_accl_time + type + trait_category + type:trait_category + (~1 | record_num) + (1 | gr(species_full, cov = A_t)) + (1 + max_temp_c| spp) + (1 | trait) + (1 + trait_category | gr(obs, cor = FALSE)), data2 = list(A_t=A_t), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 8, thin = 5, iter = 3000, warmup = 1000, cores = 8, data = lnRRQ10_data_t)
                       
     # Save models
   saveRDS(model1.3_m, file = "./output/models/lnRRQ10_1.3m")
@@ -570,17 +565,17 @@ if(rerun){
 rerun = FALSE
 if(rerun){
   # More realistic model with 
-  model1.4 <- metafor::rma.mv(effect_size ~  c_accl_time + type*habitat*life.hist, V = V, 
+  model1.4 <- metafor::rma.mv(effect_size ~  max_temp_c + c_accl_time + type*habitat*life.hist, V = V, 
                               random = list(~1 | record_num,
                                             ~1 | species_full,
                                             ~1 | trait,
-                                            ~1 | spp,
+                                            ~1 + max_temp_c| spp,
                                             ~1 | obs),
                               R = list(species_full = phylo_cor), dfs = "contain", 
                               test = "t", data = lnRRQ10_data)
 
   
-   model1.4_bayes <- brms::brm(effect_size | se(sqrt(V), sigma = TRUE) ~  c_accl_time + type*habitat*life.hist + (~1 | record_num) + (1 | gr(species_full, cov = A)) + (1 | spp) + (1|trait), data2 = list(A=A), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 8, data = lnRRQ10_data)
+   model1.4_bayes <- brms::brm(effect_size | se(sqrt(V), sigma = TRUE) ~  max_temp_c + c_accl_time + type*habitat*life.hist + (~1 | record_num) + (1 | gr(species_full, cov = A)) + (1 + max_temp_c| spp) + (1|trait), data2 = list(A=A), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 8, data = lnRRQ10_data)
                                   
   # Save model1.4
   saveRDS(model1.4, file = "./output/models/lnRRQ10_1.4")
@@ -596,13 +591,14 @@ if(rerun){
 #######################################################################
  # Create the data we want to make predcitions for. Just more intuitive
   newdata <- data.frame( c_accl_time = 0, 
+                          max_temp_c = 0, 
                                 type = as.factor(rep(c("acute", "acclim"))), 
                              habitat = as.factor(rep(c("m", "f", "t"), each = 4)), 
                            life.hist = as.factor(c("j", "a", "a", "j")))
   newdata$type  <- relevel(newdata$type, ref = "acute")
 
 # Calculate the design matrix using this new data. Need to be careful here to check that the levels are set up the same as the posterior.
-  X <- model.matrix(~c_accl_time + type*habitat*life.hist, data = newdata) 
+  X <- model.matrix(~max_temp_c + c_accl_time + type*habitat*life.hist, data = newdata) 
 
 # Extract posteriors
   posteriors_1_4 <- posterior_samples(model1.4_bayes, pars = "^b")
@@ -657,11 +653,11 @@ if(rerun){
  lnRRQ10_data_acute <-  lnRRQ10_data %>% filter(grepl("acute", name))
 
  if(rerun){ 
-    model1.s1 <- metafor::rma.mv(effect_size ~  c_accl_time + name, V = V, 
+    model1.s1 <- metafor::rma.mv(effect_size ~  max_temp_c + c_accl_time + name, V = V, 
                               random = list(~1 | record_num,
                                             ~1 | species_full,
                                             ~1 | trait,
-                                            ~1 | spp,
+                                            ~1 + max_temp_c| spp,
                                             ~1 | obs),
                               R = list(species_full = phylo_cor), dfs = "contain", 
                               test = "t", data = lnRRQ10_data_acute)
@@ -2716,13 +2712,9 @@ figs2
 
 #### Exploring the impact of temperature on $lnRR_{Q_{10}}$ PROBABLY JUST MOVE TO THE MAIN TEXT
 
-$lnRR_{Q_{10}}$, $lnCVR_{Q_{10}}$ and $lnVR_{Q_{10}}$, as with $Q_{10}$ more generally, all assume that the effect of temperature on physiological rates is linear on the log scale. While $Q_{10}$ has been used exstensively in the physiological literature, there is a preference for using a Boltzmann – Arrhenius relationship to model temperature effects because it has been suggested to better incorperate the kinetics of chemical reactions [@gillooly2001effects]. Over biologically realistic temperature ranges the Boltzmann – Arrhenius relationship and van't Hoff approaches can vary by as much as 15%. Despite this, @white2012information compared modelling the temperature-dependent effects on metabolic rate using both the Boltzmann – Arrhenius relationship and van't Hoff ($Q_{10}$) relationship, showing that, when prokaryotes are excluded, the van't Hoff equation provides a 5.8 fold better fit to the data than the Boltzmann – Arrhenius relationship. Given that we restricted studies only to those that manipulated temperatures within normal operating ranges for a species and we only focus on eukaryotes, $Q_{10}$ should remain an appropriate way to capcture temperature dependent effects. However, given that it is not possible to collect full thermal performance curves for species within our data it was not strickly possible to validate this assumption directly. As such, we conducted a series of additonal analyses to better understand when the log-linearity assumption may be violated.
+$lnRR_{Q_{10}}$, $lnCVR_{Q_{10}}$ and $lnVR_{Q_{10}}$, as with $Q_{10}$ more generally, all assume that the effect of temperature on physiological rates (or changes in relative variance) is log-linear. While $Q_{10}$ [@van1884etudes] has been used exstensively in the physiological literature to successfully address a multitude of questions [e.g., @Havird2020-mj; @Seebacher2015-wi], there is a preference for using a Boltzmann – Arrhenius (BA) relationship (or its more recent extension, the Sharpe-Schoolfield model [@molnar2017thermal; @michaletz2024hotter]) to model temperature effects on physiological rates [@gillooly2001effects; @michaletz2024hotter]. Over biologically realistic temperature ranges the BA and $Q_{10}$ approaches can vary at times by as much as 15% [@gillooly2001effects]. However, debate still exists over the utility of $Q_{10}$ when modelling temperature-dependence and both BA and $Q_{10}$ can exhibit curvilinearity at normal operating temperatures (as discussed in [@michaletz2024hotter]). @white2012information also showed that the BA model may not always perform better. For example, in eukaryotes the $Q_{10}$ approach provided a 5.8 fold better fit to metabolic rate data than the BA relationship [@white2012information]. 
 
-First, we took the maximum temperature of the experimental manipulations and include this temperature in the models. If log-linearity is a problem, $lnRR_{Q_{10}}$ should be underestimated for studies applying higher temperature treatments because such temperatures are expected to either converge on or cross the thermal optima. The benefit of such an approach means that we are able to statistically correct for the potential non-linearity in the data.
-
-Second, we explored the lowest 25% of $lnRR_{Q_{10}}$ values to understand if these studies have high relative tempereatures compared to the Topt for the species or if they have abnormally high temps. Lab and wild can be used.
-		3. Using wild populations, extract the temperature time series across the year (range, mean, SD) and compare the temperature manipulations done in the study to those in nature. Do they fall within the range? How far are they from their upper temperatures?
-		4. Using the difference between the upper temperatures in nature to the upper temperature of the experiment, include this as a moderator to explore if the deviation from natural conditions covaries with Q10. 
+Given that we restricted studies only to those that manipulated temperatures within normal operating ranges for a species and we only focus on eukaryotes, $Q_{10}$ should remain an appropriate way to capture temperature-dependent effects [@michaletz2024hotter]. However, given that it is not possible to collect full thermal performance curves for species within our data we could not validate this assumption directly. However, to correct mean effect size in our analysis as temperatures increase we included the maximum temperature of the experimental manipulations in our models. If the log-linearity assumption is violated then $lnRR_{Q_{10}}$ should decrease for studies applying higher temperature treatments because such temperatures are expected to either converge on or cross the thermal optima of the performance curve causing reaction rates to decelerate or decrease beyond $T_{op}$ [@michaletz2024hotter]. The benefit of such an approach means that we could still take advantage of the excellent properties of $Q_{10}$ as an effect size while statistically correcting for the potential non-linearity that would be expected in the data at high temperatures. Given that our data included a wide range of species and habitats, we also included a random slope of maximum temperature that varied across species because we, *a priori*, expected that each species will vary in their thermal performance curve and the chosen temperatures experimentally manipulated along the performance curve. To improve model interpretation we centred the maximum temperature around the mean temperature of the experimental treatments.
 
 ```{r, lnrrq10_nonlinear}
 
@@ -2751,7 +2743,7 @@ if(rerun){
                               R = list(species_full = phylo_cor), dfs = "contain", 
                               test = "t", data = lnRRQ10_data) 
   
-  model1.1_bayes_nl <- brms::brm(effect_size | se(sqrt(V), sigma = TRUE) ~  max_temp_c + (~1 | record_num) + (1 | gr(species_full, cov = A)) + (1 + mid_temp_c| spp) + (1|trait), data2 = list(A=A), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 8, data = lnRRQ10_data)
+  model1.1_bayes_nl <- brms::brm(effect_size | se(sqrt(V), sigma = TRUE) ~  max_temp_c + (~1 | record_num) + (1 | gr(species_full, cov = A)) + (1 + max_temp_c| spp) + (1|trait), data2 = list(A=A), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 8, data = lnRRQ10_data)
   
   # Save model1.1_nl
   saveRDS(model1.1_nl, file = "./output/models/lnRRQ10_1.1_nl")

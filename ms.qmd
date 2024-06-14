@@ -933,11 +933,12 @@ if(rerun){
                                             ~1 | obs),
                               R = list(species_full = phylo_cor_CVR), dfs = "contain", 
                               test = "t", data = lnCVRQ10_data)
-  
+  # Save model
+  saveRDS(model2.4, file = "./output/models/lnCVRQ10_2.4")
+
    model2.4_bayes <- brms::brm(effect_size | se(sqrt(V), sigma = TRUE) ~  max_temp_c + c_accl_time + type*habitat*life.hist + (~1 | record_num) + (1 | gr(species_full, cov = A_CVR)) + (1 + max_temp_c| spp) + (1|trait), data2 = list(A_CVR=A_CVR), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 4, data = lnCVRQ10_data)
                                   
   # Save model
-  saveRDS(model2.4, file = "./output/models/lnCVRQ10_2.4")
   saveRDS(model2.4_bayes, file = "./output/models/lnCVRQ10_2.4_bayes")
 
   } else{

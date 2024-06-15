@@ -337,7 +337,8 @@ if(rerun){
                               R = list(species_full = phylo_cor_phylo), dfs = "contain", 
                               test = "t", data = lnRRQ10_data) 
              mod_list[[i]] <- model1_phylo 
-        names(mod_list)[i] <- names(list)[i]                
+        names(mod_list)[i] <- names(list)[i]       
+        print(paste0("Model using ", names(mod_list)[i], " is finished with ", length(list)-i, " left to run"))
     }
 
   # Save the model list so that it doesn't need to be re-run again. It takes a LONG time otherwise.

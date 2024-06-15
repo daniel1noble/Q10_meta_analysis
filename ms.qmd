@@ -332,9 +332,10 @@ phylo_cor <- vcv(tree_lnrr, cor = TRUE)
 sum_life <- lnRRQ10_data %>% group_by(life.hist, type, habitat) %>% summarise(n=n()) %>% arrange(habitat)
 
 ##################################################
-# Grafen test
+# Grafen mode comparison test with different power
 ##################################################
 
+rerun = FALSE
 if(rerun){
            list  <- list(tree_p0.5, tree_p0.6, tree_p0.7, tree_p0.8, tree_p0.9, tree_p1.0)
     names(list)  <- c("tree_p0.5", "tree_p0.6", "tree_p0.7", "tree_p0.8", "tree_p0.9", "tree_p1.0")
@@ -345,7 +346,7 @@ if(rerun){
     
     tree_lnrr_phylo <- tree_checks(data = lnRRQ10_data, tree = list[[i]], dataCol = "species_full", type = "prune")
     phylo_cor_phylo <- vcv(tree_lnrr_phylo, cor = TRUE)
-      model1_phylo <- metafor::rma.mv(effect_size ~ 1, V = V, 
+       model1_phylo <- metafor::rma.mv(effect_size ~ 1, V = V, 
                               random = list(~1 | record_num,
                                             ~1 | species_full,
                                             ~1 | trait,
@@ -353,10 +354,21 @@ if(rerun){
                                             ~1 | obs),
                               R = list(species_full = phylo_cor_phylo), dfs = "contain", 
                               test = "t", data = lnRRQ10_data) 
-             mod_list[i] <- model1_phylo 
-      names(mod_list)[i] <- names(list)[i]                
+             mod_list[[i]] <- model1_phylo 
+        names(mod_list)[i] <- names(list)[i]                
     }
-    
+
+  # Save the model list so that it doesn't need to be re-run again. It takes a LONG time otherwise.
+  saveRDS(mod_list, file = "./output/models/lnRRQ10_phylo")
+
+} else {
+  
+  # Load the model list
+    mod_list <- readRDS("./output/models/lnRRQ10_phylo")
+
+  # Have a look at the AIC of the various models to compare which power paramater is best, if any.
+   delta_aic <- order(sapply(mod_list, function(x) AIC(x))) - min(order(sapply(mod_list, function(x) AIC(x))))
+
 }
 
 ##################################################

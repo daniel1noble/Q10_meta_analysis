@@ -319,9 +319,11 @@ We explored the possibility for publication bias graphically, using funnel plots
 
 rerun = FALSE
 if(rerun){
+    # Create a list of the distinct trees to loop over
            list  <- list(tree_p0.5, tree_p0.6, tree_p0.7, tree_p0.8, tree_p0.9, tree_p1.0)
     names(list)  <- c("tree_p0.5", "tree_p0.6", "tree_p0.7", "tree_p0.8", "tree_p0.9", "tree_p1.0")
     
+    # Create an empty list to store the models
         mod_list <- list()
     
     for(i in 1:length(list)){
@@ -342,7 +344,7 @@ if(rerun){
     }
 
   # Save the model list so that it doesn't need to be re-run again. It takes a LONG time otherwise.
-  saveRDS(mod_list, file = "./output/models/lnRRQ10_phylo")
+    saveRDS(mod_list, file = "./output/models/lnRRQ10_phylo")
 
 } else {
   

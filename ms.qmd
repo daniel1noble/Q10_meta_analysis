@@ -312,6 +312,24 @@ We explored the possibility for publication bias graphically using funnel plots,
 #############
 ## lnRRQ10 ##
 #############
+##################################################
+# Organise the data and prune tree
+##################################################
+# Subset the data
+lnRRQ10_data <- data_long2 %>% filter(grepl("lnRR", name) & !is.na(effect_size) & !is.na(V) & !V == 0 & !is.na(acclim_period)) %>% 
+                              mutate(spp = species_full, c_accl_time = acclim_period - mean(acclim_period, na.rm = TRUE),
+                                    max_temp_c = scale(temp_2, scale = FALSE))
+
+# Check and prune tree
+tree_lnrr <- tree_checks(data = lnRRQ10_data, tree = tree_p0.7, dataCol = "species_full", type = "prune")
+tree_checks(data = lnRRQ10_data, tree = tree_lnrr, dataCol = "species_full", type = "check") # Good
+
+# Create the phylo correlation matrix
+phylo_cor <- vcv(tree_lnrr, cor = TRUE)
+        A <- vcv(tree_lnrr, cor = FALSE) # For bayes, need cov matrix
+
+# have a quick look on habitat, development and type. Mostly looks sensible but there is not too much data in terrestrial realm.
+sum_life <- lnRRQ10_data %>% group_by(life.hist, type, habitat) %>% summarise(n=n()) %>% arrange(habitat)
 
 ##################################################
 # Grafen mode comparison test with different power
@@ -327,7 +345,7 @@ if(rerun){
         mod_list <- list()
     
     for(i in 1:length(list)){
-    
+    i = 5
     tree_lnrr_phylo <- tree_checks(data = lnRRQ10_data, tree = list[[i]], dataCol = "species_full", type = "prune")
     phylo_cor_phylo <- vcv(tree_lnrr_phylo, cor = TRUE)
        model1_phylo <- metafor::rma.mv(effect_size ~ 1, V = V, 
@@ -356,24 +374,6 @@ if(rerun){
 
 }
 
-##################################################
-# Organise the data and prune tree
-##################################################
-# Subset the data
-lnRRQ10_data <- data_long2 %>% filter(grepl("lnRR", name) & !is.na(effect_size) & !is.na(V) & !V == 0 & !is.na(acclim_period)) %>% 
-                              mutate(spp = species_full, c_accl_time = acclim_period - mean(acclim_period, na.rm = TRUE),
-                                    max_temp_c = scale(temp_2, scale = FALSE))
-
-# Check and prune tree
-tree_lnrr <- tree_checks(data = lnRRQ10_data, tree = tree_p0.7, dataCol = "species_full", type = "prune")
-tree_checks(data = lnRRQ10_data, tree = tree_lnrr, dataCol = "species_full", type = "check") # Good
-
-# Create the phylo correlation matrix
-phylo_cor <- vcv(tree_lnrr, cor = TRUE)
-        A <- vcv(tree_lnrr, cor = FALSE) # For bayes, need cov matrix
-
-# have a quick look on habitat, development and type. Mostly looks sensible but there is not too much data in terrestrial realm.
-sum_life <- lnRRQ10_data %>% group_by(life.hist, type, habitat) %>% summarise(n=n()) %>% arrange(habitat)
 
 ##################################################
 # Model 1.1: Intercept only model. 

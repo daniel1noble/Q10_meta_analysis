@@ -345,7 +345,7 @@ if(rerun){
         mod_list <- list()
     
     for(i in 1:length(list)){
-    i = 5
+
     tree_lnrr_phylo <- tree_checks(data = lnRRQ10_data, tree = list[[i]], dataCol = "species_full", type = "prune")
     phylo_cor_phylo <- vcv(tree_lnrr_phylo, cor = TRUE)
        model1_phylo <- metafor::rma.mv(effect_size ~ 1, V = V, 
@@ -370,7 +370,7 @@ if(rerun){
     mod_list <- readRDS("./output/models/lnRRQ10_phylo")
 
   # Have a look at the AIC of the various models to compare which power paramater is best, if any.
-   delta_aic <- order(sapply(mod_list, function(x) AIC(x))) - min(order(sapply(mod_list, function(x) AIC(x))))
+   aic <- sapply(mod_list, function(x) AIC(x))
 
 }
 

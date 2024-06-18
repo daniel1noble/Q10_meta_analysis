@@ -748,7 +748,7 @@ if(rerun){
 
 ## **Results**
 
-The final dataset included a total of `r f <- taxa_sum |> dplyr::filter(habitat == "f") |> dplyr::summarise(spp = sum(spp), k = sum(n)); f[1,1]` freshwater (fishes = `r taxa_sum |> dplyr::filter(habitat == "f" & class == "Actinopterygii") |> dplyr::summarise(sp = sum(spp))`, molluscs = `r taxa_sum |> dplyr::filter(habitat == "f" & phylum == "Mollusca") |> dplyr::summarise(sp = sum(spp))`, amphibians = `r taxa_sum |> dplyr::filter(habitat == "f" & class == "Amphibia") |> dplyr::summarise(sp = sum(spp))`, reptiles = `r taxa_sum |> dplyr::filter(habitat == "f" & class == "Reptilia") |> dplyr::summarise(sp = sum(spp))`, arthropods = `r taxa_sum |> dplyr::filter(habitat == "f" & phylum == "Arthropoda") |> dplyr::summarise(sp = sum(spp))`, and a single crustacean and nematode species), `r m <- taxa_sum |> dplyr::filter(habitat == "m") |> dplyr::summarise(spp = sum(spp), k = sum(n)); m[1,1]` marine (fishes = `r taxa_sum |> dplyr::filter(habitat == "m" & class %in% c("Actinopterygii", "Agnatha","Chondrichthyes")) |> dplyr::summarise(sp = sum(spp))`, annelids = `r taxa_sum |> dplyr::filter(habitat == "m" & phylum == "Annelida") |> dplyr::summarise(sp = sum(spp))`, molluscs = `r taxa_sum |> dplyr::filter(habitat == "m" & phylum == "Mollusca") |> dplyr::summarise(sp = sum(spp))`, echinoderms = `r taxa_sum |> dplyr::filter(habitat == "m" & phylum == "Echinodermata") |> dplyr::summarise(sp = sum(spp))`, reptiles = `r taxa_sum |> dplyr::filter(habitat == "m" & class == "Reptilia") |> dplyr::summarise(sp = sum(spp))`, arthropods = `r taxa_sum |> dplyr::filter(habitat == "m" & phylum == "Arthropoda") |> dplyr::summarise(sp = sum(spp))`, and a single crustacean and cnidarian species), and `r t <- taxa_sum |> dplyr::filter(habitat == "t") |> dplyr::summarise(spp = sum(spp), k = sum(n)); t[1,1]` terrestrial species (annelids = `r taxa_sum |> dplyr::filter(habitat == "t" & phylum == "Annelida") |> dplyr::summarise(sp = sum(spp))`, molluscs = `r taxa_sum |> dplyr::filter(habitat == "t" & phylum == "Mollusca") |> dplyr::summarise(sp = sum(spp))`, arthropods = `r taxa_sum |> dplyr::filter(habitat == "t" & phylum == "Arthropoda") |> dplyr::summarise(sp = sum(spp))`, reptiles = `r taxa_sum |> dplyr::filter(habitat == "t" & class == "Reptilia") |> dplyr::summarise(sp = sum(spp))` and amphibians = `r taxa_sum |> dplyr::filter(habitat == "t" & class == "Amphibia") |> dplyr::summarise(sp = sum(spp))` along with a single tardigrade species) (@fig-1 A). We had more data on acute thermal responses (n = `r trimmed <- data_long2 |> dplyr::filter(grepl("lnRR", name) & !is.na(effect_size) & !is.na(V) & !V == 0); sum1 = trimmed |> dplyr::group_by(name, type) |> dplyr::summarise(n = dplyr::n()) |> dplyr::filter(type =="acute"); sum(sum1$n)`) compared to thermal responses after an acclimation period (n = `r sum2 <- trimmed |> dplyr::group_by(name, type) |> dplyr::summarise(n = dplyr::n()) |> dplyr::filter(type =="acclim"); sum2$n`) because acute responses were reported for each of the two acclimation temperatures (@fig-1). The two acute $lnRR_{Q_{10}}$ effect sizes differed significantly from each other (acute responses were greater for animals acclimated to high temperatures -- $\beta$ = `r model1.s1$b[3]`, 95% CI: `r model1.s1$ci.lb[3]` to `r model1.s1$ci.ub[3]`, $p_{MCMC}$ = `r p_value(model1.s1$pval[3])`), but on average they were in the same direction and only differed by ~10%. As such, we averaged the two acute $lnRR_{Q_{10}}$ effect sizes in subsequent analyses.
+The final dataset included a total of `r f <- taxa_sum |> dplyr::filter(habitat == "f") |> dplyr::summarise(spp = sum(spp), k = sum(n)); f[1,1]` freshwater (fishes = `r taxa_sum |> dplyr::filter(habitat == "f" & class == "Actinopterygii") |> dplyr::summarise(sp = sum(spp))`, molluscs = `r taxa_sum |> dplyr::filter(habitat == "f" & phylum == "Mollusca") |> dplyr::summarise(sp = sum(spp))`, amphibians = `r taxa_sum |> dplyr::filter(habitat == "f" & class == "Amphibia") |> dplyr::summarise(sp = sum(spp))`, reptiles = `r taxa_sum |> dplyr::filter(habitat == "f" & class == "Reptilia") |> dplyr::summarise(sp = sum(spp))`, arthropods = `r taxa_sum |> dplyr::filter(habitat == "f" & phylum == "Arthropoda") |> dplyr::summarise(sp = sum(spp))`, and a single crustacean and nematode species), `r m <- taxa_sum |> dplyr::filter(habitat == "m") |> dplyr::summarise(spp = sum(spp), k = sum(n)); m[1,1]` marine (fishes = `r taxa_sum |> dplyr::filter(habitat == "m" & class %in% c("Actinopterygii", "Agnatha","Chondrichthyes")) |> dplyr::summarise(sp = sum(spp))`, annelids = `r taxa_sum |> dplyr::filter(habitat == "m" & phylum == "Annelida") |> dplyr::summarise(sp = sum(spp))`, molluscs = `r taxa_sum |> dplyr::filter(habitat == "m" & phylum == "Mollusca") |> dplyr::summarise(sp = sum(spp))`, echinoderms = `r taxa_sum |> dplyr::filter(habitat == "m" & phylum == "Echinodermata") |> dplyr::summarise(sp = sum(spp))`, reptiles = `r taxa_sum |> dplyr::filter(habitat == "m" & class == "Reptilia") |> dplyr::summarise(sp = sum(spp))`, arthropods = `r taxa_sum |> dplyr::filter(habitat == "m" & phylum == "Arthropoda") |> dplyr::summarise(sp = sum(spp))`, and a single crustacean and cnidarian species), and `r t <- taxa_sum |> dplyr::filter(habitat == "t") |> dplyr::summarise(spp = sum(spp), k = sum(n)); t[1,1]` terrestrial species (annelids = `r taxa_sum |> dplyr::filter(habitat == "t" & phylum == "Annelida") |> dplyr::summarise(sp = sum(spp))`, molluscs = `r taxa_sum |> dplyr::filter(habitat == "t" & phylum == "Mollusca") |> dplyr::summarise(sp = sum(spp))`, arthropods = `r taxa_sum |> dplyr::filter(habitat == "t" & phylum == "Arthropoda") |> dplyr::summarise(sp = sum(spp))`, reptiles = `r taxa_sum |> dplyr::filter(habitat == "t" & class == "Reptilia") |> dplyr::summarise(sp = sum(spp))` and amphibians = `r taxa_sum |> dplyr::filter(habitat == "t" & class == "Amphibia") |> dplyr::summarise(sp = sum(spp))` along with a single tardigrade species) (@fig-phylo). We had more data on acute thermal responses (n = `r trimmed <- data_long2 |> dplyr::filter(grepl("lnRR", name) & !is.na(effect_size) & !is.na(V) & !V == 0); sum1 = trimmed |> dplyr::group_by(name, type) |> dplyr::summarise(n = dplyr::n()) |> dplyr::filter(type =="acute"); sum(sum1$n)`) compared to thermal responses after an acclimation period (n = `r sum2 <- trimmed |> dplyr::group_by(name, type) |> dplyr::summarise(n = dplyr::n()) |> dplyr::filter(type =="acclim"); sum2$n`) because acute responses were reported for each of the two acclimation temperatures (@fig-phylo). The two acute $lnRR_{Q_{10}}$ effect sizes differed significantly from each other (acute responses were greater for animals acclimated to high temperatures -- $\beta$ = `r model1.s1$b[3]`, 95% CI: `r model1.s1$ci.lb[3]` to `r model1.s1$ci.ub[3]`, $p_{MCMC}$ = `r p_value(model1.s1$pval[3])`), but on average they were in the same direction and only differed by ~10%. As such, we averaged the two acute $lnRR_{Q_{10}}$ effect sizes in subsequent analyses.
 
 Most of the effect size estimates came from measurements of metabolic rates (both resting and maximal -- $N_{species}$ = `r mr <- traits_all |> dplyr::filter(trait_category %in% c("rest_MR", "max_MR")); sum(mr[,"spp_n"])`, $N_{effects}$ = `r sum(mr[,"k"])`, considering acute and acclimation effects together), metabolic enzyme rates ($N_{species}$ = `r me <- traits_all |> dplyr::filter(trait_category %in% c("metabolic_enzyme", "ATPase")); sum(me[,"spp_n"])`, $N_{effects}$ = `r me <- traits_all |> dplyr::filter(trait_category %in% c("metabolic_enzyme", "ATPase")); sum(me[,"k"])`) and whole-organism performance traits (i.e., measures of speed and endurance -- $N_{species}$ = `r per <- traits_all |> dplyr::filter(trait_category %in% c("sprint", "endurance")); sum(per[,"spp_n"])`, $N_{effects}$ = `r per <- traits_all |> dplyr::filter(trait_category %in% c("sprint", "endurance")); sum(per[,"k"])`). 
 
@@ -765,12 +765,13 @@ Most of the effect size estimates came from measurements of metabolic rates (bot
       d <- ggtree(tree, layout="circular") %<+% tree_data 
 
       # Plot the tree
-      scales1 <- c("#053061", "#D1E5F0", "#67001F")
+
+       col <- c("#0871B9", "#F3B40D", "#1BB908")
       p1 <- d + 
             #geom_tiplab(size=2, offset = 10) + 
-            geom_tippoint(aes(color=habitat), size = 2) +
+            geom_tippoint(aes(color=habitat), size = 2.5) +
             labs(color = "Habitat") + 
-            scale_colour_manual(values = scales1)
+            scale_colour_manual(values = col)
       
       # Create the data matrix that can be used to plot data as a heatmap around the phylogeny
       matrix_data <- as.data.frame(data_wide %>%
@@ -808,22 +809,21 @@ Most of the effect size estimates came from measurements of metabolic rates (bot
                 scale_fill_viridis(alpha = 0.6) + labs(fill="# of Effects") + theme(legend.text =element_text(size = 24),
                                                                                     legend.title = element_text(size = 30, face = "bold"))
    
-ggsave(filename = "fig1a_unedited.pdf", path = "./output/figures/", phylo, device = "pdf", width = 10, height = 9, units = "in")
+  ggsave(filename = "fig2_unedited_18June.pdf", path = "./output/figures/", phylo, device = "pdf", width = 10, height = 9, units = "in")
 
 # Load and plot Figure 1. Note that this figure was derived using 3 separate code chunks described below. Figures were exported, imported into Adobe Illustrator for minor formatting changes and grid organisation. 
-  fig1 <- image_read("./output/figures/fig1_final.png")
-  plot(fig1)
-
+  fig2 <- image_read("./output/figures/Fig2_r1.png")
+  plot(fig2)
 
 ```
 
 ### *Terrestrial and aquatic ectotherms differ in their capacity to acclimate but acclimation does not depend on life-history stage*
 
-Overall, $lnRR_{Q_{10_{acclimation}}}$ was `r abs(mean(avg_change))`% lower than  $lnRR_{Q_{10_{acute}}}$ across all habitats (95%CI: `r quantile(avg_change, c(0.025, 0.975))[1]` to `r quantile(avg_change, c(0.025, 0.975))[2]`%). Ectotherms in marine and freshwater environments showed partial compensation of physiological rates ([@fig-1]B) amounting to reduced $lnRR_{Q_{10_{acclimation}}}$ of `r abs(mean(change_f))`% (95% CI: `r quantile(change_f, c(0.025, 0.975))[1]` to `r quantile(change_f, c(0.025, 0.975))[2]`) in freshwater and `r abs(mean(change_m))`% (95% CI: `r quantile(change_m, c(0.025, 0.975))[1]` to `r quantile(change_m, c(0.025, 0.975))[2]`) in marine environments. In contrast, terrestrial ectotherms showed no acclimation (possibly even inverse acclimation) -- showing a `r abs(mean(change_t))`% increase in $lnRR_{Q_{10_{acclimation}}}$ (95% CI: `r quantile(change_t, c(0.025, 0.975))[1]` to `r quantile(change_t, c(0.025, 0.975))[2]`, [@fig-1]B). 
+Overall, $lnRR_{Q_{10_{acclimation}}}$ was `r abs(mean(avg_change))`% lower than  $lnRR_{Q_{10_{acute}}}$ across all habitats (95%CI: `r quantile(avg_change, c(0.025, 0.975))[1]` to `r quantile(avg_change, c(0.025, 0.975))[2]`%). Ectotherms in marine and freshwater environments showed partial compensation of physiological rates ([@fig-2]A) amounting to reduced $lnRR_{Q_{10_{acclimation}}}$ of `r abs(mean(change_f))`% (95% CI: `r quantile(change_f, c(0.025, 0.975))[1]` to `r quantile(change_f, c(0.025, 0.975))[2]`) in freshwater and `r abs(mean(change_m))`% (95% CI: `r quantile(change_m, c(0.025, 0.975))[1]` to `r quantile(change_m, c(0.025, 0.975))[2]`) in marine environments. In contrast, terrestrial ectotherms showed no acclimation (possibly even inverse acclimation) -- showing a `r abs(mean(change_t))`% increase in $lnRR_{Q_{10_{acclimation}}}$ (95% CI: `r quantile(change_t, c(0.025, 0.975))[1]` to `r quantile(change_t, c(0.025, 0.975))[2]`, [@fig-2]B). 
 
 Nonetheless, effect heterogeneity was high (only `r mean(tot_i2)`% of the variance was the result of sampling variability, 95% CI: `r quantile(tot_i2, 0.025)[1]` to `r quantile(tot_i2, 0.975)[1]`%), and most variance was explained by the specific study and type of trait (Study: `r mean(stdy_i2)`% , 95% CI: `r quantile(stdy_i2, 0.025)[1]` to `r quantile(stdy_i2, 0.975)[1]`%; Trait Type: `r mean(trait_i2)`% , 95% CI: `r quantile(trait_i2, 0.025)[1]` to `r quantile(trait_i2, 0.975)[1]`%). Evolutionary relationships among taxa and species ecology (i.e., species random effect) explained little variation in acute and acclimation responses (Species: `r mean(spp_i2)`% , 95% CI: `r quantile(spp_i2, 0.025)[1]` to `r quantile(spp_i2, 0.975)[1]`%; Phylogeny: `r mean(phylo_i2)`% , 95% CI: `r quantile(phylo_i2, 0.025)[1]` to `r quantile(phylo_i2, 0.975)[1]`%).
 
-Different trait categories showed different acclimation responses across habitat types, however, they mirrored overall patterns (see Supplement; @fig-2). Acclimation capacity also did not vary by life-history stage and there were no differences between $lnRR_{Q_{10_{acclimation}}}$ and $lnRR_{Q_{10_{acute}}}$ between adult and juveniles (@fig-cvrlh A-C) (Adult-Juvenile (Acute): `r mean(acute_all)`, 95% CI: `r quantile(acute_all, 0.025)[1]` to `r quantile(acute_all, 0.975)[1]`, $p_{MCMC}$ = `r pmcmc(acute_all)`; Adult-Juvenile (Acclimation): `r mean(acclim_all)`, 95% CI: `r quantile(acclim_all, 0.025)[1]` to `r quantile(acclim_all, 0.975)[1]`, $p_{MCMC}$ = `r pmcmc(acclim_all)`).
+Different trait categories showed different acclimation responses across habitat types, however, they mirrored overall patterns (see Supplement; @fig-S2). Acclimation capacity also did not vary by life-history stage and there were no differences between $lnRR_{Q_{10_{acclimation}}}$ and $lnRR_{Q_{10_{acute}}}$ between adult and juveniles (@fig-cvrlh A-C) (Adult-Juvenile (Acute): `r mean(acute_all)`, 95% CI: `r quantile(acute_all, 0.025)[1]` to `r quantile(acute_all, 0.975)[1]`, $p_{MCMC}$ = `r pmcmc(acute_all)`; Adult-Juvenile (Acclimation): `r mean(acclim_all)`, 95% CI: `r quantile(acclim_all, 0.025)[1]` to `r quantile(acclim_all, 0.975)[1]`, $p_{MCMC}$ = `r pmcmc(acclim_all)`).
 
 ```{r, lncvrq10}
 #| label: lncvrq10
@@ -1066,21 +1066,21 @@ if(rerun){
 
 ```
 
-```{r, fig-1}
-#| label: fig-1
+```{r, fig-3}
+#| label: fig-3
 #| fig-cap:  **A)** Mean acute and acclimation $lnRR_{Q_{10}}$ across marine, freshwater, and terrestrial systems. **C)** Mean acute and acclimation $lnCVR_{Q_{10}}$ across traits for marine, freshwater and terrestrial systems. Note there were no differences between acute and acclimation $Q_{10}$ types. For both plots, k = total number of effect size estimates while the numbers in brackets indicate the number of species. Sample sizes are the same for panel A and B. Thick bars are 95% confidence intervals (CI) and thin bars 95% prediction intervals (PI). $\Beta$ values are the contrasts between acute and acclimation means. $\mu$ values are the overall mean $lnRR_{Q_{10}}$ and $lnCVR_{Q_{10}}$ averaged across acute and acclimdation types within each habitat type. In both cases, their 95% CI's are indicated within square brackets. $p_{MCMC}$ values are the posterior probability of the contrast being different from zero."
 #| warning: false
 #| echo: false
 
 
 ##################
-  # Figure 2a plot
+  # Figure 3a plot
 ##################
 
-  cols <- c("#053061","#D1E5F0",  "#67001F")
+  col <- c("#0871B9", "#F3B40D", "#1BB908")
   k_lnrr <- manual_extract(model1.2, mod = "habitat", group = "record_num", exclude = NULL)
 
-  p1.2 <- orchaRd::orchard_plot(model1.2, mod = "habitat", group  = "record_num", at = list(type = c("acute", "acclim")), by = "type", weights = "prop", xlab = TeX("$lnRR_{Q_{10}}$"), angle = 45, legend.pos = "top.left", trunk.size = 1.8, branch.size = 2.8, alpha = 0.4) + scale_x_discrete(labels = c("T" = "Terrestrial","M" = "Marine" ,"F" = "Freshwater")) +
+  p3a <- orchaRd::orchard_plot(model1.2, mod = "habitat", group  = "record_num", at = list(type = c("acute", "acclim")), by = "type", weights = "prop", xlab = TeX("$lnRR_{Q_{10}}$"), angle = 45, legend.pos = "top.left", trunk.size = 1.8, branch.size = 2.8, alpha = 0.4) + scale_x_discrete(labels = c("T" = "Terrestrial","M" = "Marine" ,"F" = "Freshwater")) +
   theme(legend.direction = "vertical") +
   
   annotate("text", x = 1.5, y = 0, 
@@ -1098,9 +1098,9 @@ if(rerun){
   annotate("text", x = 3.20, y = -0.5, 
          label =paste0(round(mean(change_t), 3), "%"), hjust = 0, size = 8) +
   
-  scale_fill_manual(values = cols) + scale_color_manual(values = rep("black",3)) + ylim(-0.5, 1.5) 
+  scale_fill_manual(values = col) + scale_color_manual(values = rep("black",3)) + ylim(-0.5, 1.5) 
     
-  p1.2 <- p1.2 + theme_classic() + theme(axis.title  = element_text(size = 24),
+  p3a <- p3a + theme_classic() + theme(axis.title  = element_text(size = 24),
                                        axis.text = element_text(size = 24),
                                        axis.text.y = element_text(angle = 45, size = 24),
                                        legend.title = element_text(size = 30),
@@ -1108,7 +1108,7 @@ if(rerun){
                                title = element_text(size = 24), legend.position = "top") 
    
 ##################
-  # Figure 1c plot
+  # Figure 3b plot
 ################## 
   # Clear from the model that there really is no difference between the change in variance for acute or acclimation CVR. But, there is a clear reduction in between individual variance for terrestrial species. As temperature get hotter then the variance in physiological rates decreases. This is not true of aquatic systems. 
 
@@ -1117,47 +1117,41 @@ if(rerun){
   x1 = 1.4
   x2 = 2.4
   x3 = 3.4
-    
-  #sum_data_p2 <- mod_results(model2.2, mod = "habitat", group = "record_num", by = "type", at = list(type = c("acute", "acclim")))
-
-  #ggplot(lnCVRQ10_data, aes(y = effect_size, x = habitat, colour = habitat, shape = type)) + ggbeeswarm::geom_quasirandom( method = "tukey", aes(color = habitat)) + 
-   #scale_x_discrete(labels = c("T" = "Terrestrial","M" = "Marine" ,"F" = "Freshwater")) + ylim(-1.5, 1.5) + scale_colour_manual(values = viridis_cols) + 
-   # theme_classic() + coord_flip()
   
-  p2 <- orchard_plot(model2.2, xlab = TeX("$lnCVR_{Q_{10}}$"), by = "type", at = list(type = c("acute", "acclim")), mod = "habitat", group  = "record_num", weights = "prop", angle = 45, trunk.size = 1.8, branch.size = 2.8, alpha = 0.4, k.pos = "none") +
-              scale_x_discrete(labels = c("T" = "Terrestrial","M" = "Marine" ,"F" = "Freshwater")) + ylim(-1.5, 1.5) +  
+  p3b <- orchard_plot(model2.2, xlab = TeX("$lnCVR_{Q_{10}}$"), by = "type", at = list(type = c("acute", "acclim")), mod = "habitat", group  = "record_num", weights = "prop", angle = 45, trunk.size = 1.8, branch.size = 2.8, alpha = 0.4, k.pos = "none") +
+              scale_x_discrete(labels = c("T" = "Terrestrial","M" = "Marine" ,"F" = "Freshwater")) +  
   
-  scale_fill_manual(values = cols) + scale_color_manual(values = rep("black",3)) +
+  scale_fill_manual(values = col) + scale_color_manual(values = rep("black",3)) +
   
-  annotate("text", x = x1, y = -2, 
+  annotate("text", x = x1, y = -1.5, 
            label =TeX(paste0("$\\mu = $", round(mean(f_cvr_mean), 3), "[", round(quantile(f_cvr_mean, 0.025), 2)," to ", round(quantile(f_cvr_mean, 0.975),2), "] ")), hjust = 0, size = 6) + 
   annotate("text", x = x1-0.15, y = -1.5, label = TeX(paste0("$p_{MCMC} = $", round(pmcmc(f_cvr_mean), digit = 2))), hjust = 0, size = 6) + 
   annotate("text", x = x1-0.15, y = 1, 
            label =paste0(round(mean(exp(f_cvr_mean)-1)*100, 2), "%"), hjust = 0, size = 6) + 
   
-  annotate("text", x = x2, y = -2, 
+  annotate("text", x = x2, y = -1.5, 
            label =TeX(paste0("$\\mu = $", round(mean(m_cvr_mean), 3), "[", round(quantile(m_cvr_mean, 0.025), 2)," to ", round(quantile(m_cvr_mean, 0.975),2), "] ")), hjust = 0, size = 6) + 
   annotate("text", x = x2-0.15, y = -1.5, label = TeX(paste0("$p_{MCMC} = $", round(pmcmc(m_cvr_mean), digit = 2))), hjust = 0, size = 6) +
   annotate("text", x = x2-0.15, y = 1, 
            label =paste0(round(mean(exp(m_cvr_mean)-1)*100, 2), "%"), hjust = 0, size = 6) + 
   
-  annotate("text", x = x3, y = -2, 
+  annotate("text", x = x3, y = -1.5, 
            label =TeX(paste0("$\\mu = $", round(mean(t_cvr_mean), 3), "[", round(quantile(t_cvr_mean, 0.025), 2)," to ", round(quantile(t_cvr_mean, 0.975),2), "] ")), hjust = 0, size = 6) + 
   annotate("text", x = x3-0.15, y = 1, 
            label =paste0(round(mean(exp(t_cvr_mean)-1)*100, 2), "%"), hjust = 0, size = 6) + labs(shape = "Type") +
     annotate("text", x = x3-0.15, y = -1.5, label = TeX(paste0("$p_{MCMC} = $", round(pmcmc(t_cvr_mean), digit = 3))), hjust = 0, size = 6) + ylim(-1.5, 1.75) + 
     annotate("text", label= paste0("k = ", k_cvr$k, " (", k_cvr$sdy, ")"), x = c(0.8, 1.8, 2.8), y = 1.3, size = 5) + ylim (-1.5, 1.5)
    
-  p2 <- p2 + theme_classic() + theme(axis.title  = element_text(size = 24),
+  p3b <- p3b + theme_classic() + theme(axis.title  = element_text(size = 24),
                                        axis.text = element_text(size = 24),
                                        axis.text.y = element_blank(),
                                        legend.title = element_text(size = 30),
                                legend.text = element_text(size = 24),
                                title = element_text(size = 24), legend.position = "top") 
-   
-  ggsave(p2, filename = "./output/figures/fig2.pdf", width = 9.3, height = 8.8)
+  
+  fig3 <- (p3a + p3b) + plot_annotation(tag_levels = "A", tag_suffix = ")")
 
-  (p1.2 + p2) + plot_annotation(tag_levels = "A", tag_suffix = ")")
+   ggsave(fig3, filename = "./output/figures/fig3_r1.pdf", width = 9.3, height = 8.8)
 
 ```
 
@@ -2471,8 +2465,8 @@ prisma
 
 #### Acute and acclimation $lnRR_{Q_{10}}$ for different trait categories across marine, freshwater and terrestrial taxa
 
-```{r, fig-2}
-#| label: fig-2
+```{r, fig-S2}
+#| label: fig-S2
 #| fig-cap: "Acute and Acclimation $lnRR_{Q_{10}}$ across traits for A) marine, B) freshwater and C) terrestrial systems. k = total number of effect size estimates while the numbers in brackets indicate the number of species. Thick bars indicate 95% confidence intervals and thin bars indicate 95% prediction intervals. The x-axis is truncated for ease of visualisation. See methods section “Moderator Variables” for a full description of the trait categories. "
 #| echo: false
 k_marine=manual_extract(model1.3_m_het, mod = "trait_category", group = "record_num", exclude = "Antiox")
@@ -2858,10 +2852,28 @@ figs2
 #| label: fig-lnrrq10_temp
 #| fig-cap: "Bubble plot of the relationship between $lnRR_{Q_{10}}$ and maximum temperature used in treatments within a study. Temperature is centered around the mean temperature in the data."
 
-bubble_plot(model1.2, mod = "max_temp_c", group = "record_num", ylab = TeX("$lnRR_{Q_{10}}"), xlab = TeX("Centered Maximum Temperature ($^{\\circ}$C)"), by = "habitat", condition.nrow = 1)  + theme(axis.title  = element_text(size = 30), 
+mod_table <- mod_results(model1.2, mod = "max_temp_c", group = "record_num", at = list(c_accl_time = 0))$mod_table  %>% mutate(moderator = moderator + mean(lnRRQ10_data$temp_2, na.rm = TRUE))
+
+col <- c("#0871B9", "#F3B40D", "#1BB908")
+ggplot(data = lnRRQ10_data, aes(x = temp_2, y = effect_size)) + 
+geom_point(aes(size = 1/sqrt(V), colour = habitat), alpha = 0.8) +
+labs(x = TeX("Maximum Temperature ($^{\\circ}$C)"), y = TeX("$lnRR_{Q_{10}}"), size = "Precision (1/SE)", color = "Habitat") + 
+ggplot2::geom_smooth(data = mod_table, 
+ggplot2::aes(x = moderator , y = lowerPR), method = "loess", 
+            formula = y ~ x, se = FALSE, lty = "dotted", colour = "black") + 
+ggplot2::geom_smooth(data = mod_table, ggplot2::aes(x = moderator, y = upperPR), method = "loess", 
+            formula = y ~ x, se = FALSE, lty = "dotted", colour = "black") + 
+ggplot2::geom_smooth(data = mod_table, ggplot2::aes(x = moderator, y = lowerCL), method = "loess", 
+            formula = y ~ x, se = FALSE, lty = "dashed", colour = "black") + 
+ggplot2::geom_smooth(data = mod_table, ggplot2::aes(x = moderator, y = upperCL), method = "loess", 
+            formula = y ~ x, se = FALSE, lty = "dashed", colour = "black") + 
+ggplot2::geom_smooth(data = mod_table, ggplot2::aes(x = moderator, y = estimate), method = "loess", 
+            formula = y ~ x, se = FALSE, colour = "black") + 
+            scale_colour_manual(labels = c("f" = "Freshwater", "m" = "Marine", "t" = "Terrestrial"), values = col)+ 
+theme_classic() + theme(axis.title  = element_text(size = 30), 
                         axis.text = element_text(size = 26), 
                         axis.text.y = element_text(size = 26),
-                        legend.text = element_text(size = 26), 
-                        legend.title = element_text(size = 24))
+                        legend.text = element_text(size = 24), 
+                        legend.title = element_text(size = 26))
 
 ```

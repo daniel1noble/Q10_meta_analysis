@@ -2851,47 +2851,17 @@ figs2
 ```
 
 
-#### Exploring the impact of temperature on $lnRR_{Q_{10}}$ PROBABLY JUST MOVE TO THE MAIN TEXT
+#### Exploring the impact of temperature on $lnRR_{Q_{10}}$ 
 
 
+```{r, fig-lnrrq10_temp}
+#| label: fig-lnrrq10_temp
+#| fig-cap: "Bubble plot of the relationship between $lnRR_{Q_{10}}$ and maximum temperature used in treatments within a study. Temperature is centered around the mean temperature in the data."
 
-
-
-```{r, lnrrq10_nonlinear}
-
-# Subset the data
-lnRRQ10_data <- data_long2 %>% filter(grepl("lnRR", name) & !is.na(effect_size) & !is.na(V) & !V == 0 & !is.na(acclim_period)) %>% 
-                              mutate(spp = species_full, c_accl_time = acclim_period - mean(acclim_period, na.rm = TRUE),
-                                     max_temp_c = scale(temp_2, scale = FALSE))
-
-# Check and prune tree
-tree_lnrr <- tree_checks(data = lnRRQ10_data, tree = tree_p0.7, dataCol = "species_full", type = "prune")
-tree_checks(data = lnRRQ10_data, tree = tree_lnrr, dataCol = "species_full", type = "check") # Good
-
-# Create the phylo correlation matrix
-phylo_cor <- vcv(tree_lnrr, cor = TRUE)
-        A <- vcv(tree_lnrr, cor = FALSE) # For bayes, need cov matrix
-
-
-rerun = FALSE
-if(rerun){
-  model1.1_nl <- metafor::rma.mv(effect_size ~ max_temp_c, V = V, 
-                              random = list(~1 | record_num,
-                                            ~1 | species_full,
-                                            ~1 | trait,
-                                            ~1 | spp,
-                                            ~1 | obs),
-                              R = list(species_full = phylo_cor), dfs = "contain", 
-                              test = "t", data = lnRRQ10_data) 
-  
-  model1.1_bayes_nl <- brms::brm(effect_size | se(sqrt(V), sigma = TRUE) ~  max_temp_c + (~1 | record_num) + (1 | gr(species_full, cov = A)) + (1 + max_temp_c| spp) + (1|trait), data2 = list(A=A), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 8, data = lnRRQ10_data)
-  
-  # Save model1.1_nl
-  saveRDS(model1.1_nl, file = "./output/models/lnRRQ10_1.1_nl")
-  saveRDS(model1.1_bayes_nl, file = "./output/models/lnRRQ10_1.1_bayes_nl")
-} else{ 
-  model1.1_nl <- readRDS("./output/models/lnRRQ10_1.1_nl")
-model1.1_bayes_nl <- readRDS("./output/models/lnRRQ10_1.1_bayes_nl")
-}
+bubble_plot(model1.2, mod = "max_temp_c", group = "record_num", ylab = TeX("$lnRR_{Q_{10}}"), xlab = TeX("Centered Maximum Temperature ($^{\\circ}$C)"), by = "habitat", condition.nrow = 1)  + theme(axis.title  = element_text(size = 30), 
+                        axis.text = element_text(size = 26), 
+                        axis.text.y = element_text(size = 26),
+                        legend.text = element_text(size = 26), 
+                        legend.title = element_text(size = 24))
 
 ```

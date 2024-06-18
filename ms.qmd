@@ -256,7 +256,7 @@ $lnRR_{Q_{10}}$, $lnCVR_{Q_{10}}$ and $lnVR_{Q_{10}}$, as with $Q_{10}$ more gen
 
 ### *Moderator Variables*
 
-We recorded or derived a series of moderator variables from each study that are expected to have an impact on our effect size estimates. These included the duration of acclimation in days and acclimation type ("acclimation" or "acclimatization") given that acclimation responses are expected to depend on how long chronic temperature exposure occurs (longer exposure = better acclimation response) [@Seebacher2015-wi]. We also recorded if the sample of animals were derived from captive or wild stocks, the life-history stage of the animals used ("adult" or "juvenile") and the habitat type ("freshwater", "marine" or "terrestrial") given that @Seebacher2015-wi show that these factors can impact $Q_{10}$ estimates. Physiological rate measures varied widely across the studies but could generally be grouped into discrete trait categories [@Seebacher2015-wi]. As such, using the detailed information on the trait type, and its associated units from a given study, we categorized each effect size into one of 12 trait categories. These categories included measures of whole organism performance measures including cardiac (i.e., 'cardiac') and muscle ('muscle') function, sprint speed ('sprint') and endurance ('endurance') and metabolic rates (i.e., maximal and resting metabolic rate; max MR', 'rest MR', respectively). Studies also quantified various enzymatic reaction rates, including enzymes involved in general metabolic responses (categorized as 'metabolic enzyme'), various parts of the electron transport chain, including ATPase activity ('ATPase'), mitochondrial leak ('mito_leak') and oxidation ('mito_oxidation') as well as antioxidant enzymes ('antiox'). All other traits not falling within these categories were placed into 'other'. 
+We recorded or derived a series of moderator variables from each study that are expected to have an impact on our effect size estimates. These included the duration of acclimation in days and acclimation type ("acclimation" or "acclimatization") given that acclimation responses are expected to depend on how long chronic temperature exposure occurs (longer exposure = better acclimation response) [@Seebacher2015-wi]. We also recorded if the sample of animals were derived from captive or wild stocks, the life-history stage of the animals used ("adult" or "juvenile") and the habitat type ("freshwater", "marine" or "terrestrial") given that @Seebacher2015-wi show that these factors can impact $Q_{10}$ estimates. Physiological rate measures varied widely across the studies but could generally be grouped into discrete trait categories [@Seebacher2015-wi]. As such, using the detailed information on the trait type, and its associated units from a given study, we categorized each effect size into one of 12 trait categories. These categories included measures of whole organism performance measures including cardiac (i.e., 'cardiac') and muscle ('muscle') function, sprint speed ('sprint') and endurance ('endurance') and metabolic rates (i.e., maximal and resting metabolic rate; max MR', 'rest MR', respectively). Studies also quantified various enzymatic reaction rates, including enzymes involved in general metabolic responses (categorized as 'metabolic enzyme'), various parts of the electron transport chain, including ATPase activity ('ATPase'), mitochondrial leak ('Proton Leak') and oxidation ('OXPHOS', short for Oxidative Phosphorylation), as well as antioxidant enzymes ('antiox'). All other traits not falling within these categories were placed into 'other'. 
 
 ### *Climate Data*
 
@@ -1173,28 +1173,28 @@ The total proportion of heterogeneity in $lnCVR_{Q_{10}}$ was lower compared to 
 #| echo: false
 #| warning: false
 
-add_theme  <- function(){theme(axis.title  = element_text(size = 24),
-                               axis.text.y = element_text(size = 15),
-                               axis.text.x = element_text(size = 15),
-                              legend.title = element_text(size = 15),
-                               legend.text = element_text(size = 15),
-                               title = element_text(size = 24))}
-branch.size = 2
-trunk.size = 5
+add_theme  <- function(){theme(axis.title  = element_text(size = 30),
+                               axis.text.y = element_text(size = 30),
+                               axis.text.x = element_text(size = 30),
+                              legend.title = element_text(size = 30),
+                               legend.text = element_text(size = 24),
+                               title = element_text(size = 36))}
+branch.size = 2.8
+trunk.size = 1.8
 
-p1 <- orchard_plot(model1.4, mod = "type", at = list(c_accl_time = 0, habitat = "m"), group = "record_num", xlab = TeX("$lnRR_{Q_{10}}$"), condition.lab = "Life Stage", by = "life.hist",  g = FALSE, k = FALSE, legend.pos = "top.left", angle = 45, branch.size = branch.size, trunk.size = trunk.size) + labs(title = "Marine") + add_theme() + ylim(-1, 1.8)
+p1 <- orchard_plot(model1.4, mod = "type", at = list(c_accl_time = 0, habitat = "m"), group = "record_num", xlab = TeX("$lnRR_{Q_{10}}$"), condition.lab = "Life Stage", by = "life.hist",  g = FALSE, k = FALSE, legend.pos = "none", angle = 45, branch.size = branch.size, trunk.size = trunk.size) + labs(title = "Marine") + add_theme() + ylim(-0.8, 1.8)
 
-p2 <- orchard_plot(model1.4, mod = "type", at = list(c_accl_time = 0, habitat = "f"), group = "record_num", xlab = TeX("$lnRR_{Q_{10}}$"), condition.lab = "Life Stage", by = "life.hist",  g = FALSE, k = FALSE, branch.size = branch.size, trunk.size = trunk.size, angle = 45,)+ labs(title = "Freshwater")  + add_theme() + theme(legend.position = "none", axis.text.y = element_blank()) + ylim(-1, 1.8)
+p2 <- orchard_plot(model1.4, mod = "type", at = list(c_accl_time = 0, habitat = "f"), group = "record_num", xlab = TeX("$lnRR_{Q_{10}}$"), condition.lab = "Life Stage", by = "life.hist",  g = FALSE, k = FALSE, branch.size = branch.size, trunk.size = trunk.size, angle = 45,)+ labs(title = "Freshwater")  + add_theme() + theme(legend.position = "none", axis.text.y = element_blank()) + ylim(-0.8, 1.8)
 
-p3 <- orchard_plot(model1.4, mod = "type", at = list(c_accl_time = 0, habitat = "t"), group = "record_num", xlab = TeX("$lnRR_{Q_{10}}$"), condition.lab = "Life Stage", by = "life.hist",  g = FALSE, k = FALSE, branch.size = branch.size, trunk.size = trunk.size, angle = 45)+ labs(title = "Terrestrial") + add_theme() + theme(legend.position = "none", axis.text.y = element_blank()) +  ylim(-1, 1.8)
+p3 <- orchard_plot(model1.4, mod = "type", at = list(c_accl_time = 0, habitat = "t"), group = "record_num", xlab = TeX("$lnRR_{Q_{10}}$"), condition.lab = "Life Stage", by = "life.hist",  g = FALSE, k = FALSE, branch.size = branch.size, trunk.size = trunk.size, angle = 45)+ labs(title = "Terrestrial") + add_theme() + theme(legend.position = "none", axis.text.y = element_blank()) +  ylim(-0.8, 1.8)
 
-p1_cvr <- orchard_plot(model2.4, mod = "type", at = list(c_accl_time = 0, habitat = "m"), group = "record_num", xlab = TeX("$lnCVR_{Q_{10}}$"), condition.lab = "Life Stage", by = "life.hist",  g = FALSE, k = FALSE, legend.pos = "top.left", angle = 45, branch.size = branch.size, trunk.size = trunk.size) + ylim(c(-2, 2.2)) + add_theme() + ylim(-2.5, 2.5)
+p1_cvr <- orchard_plot(model2.4, mod = "type", at = list(c_accl_time = 0, habitat = "m"), group = "record_num", xlab = TeX("$lnCVR_{Q_{10}}$"), condition.lab = "Life Stage", by = "life.hist",  g = FALSE, k = FALSE, legend.pos = "none", angle = 45, branch.size = branch.size, trunk.size = trunk.size) + ylim(c(-2, 2.2)) + add_theme() + ylim(-1.5, 1.5) 
 
-p2_cvr <- orchard_plot(model2.4, mod = "type", at = list(c_accl_time = 0, habitat = "f"), group = "record_num", xlab = TeX("$lnCVR_{Q_{10}}$"), condition.lab = "Life Stage", by = "life.hist",  g = FALSE, k = FALSE, branch.size = branch.size, trunk.size = trunk.size)  + add_theme() + theme(legend.position = "none", axis.text.y = element_blank()) + ylim(-2.5, 2.5)
+p2_cvr <- orchard_plot(model2.4, mod = "type", at = list(c_accl_time = 0, habitat = "f"), group = "record_num", xlab = TeX("$lnCVR_{Q_{10}}$"), condition.lab = "Life Stage", by = "life.hist",  g = FALSE, k = FALSE, branch.size = branch.size, trunk.size = trunk.size)  + add_theme() + theme(legend.position = "none", axis.text.y = element_blank()) + ylim(-1.5, 1.5)
 
-p3_cvr <- orchard_plot(model2.4, mod = "type", at = list(c_accl_time = 0, habitat = "t"), group = "record_num", xlab = TeX("$lnCVR_{Q_{10}}$"), condition.lab = "Life Stage", by = "life.hist",  g = FALSE, k = FALSE, branch.size = branch.size, trunk.size = trunk.size)+ add_theme() + theme(legend.position = "none", axis.text.y = element_blank()) + ylim(-2.5, 2.5)
+p3_cvr <- orchard_plot(model2.4, mod = "type", at = list(c_accl_time = 0, habitat = "t"), group = "record_num", xlab = TeX("$lnCVR_{Q_{10}}$"), condition.lab = "Life Stage", by = "life.hist",  g = FALSE, k = FALSE, branch.size = branch.size, trunk.size = trunk.size)+ add_theme() + theme(legend.position = "none", axis.text.y = element_blank()) + ylim(-1.7, 1.5)
 
-fig4 <-(p1 | p2 | p3) / (p1_cvr | p2_cvr | p3_cvr) + plot_annotation(tag_levels = "A", tag_suffix = ")")
+fig4 <-(p1 | p2 | p3) / (p1_cvr | p2_cvr | p3_cvr) + plot_annotation(tag_levels = "A", tag_suffix = ")") + theme(legend.position = "bottom")
 ggsave(fig4, filename = "./output/figures/fig4_lh.pdf", width = 19, height = 12, device = "pdf")
 
 fig4 <- magick::image_read("./output/figures/fig4_lh.pdf")
@@ -2473,7 +2473,7 @@ prisma
 
 ```{r, fig-2}
 #| label: fig-2
-#| fig-cap: "Acute and Acclimation $lnRR_{Q_{10}}$ across traits for A) marine, B) freshwater and C) terrestrial systems. k = total number of effect size estimates while the numbers in brackets indicate the number of species. Thick bars indicate 95% confidence intervals and thin bars indicate 95% prediction intervals. The x-axis is truncated for ease of visualisation."
+#| fig-cap: "Acute and Acclimation $lnRR_{Q_{10}}$ across traits for A) marine, B) freshwater and C) terrestrial systems. k = total number of effect size estimates while the numbers in brackets indicate the number of species. Thick bars indicate 95% confidence intervals and thin bars indicate 95% prediction intervals. The x-axis is truncated for ease of visualisation. See methods section “Moderator Variables” for a full description of the trait categories. "
 #| echo: false
 k_marine=manual_extract(model1.3_m_het, mod = "trait_category", group = "record_num", exclude = "Antiox")
 k_fresh=manual_extract(model1.3_f_het, mod = "trait_category", group = "record_num")
@@ -2514,7 +2514,7 @@ img_fig2
 
 ```{r, fig-cvrtrait}
 #| label: fig-cvrtrait
-#| fig-cap: "Acute and acclimation $lnCVR_{Q_{10}}$ across traits for A) marine, B) freshwater and C) terrestrial systems. k = total number of effect size estimates while the numbers in brackets indicate the number of species. Thick bars indicate 95% confidence intervals and thin bars indicate 95% prediction intervals. The x-axis is truncated for ease of visualisation."
+#| fig-cap: "Acute and acclimation $lnCVR_{Q_{10}}$ across traits for A) marine, B) freshwater and C) terrestrial systems. k = total number of effect size estimates while the numbers in brackets indicate the number of species. Thick bars indicate 95% confidence intervals and thin bars indicate 95% prediction intervals. The x-axis is truncated for ease of visualisation. See methods section “Moderator Variables” for a full description of the trait categories. "
 #| echo: false
 
 k_marinecv=manual_extract(model2.3m, mod = "trait_category", group = "record_num", exclude = "Antiox")

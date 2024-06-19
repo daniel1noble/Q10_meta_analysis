@@ -23,7 +23,7 @@ crossref:
   tbl-prefix: "Table"
 ---
 
-```{r}
+```{r, setup}
 #| label: setup
 #| echo: false
 #| include: false
@@ -49,8 +49,9 @@ colfunc <- colorRampPalette(rev(brewer.pal(10,"RdBu")))
   options(digits = 2, scipen = 3)
 ```
 
-```{r data_setup_summary}
-
+```{r, data_setup_summary}
+#| label: data_setup_summary
+#| echo: false
 ##########################
 ## Load processed datasets
 ##########################
@@ -367,10 +368,10 @@ if(rerun){
 } else {
   
   # Load the model list
-    mod_list <- readRDS("./output/models/lnRRQ10_phylo")
+    #mod_list <- readRDS("./output/models/lnRRQ10_phylo")
 
   # Have a look at the AIC of the various models to compare which power paramater is best, if any.
-   aic <- sapply(mod_list, function(x) AIC(x))
+   #aic <- sapply(mod_list, function(x) AIC(x))
 
 }
 
@@ -751,7 +752,9 @@ if(rerun){
                               test = "t", data = lnRRQ10_data_acute)
     saveRDS(model1.s1_int, file = "./output/models/model1.s1_int")
 
-    # Bayesian model
+    AIC(model1.s1_int, model1.s1) # AIC basically the same 
+
+    # Bayesian models to check its the same result
     model1.s1_bayes <- brms::brm(effect_size | se(sqrt(V), sigma = TRUE) ~  max_temp_c + c_accl_time + name + (~1 | record_num) + (1 | gr(species_full, cov = A)) + (1 + max_temp_c| spp) + (1|trait), data2 = list(A=A), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 8, data = lnRRQ10_data_acute)
     
     saveRDS(model1.s1_bayes, file = "./output/models/model1.s1_bayes")
@@ -762,6 +765,7 @@ if(rerun){
 
 } else{
             model1.s1 <-  readRDS(file = "./output/models/model1.s1")
+            model1.s1_int <-  readRDS(file = "./output/models/model1.s1_int")
       model1.s1_bayes <- readRDS(file= "./output/models/model1.s1_bayes")
 }
 
@@ -2497,7 +2501,7 @@ prisma
 #| label: fig-Sacute
 #| fig.width: 12.7
 #| fig.height: 8.7
-#| fig-cap: "Mean acute $lnRR_{Q_{10}}$ for cool (blue) and warm (red) acclimated populations for terrestrial (dimonds), marine (square) and freshwater (circle) habitats. Note that poinst in each category show the full distribution of data irrespective of habitat for simplicity. k = total number of effect size estimates while the numbers in brackets indicate the number of species. Thick bars indicate 95% confidence intervals and thin bars indicate 95% prediction intervals. Note that means for all three habitats are displayed but there is weak evidence that the means differ between habitats given a model with and without an interaction with habitat are equally supported. Note that x-axis is truncated for ease of visualisation. Sample sizes for each habitat for acute warm and cold are: marine [warm = (131, 38, 29), cold = (136, 41, 32)], freshwater [warm = (294, 76, 61), cold = (293, 77, 63)], terrestrial [warm = (83, 31, 35), cold = (84, 31, 35)]. Numbers within brackets are number of effects, number of studies and number of species."
+#| fig-cap: "Mean acute $lnRR_{Q_{10}}$ for cool (blue) and warm (red) acclimated populations for terrestrial (diamonds), marine (square) and freshwater (circle) habitats. Note that points  in each category show the full distribution of data irrespective of habitat for simplicity. k = total number of effect size estimates while the numbers in brackets indicate the number of species. Thick bars indicate 95% confidence intervals and thin bars indicate 95% prediction intervals. Note that means for all three habitats are displayed but there is weak evidence that the means differ between habitats given models with and without an interaction with habitat are equally supported. Note that x-axis is truncated for ease of visualisation. Sample sizes for each habitat for acute warm and cold are: marine [warm = (131, 38, 29), cold = (136, 41, 32)], freshwater [warm = (294, 76, 61), cold = (293, 77, 63)], terrestrial [warm = (83, 31, 35), cold = (84, 31, 35)]. Numbers within brackets are number of effects, number of studies and number of species."
 #| echo: false
 
 col_acute <- c("#3F5FAC", "#EF3D25")
@@ -2600,22 +2604,28 @@ We explored mean-variance relationships for the acute and acclimation responses 
 ```{r, fig-mv}
 #| label: fig-mv
 #| fig-cap: "Mean-standard deviation relationships for the acute and acclimation responses across all habitats. Relationships are depicted for the low temperature treatment of the study (A) and high temperature treatment (B)."
+  col <- c("#0871B9", "#F3B40D", "#1BB908")
 
-# Model mean variance relationships to estimate the relationship
+# Model mean variance relationships to estimate the relationship. Two additonal models to address reviewer comments about what exactly is changing in the effect size
     model_mv1  <- brm(log(r1.1_sd) ~ log(r1.1)*habitat + (1|record_num) + (1|spp) + (1|trait), chains = 4, cores = 4, iter = 4000, warmup = 1000, thin = 1, control = list(adapt_delta = 0.98), data = lnRRQ10_data)
+    saveRDS(model_mv1, file = "./output/models/model_mv1")
+    
     model_mv2  <- brm(log(r1.2_sd) ~ log(r1.2)*habitat + (1|record_num) + (1|spp) + (1|trait), chains = 4, cores = 4, iter = 4000, warmup = 1000, thin = 1, control = list(adapt_delta = 0.98), data = lnRRQ10_data)
+    saveRDS(model_mv2, file = "./output/models/model_mv2")
 
-mv1 <- ggplot2::ggplot(lnRRQ10_data, aes(x = log(r1.1), y = log(r1.1_sd))) +
+mv1 <- ggplot2::ggplot(lnRRQ10_data, aes(x = log(r1.1), y = log(r1.1_sd),color = habitat)) +
                 geom_point(aes(color = habitat), size = 2.2) + 
                 geom_smooth(method = "lm", se = FALSE) + 
                 labs(x = "log (Mean)", y = "log (SD)", color = "Habitat") + 
+                scale_colour_manual(values = col) + 
                 facet_wrap(~type) + theme_classic() + theme(axis.text = element_text(size=14), axis.title = element_text(size = 16), 
                 legend.text = element_text(size = 14), legend.title = element_text(size = 16), strip.text = element_text(size = 16))
 
-mv2 <- ggplot2::ggplot(lnRRQ10_data, aes(x = log(r1.2), y = log(r1.2_sd))) +
+mv2 <- ggplot2::ggplot(lnRRQ10_data, aes(x = log(r1.2), y = log(r1.2_sd), color = habitat)) +
                 geom_point(aes(color = habitat), size = 2.2) + 
                 geom_smooth(method = "lm", se = FALSE) + 
                 labs(x = "log (Mean)", y = "log (SD)", color = "Habitat") + 
+                scale_colour_manual(values = col)  +
                 facet_wrap(~type) + theme_classic() + theme(axis.text = element_text(size=14), axis.title = element_text(size = 16), 
                 legend.text = element_text(size = 14), legend.title = element_text(size = 16), strip.text = element_text(size = 16))
 

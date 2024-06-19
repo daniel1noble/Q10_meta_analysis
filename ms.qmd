@@ -2950,10 +2950,14 @@ theme_classic() + theme(axis.title  = element_text(size = 30),
 ```
 
 
-```{r}
-  bubble_plot(model1.2, mod = "c_accl_time", group = "spp", ylab = TeX("$lnRR_{Q_{10}}$"), xlab = "Centered Acclimaton Time (days)") + theme_classic() + theme(axis.title  = element_text(size = 30), 
+```{r, fig-accl_time}
+#| label: fig-accl_time
+#| fig-cap: "Bubble plot of the relationship between $lnRR_{Q_{10}}$ and acclimation time within a study. Acclimation time is centered around the mean acclimation time in the data."
+
+  bubble_plot(model1.2, mod = "c_accl_time", group = "spp", ylab = TeX("$lnRR_{Q_{10}}$"), xlab = "Centered Acclimaton Time (days)") + geom_point(data = lnRRQ10_data, aes(colour)) +theme_classic() + theme(axis.title  = element_text(size = 30), 
                         axis.text = element_text(size = 26), 
                         axis.text.y = element_text(size = 26),
                         legend.text = element_text(size = 24), 
                         legend.title = element_text(size = 26))
+                 
 ```

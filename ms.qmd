@@ -1188,7 +1188,7 @@ if(rerun){
                                legend.text = element_text(size = 24),
                                title = element_text(size = 24), legend.position = "top") + guides(shape = "none")
   
-  fig3 <- (p3a + p3b) + plot_annotation(tag_levels = "A", tag_suffix = ")")
+  fig3 <- (p3a + p3b) + plot_annotation(tag_levels = "A")
   fig3
   ggsave(fig3, filename = "./output/figures/fig3_r1.pdf", width = 21.88, height = 9)
 
@@ -1244,10 +1244,10 @@ p2_cvr <- orchard_plot(model2.4, mod = "type", at = list(c_accl_time = 0, habita
 
 p3_cvr <- orchard_plot(model2.4, mod = "type", at = list(c_accl_time = 0, habitat = "t"), angle = 45, group = "record_num", xlab = TeX("$lnCVR_{Q_{10}}$"), condition.lab = "Life Stage", by = "life.hist",  g = FALSE, k = FALSE, branch.size = branch.size, trunk.size = trunk.size)+ add_theme()  + ylim(-1.55, 1.1) + annotate("text", x = x.pos, y = 0.6, label = TeX(paste0("\\it{k} = ", t_cv$k, " (", t_cv$spp, ")")), size = size_annot) +  theme(legend.position = "none")
 
-fig4 <-(p3 | p1 | p2) / (p3_cvr | p1_cvr | p2_cvr) + plot_annotation(tag_levels = "A", tag_suffix = ")") 
+fig4 <-(p3 | p1 | p2) / (p3_cvr | p1_cvr | p2_cvr) + plot_annotation(tag_levels = "A") 
 ggsave(fig4, filename = "./output/figures/fig4_lh_r1.pdf", width = 22, height = 12, device = "pdf")
 
-fig4 <- magick::image_read("./output/figures/fig4_lh.pdf")
+fig4 <- magick::image_read("./output/figures/fig4_lh_r1.pdf")
 fig4
 ```
 
@@ -1306,64 +1306,13 @@ envi_var <- lnRRQ10_data_wild %>% group_by(habitat) %>% summarise(mean_SD = mean
 # Lets have a look at modelling whether the environmental variability and predcitability vary by habitats
 if(rerun){
      sd_mod <- bf(log(sd) ~ habitat  + (1|record_num) + (1|spp)) 
-    acf_all_mod <- bf(acf_all ~ habitat  + (1|record_num) + (1|spp))
 
-  model_envi <- brms::brm(sd_mod + acf_all_mod + set_rescor(TRUE), family = gaussian(),  control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 4, data = lnRRQ10_data_wild)
+  model_envi <- brms::brm(sd_mod, family = gaussian(),  control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 1, iter = 5000, warmup = 1000, cores = 4, data = lnRRQ10_data_wild)
   saveRDS(model_envi, file = "./output/models/model_envi")
 } else {
   model_envi <- readRDS("./output/models/model_envi")
 }
 
-###################################################
-  # Model 3.2: Model controlling for acclimation time, 
-  # type and habitat assuming type can vary by habitat
-###################################################
-rerun = FALSE
-if(rerun){
-  # More realistic model with 
-  model3.2          <- metafor::rma.mv(effect_size ~ max_temp_c + c_accl_time + type + habitat + type:habitat, V = V,
-                                       random = list(~1 | record_num,
-                                            ~1 | species_full,
-                                            ~1 | trait,
-                                            ~1 + max_temp_c| spp,
-                                            ~1 | obs),
-                              R = list(species_full = phylo_cor_wild), dfs = "contain", 
-                              test = "t", data = lnRRQ10_data_wild)
-  
-   model3.2_bayes <- brms::brm(effect_size | se(sqrt(V), sigma = TRUE) ~  max_temp_c + c_accl_time + type + habitat + type:habitat + (~1 | record_num) + (1 | gr(species_full, cov = A_wild)) + (1 + max_temp_c| spp) + (1|trait), data2 = list(A_wild=A_wild), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 8, data = lnRRQ10_data_wild)
-                                  
-  # Save model3.2
-  saveRDS(model3.2, file = "./output/models/lnRRQ10_3.2")
-  saveRDS(model3.2_bayes, file = "./output/models/lnRRQ10_3.2_bayes")
-
-  } else{
-        model3.2 <- readRDS("./output/models/lnRRQ10_3.2")
-  model3.2_bayes <- readRDS("./output/models/lnRRQ10_3.2_bayes")
-}
-
-####################################################
-  ## Model 3.2: Bayesian Contrasts
-###################################################
-  posteriors_3.2 <- posterior_samples(model3.2_bayes, pars = "^b")
-  f_acute_wild  <- posteriors_3.2[,"b_Intercept"]
-  f_acclim_wild <- posteriors_3.2[,"b_Intercept"] + posteriors_3.2[,"b_typeacclim"]
-  m_acute_wild  <- posteriors_3.2[,"b_Intercept"] + posteriors_3.2[,"b_habitatm"]
-  m_acclim_wild <- posteriors_3.2[,"b_Intercept"] + posteriors_3.2[,"b_habitatm"] + posteriors_3.2[,"b_typeacclim"] + posteriors_3.2[,"b_typeacclim:habitatm"]
-  t_acute_wild  <- posteriors_3.2[,"b_Intercept"] + posteriors_3.2[,"b_habitatt"]
-  t_acclim_wild <- posteriors_3.2[,"b_Intercept"] + posteriors_3.2[,"b_habitatt"] + posteriors_3.2[,"b_typeacclim"] + posteriors_3.2[,"b_typeacclim:habitatt"]
-
-# Q10 values for each category. Effect sizes are quite small really
-   f_acute_Q10_wild <- exp(f_acute_wild) ; mean(f_acute_Q10_wild)
-  f_acclim_Q10_wild <- exp(f_acclim_wild); mean(f_acclim_Q10_wild)
-   m_acute_Q10_wild <- exp(m_acute_wild) ; mean(f_acute_Q10_wild)
-  m_acclim_Q10_wild <- exp(m_acclim_wild); mean(f_acclim_Q10_wild)
-   t_acute_Q10_wild <- exp(t_acute_wild) ; mean(t_acute_Q10_wild)
-  t_acclim_Q10_wild <- exp(t_acclim_wild); mean(t_acclim_Q10_wild)
-
-# % change in acclimation on log scale; relative to the acute measurements
-  change_f_wild <- ((f_acclim_wild - f_acute_wild) / f_acute_wild) *100; quantile(change_f_wild, c(0.025, 0.975))
-  change_m_wild <- ((m_acclim_wild - m_acute_wild) / m_acute_wild) *100; quantile(change_m_wild, c(0.025, 0.975))
-  change_t_wild <- ((t_acclim_wild - t_acute_wild) / t_acute_wild) *100; quantile(change_t_wild, c(0.025, 0.975))
 
 ####################################################
   # Model 3.3: Model environmental variability by acute 
@@ -1392,153 +1341,7 @@ if(rerun){
   model3.3_bayes <- readRDS("./output/models/lnRRQ10_3.3_bayes")
 }
   
-################################################################
-  # Model 3.4: Environmental autocorrelation model by acute/acclim
-################################################################
-if(rerun){
-  # More realistic model with 
-  model3.4          <- metafor::rma.mv(effect_size ~ max_temp_c + c_accl_time + acf_all_c + type + type:acf_all_c, V = V,
-                                       random = list(~1 | record_num,
-                                            ~1 | species_full,
-                                            ~1 | trait,
-                                            ~1 + max_temp_c| spp,
-                                            ~1 | obs),
-                              R = list(species_full = phylo_cor_wild), dfs = "contain", 
-                              test = "t", data = lnRRQ10_data_wild)
-  
-   model3.4_bayes <- brms::brm(effect_size | se(sqrt(V), sigma = TRUE) ~  max_temp_c + c_accl_time + acf_all_c + type + type:acf_all_c + (~1 | record_num) + (1 | gr(species_full, cov = A_wild)) + (1 + max_temp_c| spp) + (1|trait), data2 = list(A_wild=A_wild), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 8, data = lnRRQ10_data_wild)
-                                  
-  # Save model3.3
-  saveRDS(model3.4, file = "./output/models/lnRRQ10_3.4")
-  saveRDS(model3.4_bayes, file = "./output/models/lnRRQ10_3.4_bayes")
 
-  } else{
-        model3.4 <- readRDS("./output/models/lnRRQ10_3.4")
-  model3.4_bayes <- readRDS("./output/models/lnRRQ10_3.4_bayes")
-}
-  
-################################################################
-  # Model 3.5: Environmental variability  model
-################################################################
-if(rerun){
-  # More realistic model with 
-  model3.5          <- metafor::rma.mv(effect_size ~ max_temp_c + c_accl_time + cv_c + type, V = V,
-                                       random = list(~1 | record_num,
-                                            ~1 | species_full,
-                                            ~1 | trait,
-                                            ~1 + max_temp_c| spp,
-                                            ~1 | obs),
-                              R = list(species_full = phylo_cor_wild), dfs = "contain", 
-                              test = "t", data = lnRRQ10_data_wild)
-  
-   model3.5_bayes <- brms::brm(effect_size | se(sqrt(V), sigma = TRUE) ~  max_temp_c + c_accl_time + cv_c + type + (~1 | record_num) + (1 | gr(species_full, cov = A_wild)) + (1 + max_temp_c| spp) + (1|trait) + (1|obs), data2 = list(A_wild=A_wild), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 8, data = lnRRQ10_data_wild)
-                                  
-  # Save model3.5
-  saveRDS(model3.5, file = "./output/models/lnRRQ10_3.5")
-  saveRDS(model3.5_bayes, file = "./output/models/lnRRQ10_3.5_bayes")
-
-  } else{
-        model3.5 <- readRDS("./output/models/lnRRQ10_3.5")
-  model3.5_bayes <- readRDS("./output/models/lnRRQ10_3.5_bayes")
-}
-  
-################################################################
-  # Model 3.6: Environmental autocorrelation model
-################################################################
-if(rerun){
-  # More realistic model with 
-  model3.6          <- metafor::rma.mv(effect_size ~ max_temp_c + c_accl_time + acf_all_c + type, V = V,
-                                       random = list(~1 | record_num,
-                                            ~1 | species_full,
-                                            ~1 | trait,
-                                            ~1 + max_temp_c| spp,
-                                            ~1 | obs),
-                              R = list(species_full = phylo_cor_wild), dfs = "contain", 
-                              test = "t", data = lnRRQ10_data_wild)
-  
-   model3.6_bayes <- brms::brm(effect_size | se(sqrt(V), sigma = TRUE) ~  max_temp_c+ c_accl_time + acf_all_c + type + (~1 | record_num) + (1 | gr(species_full, cov = A_wild)) + (1 + max_temp_c| spp) + (1|trait), data2 = list(A_wild=A_wild), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 4, data = lnRRQ10_data_wild)
-                                  
-  # Save model3.6
-  saveRDS(model3.6, file = "./output/models/lnRRQ10_3.6")
-  saveRDS(model3.6_bayes, file = "./output/models/lnRRQ10_3.6_bayes")
-
-  } else{
-        model3.6 <- readRDS("./output/models/lnRRQ10_3.6")
-  model3.6_bayes <- readRDS("./output/models/lnRRQ10_3.6_bayes")
-}
-  
-################################################################
-  # Model 3.7: Environmental variability and autocorrelation model
-################################################################
-  
-if(rerun){
-  # More realistic model with 
-  model3.7          <- metafor::rma.mv(effect_size ~ max_temp_c + c_accl_time + acf_all_c + cv_c + type, V = V,
-                                       random = list(~1 | record_num,
-                                            ~1 | species_full,
-                                            ~1 | trait,
-                                            ~1 + max_temp_c| spp,
-                                            ~1 | obs),
-                              R = list(species_full = phylo_cor_wild), dfs = "contain", 
-                              test = "t", data = lnRRQ10_data_wild)
-  
-   model3.7_bayes <- brms::brm(effect_size | se(sqrt(V), sigma = TRUE) ~  max_temp_c + c_accl_time + acf_all_c + cv_c + type + (~1 | record_num) + (1 | gr(species_full, cov = A_wild)) + (1 + max_temp_c| spp) + (1|trait), data2 = list(A_wild=A_wild), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 8, data = lnRRQ10_data_wild)
-                                  
-  # Save model3.7
-  saveRDS(model3.7, file = "./output/models/lnRRQ10_3.7")
-  saveRDS(model3.7_bayes, file = "./output/models/lnRRQ10_3.7_bayes")
-
-  } else{
-        model3.7 <- readRDS("./output/models/lnRRQ10_3.7")
-  model3.7_bayes <- readRDS("./output/models/lnRRQ10_3.7_bayes")
-}
-  
-############################################################################################
-# Model 3.8: Acclimatization lnRRQ10 only. Test if environmental predictability explains 
-# differently in each habitat
-############################################################################################  
-  lnRRQ10_data_wild_acclim <- lnRRQ10_data_wild %>%  filter(type == "acclim")
-  
-  # Create the phylo correlation matrix
-  
-  # Check and prune tree
-tree_lnrr_wild_acclim <- tree_checks(data = lnRRQ10_data_wild_acclim, tree = tree_p0.7, dataCol = "species_full", type = "prune")
-tree_checks(data = lnRRQ10_data_wild_acclim, tree = tree_lnrr_wild_acclim, dataCol = "species_full", type = "check")
-
-phylo_cor_wild_acclim <- vcv(tree_lnrr_wild_acclim, cor = TRUE)
-        A_wild_acclim <- vcv(tree_lnrr_wild_acclim, cor = FALSE) # For bayes, need cov matrix
-  
-if(rerun){
-  # More realistic model with 
-  model3.8  <- metafor::rma.mv(effect_size ~ max_temp_c + c_accl_time + acf_all_c + habitat + habitat:acf_all_c, V = V,
-                                       random = list(~1 | record_num,
-                                            ~1 | species_full,
-                                            ~1 | trait,
-                                            ~1 + max_temp_c| spp,
-                                            ~1 | obs),
-                              R = list(species_full = phylo_cor_wild_acclim), dfs = "contain", 
-                              test = "t", data = lnRRQ10_data_wild_acclim)
-  
-   model3.8_bayes <- brms::brm(effect_size | se(sqrt(V), sigma = TRUE) ~  max_temp_c + c_accl_time + acf_all_c + habitat + habitat:acf_all_c + (~1 | record_num) + (1 | gr(species_full, cov = A_wild_acclim)) + (1 + max_temp_c| spp) + (1|trait), data2 = list(A_wild_acclim=A_wild_acclim), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 8, data = lnRRQ10_data_wild_acclim)
-                                  
-  # Save model3.8
-  saveRDS(model3.8, file = "./output/models/lnRRQ10_3.8")
-  saveRDS(model3.8_bayes, file = "./output/models/lnRRQ10_3.8_bayes")
-
-  } else{
-        model3.8 <- readRDS("./output/models/lnRRQ10_3.8")
-  model3.8_bayes <- readRDS("./output/models/lnRRQ10_3.8_bayes")
-}
-
-#################################################
-### Bayesian Slopes from Model 3.8
-#################################################
- posteriors3.8 <- posterior_samples(model3.8_bayes, "^b") 
-        
-    slope_f_3.8 <- posteriors3.8[,"b_acf_all_c"]; pmcmc(slope_f_3.8); quantile(slope_f_3.8, c(0.025, 0.975))
-    slope_m_3.8 <- posteriors3.8[,"b_acf_all_c"] + posteriors3.8[,"b_acf_all_c:habitatm"]; pmcmc(slope_m_3.8); quantile(slope_m_3.8, c(0.025, 0.975))
-    slope_t_3.8 <- posteriors3.8[,"b_acf_all_c"] + posteriors3.8[,"b_acf_all_c:habitatt"]; pmcmc(slope_t_3.8); quantile(slope_t_3.8, c(0.025, 0.975))
-    
 ############################################################################################
 # Model 3.9: Acclimatization lnRRQ10 only. Test if environmental variance explains 
 # differently in each habitat
@@ -1585,16 +1388,6 @@ if(rerun){
 
 if(rerun){
     # Terrestrial Models
-    model3.8_t  <- metafor::rma.mv(effect_size ~ max_temp_c + c_accl_time + acf_all_c, V = V,
-                                       random = list(~1 | record_num,
-                                            ~1 | species_full,
-                                            ~1 | trait,
-                                            ~1 + max_temp_c| spp,
-                                            ~1 | obs),
-                              R = list(species_full = phylo_cor_wild_acclim), dfs = "contain", 
-                              test = "t", data = lnRRQ10_data_wild_acclim_t)
-    saveRDS(model3.8_t, "./output/models/model3.8_t")
-
     model3.9_t  <- metafor::rma.mv(effect_size ~ max_temp_c + c_accl_time + cv_c, V = V,
                                        random = list(~1 | record_num,
                                             ~1 | species_full,
@@ -1605,26 +1398,7 @@ if(rerun){
                               test = "t", data = lnRRQ10_data_wild_acclim_t)
     saveRDS(model3.9_t, "./output/models/model3.9_t")
                    
-        # Model just quickly tests if we are missing an important interaction. It may not necessarily be just about the variability. We could have variable sites, but a variance site that has some predictability vs a variable site without predictability are two different things. We want predictability AND variance
-    model3.10_t  <- metafor::rma.mv(effect_size ~ max_temp_c + c_accl_time + cv_c + acf_all_c + acf_all_c:cv_c, V = V,
-                                       random = list(~1 | record_num,
-                                            ~1 | species_full,
-                                            ~1 | trait,
-                                            ~1 + max_temp_c| spp,
-                                            ~1 | obs),
-                              R = list(species_full = phylo_cor_wild_acclim), dfs = "contain", 
-                              test = "t", data = lnRRQ10_data_wild_acclim_t)
-     saveRDS(model3.10_t, "./output/models/model3.10_t")
     # Freshwater Models
-    model3.8_f  <- metafor::rma.mv(effect_size ~ max_temp_c + c_accl_time + acf_all_c, V = V,
-                                       random = list(~1 | record_num,
-                                            ~1 | species_full,
-                                            ~1 | trait,
-                                            ~1 + max_temp_c| spp,
-                                            ~1 | obs),
-                              R = list(species_full = phylo_cor_wild_acclim), dfs = "contain", 
-                              test = "t", data = lnRRQ10_data_wild_acclim_f)
-    saveRDS(model3.8_f, "./output/models/model3.8_f")
     
     model3.9_f  <- metafor::rma.mv(effect_size ~ max_temp_c + c_accl_time + cv_c, V = V,
                                        random = list(~1 | record_num,
@@ -1637,27 +1411,7 @@ if(rerun){
 
     saveRDS(model3.9_f, "./output/models/model3.9_f")
 
-       # Model just quickly tests if we are missing an important interaction. It may not necessarily be just about the variability. We could have variable sites, but a variance site that has some predictability vs a variable site without predictability are two different things. We want predictability AND variance 
-    
-     model3.10_f  <- metafor::rma.mv(effect_size ~ max_temp_c + c_accl_time + cv_c + acf_all_c + acf_all_c:cv_c, V = V,
-                                       random = list(~1 | record_num,
-                                            ~1 | species_full,
-                                            ~1 | trait,
-                                            ~1 + max_temp_c| spp,
-                                            ~1 | obs),
-                              R = list(species_full = phylo_cor_wild_acclim), dfs = "contain", 
-                              test = "t", data = lnRRQ10_data_wild_acclim_f)
-      saveRDS(model3.10_f, "./output/models/model3.10_f")
     # Marine Models
-      model3.8_m  <- metafor::rma.mv(effect_size ~ max_temp_c + c_accl_time + acf_all_c, V = V,
-                                       random = list(~1 | record_num,
-                                            ~1 | species_full,
-                                            ~1 | trait,
-                                            ~1 + max_temp_c| spp,
-                                            ~1 | obs),
-                              R = list(species_full = phylo_cor_wild_acclim), dfs = "contain", 
-                              test = "t", data = lnRRQ10_data_wild_acclim_m)
-        saveRDS(model3.8_m, "./output/models/model3.8_m")
 
     model3.9_m  <- metafor::rma.mv(effect_size ~ max_temp_c + c_accl_time + cv_c, V = V,
                                        random = list(~1 | record_num,
@@ -1668,27 +1422,11 @@ if(rerun){
                               R = list(species_full = phylo_cor_wild_acclim), dfs = "contain", 
                               test = "t", data = lnRRQ10_data_wild_acclim_m)
     saveRDS(model3.9_m, "./output/models/model3.9_m")
-    # Model just quickly tests if we are missing an important interaction. It may not necessarily be just about the variability. We could have variable sites, but a variance site that has some predictability vs a variable site without predictability are two different things. We want predictability AND variance
     
-    model3.10_m  <- metafor::rma.mv(effect_size ~ max_temp_c + c_accl_time + cv_c + acf_all_c + acf_all_c:cv_c, V = V,
-                                       random = list(~1 | record_num,
-                                            ~1 | species_full,
-                                            ~1 | trait,
-                                            ~1 + max_temp_c| spp,
-                                            ~1 | obs),
-                              R = list(species_full = phylo_cor_wild_acclim), dfs = "contain", 
-                              test = "t", data = lnRRQ10_data_wild_acclim_m)
-    saveRDS(model3.10_m, "./output/models/model3.10_m")
   } else {
-     model3.8_t <- readRDS("./output/models/model3.8_t")
      model3.9_t <- readRDS("./output/models/model3.9_t")
-    model3.10_t <- readRDS("./output/models/model3.10_t")
-     model3.8_f <- readRDS("./output/models/model3.8_f")
      model3.9_f <- readRDS("./output/models/model3.9_f")
-    model3.10_f <- readRDS("./output/models/model3.10_f")
      model3.9_m <- readRDS("./output/models/model3.9_m")
-    model3.10_m <- readRDS("./output/models/model3.10_m")
-     model3.8_m <- readRDS("./output/models/model3.8_m")
 }
 
        r2_t <- r2_ml(model3.9_t)[1]    
@@ -1742,57 +1480,6 @@ phylo_cor_wild_cvr <- vcv(tree_lncvr_wild, cor = TRUE)
     lnCVRQ10_data_wild <- lnCVRQ10_data_wild %>% mutate(     cv_c = scale(cv),
                                                         acf_all_c = scale(acf_all))
 
-###################################################
-  # Model 4.2: Model controlling for acclimation time, 
-  # type and habitat assuming type can vary by habitat
-###################################################
-rerun = FALSE
-if(rerun){
-  # More realistic model with 
-  model4.2          <- metafor::rma.mv(effect_size ~ c_accl_time + type + habitat + type:habitat, V = V,
-                              random = list(~1 | record_num,
-                                            ~1 | species_full,
-                                            ~1 | trait,
-                                            ~1 | spp,
-                                            ~1 | obs),
-                              R = list(species_full = phylo_cor_wild_cvr), dfs = "contain", 
-                              test = "t", data = lnCVRQ10_data_wild)
-  
-   model4.2_bayes <- brms::brm(effect_size | se(sqrt(V), sigma = TRUE) ~  c_accl_time + type + habitat + type:habitat + (~1 | record_num) + (1 | gr(species_full, cov = A_wild_cvr)) + (1 | spp) + (1|trait), data2 = list(A_wild_cvr=A_wild_cvr), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 8, data = lnCVRQ10_data_wild)
-                                  
-  # Save model3.2
-  saveRDS(model4.2, file = "./output/models/lnCVRQ10_4.2")
-  saveRDS(model4.2_bayes, file = "./output/models/lnCVRQ10_4.2_bayes")
-
-  } else{
-        model4.2 <- readRDS("./output/models/lnCVRQ10_4.2")
-  model4.2_bayes <- readRDS("./output/models/lnCVRQ10_4.2_bayes")
-}
-
-####################################################
-  ## Model 4.2: Bayesian Contrasts
-###################################################
-  posteriors_4.2 <- posterior_samples(model4.2_bayes, pars = "^b")
-  f_acute_wild_cvr  <- posteriors_4.2[,"b_Intercept"]
-  f_acclim_wild_cvr <- posteriors_4.2[,"b_Intercept"] + posteriors_4.2[,"b_typeacclim"]
-  m_acute_wild_cvr  <- posteriors_4.2[,"b_Intercept"] + posteriors_4.2[,"b_habitatm"]
-  m_acclim_wild_cvr <- posteriors_4.2[,"b_Intercept"] + posteriors_4.2[,"b_habitatm"] + posteriors_4.2[,"b_typeacclim"] + posteriors_4.2[,"b_typeacclim:habitatm"]
-  t_acute_wild_cvr  <- posteriors_4.2[,"b_Intercept"] + posteriors_4.2[,"b_habitatt"]
-  t_acclim_wild_cvr <- posteriors_4.2[,"b_Intercept"] + posteriors_4.2[,"b_habitatt"] + posteriors_4.2[,"b_typeacclim"] + posteriors_4.2[,"b_typeacclim:habitatt"]
-
-# CVRQ10 values for each category.
-   f_acute_Q10_wild_cvr <- exp(f_acute_wild_cvr) ; mean(f_acute_Q10_wild_cvr)
-  f_acclim_Q10_wild_cvr <- exp(f_acclim_wild_cvr); mean(f_acclim_Q10_wild_cvr)
-   m_acute_Q10_wild_cvr <- exp(m_acute_wild_cvr) ; mean(f_acute_Q10_wild_cvr)
-  m_acclim_Q10_wild_cvr <- exp(m_acclim_wild_cvr); mean(f_acclim_Q10_wild_cvr)
-   t_acute_Q10_wild_cvr <- exp(t_acute_wild_cvr) ; mean(t_acute_Q10_wild_cvr)
-  t_acclim_Q10_wild_cvr <- exp(t_acclim_wild_cvr); mean(t_acclim_Q10_wild_cvr)
-
-# % change in acclimation on log scale
-  change_f_wild_cvr <- ((f_acclim_wild_cvr - f_acute_wild_cvr) / f_acute_wild_cvr)*100; quantile(change_f_wild_cvr, c(0.025, 0.975))
-  change_m_wild_cvr <- ((m_acclim_wild_cvr - m_acute_wild_cvr) /m_acute_wild_cvr)*100; quantile(change_m_wild_cvr, c(0.025, 0.975))
-  change_t_wild_cvr <- ((t_acclim_wild_cvr - t_acute_wild_cvr)/t_acute_wild_cvr)*100; quantile(change_t_wild_cvr, c(0.025, 0.975))
-
 ####################################################
   # Model 4.3: Model environmental variability by acute/acclim
 ####################################################
@@ -1819,153 +1506,7 @@ if(rerun){
   model4.3_bayes <- readRDS("./output/models/lnCVRQ10_4.3_bayes")
 }
   
-################################################################
-  # Model 4.4: Environmental autocorrelation model by acute/acclim
-################################################################
-if(rerun){
-  # More realistic model with 
-  model4.4          <- metafor::rma.mv(effect_size ~ c_accl_time + acf_all_c + type + type:acf_all_c, V = V,
-                                       random = list(~1 | record_num,
-                                            ~1 | species_full,
-                                            ~1 | trait,
-                                            ~1 | spp,
-                                            ~1 | obs),
-                              R = list(species_full = phylo_cor_wild_cvr), dfs = "contain", 
-                              test = "t", data = lnCVRQ10_data_wild)
-  
-   model4.4_bayes <- brms::brm(effect_size | se(sqrt(V), sigma = TRUE) ~  c_accl_time + acf_all_c + type + type:acf_all_c + (~1 | record_num) + (1 | gr(species_full, cov = A_wild_cvr)) + (1 | spp) + (1|trait), data2 = list(A_wild_cvr=A_wild_cvr), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 8, data = lnCVRQ10_data_wild)
-                                  
-  # Save model3.3
-  saveRDS(model4.4, file = "./output/models/lnCVRQ10_4.4")
-  saveRDS(model4.4_bayes, file = "./output/models/lnCVRQ10_4.4_bayes")
 
-  } else{
-        model4.4 <- readRDS("./output/models/lnCVRQ10_4.4")
-  model4.4_bayes <- readRDS("./output/models/lnCVRQ10_4.4_bayes")
-}
-  
-################################################################
-  # Model 4.5: Environmental variability
-################################################################
-if(rerun){
-  # More realistic model with 
-  model4.5          <- metafor::rma.mv(effect_size ~ c_accl_time + cv_c + type, V = V,
-                                       random = list(~1 | record_num,
-                                            ~1 | species_full,
-                                            ~1 | trait,
-                                            ~1 | spp,
-                                            ~1 | obs),
-                              R = list(species_full = phylo_cor_wild_cvr), dfs = "contain", 
-                              test = "t", data = lnCVRQ10_data_wild)
-  
-   model4.5_bayes <- brms::brm(effect_size | se(sqrt(V), sigma = TRUE) ~  c_accl_time + cv_c + type + (~1 | record_num) + (1 | gr(species_full, cov = A_wild_cvr)) + (1 | spp) + (1|trait), data2 = list(A_wild_cvr=A_wild_cvr), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 8, data = lnCVRQ10_data_wild)
-                                  
-  # Save model4.5
-  saveRDS(model4.5, file = "./output/models/lnCVRQ10_4.5")
-  saveRDS(model4.5_bayes, file = "./output/models/lnCVRQ10_4.5_bayes")
-
-  } else{
-        model4.5 <- readRDS("./output/models/lnCVRQ10_4.5")
-  model4.5_bayes <- readRDS("./output/models/lnCVRQ10_4.5_bayes")
-}
-  
-################################################################
-  # Model 4.6: Environmental autocorrelation model 
-################################################################
-if(rerun){
-  # More realistic model with 
-  model4.6          <- metafor::rma.mv(effect_size ~ c_accl_time + acf_all_c + type, V = V,
-                                       random = list(~1 | record_num,
-                                            ~1 | species_full,
-                                            ~1 | trait,
-                                            ~1 | spp,
-                                            ~1 | obs),
-                              R = list(species_full = phylo_cor_wild_cvr), dfs = "contain", 
-                              test = "t", data = lnCVRQ10_data_wild)
-  
-   model4.6_bayes <- brms::brm(effect_size | se(sqrt(V), sigma = TRUE) ~  c_accl_time + acf_all_c + type + (~1 | record_num) + (1 | gr(species_full, cov = A_wild_cvr)) + (1 | spp) + (1|trait), data2 = list(A_wild_cvr=A_wild_cvr), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 8, data = lnCVRQ10_data_wild)
-                                  
-  # Save model4.6
-  saveRDS(model4.6, file = "./output/models/lnCVRQ10_4.6")
-  saveRDS(model4.6_bayes, file = "./output/models/lnCVRQ10_4.6_bayes")
-
-  } else{
-        model4.6 <- readRDS("./output/models/lnCVRQ10_4.6")
-  model4.6_bayes <- readRDS("./output/models/lnCVRQ10_4.6_bayes")
-}
-  
-################################################################
-  # Model 4.7: Environmental autocorrelation and variability
-################################################################
-if(rerun){
-  # More realistic model with 
-  model4.7          <- metafor::rma.mv(effect_size ~ c_accl_time + acf_all_c + cv_c + type, V = V,
-                                       random = list(~1 | record_num,
-                                            ~1 | species_full,
-                                            ~1 | trait,
-                                            ~1 | spp,
-                                            ~1 | obs),
-                              R = list(species_full = phylo_cor_wild_cvr), dfs = "contain", 
-                              test = "t", data = lnCVRQ10_data_wild)
-  
-   model4.7_bayes <- brms::brm(effect_size | se(sqrt(V), sigma = TRUE) ~  c_accl_time + acf_all_c + cv_c + type + (~1 | record_num) + (1 | gr(species_full, cov = A_wild_cvr)) + (1 | spp) + (1|trait) + (1|obs), data2 = list(A_wild_cvr=A_wild_cvr), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 8, data = lnCVRQ10_data_wild)
-                                  
-  # Save model4.7
-  saveRDS(model4.7, file = "./output/models/lnCVRQ10_4.7")
-  saveRDS(model4.7_bayes, file = "./output/models/lnCVRQ10_4.7_bayes")
-
-  } else{
-        model4.7 <- readRDS("./output/models/lnCVRQ10_4.7")   ### DIFFERENT 
-  #model4.7_bayes <- readRDS("./output/models/lnCVRQ10_4.7_bayes")
-}
-  
-############################################################################################
-  # Model 4.8: Acclimatization lnCVRQ10 only. Test if environmental predictability explains 
-  # differently in each habitat
-############################################################################################  
-  lnCVRQ10_data_wild_acclim <- lnCVRQ10_data_wild %>%  filter(type == "acclim")
-  
-  # Create the phylo correlation matrix
-  
-  # Check and prune tree
-tree_lncvr_wild_acclim <- tree_checks(data = lnCVRQ10_data_wild_acclim, tree = tree_p0.7, dataCol = "species_full", type = "prune")
-tree_checks(data = lnCVRQ10_data_wild_acclim, tree = tree_lncvr_wild_acclim, dataCol = "species_full", type = "check")
-
-phylo_cor_wild_acclim <- vcv(tree_lncvr_wild_acclim, cor = TRUE)
-        A_wild_acclim <- vcv(tree_lncvr_wild_acclim, cor = FALSE) # For bayes, need cov matrix
-  
-  
-if(rerun){
-  # More realistic model with 
-  model4.8  <- metafor::rma.mv(effect_size ~ c_accl_time + acf_all_c + habitat + habitat:acf_all_c, V = V,
-                                       random = list(~1 | record_num,
-                                            ~1 | species_full,
-                                            ~1 | trait,
-                                            ~1 | spp,
-                                            ~1 | obs),
-                              R = list(species_full = phylo_cor_wild_acclim), dfs = "contain", 
-                              test = "t", data = lnCVRQ10_data_wild_acclim)
-  
-   model4.8_bayes <- brms::brm(effect_size | se(sqrt(V), sigma = TRUE) ~  c_accl_time + acf_all_c + habitat + habitat:acf_all_c + (~1 | record_num) + (1 | gr(species_full, cov = A_wild_acclim)) + (1 | spp) + (1|trait), data2 = list(A_wild_acclim=A_wild_acclim), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 4, data = lnCVRQ10_data_wild_acclim)
-                                  
-  # Save model4.8
-  saveRDS(model4.8, file = "./output/models/lnRRQ10_4.8")
-  saveRDS(model4.8_bayes, file = "./output/models/lnRRQ10_4.8_bayes")
-
-  } else{
-        model4.8 <- readRDS("./output/models/lnRRQ10_4.8")
-  model4.8_bayes <- readRDS("./output/models/lnRRQ10_4.8_bayes")
-}
-     
-#################################################
-### Bayesian Slopes from Model 4.8
-#################################################
- posteriors4.8 <- posterior_samples(model4.8_bayes, "^b") 
-        
-    slope_f_4.8 <- posteriors4.8[,"b_acf_all_c"]; mean(slope_f_4.8); pmcmc(slope_f_4.8); quantile(slope_f_4.8, c(0.025, 0.975))
-    slope_m_4.8 <- posteriors4.8[,"b_acf_all_c"] + posteriors4.8[,"b_acf_all_c:habitatm"]; mean(slope_m_4.8); pmcmc(slope_m_4.8); quantile(slope_m_4.8, c(0.025, 0.975))
-    slope_t_4.8 <- posteriors4.8[,"b_acf_all_c"] + posteriors4.8[,"b_acf_all_c:habitatt"]; mean(slope_t_4.8); pmcmc(slope_t_4.8); quantile(slope_t_4.8, c(0.025, 0.975))
-    
 ############################################################################################
 # Model 4.9: Acclimatization lnCVRQ10 only. Test if environmental variance explains 
 # differently in each habitat
@@ -2008,14 +1549,20 @@ if(rerun){
 
 Thermal variability (i.e., $CV$) and predictability experienced by a population in the past did not explain acclimation capacity (@fig-4) or changes in physiological rate variance (@fig-5) among terrestrial, marine or freshwater populations. 
 
-```{r, fig-4}
-#| label: fig-4
+
+
+```{r, fig-5}
+#| label: fig-5
 #| fig-align: center
-#| fig-cap: "Predicted mean (thick black line) $lnRR_{Q_{10}}$ as a function of the Thermal Coefficient of Variation (CV) (A) and thermal predictability (B) for wild populations across marine, freshwater and terrestrial habitats. Dashed lines indicate 95% confidence intervals and dotted lines indicate 95% prediction intervals. Model slope ($\\beta$) along with the 95% CI and $p_{MCMC}$ value is shown for each habitat."
+#| fig-cap: "Predicted mean acclimation (thick black line) $lnRR_{Q_{10}_{acclim}}$ (A) and $lnCVR_{Q_{10}_{acclim}}$ (B) as a function of the Thermal Coefficient of Variation (CV) for wild populations across marine, freshwater and terrestrial habitats. Dashed lines indicate 95% confidence intervals and dotted lines indicate 95% prediction intervals. Model slope ($\\beta$) along with the 95% CI and $p_{MCMC}$ values for the slopes are shown for each habitat."
 
 size_axis = 18
-# CV
-dat_text <- data.frame(label = c(text(slope_f), text(slope_m), text(slope_t)),
+col <- c("#0871B9", "#F3B40D", "#1BB908")
+
+
+
+# lnRR CV
+ dat_text <- data.frame(label = c(text(slope_f), text(slope_m), text(slope_t)),
                       label2 = c(text(slope_f, b = FALSE), text(slope_m,b = FALSE), text(slope_t,b = FALSE)),
                       p = c(p_text(slope_f), p_text(slope_m), p_text(slope_t)),
                       title = c("Freshwater", "Marine", "Terrestrial"), 
@@ -2023,53 +1570,17 @@ dat_text <- data.frame(label = c(text(slope_f), text(slope_m), text(slope_t)),
                       x = rep(1.2, 3),
                       y = rep(-1.2, 3))
  
- col <- c("#0871B9", "#F3B40D", "#1BB908")
 p8.1 <- bubble_plot(model3.9, mod = "cv_c", group = "record_num", by = "habitat", ylab = TeX("$lnRR_{Q_{10}}$"), xlab = "Thermal Coefficient of Variation (CV)", condition.nrow = 1, k = FALSE) + 
 theme_classic() + 
 scale_fill_manual(values = c(col)) + 
-geom_text(data = dat_text, aes(x = x, y = y, label = label), size = 5) + 
+geom_text(data = dat_text, aes(x = x, y = y, label = TeX(label)), size = 5) + 
 geom_text(data = dat_text, aes(x = x, y = y-0.3, label = label2), size = 5) +
-geom_text(data = dat_text, aes(x = x, y = y-0.6, label = p), size = 5) +
+geom_text(data = dat_text, aes(x = x, y = y-0.6, label = TeX(p)), size = 5) +
 geom_text(data = dat_text, aes(x = x, y = y+4, label = title), size = 5) + 
 theme(legend.position = "none", strip.background = element_blank(), strip.text = element_blank(),axis.text = element_text(size = size_axis), axis.title = element_text(size = size_axis)) 
 
-  # ACF
-dat_text2 <- data.frame(label = c(text(slope_f_3.8), text(slope_m_3.8), text(slope_t_3.8)),
-                      label2 = c(text(slope_f_3.8, b = FALSE), text(slope_m_3.8,b = FALSE), text(slope_t_3.8,b = FALSE)),
-                      p = c(p_text(slope_f_3.8), p_text(slope_m_3.8), p_text(slope_t_3.8)),
-                      condition = c("f", "m", "t"),
-                      x = rep(-2.8, 3),
-                      y = rep(-1.2, 3))
+# lnCVR CV
 
-p8.2 <- bubble_plot(model3.8, mod = "acf_all_c", group = "record_num", by = "habitat",  ylab = TeX("$lnRR_{Q_{10}}$"), xlab = "Thermal Predictability", condition.nrow = 1, k = FALSE) + 
-theme_classic() + 
-scale_fill_manual(values = c(col)) + 
-geom_text(data = dat_text2, aes(x = x+1, y = y, label =label), size = 5) + 
-geom_text(data = dat_text2, aes(x = x+1, y = y-0.3, label =label2), size = 5) +
-geom_text(data = dat_text2, aes(x = x+1, y = y-0.65, label = p), size = 5) +
-theme(legend.position = "bottom", 
-      strip.background = element_blank(), 
-      strip.text = element_blank(), 
-      axis.text = element_text(size = size_axis), 
-      axis.title = element_text(size = size_axis),
-      legend.text = element_text(size = 16),
-      legend.title = element_text(size = 16))
-
-p8.1.2 <- (p8.1 / p8.2) + plot_annotation(tag_levels = "A", tag_suffix = ")") & theme(plot.tag = element_text(size = 20))
-
-ggsave(p8.1.2, width = 8.2, height = 8.7, filename = "./output/figures/fig8.png")
-
-  p8.1.2 <- image_read("./output/figures/fig8.png")
-  p8.1.2 
-```
-
-```{r, fig-5}
-#| label: fig-5
-#| fig-align: center
-#| fig-cap: "Predicted mean (thick black line) $lnCVR_{Q_{10}}$ as a function of the Thermal Coefficient of Variation (CV) (A) and thermal predictability (B) for wild populations across marine, freshwater and terrestrial habitats. Dashed lines indicate 95% confidence intervals and dotted lines indicate 95% prediction intervals. Model slope ($\\beta$) along with the 95% CI and $p_{MCMC}$ value is shown for each habitat."
-
-size_axis = 18
-# CV
 dat_text <- data.frame(label = c(text(slope_f_4.9), text(slope_m_4.9), text(slope_t_4.9)),
                       label2 = c(text(slope_f_4.9, b = FALSE), text(slope_m_4.9,b = FALSE), text(slope_t_4.9,b = FALSE)),
                       p = c(p_text(slope_f_4.9), p_text(slope_m_4.9), p_text(slope_t_4.9)),
@@ -2078,7 +1589,7 @@ dat_text <- data.frame(label = c(text(slope_f_4.9), text(slope_m_4.9), text(slop
                       x = rep(1.2, 3),
                       y = rep(-4, 3))
  
- col <- c("#0871B9", "#F3B40D", "#1BB908")
+ 
 p9.1 <- bubble_plot(model4.9, mod = "cv_c", group = "record_num", by = "habitat",  ylab = TeX("$lnCVR_{Q_{10}}$"), xlab = "Thermal Coefficient of Variation (CV)", condition.nrow = 1, k = FALSE) + 
 theme_classic() + 
 scale_fill_manual(values = c(col)) + 
@@ -2088,29 +1599,8 @@ geom_text(data = dat_text, aes(x = x, y = y-2, label = p), size = 5) +
 geom_text(data = dat_text, aes(x = x, y = y+10, label = title, size = 5)) + 
 theme(legend.position = "none", strip.background = element_blank(), strip.text = element_blank(),axis.text = element_text(size = size_axis), axis.title = element_text(size = size_axis)) 
 
-  # ACF
-dat_text2 <- data.frame(label = c(text(slope_f_4.8), text(slope_m_4.8), text(slope_t_4.8)),
-                      label2 = c(text(slope_f_4.8, b = FALSE), text(slope_m_4.8,b = FALSE), text(slope_t_4.8,b = FALSE)),
-                      p = c(p_text(slope_f_4.8), p_text(slope_m_4.8), p_text(slope_t_4.8)),
-                      condition = c("f", "m", "t"),
-                      x = rep(-2.8, 3),
-                      y = rep(-4, 3))
 
-p9.2 <- bubble_plot(model4.8, mod = "acf_all_c", group = "record_num", by = "habitat",  ylab = TeX("$lnCVR_{Q_{10}}$"), xlab = "Thermal Predictability", condition.nrow = 1, k = FALSE) + 
-theme_classic() + 
-scale_fill_manual(values = c(col)) + 
-geom_text(data = dat_text2, aes(x = x+1, y = y, label = label), size = 5) + 
-geom_text(data = dat_text2, aes(x = x+1, y = y-0.6, label = label2), size = 5) +
-geom_text(data = dat_text2, aes(x = x+1, y = y-1.2, label = p), size = 5) +
-theme(legend.position = "bottom", 
-      strip.background = element_blank(), 
-      strip.text = element_blank(), 
-      axis.text = element_text(size = size_axis), 
-      axis.title = element_text(size = size_axis),
-      legend.text = element_text(size = 16),
-      legend.title = element_text(size = 16))
-
-p9.1.2 <- (p9.1 / p9.2) + plot_annotation(tag_levels = "A", tag_suffix = ")") & theme(plot.tag = element_text(size = 20))
+p9.1.2 <- (p9.1 / p9.2) + plot_annotation(tag_levels = "A") & theme(plot.tag = element_text(size = 20))
 
 ggsave(p9.1.2, width = 8.2, height = 8.7, filename = "./output/figures/fig9.png")
 
@@ -2931,6 +2421,248 @@ figs3
 ```
 
 
+
+#### *Environmental predictability*
+
+Theoretical models highlight the importance of environmental predictability in selecting for plastic responses. However, capturing environmental predictability is challing given that it is unclear which timescale one should select. For example, is it more important to look at correlation between temperatures monthly or seasonally. In addition, such temporal resolution will likely depend on the species in question given that for some species fine-grained thermal predictability maybe more important compared to others.
+
+With these limitations in mind, we used our temperature time series to calculate autoregressive correlation in temperaure across the entire time series. We then modelled how this measure of thermal predictability was related to plasticity. 
+
+```{r}
+
+############################################################################################
+# Model 3.8: Acclimatization lnRRQ10 only. Test if environmental predictability explains 
+# differently in each habitat
+############################################################################################  
+  lnRRQ10_data_wild_acclim <- lnRRQ10_data_wild %>%  filter(type == "acclim")
+  
+  # Create the phylo correlation matrix
+  
+  # Check and prune tree
+tree_lnrr_wild_acclim <- tree_checks(data = lnRRQ10_data_wild_acclim, tree = tree_p0.7, dataCol = "species_full", type = "prune")
+tree_checks(data = lnRRQ10_data_wild_acclim, tree = tree_lnrr_wild_acclim, dataCol = "species_full", type = "check")
+
+phylo_cor_wild_acclim <- vcv(tree_lnrr_wild_acclim, cor = TRUE)
+        A_wild_acclim <- vcv(tree_lnrr_wild_acclim, cor = FALSE) # For bayes, need cov matrix
+  
+if(rerun){
+  # More realistic model with 
+  model3.8  <- metafor::rma.mv(effect_size ~ max_temp_c + c_accl_time + acf_all_c + habitat + habitat:acf_all_c, V = V,
+                                       random = list(~1 | record_num,
+                                            ~1 | species_full,
+                                            ~1 | trait,
+                                            ~1 + max_temp_c| spp,
+                                            ~1 | obs),
+                              R = list(species_full = phylo_cor_wild_acclim), dfs = "contain", 
+                              test = "t", data = lnRRQ10_data_wild_acclim)
+  
+   model3.8_bayes <- brms::brm(effect_size | se(sqrt(V), sigma = TRUE) ~  max_temp_c + c_accl_time + acf_all_c + habitat + habitat:acf_all_c + (~1 | record_num) + (1 | gr(species_full, cov = A_wild_acclim)) + (1 + max_temp_c| spp) + (1|trait), data2 = list(A_wild_acclim=A_wild_acclim), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 8, data = lnRRQ10_data_wild_acclim)
+                                  
+  # Save model3.8
+  saveRDS(model3.8, file = "./output/models/lnRRQ10_3.8")
+  saveRDS(model3.8_bayes, file = "./output/models/lnRRQ10_3.8_bayes")
+
+  } else{
+        model3.8 <- readRDS("./output/models/lnRRQ10_3.8")
+  model3.8_bayes <- readRDS("./output/models/lnRRQ10_3.8_bayes")
+}
+
+#################################################
+### Bayesian Slopes from Model 3.8
+#################################################
+ posteriors3.8 <- posterior_samples(model3.8_bayes, "^b") 
+        
+    slope_f_3.8 <- posteriors3.8[,"b_acf_all_c"]; pmcmc(slope_f_3.8); quantile(slope_f_3.8, c(0.025, 0.975))
+    slope_m_3.8 <- posteriors3.8[,"b_acf_all_c"] + posteriors3.8[,"b_acf_all_c:habitatm"]; pmcmc(slope_m_3.8); quantile(slope_m_3.8, c(0.025, 0.975))
+    slope_t_3.8 <- posteriors3.8[,"b_acf_all_c"] + posteriors3.8[,"b_acf_all_c:habitatt"]; pmcmc(slope_t_3.8); quantile(slope_t_3.8, c(0.025, 0.975))
+    
+
+################################################################
+  # Model 4.4: Environmental autocorrelation model by acute/acclim
+################################################################
+if(rerun){
+  # More realistic model with 
+  model4.4          <- metafor::rma.mv(effect_size ~ c_accl_time + acf_all_c + type + type:acf_all_c, V = V,
+                                       random = list(~1 | record_num,
+                                            ~1 | species_full,
+                                            ~1 | trait,
+                                            ~1 | spp,
+                                            ~1 | obs),
+                              R = list(species_full = phylo_cor_wild_cvr), dfs = "contain", 
+                              test = "t", data = lnCVRQ10_data_wild)
+  
+   model4.4_bayes <- brms::brm(effect_size | se(sqrt(V), sigma = TRUE) ~  c_accl_time + acf_all_c + type + type:acf_all_c + (~1 | record_num) + (1 | gr(species_full, cov = A_wild_cvr)) + (1 | spp) + (1|trait), data2 = list(A_wild_cvr=A_wild_cvr), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 8, data = lnCVRQ10_data_wild)
+                                  
+  # Save model3.3
+  saveRDS(model4.4, file = "./output/models/lnCVRQ10_4.4")
+  saveRDS(model4.4_bayes, file = "./output/models/lnCVRQ10_4.4_bayes")
+
+  } else{
+        model4.4 <- readRDS("./output/models/lnCVRQ10_4.4")
+  model4.4_bayes <- readRDS("./output/models/lnCVRQ10_4.4_bayes")
+}
+  
+##################################################
+    # Model 3.8, 3.9 and 3.10 - Habitat subset
+##################################################
+    # Subset data to habitat
+    lnRRQ10_data_wild_acclim_t <- lnRRQ10_data_wild_acclim %>% filter(habitat == "t")
+    lnRRQ10_data_wild_acclim_f <- lnRRQ10_data_wild_acclim %>% filter(habitat == "f")
+    lnRRQ10_data_wild_acclim_m <- lnRRQ10_data_wild_acclim %>% filter(habitat == "m")
+
+if(rerun){
+    # Terrestrial Models
+    model3.8_t  <- metafor::rma.mv(effect_size ~ max_temp_c + c_accl_time + acf_all_c, V = V,
+                                       random = list(~1 | record_num,
+                                            ~1 | species_full,
+                                            ~1 | trait,
+                                            ~1 + max_temp_c| spp,
+                                            ~1 | obs),
+                              R = list(species_full = phylo_cor_wild_acclim), dfs = "contain", 
+                              test = "t", data = lnRRQ10_data_wild_acclim_t)
+    saveRDS(model3.8_t, "./output/models/model3.8_t")
+                   
+
+    # Freshwater Models
+    model3.8_f  <- metafor::rma.mv(effect_size ~ max_temp_c + c_accl_time + acf_all_c, V = V,
+                                       random = list(~1 | record_num,
+                                            ~1 | species_full,
+                                            ~1 | trait,
+                                            ~1 + max_temp_c| spp,
+                                            ~1 | obs),
+                              R = list(species_full = phylo_cor_wild_acclim), dfs = "contain", 
+                              test = "t", data = lnRRQ10_data_wild_acclim_f)
+    saveRDS(model3.8_f, "./output/models/model3.8_f")
+    
+    # Marine Models
+      model3.8_m  <- metafor::rma.mv(effect_size ~ max_temp_c + c_accl_time + acf_all_c, V = V,
+                                       random = list(~1 | record_num,
+                                            ~1 | species_full,
+                                            ~1 | trait,
+                                            ~1 + max_temp_c| spp,
+                                            ~1 | obs),
+                              R = list(species_full = phylo_cor_wild_acclim), dfs = "contain", 
+                              test = "t", data = lnRRQ10_data_wild_acclim_m)
+        saveRDS(model3.8_m, "./output/models/model3.8_m")
+
+   
+  } else {
+     model3.8_t <- readRDS("./output/models/model3.8_t")
+     model3.8_f <- readRDS("./output/models/model3.8_f")
+     model3.8_m <- readRDS("./output/models/model3.8_m")
+}
+
+
+############################################################################################
+  # Model 4.8: Acclimatization lnCVRQ10 only. Test if environmental predictability explains 
+  # differently in each habitat
+############################################################################################  
+  lnCVRQ10_data_wild_acclim <- lnCVRQ10_data_wild %>%  filter(type == "acclim")
+  
+  # Create the phylo correlation matrix
+  
+  # Check and prune tree
+tree_lncvr_wild_acclim <- tree_checks(data = lnCVRQ10_data_wild_acclim, tree = tree_p0.7, dataCol = "species_full", type = "prune")
+tree_checks(data = lnCVRQ10_data_wild_acclim, tree = tree_lncvr_wild_acclim, dataCol = "species_full", type = "check")
+
+phylo_cor_wild_acclim <- vcv(tree_lncvr_wild_acclim, cor = TRUE)
+        A_wild_acclim <- vcv(tree_lncvr_wild_acclim, cor = FALSE) # For bayes, need cov matrix
+  
+  
+if(rerun){
+  # More realistic model with 
+  model4.8  <- metafor::rma.mv(effect_size ~ c_accl_time + acf_all_c + habitat + habitat:acf_all_c, V = V,
+                                       random = list(~1 | record_num,
+                                            ~1 | species_full,
+                                            ~1 | trait,
+                                            ~1 | spp,
+                                            ~1 | obs),
+                              R = list(species_full = phylo_cor_wild_acclim), dfs = "contain", 
+                              test = "t", data = lnCVRQ10_data_wild_acclim)
+  
+   model4.8_bayes <- brms::brm(effect_size | se(sqrt(V), sigma = TRUE) ~  c_accl_time + acf_all_c + habitat + habitat:acf_all_c + (~1 | record_num) + (1 | gr(species_full, cov = A_wild_acclim)) + (1 | spp) + (1|trait), data2 = list(A_wild_acclim=A_wild_acclim), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 4, data = lnCVRQ10_data_wild_acclim)
+                                  
+  # Save model4.8
+  saveRDS(model4.8, file = "./output/models/lnRRQ10_4.8")
+  saveRDS(model4.8_bayes, file = "./output/models/lnRRQ10_4.8_bayes")
+
+  } else{
+        model4.8 <- readRDS("./output/models/lnRRQ10_4.8")
+  model4.8_bayes <- readRDS("./output/models/lnRRQ10_4.8_bayes")
+}
+     
+#################################################
+### Bayesian Slopes from Model 4.8
+#################################################
+ posteriors4.8 <- posterior_samples(model4.8_bayes, "^b") 
+        
+    slope_f_4.8 <- posteriors4.8[,"b_acf_all_c"]; mean(slope_f_4.8); pmcmc(slope_f_4.8); quantile(slope_f_4.8, c(0.025, 0.975))
+    slope_m_4.8 <- posteriors4.8[,"b_acf_all_c"] + posteriors4.8[,"b_acf_all_c:habitatm"]; mean(slope_m_4.8); pmcmc(slope_m_4.8); quantile(slope_m_4.8, c(0.025, 0.975))
+    slope_t_4.8 <- posteriors4.8[,"b_acf_all_c"] + posteriors4.8[,"b_acf_all_c:habitatt"]; mean(slope_t_4.8); pmcmc(slope_t_4.8); quantile(slope_t_4.8, c(0.025, 0.975))
+    
+```
+
+```{r, fig-4}
+#| label: fig-4
+#| fig-align: center
+#| fig-cap: "Predicted mean (thick black line) $lnRR_{Q_{10}}$ as a function of the Thermal Coefficient of Variation (CV) (A) and thermal predictability (B) for wild populations across marine, freshwater and terrestrial habitats. Dashed lines indicate 95% confidence intervals and dotted lines indicate 95% prediction intervals. Model slope ($\\beta$) along with the 95% CI and $p_{MCMC}$ value is shown for each habitat."
+
+size_axis = 18
+# lnRR ACF
+ 
+ col <- c("#0871B9", "#F3B40D", "#1BB908")
+ 
+ dat_text2rr <- data.frame(label = c(text(slope_f_3.8), text(slope_m_3.8), text(slope_t_3.8)),
+                      label2 = c(text(slope_f_3.8, b = FALSE), text(slope_m_3.8,b = FALSE), text(slope_t_3.8,b = FALSE)),
+                      p = c(p_text(slope_f_3.8), p_text(slope_m_3.8), p_text(slope_t_3.8)),
+                      condition = c("f", "m", "t"),
+                      x = rep(-2.8, 3),
+                      y = rep(-1.2, 3))
+
+p8.2 <- bubble_plot(model3.8, mod = "acf_all_c", group = "record_num", by = "habitat",  ylab = TeX("$lnRR_{Q_{10}}$"), xlab = "Thermal Predictability", condition.nrow = 1, k = FALSE) + 
+theme_classic() + 
+scale_fill_manual(values = c(col)) + 
+geom_text(data = dat_text2rr, aes(x = x+1, y = y, label =label), size = 5) + 
+geom_text(data = dat_text2rr, aes(x = x+1, y = y-0.3, label =label2), size = 5) +
+geom_text(data = dat_text2rr, aes(x = x+1, y = y-0.65, label = p), size = 5) +
+theme(legend.position = "bottom", 
+      strip.background = element_blank(), 
+      strip.text = element_blank(), 
+      axis.text = element_text(size = size_axis), 
+      axis.title = element_text(size = size_axis),
+      legend.text = element_text(size = 16),
+      legend.title = element_text(size = 16))
+
+# lnCVR ACF
+dat_text2cvr <- data.frame(label = c(text(slope_f_4.8), text(slope_m_4.8), text(slope_t_4.8)),
+                      label2 = c(text(slope_f_4.8, b = FALSE), text(slope_m_4.8,b = FALSE), text(slope_t_4.8,b = FALSE)),
+                      p = c(p_text(slope_f_4.8), p_text(slope_m_4.8), p_text(slope_t_4.8)),
+                      condition = c("f", "m", "t"),
+                      x = rep(-2.8, 3),
+                      y = rep(-4, 3))
+
+p9.2 <- bubble_plot(model4.8, mod = "acf_all_c", group = "record_num", by = "habitat",  ylab = TeX("$lnCVR_{Q_{10}}$"), xlab = "Thermal Predictability", condition.nrow = 1, k = FALSE) + 
+theme_classic() + 
+scale_fill_manual(values = c(col)) + 
+geom_text(data = dat_text2cvr, aes(x = x+1, y = y, label = label), size = 5) + 
+geom_text(data = dat_text2cvr, aes(x = x+1, y = y-0.6, label = label2), size = 5) +
+geom_text(data = dat_text2cvr, aes(x = x+1, y = y-1.2, label = p), size = 5) +
+theme(legend.position = "bottom", 
+      strip.background = element_blank(), 
+      strip.text = element_blank(), 
+      axis.text = element_text(size = size_axis), 
+      axis.title = element_text(size = size_axis),
+      legend.text = element_text(size = 16),
+      legend.title = element_text(size = 16))
+
+
+p8.1.2 <- (p8.1 / p8.2) + plot_annotation(tag_levels = "A") & theme(plot.tag = element_text(size = 20))
+
+ggsave(p8.1.2, width = 8.2, height = 8.7, filename = "./output/figures/fig8.png")
+
+  p8.1.2 <- image_read("./output/figures/fig8.png")
+  p8.1.2 
+```
 #### *Publication bias analysis*
 
 Funnel plots did not show any noticeable deviation from the typical funnel shape for any of the effect size estimates (@fig-s2). 

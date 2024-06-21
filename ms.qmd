@@ -1634,8 +1634,7 @@ col <- c("#0871B9", "#F3B40D", "#1BB908")
 y_adj = -3
 # Terrestrial
   p_t_rr <-  bubble_plot(model3.9_t, mod = "cv_c", group = "spp", ylab = TeX("$lnRR_{Q_{10_{acclim}}}$"), xlab = "Thermal Coefficient of Variation (CV)", g = TRUE) + 
-    geom_point(data = lnRRQ10_data_wild_acclim_t, aes(x = cv_c, y = effect_size, size = 1/sqrt(V)), colour = col[3]) + 
-  scale_fill_manual(values = "black")+ labs(title = dat_text$title[3]) +
+    geom_point(data = lnRRQ10_data_wild_acclim_t, aes(x = cv_c, y = effect_size, size = 1/sqrt(V)), fill = col[3], colour = "black", stroke = 0.2, shape = 21) + labs(title = dat_text$title[3]) +
   annotate("text", x = dat_text$x[3], y = y_adj, label = TeX(dat_text$p[3]), size = 8) +
   annotate("text", x = dat_text$x[3], y = y_adj + 0.5, label = TeX(dat_text$label2[3]), size = 8) +
   annotate("text", x = dat_text$x[3], y = y_adj + 1, label = TeX(dat_text$label[3]), size = 8) +
@@ -1647,8 +1646,7 @@ theme(axis.text = element_text(size = size_axis),
 
 # Marine
 p_m_rr <-  bubble_plot(model3.9_m, mod = "cv_c", group = "spp", ylab = TeX("$lnRR_{Q_{10_{acclim}}}"), xlab = "Thermal Coefficient of Variation (CV)", g = TRUE) + 
-    geom_point(data = lnRRQ10_data_wild_acclim_m, aes(x = cv_c, y = effect_size, size = 1/sqrt(V)), colour = col[2]) + 
-  scale_fill_manual(values = "black") + labs(title = dat_text$title[2]) +
+    geom_point(data = lnRRQ10_data_wild_acclim_m, aes(x = cv_c, y = effect_size, size = 1/sqrt(V)), fill = col[2], colour = "black", stroke = 0.2, shape = 21) +  labs(title = dat_text$title[2]) +
   annotate("text", x = dat_text$x[2]-0.5, y = y_adj, label = TeX(dat_text$p[2]), size = 8) +
   annotate("text", x = dat_text$x[2]-0.5, y = y_adj+0.5, label = TeX(dat_text$label2[2]), size = 8) +
   annotate("text", x = dat_text$x[2]-0.5, y = y_adj+1, label = TeX(dat_text$label[2]), size = 8) +
@@ -1661,8 +1659,7 @@ theme(axis.text = element_text(size = size_axis),
 
 # Freshwater
 p_f_rr <-  bubble_plot(model3.9_f, mod = "cv_c", group = "spp", ylab = TeX("$lnRR_{Q_{10_{acclim}}}"), xlab = "Thermal Coefficient of Variation (CV)", g = TRUE) + 
-    geom_point(data = lnRRQ10_data_wild_acclim_f, aes(x = cv_c, y = effect_size, size = 1/sqrt(V)), colour = col[1]) + 
-  scale_fill_manual(values = "black") + labs(title = dat_text$title[1]) +
+    geom_point(data = lnRRQ10_data_wild_acclim_f, aes(x = cv_c, y = effect_size, size = 1/sqrt(V)), fill = col[1], colour = "black", stroke = 0.2, shape = 21) +  labs(title = dat_text$title[1]) +
   annotate("text", x = dat_text$x[1]+0.6, y = y_adj, label = TeX(dat_text$p[1]), size = 8) +
   annotate("text", x = dat_text$x[1]+0.6, y = y_adj+0.5, label = TeX(dat_text$label2[1]), size = 8) +
   annotate("text", x = dat_text$x[1]+0.6, y = y_adj+ 1, label = TeX(dat_text$label[1]), size = 8) +
@@ -1693,8 +1690,7 @@ dat_textcvr <- data.frame(label = c(text(slope_f_4.9),
   yadj2 = -6
   x_f = 0.6
   p_f_cv <-  bubble_plot(model4.9_f, mod = "cv_c", group = "spp", ylab = TeX("$lnCVR_{Q_{10_{acclim}}}$"), xlab = "Thermal Coefficient of Variation (CV)", g =FALSE, k = FALSE) + 
-      geom_point(data = lnCVRQ10_data_wild_acclim_f, aes(x = cv_c, y = effect_size, size = 1/sqrt(V)), colour = col[1]) + 
-    scale_fill_manual(values = "black") + 
+      geom_point(data = lnCVRQ10_data_wild_acclim_f, aes(x = cv_c, y = effect_size, size = 1/sqrt(V)), fill = col[1], colour = "black", stroke = 0.2, shape = 21) + 
     annotate("text", x = dat_textcvr$x[1]+x_f, y = yadj2, label = TeX(dat_textcvr$p[1]), size = 8) +
     annotate("text", x = dat_textcvr$x[1]+x_f, y = yadj2+0.8, label = TeX(dat_textcvr$label2[1]), size = 8) +
     annotate("text", x = dat_textcvr$x[1]+x_f, y = yadj2+1.6, label = TeX(dat_textcvr$label[1]), size = 8) +
@@ -1709,7 +1705,7 @@ dat_textcvr <- data.frame(label = c(text(slope_f_4.9),
   p_m_cv <-  bubble_plot(model4.9_m, mod = "cv_c", group = "spp", ylab = TeX("$lnCVR_{Q_{10_{acclim}}}$"), xlab = "Thermal Coefficient of Variation (CV)", g =FALSE, k = FALSE) + 
     geom_point(data = lnCVRQ10_data_wild_acclim_m, 
                  aes(x = cv_c, y = effect_size, size = 1/sqrt(V)), 
-                 colour = col[2]) + 
+                 fill = col[2], colour = "black", stroke = 0.2, shape = 21) + 
     annotate("text", x = dat_textcvr$x[1]+x_m, y = yadj2, label = TeX(dat_textcvr$p[2]), size = 8) +
     annotate("text", x = dat_textcvr$x[1]+x_m, y = yadj2+0.8, label = TeX(dat_textcvr$label2[2]), size = 8) +
     annotate("text", x = dat_textcvr$x[1]+x_m, y = yadj2+1.6, label = TeX(dat_textcvr$label[2]), size = 8) +
@@ -1725,7 +1721,7 @@ x_t = 0
 p_t_cv <-  bubble_plot(model4.9_t, mod = "cv_c", group = "spp", ylab = TeX("$lnCVR_{Q_{10_{acclim}}}$"), xlab = "Thermal Coefficient of Variation (CV)", g = FALSE, k = FALSE) + 
   geom_point(data = lnCVRQ10_data_wild_acclim_t, 
                aes(x = cv_c, y = effect_size, size = 1/sqrt(V)), 
-               colour = col[3]) + 
+               fill = col[3], colour = "black", stroke = 0.2, shape = 21) +
   annotate("text", x = dat_textcvr$x[3]+x_t, y = yadj2, label = TeX(dat_textcvr$p[3]), size = 8) +
   annotate("text", x = dat_textcvr$x[3]+x_t, y = yadj2+0.8, label = TeX(dat_textcvr$label2[3]), size = 8) +
   annotate("text", x = dat_textcvr$x[3]+x_t, y = yadj2+1.6, label = TeX(dat_textcvr$label[3]), size = 8) +

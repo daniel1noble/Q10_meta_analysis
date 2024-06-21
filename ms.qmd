@@ -2560,7 +2560,7 @@ figs3
 
 #### *Environmental predictability*
 
-Theoretical models highlight the importance of environmental predictability in selecting for plastic responses. However, capturing environmental predictability is challing given that it is unclear which timescale one should select. For example, is it more important to look at correlation between temperatures monthly or seasonally. In addition, such temporal resolution will likely depend on the species in question given that for some species fine-grained thermal predictability maybe more important compared to others.
+Theoretical models highlight the importance of environmental predictability in selecting for plastic responses. However, capturing environmental predictability is challenging given that it is unclear which timescale one should select. For example, is it more important to look at correlation between temperatures monthly or seasonally. In addition, such temporal resolution will likely depend on the species in question given that for some species fine-grained thermal predictability maybe more important compared to others.
 
 With these limitations in mind, we used our temperature time series to calculate autoregressive correlation in temperaure across the entire time series. We then modelled how this measure of thermal predictability was related to plasticity. 
 
@@ -2730,63 +2730,132 @@ if(rerun){
 ```{r, fig-4}
 #| label: fig-4
 #| fig-align: center
-#| fig-cap: "Predicted mean (thick black line) $lnRR_{Q_{10}}$ as a function of the Thermal Coefficient of Variation (CV) (A) and thermal predictability (B) for wild populations across marine, freshwater and terrestrial habitats. Dashed lines indicate 95% confidence intervals and dotted lines indicate 95% prediction intervals. Model slope ($\\beta$) along with the 95% CI and $p_{MCMC}$ value is shown for each habitat."
+#| fig-cap: "Predicted mean acclimation (thick black line) $lnRR_{Q_{10_{acclim}}}$ (A) and $lnCVR_{Q_{10_{acclim}}}$ (B) as a function of the Thermal Predictability for wild populations across marine, freshwater and terrestrial habitats. Dashed lines indicate 95% confidence intervals and dotted lines indicate 95% prediction intervals. Model slope ($\\beta$) along with the 95% CI and $p_{MCMC}$ values for the slopes are shown for each habitat."
 
-size_axis = 18
+size_axis = 20
+col <- c("#0871B9", "#F3B40D", "#1BB908")
+
+
+####################
 # lnRR ACF
- 
- col <- c("#0871B9", "#F3B40D", "#1BB908")
- 
- dat_text2rr <- data.frame(label = c(text(slope_f_3.8), text(slope_m_3.8), text(slope_t_3.8)),
-                      label2 = c(text(slope_f_3.8, b = FALSE), text(slope_m_3.8,b = FALSE), text(slope_t_3.8,b = FALSE)),
-                      p = c(p_text(slope_f_3.8), p_text(slope_m_3.8), p_text(slope_t_3.8)),
+####################
+ dat_textacf <- data.frame(label = c(text(slope_f), text(slope_m), text(slope_t)),
+                      label2 = c(text(slope_f, b = FALSE), text(slope_m,b = FALSE), text(slope_t,b = FALSE)),
+                      p = c(p_text(slope_f), p_text(slope_m), p_text(slope_t)),
+                      title = c("Freshwater", "Marine", "Terrestrial"), 
                       condition = c("f", "m", "t"),
-                      x = rep(-2.8, 3),
-                      y = rep(-1.2, 3))
-
-p8.2 <- bubble_plot(model3.8, mod = "acf_all_c", group = "record_num", by = "habitat",  ylab = TeX("$lnRR_{Q_{10}}$"), xlab = "Thermal Predictability", condition.nrow = 1, k = FALSE) + 
-theme_classic() + 
-scale_fill_manual(values = c(col)) + 
-geom_text(data = dat_text2rr, aes(x = x+1, y = y, label =label), size = 5) + 
-geom_text(data = dat_text2rr, aes(x = x+1, y = y-0.3, label =label2), size = 5) +
-geom_text(data = dat_text2rr, aes(x = x+1, y = y-0.65, label = p), size = 5) +
-theme(legend.position = "bottom", 
-      strip.background = element_blank(), 
-      strip.text = element_blank(), 
-      axis.text = element_text(size = size_axis), 
+                      x = rep(0, 3))
+y_adj = -3
+# Terrestrial
+  p_t_rr_acf <-  bubble_plot(model3.9_t, mod = "cv_c", group = "spp", ylab = TeX("$lnRR_{Q_{10_{acclim}}}$"), xlab = "Thermal Predictability", g = TRUE) + 
+    geom_point(data = lnRRQ10_data_wild_acclim_t, aes(x = cv_c, y = effect_size, size = 1/sqrt(V)), fill = col[3], colour = "black", stroke = 0.2, shape = 21) + labs(title = dat_text$title[3]) +
+  annotate("text", x = dat_text$x[3], y = y_adj, label = TeX(dat_text$p[3]), size = 8) +
+  annotate("text", x = dat_text$x[3], y = y_adj + 0.5, label = TeX(dat_text$label2[3]), size = 8) +
+  annotate("text", x = dat_text$x[3], y = y_adj + 1, label = TeX(dat_text$label[3]), size = 8) +
+theme(axis.text = element_text(size = size_axis), 
+      axis.text.y = element_text(size = size_axis), 
       axis.title = element_text(size = size_axis),
-      legend.text = element_text(size = 16),
-      legend.title = element_text(size = 16))
+      axis.title.x = element_blank(),
+      plot.title = element_text( size = 36, hjust = 0)) + ylim(-3,3)
 
-# lnCVR ACF
-dat_text2cvr <- data.frame(label = c(text(slope_f_4.8), text(slope_m_4.8), text(slope_t_4.8)),
-                      label2 = c(text(slope_f_4.8, b = FALSE), text(slope_m_4.8,b = FALSE), text(slope_t_4.8,b = FALSE)),
-                      p = c(p_text(slope_f_4.8), p_text(slope_m_4.8), p_text(slope_t_4.8)),
+# Marine
+p_m_rr_acf <-  bubble_plot(model3.9_m, mod = "cv_c", group = "spp", ylab = TeX("$lnRR_{Q_{10_{acclim}}}"), xlab = "Thermal Predictability", g = TRUE) + 
+    geom_point(data = lnRRQ10_data_wild_acclim_m, aes(x = cv_c, y = effect_size, size = 1/sqrt(V)), fill = col[2], colour = "black", stroke = 0.2, shape = 21) +  labs(title = dat_text$title[2]) +
+  annotate("text", x = dat_text$x[2]-0.5, y = y_adj, label = TeX(dat_text$p[2]), size = 8) +
+  annotate("text", x = dat_text$x[2]-0.5, y = y_adj+0.5, label = TeX(dat_text$label2[2]), size = 8) +
+  annotate("text", x = dat_text$x[2]-0.5, y = y_adj+1, label = TeX(dat_text$label[2]), size = 8) +
+theme(axis.text = element_text(size = size_axis), 
+      axis.text.y = element_text(size = size_axis), 
+      axis.title = element_text(size = size_axis), 
+      axis.title.x = element_blank(),
+      plot.title = element_text( size = 36, hjust = 0)) + ylim(-3, 3)
+
+
+# Freshwater
+p_f_rr_acf <-  bubble_plot(model3.9_f, mod = "cv_c", group = "spp", ylab = TeX("$lnRR_{Q_{10_{acclim}}}"), xlab = "Thermal Predictability", g = TRUE) + 
+    geom_point(data = lnRRQ10_data_wild_acclim_f, aes(x = cv_c, y = effect_size, size = 1/sqrt(V)), fill = col[1], colour = "black", stroke = 0.2, shape = 21) +  labs(title = dat_text$title[1]) +
+  annotate("text", x = dat_text$x[1]+0.6, y = y_adj, label = TeX(dat_text$p[1]), size = 8) +
+  annotate("text", x = dat_text$x[1]+0.6, y = y_adj+0.5, label = TeX(dat_text$label2[1]), size = 8) +
+  annotate("text", x = dat_text$x[1]+0.6, y = y_adj+ 1, label = TeX(dat_text$label[1]), size = 8) +
+theme(axis.text = element_text(size = size_axis), 
+      axis.text.y = element_text(size = size_axis), 
+      axis.title = element_text(size = size_axis), 
+      axis.title.x = element_blank(),
+      plot.title = element_text( size = 36, hjust = 0)) + ylim(-3, 3)
+
+####################
+# lnCVR CV
+####################
+dat_textcvr_acf <- data.frame(label = c(text(slope_f_4.9), 
+                                 text(slope_m_4.9), 
+                                 text(slope_t_4.9)),
+                      label2 = c(text(slope_f_4.9, b = FALSE), 
+                                 text(slope_m_4.9,b = FALSE), 
+                                 text(slope_t_4.9,b = FALSE)),
+                           p = c(p_text(slope_f_4.9), 
+                                 p_text(slope_m_4.9), 
+                                 p_text(slope_t_4.9)),
+                       title = c("Freshwater", "Marine", "Terrestrial"), 
                       condition = c("f", "m", "t"),
-                      x = rep(-2.8, 3),
+                      x = rep(0, 3),
                       y = rep(-4, 3))
+ 
+# Freshwater
+  yadj2 = -6
+  x_f = 0.6
+  p_f_cv_acf <-  bubble_plot(model4.9_f, mod = "cv_c", group = "spp", ylab = TeX("$lnCVR_{Q_{10_{acclim}}}$"), xlab = "Thermal Predictability", g =FALSE, k = FALSE) + 
+      geom_point(data = lnCVRQ10_data_wild_acclim_f, aes(x = cv_c, y = effect_size, size = 1/sqrt(V)), fill = col[1], colour = "black", stroke = 0.2, shape = 21) + 
+    annotate("text", x = dat_textcvr$x[1]+x_f, y = yadj2, label = TeX(dat_textcvr$p[1]), size = 8) +
+    annotate("text", x = dat_textcvr$x[1]+x_f, y = yadj2+0.8, label = TeX(dat_textcvr$label2[1]), size = 8) +
+    annotate("text", x = dat_textcvr$x[1]+x_f, y = yadj2+1.6, label = TeX(dat_textcvr$label[1]), size = 8) +
+  theme(axis.text = element_text(size = size_axis), 
+        axis.text.y = element_text(size = size_axis), 
+        axis.title = element_text(size = size_axis), 
+        plot.title = element_text(face = "bold", size = 36, hjust = 0.5)) + 
+    ylim(-6, 3.5)
+ 
+# Marine
+  x_m = -0.4
+  p_m_cv_acf <-  bubble_plot(model4.9_m, mod = "cv_c", group = "spp", ylab = TeX("$lnCVR_{Q_{10_{acclim}}}$"), xlab = "Thermal Predictability", g =FALSE, k = FALSE) + 
+    geom_point(data = lnCVRQ10_data_wild_acclim_m, 
+                 aes(x = cv_c, y = effect_size, size = 1/sqrt(V)), 
+                 fill = col[2], colour = "black", stroke = 0.2, shape = 21) + 
+    annotate("text", x = dat_textcvr$x[1]+x_m, y = yadj2, label = TeX(dat_textcvr$p[2]), size = 8) +
+    annotate("text", x = dat_textcvr$x[1]+x_m, y = yadj2+0.8, label = TeX(dat_textcvr$label2[2]), size = 8) +
+    annotate("text", x = dat_textcvr$x[1]+x_m, y = yadj2+1.6, label = TeX(dat_textcvr$label[2]), size = 8) +
+    theme(axis.text = element_text(size = size_axis), 
+        axis.text.y = element_text(size = size_axis), 
+        axis.title = element_text(size = size_axis), 
+        plot.title = element_text(face = "bold", size = 36, hjust = 0.5)) + 
+    ylim(-6, 3.5)
 
-p9.2 <- bubble_plot(model4.8, mod = "acf_all_c", group = "record_num", by = "habitat",  ylab = TeX("$lnCVR_{Q_{10}}$"), xlab = "Thermal Predictability", condition.nrow = 1, k = FALSE) + 
-theme_classic() + 
-scale_fill_manual(values = c(col)) + 
-geom_text(data = dat_text2cvr, aes(x = x+1, y = y, label = label), size = 5) + 
-geom_text(data = dat_text2cvr, aes(x = x+1, y = y-0.6, label = label2), size = 5) +
-geom_text(data = dat_text2cvr, aes(x = x+1, y = y-1.2, label = p), size = 5) +
-theme(legend.position = "bottom", 
-      strip.background = element_blank(), 
-      strip.text = element_blank(), 
-      axis.text = element_text(size = size_axis), 
-      axis.title = element_text(size = size_axis),
-      legend.text = element_text(size = 16),
-      legend.title = element_text(size = 16))
+# Terrestrial
+
+x_t = 0
+p_t_cv_acf <-  bubble_plot(model4.9_t, mod = "cv_c", group = "spp", ylab = TeX("$lnCVR_{Q_{10_{acclim}}}$"), xlab = "Thermal Predictability", g = FALSE, k = FALSE) + 
+  geom_point(data = lnCVRQ10_data_wild_acclim_t, 
+               aes(x = cv_c, y = effect_size, size = 1/sqrt(V)), 
+               fill = col[3], colour = "black", stroke = 0.2, shape = 21) +
+  annotate("text", x = dat_textcvr$x[3]+x_t, y = yadj2, label = TeX(dat_textcvr$p[3]), size = 8) +
+  annotate("text", x = dat_textcvr$x[3]+x_t, y = yadj2+0.8, label = TeX(dat_textcvr$label2[3]), size = 8) +
+  annotate("text", x = dat_textcvr$x[3]+x_t, y = yadj2+1.6, label = TeX(dat_textcvr$label[3]), size = 8) +
+  theme(axis.text = element_text(size = size_axis), 
+      axis.text.y = element_text(size = size_axis), 
+      axis.title = element_text(size = size_axis), 
+      plot.title = element_text(face = "bold", size = 36, hjust = 0.5)) + 
+  ylim(-6, 3.5)
+
+####################
+# Full plot
+####################
 
 
-p8.1.2 <- (p8.1 / p8.2) + plot_annotation(tag_levels = "A") & theme(plot.tag = element_text(size = 20))
+p_cv_acf <- (p_t_rr_acf + p_m_rr_acf + p_f_rr_acf) / (p_t_cv_acf + p_m_cv_acf + p_f_cv_acf) + plot_annotation(tag_levels = "A") & theme(plot.tag = element_text(size = 36))
 
-ggsave(p8.1.2, width = 8.2, height = 8.7, filename = "./output/figures/fig8.png")
+ggsave(p_cv_acf, width = 18, height = 10, filename = "./output/figures/fig_p_cv_acf_r1.pdf")
 
-  p8.1.2 <- image_read("./output/figures/fig8.png")
-  p8.1.2 
+  p_cv <- image_read("./output/figures/fig_p_cv_r1.png")
+  p_cv 
 ```
 #### *Publication bias analysis*
 

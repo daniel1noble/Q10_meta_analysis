@@ -1615,7 +1615,7 @@ Thermal variability (i.e., $CV$) and predictability experienced by a population 
 ```{r, fig-5}
 #| label: fig-5
 #| fig-align: center
-#| fig-cap: "Predicted mean acclimation (thick black line) $lnRR_{Q_{10}_{acclim}}$ (A) and $lnCVR_{Q_{10}_{acclim}}$ (B) as a function of the Thermal Coefficient of Variation (CV) for wild populations across marine, freshwater and terrestrial habitats. Dashed lines indicate 95% confidence intervals and dotted lines indicate 95% prediction intervals. Model slope ($\\beta$) along with the 95% CI and $p_{MCMC}$ values for the slopes are shown for each habitat."
+#| fig-cap: "Predicted mean acclimation (thick black line) $lnRR_{Q_{10_{acclim}}}$ (A) and $lnCVR_{Q_{10_{acclim}}}$ (B) as a function of the Thermal Coefficient of Variation (CV) for wild populations across marine, freshwater and terrestrial habitats. Dashed lines indicate 95% confidence intervals and dotted lines indicate 95% prediction intervals. Model slope ($\\beta$) along with the 95% CI and $p_{MCMC}$ values for the slopes are shown for each habitat."
 
 size_axis = 20
 col <- c("#0871B9", "#F3B40D", "#1BB908")

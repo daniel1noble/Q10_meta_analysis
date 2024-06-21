@@ -1511,10 +1511,21 @@ if(rerun){
 # Model 4.9: Acclimatization lnCVRQ10 only. Test if environmental variance explains 
 # differently in each habitat
 ############################################################################################          
-        
+  lnCVRQ10_data_wild_acclim <- lnCVRQ10_data_wild %>%  filter(type == "acclim")
+  
+  # Create the phylo correlation matrix
+  
+  # Check and prune tree
+tree_lncvr_wild_acclim <- tree_checks(data = lnCVRQ10_data_wild_acclim, tree = tree_p0.7, dataCol = "species_full", type = "prune")
+tree_checks(data = lnCVRQ10_data_wild_acclim, tree = tree_lncvr_wild_acclim, dataCol = "species_full", type = "check")
+
+phylo_cor_wild_acclim <- vcv(tree_lncvr_wild_acclim, cor = TRUE)
+        A_wild_acclim <- vcv(tree_lncvr_wild_acclim, cor = FALSE) # For bayes, need cov matrix
+  
+  
 if(rerun){
   # More realistic model with 
-  model4.9  <- metafor::rma.mv(effect_size ~ c_accl_time + cv_c + habitat + habitat:cv_c, V = V,
+  model4.9  <- metafor::rma.mv(effect_size ~ max_temp_c + c_accl_time + cv_c + habitat + habitat:cv_c, V = V,
                                        random = list(~1 | record_num,
                                             ~1 | species_full,
                                             ~1 | trait,
@@ -1523,15 +1534,15 @@ if(rerun){
                               R = list(species_full = phylo_cor_wild_acclim), dfs = "contain", 
                               test = "t", data = lnCVRQ10_data_wild_acclim)
   
-   model4.9_bayes <- brms::brm(effect_size | se(sqrt(V), sigma = TRUE) ~  c_accl_time + cv_c + habitat + habitat:cv_c + (~1 | record_num) + (1 | gr(species_full, cov = A_wild_acclim)) + (1 | spp) + (1|trait), data2 = list(A_wild_acclim=A_wild_acclim), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 8, data = lnCVRQ10_data_wild_acclim)
+   model4.9_bayes <- brms::brm(effect_size | se(sqrt(V), sigma = TRUE) ~  max_temp_c + c_accl_time + cv_c + habitat + habitat:cv_c + (~1 | record_num) + (1 | gr(species_full, cov = A_wild_acclim)) + (1 | spp) + (1|trait), data2 = list(A_wild_acclim=A_wild_acclim), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.99, max_treedepth = 12), chains = 4, thin = 1, iter = 5000, warmup = 1000, cores = 8, data = lnCVRQ10_data_wild_acclim)
                                   
   # Save model3.8
-  saveRDS(model4.9, file = "./output/models/lnRRQ10_4.9")
-  saveRDS(model4.9_bayes, file = "./output/models/lnRRQ10_4.9_bayes")
+  saveRDS(model4.9, file = "./output/models/lnCVRQ10_4.9")
+  saveRDS(model4.9_bayes, file = "./output/models/lnCVRQ10_4.9_bayes")
 
   } else{
-        model4.9 <- readRDS("./output/models/lnRRQ10_4.9")
-  model4.9_bayes <- readRDS("./output/models/lnRRQ10_4.9_bayes")
+        model4.9 <- readRDS("./output/models/lnCVRQ10_4.9")
+  model4.9_bayes <- readRDS("./output/models/lnCVRQ10_4.9_bayes")
 }
                   
 #################################################
@@ -1543,69 +1554,198 @@ if(rerun){
     slope_m_4.9 <- posteriors4.9[,"b_cv_c"] + posteriors4.9[,"b_cv_c:habitatm"]; mean(slope_m_4.9); pmcmc(slope_m_4.9); quantile(slope_m_4.9, c(0.025, 0.975))
     slope_t_4.9 <- posteriors4.9[,"b_cv_c"] + posteriors4.9[,"b_cv_c:habitatt"]; mean(slope_t_4.9); pmcmc(slope_t_4.9); quantile(slope_t_4.9, c(0.025, 0.975))
 
+##################################################
+    # Model 4.8, 4.9 and 4.10 - Habitat subset
+    # Used for making plots
+##################################################
+    # Subset data to habitat
+    lnCVRQ10_data_wild_acclim_t <- lnCVRQ10_data_wild_acclim %>% filter(habitat == "t")
+    lnCVRQ10_data_wild_acclim_f <- lnCVRQ10_data_wild_acclim %>% filter(habitat == "f")
+    lnCVRQ10_data_wild_acclim_m <- lnCVRQ10_data_wild_acclim %>% filter(habitat == "m")
+
+if(rerun){
+    # Terrestrial Models
+    model4.9_t  <- metafor::rma.mv(effect_size ~ max_temp_c + c_accl_time + cv_c, V = V,
+                                       random = list(~1 | record_num,
+                                            ~1 | species_full,
+                                            ~1 | trait,
+                                            ~1 + max_temp_c| spp,
+                                            ~1 | obs),
+                              R = list(species_full = phylo_cor_wild_acclim), dfs = "contain", 
+                              test = "t", data = lnCVRQ10_data_wild_acclim_t)
+    saveRDS(model4.9_t, "./output/models/model4.9_t")
+                   
+    # Freshwater Models
+    
+    model4.9_f  <- metafor::rma.mv(effect_size ~ max_temp_c + c_accl_time + cv_c, V = V,
+                                       random = list(~1 | record_num,
+                                            ~1 | species_full,
+                                            ~1 | trait,
+                                            ~1 + max_temp_c| spp,
+                                            ~1 | obs),
+                              R = list(species_full = phylo_cor_wild_acclim), dfs = "contain", 
+                              test = "t", data = lnCVRQ10_data_wild_acclim_f)
+
+    saveRDS(model4.9_f, "./output/models/model4.9_f")
+
+    # Marine Models
+
+    model4.9_m  <- metafor::rma.mv(effect_size ~ max_temp_c + c_accl_time + cv_c, V = V,
+                                       random = list(~1 | record_num,
+                                            ~1 | species_full,
+                                            ~1 | trait,
+                                            ~1 + max_temp_c| spp,
+                                            ~1 | obs),
+                              R = list(species_full = phylo_cor_wild_acclim), dfs = "contain", 
+                              test = "t", data = lnCVRQ10_data_wild_acclim_m)
+    saveRDS(model4.9_m, "./output/models/model4.9_m")
+    
+  } else {
+     model4.9_t <- readRDS("./output/models/model4.9_t")
+     model4.9_f <- readRDS("./output/models/model4.9_f")
+     model4.9_m <- readRDS("./output/models/model4.9_m")
+}
+
 ```
 
 ### *Past climate does not influence acclimation capacity or expected change in variance*
 
 Thermal variability (i.e., $CV$) and predictability experienced by a population in the past did not explain acclimation capacity (@fig-4) or changes in physiological rate variance (@fig-5) among terrestrial, marine or freshwater populations. 
 
-
-
 ```{r, fig-5}
 #| label: fig-5
 #| fig-align: center
 #| fig-cap: "Predicted mean acclimation (thick black line) $lnRR_{Q_{10}_{acclim}}$ (A) and $lnCVR_{Q_{10}_{acclim}}$ (B) as a function of the Thermal Coefficient of Variation (CV) for wild populations across marine, freshwater and terrestrial habitats. Dashed lines indicate 95% confidence intervals and dotted lines indicate 95% prediction intervals. Model slope ($\\beta$) along with the 95% CI and $p_{MCMC}$ values for the slopes are shown for each habitat."
 
-size_axis = 18
+size_axis = 20
 col <- c("#0871B9", "#F3B40D", "#1BB908")
 
 
-
+####################
 # lnRR CV
+####################
  dat_text <- data.frame(label = c(text(slope_f), text(slope_m), text(slope_t)),
                       label2 = c(text(slope_f, b = FALSE), text(slope_m,b = FALSE), text(slope_t,b = FALSE)),
                       p = c(p_text(slope_f), p_text(slope_m), p_text(slope_t)),
                       title = c("Freshwater", "Marine", "Terrestrial"), 
                       condition = c("f", "m", "t"),
-                      x = rep(1.2, 3),
-                      y = rep(-1.2, 3))
- 
-p8.1 <- bubble_plot(model3.9, mod = "cv_c", group = "record_num", by = "habitat", ylab = TeX("$lnRR_{Q_{10}}$"), xlab = "Thermal Coefficient of Variation (CV)", condition.nrow = 1, k = FALSE) + 
-theme_classic() + 
-scale_fill_manual(values = c(col)) + 
-geom_text(data = dat_text, aes(x = x, y = y, label = TeX(label)), size = 5) + 
-geom_text(data = dat_text, aes(x = x, y = y-0.3, label = label2), size = 5) +
-geom_text(data = dat_text, aes(x = x, y = y-0.6, label = TeX(p)), size = 5) +
-geom_text(data = dat_text, aes(x = x, y = y+4, label = title), size = 5) + 
-theme(legend.position = "none", strip.background = element_blank(), strip.text = element_blank(),axis.text = element_text(size = size_axis), axis.title = element_text(size = size_axis)) 
+                      x = rep(0, 3),
+                      y = rep(-1.1, 3))
+y_adj = -3
+# Terrestrial
+  p_t_rr <-  bubble_plot(model3.9_t, mod = "cv_c", group = "spp", ylab = TeX("$lnRR_{Q_{10_{acclim}}}$"), xlab = "Thermal Coefficient of Variation (CV)", g = TRUE) + 
+    geom_point(data = lnRRQ10_data_wild_acclim_t, aes(x = cv_c, y = effect_size, size = 1/sqrt(V)), colour = col[3]) + 
+  scale_fill_manual(values = "black")+ labs(title = dat_text$title[3]) +
+  annotate("text", x = dat_text$x[3], y = y_adj, label = TeX(dat_text$p[3]), size = 8) +
+  annotate("text", x = dat_text$x[3], y = y_adj + 0.5, label = TeX(dat_text$label2[3]), size = 8) +
+  annotate("text", x = dat_text$x[3], y = y_adj + 1, label = TeX(dat_text$label[3]), size = 8) +
+theme(axis.text = element_text(size = size_axis), 
+      axis.text.y = element_text(size = size_axis), 
+      axis.title = element_text(size = size_axis),
+      axis.title.x = element_blank(),
+      plot.title = element_text( size = 36, hjust = 0)) + ylim(-3,3)
 
+# Marine
+p_m_rr <-  bubble_plot(model3.9_m, mod = "cv_c", group = "spp", ylab = TeX("$lnRR_{Q_{10_{acclim}}}"), xlab = "Thermal Coefficient of Variation (CV)", g = TRUE) + 
+    geom_point(data = lnRRQ10_data_wild_acclim_m, aes(x = cv_c, y = effect_size, size = 1/sqrt(V)), colour = col[2]) + 
+  scale_fill_manual(values = "black") + labs(title = dat_text$title[2]) +
+  annotate("text", x = dat_text$x[2]-0.5, y = y_adj, label = TeX(dat_text$p[2]), size = 8) +
+  annotate("text", x = dat_text$x[2]-0.5, y = y_adj+0.5, label = TeX(dat_text$label2[2]), size = 8) +
+  annotate("text", x = dat_text$x[2]-0.5, y = y_adj+1, label = TeX(dat_text$label[2]), size = 8) +
+theme(axis.text = element_text(size = size_axis), 
+      axis.text.y = element_text(size = size_axis), 
+      axis.title = element_text(size = size_axis), 
+      axis.title.x = element_blank(),
+      plot.title = element_text( size = 36, hjust = 0)) + ylim(-3, 3)
+
+
+# Freshwater
+p_f_rr <-  bubble_plot(model3.9_f, mod = "cv_c", group = "spp", ylab = TeX("$lnRR_{Q_{10_{acclim}}}"), xlab = "Thermal Coefficient of Variation (CV)", g = TRUE) + 
+    geom_point(data = lnRRQ10_data_wild_acclim_f, aes(x = cv_c, y = effect_size, size = 1/sqrt(V)), colour = col[1]) + 
+  scale_fill_manual(values = "black") + labs(title = dat_text$title[1]) +
+  annotate("text", x = dat_text$x[1]+0.6, y = y_adj, label = TeX(dat_text$p[1]), size = 8) +
+  annotate("text", x = dat_text$x[1]+0.6, y = y_adj+0.5, label = TeX(dat_text$label2[1]), size = 8) +
+  annotate("text", x = dat_text$x[1]+0.6, y = y_adj+ 1, label = TeX(dat_text$label[1]), size = 8) +
+theme(axis.text = element_text(size = size_axis), 
+      axis.text.y = element_text(size = size_axis), 
+      axis.title = element_text(size = size_axis), 
+      axis.title.x = element_blank(),
+      plot.title = element_text( size = 36, hjust = 0)) + ylim(-3, 3)
+
+####################
 # lnCVR CV
-
-dat_text <- data.frame(label = c(text(slope_f_4.9), text(slope_m_4.9), text(slope_t_4.9)),
-                      label2 = c(text(slope_f_4.9, b = FALSE), text(slope_m_4.9,b = FALSE), text(slope_t_4.9,b = FALSE)),
-                      p = c(p_text(slope_f_4.9), p_text(slope_m_4.9), p_text(slope_t_4.9)),
-                      title = c("Freshwater", "Marine", "Terrestrial"), 
+####################
+dat_textcvr <- data.frame(label = c(text(slope_f_4.9), 
+                                 text(slope_m_4.9), 
+                                 text(slope_t_4.9)),
+                      label2 = c(text(slope_f_4.9, b = FALSE), 
+                                 text(slope_m_4.9,b = FALSE), 
+                                 text(slope_t_4.9,b = FALSE)),
+                           p = c(p_text(slope_f_4.9), 
+                                 p_text(slope_m_4.9), 
+                                 p_text(slope_t_4.9)),
+                       title = c("Freshwater", "Marine", "Terrestrial"), 
                       condition = c("f", "m", "t"),
-                      x = rep(1.2, 3),
+                      x = rep(0, 3),
                       y = rep(-4, 3))
  
+# Freshwater
+  yadj2 = -6
+  x_f = 0.6
+  p_f_cv <-  bubble_plot(model4.9_f, mod = "cv_c", group = "spp", ylab = TeX("$lnCVR_{Q_{10_{acclim}}}$"), xlab = "Thermal Coefficient of Variation (CV)", g =FALSE, k = FALSE) + 
+      geom_point(data = lnCVRQ10_data_wild_acclim_f, aes(x = cv_c, y = effect_size, size = 1/sqrt(V)), colour = col[1]) + 
+    scale_fill_manual(values = "black") + 
+    annotate("text", x = dat_textcvr$x[1]+x_f, y = yadj2, label = TeX(dat_textcvr$p[1]), size = 8) +
+    annotate("text", x = dat_textcvr$x[1]+x_f, y = yadj2+0.8, label = TeX(dat_textcvr$label2[1]), size = 8) +
+    annotate("text", x = dat_textcvr$x[1]+x_f, y = yadj2+1.6, label = TeX(dat_textcvr$label[1]), size = 8) +
+  theme(axis.text = element_text(size = size_axis), 
+        axis.text.y = element_text(size = size_axis), 
+        axis.title = element_text(size = size_axis), 
+        plot.title = element_text(face = "bold", size = 36, hjust = 0.5)) + 
+    ylim(-6, 3.5)
  
-p9.1 <- bubble_plot(model4.9, mod = "cv_c", group = "record_num", by = "habitat",  ylab = TeX("$lnCVR_{Q_{10}}$"), xlab = "Thermal Coefficient of Variation (CV)", condition.nrow = 1, k = FALSE) + 
-theme_classic() + 
-scale_fill_manual(values = c(col)) + 
-geom_text(data = dat_text, aes(x = x, y = y, label = label), size = 5) + 
-geom_text(data = dat_text, aes(x = x, y = y-1, label = label2), size = 5) +
-geom_text(data = dat_text, aes(x = x, y = y-2, label = p), size = 5) +
-geom_text(data = dat_text, aes(x = x, y = y+10, label = title, size = 5)) + 
-theme(legend.position = "none", strip.background = element_blank(), strip.text = element_blank(),axis.text = element_text(size = size_axis), axis.title = element_text(size = size_axis)) 
+# Marine
+  x_m = -0.4
+  p_m_cv <-  bubble_plot(model4.9_m, mod = "cv_c", group = "spp", ylab = TeX("$lnCVR_{Q_{10_{acclim}}}$"), xlab = "Thermal Coefficient of Variation (CV)", g =FALSE, k = FALSE) + 
+    geom_point(data = lnCVRQ10_data_wild_acclim_m, 
+                 aes(x = cv_c, y = effect_size, size = 1/sqrt(V)), 
+                 colour = col[2]) + 
+    annotate("text", x = dat_textcvr$x[1]+x_m, y = yadj2, label = TeX(dat_textcvr$p[2]), size = 8) +
+    annotate("text", x = dat_textcvr$x[1]+x_m, y = yadj2+0.8, label = TeX(dat_textcvr$label2[2]), size = 8) +
+    annotate("text", x = dat_textcvr$x[1]+x_m, y = yadj2+1.6, label = TeX(dat_textcvr$label[2]), size = 8) +
+    theme(axis.text = element_text(size = size_axis), 
+        axis.text.y = element_text(size = size_axis), 
+        axis.title = element_text(size = size_axis), 
+        plot.title = element_text(face = "bold", size = 36, hjust = 0.5)) + 
+    ylim(-6, 3.5)
+
+# Terrestrial
+
+x_t = 0
+p_t_cv <-  bubble_plot(model4.9_t, mod = "cv_c", group = "spp", ylab = TeX("$lnCVR_{Q_{10_{acclim}}}$"), xlab = "Thermal Coefficient of Variation (CV)", g = FALSE, k = FALSE) + 
+  geom_point(data = lnCVRQ10_data_wild_acclim_t, 
+               aes(x = cv_c, y = effect_size, size = 1/sqrt(V)), 
+               colour = col[3]) + 
+  annotate("text", x = dat_textcvr$x[3]+x_t, y = yadj2, label = TeX(dat_textcvr$p[3]), size = 8) +
+  annotate("text", x = dat_textcvr$x[3]+x_t, y = yadj2+0.8, label = TeX(dat_textcvr$label2[3]), size = 8) +
+  annotate("text", x = dat_textcvr$x[3]+x_t, y = yadj2+1.6, label = TeX(dat_textcvr$label[3]), size = 8) +
+  theme(axis.text = element_text(size = size_axis), 
+      axis.text.y = element_text(size = size_axis), 
+      axis.title = element_text(size = size_axis), 
+      plot.title = element_text(face = "bold", size = 36, hjust = 0.5)) + 
+  ylim(-6, 3.5)
+
+####################
+# Full plot
+####################
 
 
-p9.1.2 <- (p9.1 / p9.2) + plot_annotation(tag_levels = "A") & theme(plot.tag = element_text(size = 20))
+p_cv <- (p_t_rr + p_m_rr + p_f_rr) / (p_t_cv + p_m_cv + p_f_cv) + plot_annotation(tag_levels = "A") & theme(plot.tag = element_text(size = 36))
 
-ggsave(p9.1.2, width = 8.2, height = 8.7, filename = "./output/figures/fig9.png")
+ggsave(p_cv, width = 18, height = 10, filename = "./output/figures/fig_p_cv_r1.pdf")
 
-  p9.1.2 <- image_read("./output/figures/fig9.png")
-  p9.1.2 
+  p_cv <- image_read("./output/figures/fig_p_cv_r1.png")
+  p_cv 
 ```
 
 ### Changes in physiological rate variance under climate change
@@ -2557,17 +2697,6 @@ if(rerun){
   # Model 4.8: Acclimatization lnCVRQ10 only. Test if environmental predictability explains 
   # differently in each habitat
 ############################################################################################  
-  lnCVRQ10_data_wild_acclim <- lnCVRQ10_data_wild %>%  filter(type == "acclim")
-  
-  # Create the phylo correlation matrix
-  
-  # Check and prune tree
-tree_lncvr_wild_acclim <- tree_checks(data = lnCVRQ10_data_wild_acclim, tree = tree_p0.7, dataCol = "species_full", type = "prune")
-tree_checks(data = lnCVRQ10_data_wild_acclim, tree = tree_lncvr_wild_acclim, dataCol = "species_full", type = "check")
-
-phylo_cor_wild_acclim <- vcv(tree_lncvr_wild_acclim, cor = TRUE)
-        A_wild_acclim <- vcv(tree_lncvr_wild_acclim, cor = FALSE) # For bayes, need cov matrix
-  
   
 if(rerun){
   # More realistic model with 

@@ -439,14 +439,14 @@ manual_extract  <- function(model, mod = "trait_category", group = "record_num",
 #' 
  text <- function(post, b = TRUE){
       if(b){
-        paste0("B = ", round(mean(post), 2))
+        paste0("$\\beta$ = ", round(mean(post), 2))
       } else {
         paste0("95% CI: ", round(quantile(post, c(0.025, 0.975)[1]), 2), " to ", round(quantile(post, c(0.025, 0.975)[2]), 2))
       }
   }
 
 p_text <- function(post){
-   paste0("p = ", round(pmcmc(post), 2))
+   paste0("$p_{MCMC}$ = ", round(pmcmc(post), 2))
 }
 
 

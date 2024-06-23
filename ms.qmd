@@ -2707,9 +2707,12 @@ if(rerun){
 ### Same model as above, but seperate for habitat 
 ### For plotting, 4.8
 #################################################
- 
+ lnCVRQ10_data_wild_acclim_t <- lnCVRQ10_data_wild_acclim %>% filter(habitat == "t")
+ lnCVRQ10_data_wild_acclim_m <- lnCVRQ10_data_wild_acclim %>% filter(habitat == "m")
+ lnCVRQ10_data_wild_acclim_f <- lnCVRQ10_data_wild_acclim %>% filter(habitat == "f")
+    
 if(rerun){
-  # Terrestrial Models
+  # Terrestrial Model
     model4.8_t  <- metafor::rma.mv(effect_size ~ max_temp_c + c_accl_time + acf_lag1_c, V = V,
                                        random = list(~1 | record_num,
                                             ~1 | species_full,
@@ -2719,6 +2722,28 @@ if(rerun){
                               R = list(species_full = phylo_cor_wild_acclim), dfs = "contain", 
                               test = "t", data = lnCVRQ10_data_wild_acclim_t)
     saveRDS(model4.8_t, "./output/models/model4.8_t")
+    
+  # Freshwater Model
+    model4.8_f  <- metafor::rma.mv(effect_size ~ max_temp_c + c_accl_time + acf_lag1_c, V = V,
+                                       random = list(~1 | record_num,
+                                            ~1 | species_full,
+                                            ~1 | trait,
+                                            ~1 + max_temp_c| spp,
+                                            ~1 | obs),
+                              R = list(species_full = phylo_cor_wild_acclim), dfs = "contain", 
+                              test = "t", data = lnCVRQ10_data_wild_acclim_f)
+    saveRDS(model4.8_f, "./output/models/model4.8_f")
+    
+  # Marine Model
+    model4.8_m  <- metafor::rma.mv(effect_size ~ max_temp_c + c_accl_time + acf_lag1_c, V = V,
+                                       random = list(~1 | record_num,
+                                            ~1 | species_full,
+                                            ~1 | trait,
+                                            ~1 + max_temp_c| spp,
+                                            ~1 | obs),
+                              R = list(species_full = phylo_cor_wild_acclim), dfs = "contain", 
+                              test = "t", data = lnCVRQ10_data_wild_acclim_m)
+    saveRDS(model4.8_m, "./output/models/model4.8_m")
 } else {
      model4.8_t <- readRDS("./output/models/model4.8_t")
      model4.8_m <- readRDS("./output/models/model4.8_m")
@@ -2751,43 +2776,67 @@ col <- c("#0871B9", "#F3B40D", "#1BB908")
                            title = c("Freshwater", "Marine", "Terrestrial"), 
                        condition = c("f", "m", "t"),
                                x = rep(0, 3))
-y_adj = -3
+  y_adj = -3
+#############
 # Terrestrial
-  p_t_rr_acf <-  bubble_plot(model3.9_t, mod = "cv_c", group = "spp", ylab = TeX("$lnRR_{Q_{10_{acclim}}}$"), xlab = "Thermal Predictability", g = TRUE) + 
-    geom_point(data = lnRRQ10_data_wild_acclim_t, aes(x = cv_c, y = effect_size, size = 1/sqrt(V)), fill = col[3], colour = "black", stroke = 0.2, shape = 21) + labs(title = dat_text$title[3]) +
-  annotate("text", x = dat_text$x[3], y = y_adj, label = TeX(dat_text$p[3]), size = 8) +
-  annotate("text", x = dat_text$x[3], y = y_adj + 0.5, label = TeX(dat_text$label2[3]), size = 8) +
-  annotate("text", x = dat_text$x[3], y = y_adj + 1, label = TeX(dat_text$label[3]), size = 8) +
-theme(axis.text = element_text(size = size_axis), 
-      axis.text.y = element_text(size = size_axis), 
-      axis.title = element_text(size = size_axis),
-      axis.title.x = element_blank(),
-      plot.title = element_text( size = 36, hjust = 0)) + ylim(-3,3)
-
+#############
+  p_t_rr_acf <-  bubble_plot(model3.8_t, mod = "acf_lag1_c", group = "spp", 
+                             ylab = TeX("$lnRR_{Q_{10_{acclim}}}$"), 
+                             xlab = "Thermal Predictability", g = TRUE) + 
+    geom_point(data = lnRRQ10_data_wild_acclim_t, 
+               aes(x = acf_lag1_c, y = effect_size, size = 1/sqrt(V)), 
+               fill = col[3], colour = "black", stroke = 0.2, shape = 21) + 
+    labs(title = dat_textacf$title[3]) +
+    annotate("text", x = dat_textacf$x[3], y = y_adj, label = TeX(dat_textacf$p[3]), size = 8) +
+    annotate("text", x = dat_textacf$x[3], y = y_adj + 0.5, label = TeX(dat_text$label2[3]), size = 8) +
+    annotate("text", x = dat_textacf$x[3], y = y_adj + 1, label = TeX(dat_textacf$label[3]), size = 8) +
+    theme( axis.text = element_text(size = size_axis), 
+         axis.text.y = element_text(size = size_axis), 
+          axis.title = element_text(size = size_axis),
+        axis.title.x = element_blank(),
+          plot.title = element_text( size = 36, hjust = 0)) + 
+    ylim(-3,3)
+#############
 # Marine
-p_m_rr_acf <-  bubble_plot(model3.9_m, mod = "cv_c", group = "spp", ylab = TeX("$lnRR_{Q_{10_{acclim}}}"), xlab = "Thermal Predictability", g = TRUE) + 
-    geom_point(data = lnRRQ10_data_wild_acclim_m, aes(x = cv_c, y = effect_size, size = 1/sqrt(V)), fill = col[2], colour = "black", stroke = 0.2, shape = 21) +  labs(title = dat_text$title[2]) +
-  annotate("text", x = dat_text$x[2]-0.5, y = y_adj, label = TeX(dat_text$p[2]), size = 8) +
-  annotate("text", x = dat_text$x[2]-0.5, y = y_adj+0.5, label = TeX(dat_text$label2[2]), size = 8) +
-  annotate("text", x = dat_text$x[2]-0.5, y = y_adj+1, label = TeX(dat_text$label[2]), size = 8) +
-theme(axis.text = element_text(size = size_axis), 
-      axis.text.y = element_text(size = size_axis), 
-      axis.title = element_text(size = size_axis), 
-      axis.title.x = element_blank(),
-      plot.title = element_text( size = 36, hjust = 0)) + ylim(-3, 3)
+#############
+  x_m = -2.5
+p_m_rr_acf <-  bubble_plot(model3.8_m, mod = "acf_lag1_c", group = "spp", 
+                           ylab = TeX("$lnRR_{Q_{10_{acclim}}}"), 
+                           xlab = "Thermal Predictability", g = TRUE) + 
+    geom_point(data = lnRRQ10_data_wild_acclim_m, 
+               aes(x = acf_lag1_c, y = effect_size, size = 1/sqrt(V)), 
+               fill = col[2], colour = "black", stroke = 0.2, shape = 21) +  
+    labs(title = dat_textacf$title[2]) +
+    annotate("text", x = dat_textacf$x[2]+x_m, y = y_adj,     label = TeX(dat_textacf$p[2]),      size = 8) +
+    annotate("text", x = dat_textacf$x[2]+x_m, y = y_adj+0.5, label = TeX(dat_textacf$label2[2]), size = 8) +
+    annotate("text", x = dat_textacf$x[2]+x_m, y = y_adj+1,   label = TeX(dat_textacf$label[2]),  size = 8) +
+    theme(axis.text = element_text(size = size_axis), 
+        axis.text.y = element_text(size = size_axis), 
+         axis.title = element_text(size = size_axis), 
+       axis.title.x = element_blank(),
+         plot.title = element_text( size = 36, hjust = 0)) + 
+    ylim(-3, 3)
 
-
+#############
 # Freshwater
-p_f_rr_acf <-  bubble_plot(model3.9_f, mod = "cv_c", group = "spp", ylab = TeX("$lnRR_{Q_{10_{acclim}}}"), xlab = "Thermal Predictability", g = TRUE) + 
-    geom_point(data = lnRRQ10_data_wild_acclim_f, aes(x = cv_c, y = effect_size, size = 1/sqrt(V)), fill = col[1], colour = "black", stroke = 0.2, shape = 21) +  labs(title = dat_text$title[1]) +
-  annotate("text", x = dat_text$x[1]+0.6, y = y_adj, label = TeX(dat_text$p[1]), size = 8) +
-  annotate("text", x = dat_text$x[1]+0.6, y = y_adj+0.5, label = TeX(dat_text$label2[1]), size = 8) +
-  annotate("text", x = dat_text$x[1]+0.6, y = y_adj+ 1, label = TeX(dat_text$label[1]), size = 8) +
-theme(axis.text = element_text(size = size_axis), 
-      axis.text.y = element_text(size = size_axis), 
-      axis.title = element_text(size = size_axis), 
-      axis.title.x = element_blank(),
-      plot.title = element_text( size = 36, hjust = 0)) + ylim(-3, 3)
+#############
+x_f = -0.2
+p_f_rr_acf <-  bubble_plot(model3.8_f, mod = "acf_lag1_c", group = "spp", 
+                           ylab = TeX("$lnRR_{Q_{10_{acclim}}}"), 
+                           xlab = "Thermal Predictability", g = TRUE) + 
+    geom_point(data = lnRRQ10_data_wild_acclim_f, 
+               aes(x = acf_lag1_c, y = effect_size, size = 1/sqrt(V)), 
+               fill = col[1], colour = "black", stroke = 0.2, shape = 21) +  
+    labs(title = dat_textacf$title[1]) +
+    annotate("text", x = dat_textacf$x[1]+x_f, y = y_adj,     label = TeX(dat_textacf$p[1]),      size = 8) +
+    annotate("text", x = dat_textacf$x[1]+x_f, y = y_adj+0.5, label = TeX(dat_textacf$label2[1]), size = 8) +
+    annotate("text", x = dat_textacf$x[1]+x_f, y = y_adj+ 1,  label = TeX(dat_textacf$label[1]),  size = 8) +
+    theme(axis.text = element_text(size = size_axis), 
+        axis.text.y = element_text(size = size_axis), 
+         axis.title = element_text(size = size_axis), 
+       axis.title.x = element_blank(),
+         plot.title = element_text( size = 36, hjust = 0)) + 
+    ylim(-3, 3)
 
 ####################
 # lnCVR CV
@@ -2805,11 +2854,12 @@ dat_textcvr_acf <- data.frame(label = c(text(slope_f_4.8),
                       condition = c("f", "m", "t"),
                       x = rep(0, 3),
                       y = rep(-4, 3))
- 
+#############
 # Freshwater
+#############
   yadj2 = -6
-  x_f = 0.6
-  p_f_cv_acf <-  bubble_plot( , mod = "acf_lag1_c", group = "spp", ylab = TeX("$lnCVR_{Q_{10_{acclim}}}$"), 
+  x_f = -0.2
+  p_f_cv_acf <-  bubble_plot(model4.8_f, mod = "acf_lag1_c", group = "spp", ylab = TeX("$lnCVR_{Q_{10_{acclim}}}$"), 
                               xlab = "Thermal Predictability", g =FALSE, k = FALSE) + 
       geom_point(data = lnCVRQ10_data_wild_acclim_f, 
                  aes(x = acf_lag1_c, y = effect_size, size = 1/sqrt(V)), 
@@ -2822,10 +2872,11 @@ dat_textcvr_acf <- data.frame(label = c(text(slope_f_4.8),
         axis.title = element_text(size = size_axis), 
         plot.title = element_text(face = "bold", size = 36, hjust = 0.5)) + 
     ylim(-6, 3.5)
- 
+#############
 # Marine
-  x_m = -0.4
-  p_m_cv_acf <-  bubble_plot( , mod = "acf_lag1_c", group = "spp", ylab = TeX("$lnCVR_{Q_{10_{acclim}}}$"), 
+#############
+  x_m = -2.5
+  p_m_cv_acf <-  bubble_plot(model4.8_m, mod = "acf_lag1_c", group = "spp", ylab = TeX("$lnCVR_{Q_{10_{acclim}}}$"), 
                               xlab = "Thermal Predictability", g =FALSE, k = FALSE) + 
     geom_point(data = lnCVRQ10_data_wild_acclim_m, 
                  aes(x = acf_lag1_c, y = effect_size, size = 1/sqrt(V)), 
@@ -2838,11 +2889,11 @@ dat_textcvr_acf <- data.frame(label = c(text(slope_f_4.8),
         axis.title = element_text(size = size_axis), 
         plot.title = element_text(face = "bold", size = 36, hjust = 0.5)) + 
     ylim(-6, 3.5)
-
+#############
 # Terrestrial
-
-x_t = 0
-p_t_cv_acf <-  bubble_plot( , mod = "acf_lag1_c", group = "spp", ylab = TeX("$lnCVR_{Q_{10_{acclim}}}$"), 
+#############
+x_t = -0.2
+p_t_cv_acf <-  bubble_plot(model4.8_t, mod = "acf_lag1_c", group = "spp", ylab = TeX("$lnCVR_{Q_{10_{acclim}}}$"), 
                             xlab = "Thermal Predictability", g = FALSE, k = FALSE) + 
   geom_point(data = lnCVRQ10_data_wild_acclim_t, 
                aes(x = acf_lag1_c, y = effect_size, size = 1/sqrt(V)), 
@@ -2861,12 +2912,12 @@ p_t_cv_acf <-  bubble_plot( , mod = "acf_lag1_c", group = "spp", ylab = TeX("$ln
 ####################
 
 
-p_cv_acf <- (p_t_rr_acf + p_m_rr_acf + p_f_rr_acf) / (p_t_cv_acf + p_m_cv_acf + p_f_cv_acf) + plot_annotation(tag_levels = "A") & theme(plot.tag = element_text(size = 36))
+p_acf <- (p_t_rr_acf + p_m_rr_acf + p_f_rr_acf) / (p_t_cv_acf + p_m_cv_acf + p_f_cv_acf) + plot_annotation(tag_levels = "A") & theme(plot.tag = element_text(size = 36))
 
-ggsave(p_cv_acf, width = 18, height = 10, filename = "./output/figures/fig_p_cv_acf_r1.pdf")
+ggsave(p_acf, width = 18, height = 10, filename = "./output/figures/fig_p_acf_r1.pdf")
 
-  p_cv <- image_read("./output/figures/fig_p_cv_r1.png")
-  p_cv 
+  p_acf <- image_read("./output/figures/fig_p_acf_r1.png")
+  p_acf 
 ```
 #### *Publication bias analysis*
 
@@ -2878,11 +2929,11 @@ Funnel plots did not show any noticeable deviation from the typical funnel shape
 #| include: false
 rerun = FALSE
 if(rerun){
-  model_full_lnrr_pb <- brms::brm(effect_size | se(sqrt(V)) ~  c_accl_time + V + habitat*life.hist*type + trait_category + habitat:type + habitat:life.hist + habitat:life.hist:type + (~1 | record_num) + (1 | gr(species_full, cov = A)) + (1 | spp) + (1 | trait) + (1  | obs),  data2 = list(A=A), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 8, data = lnRRQ10_data)
+  model_full_lnrr_pb <- brms::brm(effect_size | se(sqrt(V)) ~  max_temp_c + c_accl_time + V + habitat*life.hist*type + trait_category + habitat:type + habitat:life.hist + habitat:life.hist:type + (~1 | record_num) + (1 | gr(species_full, cov = A)) + (1 + max_temp_c | spp) + (1 | trait) + (1  | obs),  data2 = list(A=A), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 8, data = lnRRQ10_data)
 
-  model_full_lncvr_pb <- brms::brm(effect_size | se(sqrt(V)) ~  c_accl_time + V + habitat*life.hist*type + trait_category + (~1 | record_num) + (1 | gr(species_full, cov = A_CVR)) + (1 | spp) + (1 | trait) + (1  | obs),  data2 = list(A_CVR=A_CVR), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 8, data = lnCVRQ10_data)
+  model_full_lncvr_pb <- brms::brm(effect_size | se(sqrt(V)) ~ max_temp_c +  c_accl_time + V + habitat*life.hist*type + trait_category + (~1 | record_num) + (1 | gr(species_full, cov = A_CVR)) + (1 + max_temp_c| spp) + (1 | trait) + (1  | obs),  data2 = list(A_CVR=A_CVR), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 8, data = lnCVRQ10_data)
 
-  model_full_lnvr_pb <- brms::brm(effect_size | se(sqrt(V)) ~  c_accl_time + V + habitat*life.hist*type + trait_category  + (~1 | record_num) + (1 | gr(species_full, cov = A_VR)) + (1 | spp) + (1 | trait) + (1  | obs),  data2 = list(A_VR=A_VR), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 8, data = lnVRQ10_data)
+  model_full_lnvr_pb <- brms::brm(effect_size | se(sqrt(V)) ~  max_temp_c + c_accl_time + V + habitat*life.hist*type + trait_category  + (~1 | record_num) + (1 | gr(species_full, cov = A_VR)) + (1 + max_temp_c | spp) + (1 | trait) + (1  | obs),  data2 = list(A_VR=A_VR), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 8, data = lnVRQ10_data)
 
   saveRDS(model_full_lnrr_pb, file = "./output/models/lnRRQ10_pubbias")
   saveRDS(model_full_lncvr_pb, file = "./output/models/lnCVRQ10_pubbias")
@@ -2897,7 +2948,7 @@ if(rerun){
 
 ```{r, fig-s2}
 #| label: fig-s2
-#| fig-cap: Funnel plot of precision (1/sampling standard error) against effect size for A) log response ratio $Q_{10}$ ($lnRR_{Q_{10}}$), B)log coefficient of variance ratio $Q_{10}$ ($lnCVR_{Q_{10}}$) and C) log variance ratio $Q_{10}$ ($lnVR_{Q_{10}}$). Both acute ('green') and acclimation ('orange') effect sizes are plotted.
+#| fig-cap: Funnel plot of precision (1/sampling standard error) against effect size for A) log response ratio $Q_{10}$ ($lnRR_{Q_{10}}$), B) log coefficient of variance ratio $Q_{10}$ ($lnCVR_{Q_{10}}$) and C) log variance ratio $Q_{10}$ ($lnVR_{Q_{10}}$). Both acute ('black') and acclimation ('grey') effect sizes are plotted.
 cols <- c("#303234", "#D3D3D3")
 ps2_1 <- ggplot(lnRRQ10_data, aes(y = 1/sqrt(V), x = effect_size, color = type)) + geom_point() + theme_classic() + labs(y = TeX("Precision\\ $\\left( \\frac{1}{\\sqrt{V}} \\right)$"), x = TeX("$lnRR_{Q_{10}}$"))+geom_vline(xintercept = 0, linetype = 3) + theme(legend.title  = element_text(size = 15), legend.text = element_text(size = 15), axis.title = element_text(size = 15), axis.text = element_text(size = 15), legend.position = "none") + scale_color_manual(name = "Type", values = cols)
 

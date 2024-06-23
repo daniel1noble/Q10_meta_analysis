@@ -2921,8 +2921,6 @@ ggsave(p_acf, width = 18, height = 10, filename = "./output/figures/fig_p_acf_r1
 ```
 #### *Publication bias analysis*
 
-Funnel plots did not show any noticeable deviation from the typical funnel shape for any of the effect size estimates (@fig-s2). 
-
 ```{r, pubias}
 #| label: pubias
 #| echo: false
@@ -2931,9 +2929,15 @@ rerun = FALSE
 if(rerun){
   model_full_lnrr_pb <- brms::brm(effect_size | se(sqrt(V)) ~  max_temp_c + c_accl_time + V + habitat*life.hist*type + trait_category + habitat:type + habitat:life.hist + habitat:life.hist:type + (~1 | record_num) + (1 | gr(species_full, cov = A)) + (1 + max_temp_c | spp) + (1 | trait) + (1  | obs),  data2 = list(A=A), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 8, data = lnRRQ10_data)
 
+  post_pb_lnrr <- posterior_samples(model_full_lnrr_pb, "^b_V")[,1]
+  
   model_full_lncvr_pb <- brms::brm(effect_size | se(sqrt(V)) ~ max_temp_c +  c_accl_time + V + habitat*life.hist*type + trait_category + (~1 | record_num) + (1 | gr(species_full, cov = A_CVR)) + (1 + max_temp_c| spp) + (1 | trait) + (1  | obs),  data2 = list(A_CVR=A_CVR), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 8, data = lnCVRQ10_data)
+  
+  post_pb_lncvr <- posterior_samples(model_full_lncvr_pb, "^b_V")[,1]
 
   model_full_lnvr_pb <- brms::brm(effect_size | se(sqrt(V)) ~  max_temp_c + c_accl_time + V + habitat*life.hist*type + trait_category  + (~1 | record_num) + (1 | gr(species_full, cov = A_VR)) + (1 + max_temp_c | spp) + (1 | trait) + (1  | obs),  data2 = list(A_VR=A_VR), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 8, data = lnVRQ10_data)
+
+  model_full_lnvr_pb <- posterior_samples(model_full_lnvr_pb, "^b_V")[,1]
 
   saveRDS(model_full_lnrr_pb, file = "./output/models/lnRRQ10_pubbias")
   saveRDS(model_full_lncvr_pb, file = "./output/models/lnCVRQ10_pubbias")
@@ -2963,4 +2967,4 @@ figs2 <- image_read("./output/figures/figS2.png")
 figs2
 ```
 
-
+Funnel plots did not show any noticeable deviation from the typical funnel shape for any of the effect size estimates (@fig-s2). Meta-regression models including sampling variance as a moderator also suggested no relationship with effect size for $lnRR_{Q_{10}}$ ($\beta$ = `r mean(post_pb_lnrr)`, 95% CI: `r quantile(post_pb_lnrr, 0.025)` to `r quantile(post_pb_lnrr, 0.975)`, $p_{MCMC}$ = `r p_value(pmcmc(post_pb_lnrr))`), $lnCVR_{Q_{10}}$ ($\beta$ = `r mean(post_pb_lncvr)`, 95% CI: `r quantile(post_pb_lncvr, 0.025)` to `r quantile(post_pb_lncvr, 0.975)`, $p_{MCMC}$ = `r p_value(pmcmc(post_pb_lncvr))`) or $lnVR_{Q_{10}}$ ($\beta$ = `r mean(model_full_lnvr_pb)`, 95% CI: `r quantile(model_full_lnvr_pb, 0.025)` to `r quantile(model_full_lnvr_pb, 0.975)`, $p_{MCMC}$ = `r p_value(pmcmc(model_full_lnvr_pb))`).

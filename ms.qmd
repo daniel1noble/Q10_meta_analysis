@@ -301,7 +301,7 @@ $$ {#eq-lCVRpred}
 
 ### *Publication Bias*
 
-We explored the possibility for publication bias graphically using funnel plots, and more formally by including sampling variance (or sampling standard error) in our meta-regression models  [@Nakagawa2022-gy]. Funnel plot asymmetry may suggest a form of publication bias called the 'file-drawer' effect whereby low-powered studies are less likely to be published. To test whether sampling variance covaried with effect size we included it in a multi-level meta-regression model that accounted for all the random effects (study, species, trait) and fixed effects (acclimation time, type of effect, habitat, trait category and the interaction between habitat type and trait category). 
+We explored the possibility for publication bias graphically using funnel plots, and more formally by including the square root of the inverse effective sample size ($\sqrt{1/ne}$) in our meta-regression models  [@Nakagawa2022-gy]. Funnel plot asymmetry may suggest a form of publication bias called the 'file-drawer' effect whereby low-powered studies are less likely to be published, however, graphical approaches do not account for sources of non-independence and high heterogeneity which can drive apparent funnel asymmetry [@Nakagawa2022-gy]. As such, we included $\sqrt{1/ne}$ as a moderator in a multi-level meta-regression model that accounted for all the random effects (i.e, study, species, trait) and fixed effects (acclimation time, type of effect, habitat, trait category and the interaction between habitat type and trait category). While sampling standard error (or variance) could have been included in our model, @Nakagawa2022-gy suggested instead to use $\sqrt{1/ne}$ (and its square root) to avoid potential problems with using sampling error itself (see @Nakagawa2022-gy for a discussion). 
 
 
 ```{r lnrrq10}
@@ -2927,17 +2927,37 @@ ggsave(p_acf, width = 18, height = 10, filename = "./output/figures/fig_p_acf_r1
 #| include: false
 rerun = FALSE
 if(rerun){
-  model_full_lnrr_pb <- brms::brm(effect_size | se(sqrt(V)) ~  max_temp_c + c_accl_time + V + habitat*life.hist*type + trait_category + habitat:type + habitat:life.hist + habitat:life.hist:type + (~1 | record_num) + (1 | gr(species_full, cov = A)) + (1 + max_temp_c | spp) + (1 | trait) + (1  | obs),  data2 = list(A=A), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 8, data = lnRRQ10_data)
 
-  post_pb_lnrr <- posterior_samples(model_full_lnrr_pb, "^b_V")[,1]
+# USe effective sample size instead because sampling variance estimates could indue a spurious correlation with our effect size
+    lnRRQ10_data <- lnRRQ10_data %>%  
+              mutate(n_ef = ifelse(name == "lnRR_Q10_acute_t1", (4*r1.1_N*r1.2_N)/(r1.1_N + r1.2_N), # acute 1
+                            ifelse(name == "lnRR_Q10_acute_t2", (4*r2.1_N*r2.2_N)/(r2.1_N + r2.2_N), # acute 2
+                                                                (4*r1.1_N*r2.2_N)/(r1.1_N + r2.2_N)))) # acclimation
   
-  model_full_lncvr_pb <- brms::brm(effect_size | se(sqrt(V)) ~ max_temp_c +  c_accl_time + V + habitat*life.hist*type + trait_category + (~1 | record_num) + (1 | gr(species_full, cov = A_CVR)) + (1 + max_temp_c| spp) + (1 | trait) + (1  | obs),  data2 = list(A_CVR=A_CVR), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 8, data = lnCVRQ10_data)
+    lnCVRQ10_data <- lnCVRQ10_data %>%  
+              mutate(n_ef = ifelse(name == "lnCVR_Q10_acute_t1", (4*r1.1_N*r1.2_N)/(r1.1_N + r1.2_N), # acute 1
+                            ifelse(name == "lnCVR_Q10_acute_t2", (4*r2.1_N*r2.2_N)/(r2.1_N + r2.2_N), # acute 2
+                                                                (4*r1.1_N*r2.2_N)/(r1.1_N + r2.2_N)))) # acclimation
+    
+    lnVRQ10_data <- lnVRQ10_data %>%  
+              mutate(n_ef = ifelse(name == "lnVR_Q10_acute_t1", (4*r1.1_N*r1.2_N)/(r1.1_N + r1.2_N), # acute 1
+                            ifelse(name == "lnVR_Q10_acute_t2", (4*r2.1_N*r2.2_N)/(r2.1_N + r2.2_N), # acute 2
+                                                                (4*r1.1_N*r2.2_N)/(r1.1_N + r2.2_N)))) # acclimation
   
-  post_pb_lncvr <- posterior_samples(model_full_lncvr_pb, "^b_V")[,1]
+  model_full_lnrr_pb <- brms::brm(effect_size | se(sqrt(V)) ~  max_temp_c + c_accl_time + sqrt(1/n_ef) + habitat*life.hist*type + trait_category + habitat:type + habitat:life.hist + habitat:life.hist:type + (~1 | record_num) + (1 | gr(species_full, cov = A)) + (1 + max_temp_c | spp) + (1 | trait) + (1  | obs),  data2 = list(A=A), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 8, data = lnRRQ10_data)
 
-  model_full_lnvr_pb <- brms::brm(effect_size | se(sqrt(V)) ~  max_temp_c + c_accl_time + V + habitat*life.hist*type + trait_category  + (~1 | record_num) + (1 | gr(species_full, cov = A_VR)) + (1 + max_temp_c | spp) + (1 | trait) + (1  | obs),  data2 = list(A_VR=A_VR), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 8, data = lnVRQ10_data)
+  #Pull the posterior for the slope with sqrt effective n
+  post_pb_lnrr <- posterior_samples(model_full_lnrr_pb, "^b_sqrt1Dn_ef")[,1]
+  
+  model_full_lncvr_pb <- brms::brm(effect_size | se(sqrt(V)) ~ max_temp_c +  c_accl_time + sqrt(1/n_ef) + habitat*life.hist*type + trait_category + (~1 | record_num) + (1 | gr(species_full, cov = A_CVR)) + (1 + max_temp_c| spp) + (1 | trait) + (1  | obs),  data2 = list(A_CVR=A_CVR), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 8, data = lnCVRQ10_data)
+  
+  #Pull the posterior for the slope with sqrt effective n
+  post_pb_lncvr <- posterior_samples(model_full_lncvr_pb, "^b_sqrt1Dn_ef")[,1]
 
-  model_full_lnvr_pb <- posterior_samples(model_full_lnvr_pb, "^b_V")[,1]
+  model_full_lnvr_pb <- brms::brm(effect_size | se(sqrt(V)) ~  max_temp_c + c_accl_time + sqrt(1/n_ef) + habitat*life.hist*type + trait_category + (~1 | record_num) + (1 | gr(species_full, cov = A_VR)) + (1 + max_temp_c | spp) + (1 | trait) + (1  | obs),  data2 = list(A_VR=A_VR), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 8, data = lnVRQ10_data)
+
+  #Pull the posterior for the slope with sqrt effective n
+  model_full_lnvr_pb <- posterior_samples(model_full_lnvr_pb, "^b_sqrt1Dn_ef")[,1]
 
   saveRDS(model_full_lnrr_pb, file = "./output/models/lnRRQ10_pubbias")
   saveRDS(model_full_lncvr_pb, file = "./output/models/lnCVRQ10_pubbias")
@@ -2967,4 +2987,4 @@ figs2 <- image_read("./output/figures/figS2.png")
 figs2
 ```
 
-Funnel plots did not show any noticeable deviation from the typical funnel shape for any of the effect size estimates (@fig-s2). Meta-regression models including sampling variance as a moderator also suggested no relationship with effect size for $lnRR_{Q_{10}}$ ($\beta$ = `r mean(post_pb_lnrr)`, 95% CI: `r quantile(post_pb_lnrr, 0.025)` to `r quantile(post_pb_lnrr, 0.975)`, $p_{MCMC}$ = `r p_value(pmcmc(post_pb_lnrr))`), $lnCVR_{Q_{10}}$ ($\beta$ = `r mean(post_pb_lncvr)`, 95% CI: `r quantile(post_pb_lncvr, 0.025)` to `r quantile(post_pb_lncvr, 0.975)`, $p_{MCMC}$ = `r p_value(pmcmc(post_pb_lncvr))`) or $lnVR_{Q_{10}}$ ($\beta$ = `r mean(model_full_lnvr_pb)`, 95% CI: `r quantile(model_full_lnvr_pb, 0.025)` to `r quantile(model_full_lnvr_pb, 0.975)`, $p_{MCMC}$ = `r p_value(pmcmc(model_full_lnvr_pb))`).
+Funnel plots did not show any noticeable deviation from the typical funnel shape for any of the effect size estimates (@fig-s2). Meta-regression models including sampling standard error as a moderator also suggested no relationship with effect size for $lnRR_{Q_{10}}$ ($\beta$ = `r mean(post_pb_lnrr)`, 95% CI: `r quantile(post_pb_lnrr, 0.025)` to `r quantile(post_pb_lnrr, 0.975)`, $p_{MCMC}$ = `r p_value(pmcmc(post_pb_lnrr))`), $lnCVR_{Q_{10}}$ ($\beta$ = `r mean(post_pb_lncvr)`, 95% CI: `r quantile(post_pb_lncvr, 0.025)` to `r quantile(post_pb_lncvr, 0.975)`, $p_{MCMC}$ = `r p_value(pmcmc(post_pb_lncvr))`) or $lnVR_{Q_{10}}$ ($\beta$ = `r mean(model_full_lnvr_pb)`, 95% CI: `r quantile(model_full_lnvr_pb, 0.025)` to `r quantile(model_full_lnvr_pb, 0.975)`, $p_{MCMC}$ = `r p_value(pmcmc(model_full_lnvr_pb))`) was not significant indicating little evidence for publication bias.

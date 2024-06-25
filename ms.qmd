@@ -1115,7 +1115,7 @@ if(rerun){
 
 ```{r, fig-2}
 #| label: fig-2
-#| fig-cap:  **A)** Mean acute and acclimation $lnRR_{Q_{10}}$ across ectotherms in marine, freshwater, and terrestrial habitats. **B)** Mean acute and acclimation $lnCVR_{Q_{10}}$ across ectotherms in marine, freshwater and terrestrial habitats. For both plots, k = total number of effect size estimates while the numbers in brackets indicate the number of species. Sample sizes are the same for panel A and B. In panels A and B, thick bars are 95% confidence intervals (CI) and thin bars 95% prediction intervals (PI). $\Beta$ values are the contrasts between acute and acclimation means within each habitat. $\mu$ values are the overall meta-analytic means averaged across acute and acclimation types within each habitat type. In both cases, their 95% CI's are indicated within square brackets. $p_{MCMC}$ values are the posterior probability of the contrast or overall meta-analytic mean being different from zero. For ease of visualisation, all teh raw data plotted for both acute and acclimation type effect sizes are presented as circles."
+#| fig-cap:  "**A)** Mean acute and acclimation $lnRR_{Q_{10}}$ across ectotherms in marine, freshwater, and terrestrial habitats. **B)** Mean acute and acclimation $lnCVR_{Q_{10}}$ across ectotherms in marine, freshwater and terrestrial habitats. For both plots, k = total number of effect size estimates while the numbers in brackets indicate the number of species. Sample sizes are the same for panel A and B. In panels A and B, thick bars are 95% confidence intervals (CI) and thin bars 95% prediction intervals (PI). $\Beta$ values are the contrasts between acute and acclimation means within each habitat. $\mu$ values are the overall meta-analytic means averaged across acute and acclimation types within each habitat type. In both cases, their 95% CI's are indicated within square brackets. $p_{MCMC}$ values are the posterior probability of the contrast or overall meta-analytic mean being different from zero. For ease of visualisation, all the raw data plotted for both acute and acclimation type effect sizes are presented as circles."
 #| warning: false
 #| echo: false
 
@@ -2482,29 +2482,30 @@ Analysis of $lnVR_{Q_{10}}$ suggested that variance increases with higher temper
 ```{r, fig-s1}
 #| label: fig-s1
 #| fig-align: center
-#| fig-cap: "Estimated mean $lnVR_{Q_{10}}$ for marine, freshwater and terrestrial systems. Note there were no differences between acute and acclimation $Q_{10}$ types so they were averaged. Thick black bars are 95% confidence intervals (CI's) and thin bars 95% prediction intervals (PI's). The percentage change in variance is also back calculated. Note that these are raw variances and do not account for changes in mean physiological rates. k = total number of effect size estimates while the numbers in brackets indicate the number of species."
+#| fig-cap: "Estimated mean acute and acclimation $lnVR_{Q_{10}}$ for marine, freshwater and terrestrial habitats. The percentage change in variance is also back calculated. Note that these are raw variances and do not account for changes in mean physiological rates. k = total number of effect size estimates while the numbers in brackets indicate the number of species. Thick bars are 95% confidence intervals (CI) and thin bars 95% prediction intervals (PI). $\Beta$ values are the contrasts between acute and acclimation means within each habitat with 'NS' signifiying . $\mu$ values are the overall meta-analytic means averaged across acute and acclimation types within each habitat type. In both cases, their 95% CI's are indicated within square brackets. $p_{MCMC}$ values are the posterior probability of the contrast or overall meta-analytic mean being different from zero. For ease of visualisation, all the raw data plotted for both acute and acclimation type effect sizes are presented as circles."
 
+k_vr <- manual_extract(model3.2, mod = "habitat", group = "spp", exclude = NULL)
 
 ##################
   # Figure S1
 ################## 
   # Sensitivity analysis that looks at how variance changes but not controlling for the mean.
   col <- c("#0871B9", "#F3B40D", "#1BB908")
-  p3 <- orchard_plot(model3.2, xlab = TeX("$lnVR_{Q_{10}}$"), mod = "habitat", group  = "record_num", weights = "prop", angle = 45, trunk.size = 5) +
-              scale_x_discrete(labels = c("T" = "Terrestrial","M" = "Marine" ,"F" = "Freshwater")) + annotate("text", x = 1.3, y = -5.2, 
-           label =TeX(paste0("$\\mu = $", round(mean(f_VR_mean), 2), " [", round(quantile(f_VR_mean, 0.025), 2)," to ", round(quantile(f_VR_mean, 0.975),2), "] ")), hjust = 0, size = 6) + 
-  annotate("text", x = 1.15, y = -3.5, label = TeX(paste0("$\\italic(p)$ ", p_value(round(pmcmc(f_VR_mean), digit = 2)))), hjust = 0, size = 6) + 
-  annotate("text", x = 1.15, y = -5, 
-           label =paste0(round(mean(exp(f_VR_mean)-1)*100, 2), "%"), hjust = 0, size = 6) + 
-  annotate("text", x = 2.3, y = -5.2, 
-           label =TeX(paste0("$\\mu = $", round(mean(m_VR_mean), 2), " [", round(quantile(m_VR_mean, 0.025), 2)," to ", round(quantile(m_VR_mean, 0.975),2), "] ")), hjust = 0, size = 6) + 
-  annotate("text", x = 2.15, y = -3.5, label = TeX(paste0("$\\italic(p)$ ", p_value(round(pmcmc(m_VR_mean), digit = 2)))), hjust = 0, size = 6) + 
-  annotate("text", x = 2.15, y = -5, 
-           label =paste0(round(mean(exp(m_VR_mean)-1)*100, 2), "%"), hjust = 0, size = 6) + annotate("text", x = 3.3, y = -5.2, 
-           label =TeX(paste0("$\\mu = $", round(mean(t_VR_mean), 2), " [", round(quantile(t_VR_mean, 0.025), 2)," to ", round(quantile(t_VR_mean, 0.975),2), "] ")), hjust = 0, size = 6) + 
-  annotate("text", x = 3.15, y = -5, 
-           label =paste0(round(mean(exp(t_VR_mean)-1)*100, 2), "%"), hjust = 0, size = 6) + labs(shape = "Type") +
-    annotate("text", x = 3.15, y = -3.5, label = TeX(paste0("$\\italic(p)$ ", p_value(round(pmcmc(t_VR_mean), digit = 3)))), hjust = 0, size = 6) + scale_fill_manual(values = c(col))
+  p3 <- orchard_plot(model3.2, xlab = TeX("$lnVR_{Q_{10}}$"), mod = "habitat", by = "type", group  = "record_num", weights = "prop", angle = 45, trunk.size = 1) +
+              scale_x_discrete(labels = c("T" = "Terrestrial","M" = "Marine" ,"F" = "Freshwater")) + ylim(-2,3) +
+    
+     annotate("text", x = 1.5, y = -2, label =TeX(paste0("$\\mu = $", round(mean(f_VR_mean), 2), " [", round(quantile(f_VR_mean, 0.025), 2)," to ", round(quantile(f_VR_mean, 0.975),2), "] ", " $\\,p_{MCMC}$", p_value(round(pmcmc(f_VR_mean), digit = 2)))), hjust = 0, size = 8) + 
+    annotate("text", x = 1.2, y = 1.5, label =TeX(paste0("$\\beta = $", "NS")), hjust = 0, size = 8) +
+  annotate("text", x = 1.20, y = -2, label =paste0(round(mean(f_VR_mean_ef), 3), "%"), hjust = 0, size = 8) + labs(shape = "Type") +
+    
+    annotate("text", x = 2.5, y = -2, label =TeX(paste0("$\\mu = $", round(mean(m_VR_mean), 2), " [", round(quantile(m_VR_mean, 0.025), 2)," to ", round(quantile(m_VR_mean, 0.975),2), "] ", " $\\,p_{MCMC}$", p_value(round(pmcmc(m_VR_mean), digit = 2)))), hjust = 0, size = 8) + 
+    annotate("text", x = 2.2, y = 1.5, label =TeX(paste0("$\\beta = $", "NS")), hjust = 0, size = 8) +
+  annotate("text", x = 2.20, y = -2, label =paste0(round(mean(m_VR_mean_ef), 3), "%"), hjust = 0, size = 8) + labs(shape = "Type") +
+    
+        annotate("text", x = 3.5, y = -2, label =TeX(paste0("$\\mu = $", round(mean(t_VR_mean), 2), " [", round(quantile(t_VR_mean, 0.025), 2)," to ", round(quantile(t_VR_mean, 0.975),2), "] ", " $\\,p_{MCMC}$ =", p_value(round(pmcmc(t_VR_mean), digit = 2)))), hjust = 0, size = 8) + 
+    annotate("text", x = 3.2, y = 1.5, label =TeX(paste0("$\\beta = $", "NS")), hjust = 0, size = 8) +
+  annotate("text", x = 3.20, y = -2, label =paste0(round(mean(t_VR_mean_ef), 3), "%"), hjust = 0, size = 8) + labs(shape = "Type") + scale_fill_manual(values = c(col))
+
    
   
   p3 <- p3 + theme_classic() + theme(axis.title  = element_text(size = 24),
@@ -2520,7 +2521,7 @@ Analysis of $lnVR_{Q_{10}}$ suggested that variance increases with higher temper
 ```{r, tbl-s1}
 #| label: tbl-s1
 #| echo: false
-#| tbl-cap: Model estimates, standard error, and 95% credible intervals comparing changes in acute and acclimation $lnVR_{Q_{10}}$ across habitat types. Model estimates are based off 1,253 effect sizes from 139 studies.
+#| tbl-cap: "Model estimates, standard error, and 95% credible intervals comparing changes in acute and acclimation $lnVR_{Q_{10}}$ across habitat types. Model estimates are based off 1,253 effect sizes from 139 studies."
  
  # Extract the fixed / population-level effect summaries of the posterior
     fixed <- do.call(rbind, apply(posterior_samples(model3.2_bayes, pars = "^b"), 2,  function(x) post_summary(x)))
@@ -2919,6 +2920,7 @@ ggsave(p_acf, width = 18, height = 10, filename = "./output/figures/fig_p_acf_r1
   p_acf <- image_read("./output/figures/fig_p_acf_r1.png")
   p_acf 
 ```
+
 #### *Publication bias analysis*
 
 ```{r, pubias}

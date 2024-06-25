@@ -2952,12 +2952,12 @@ if(rerun){
   #Pull the posterior for the slope with sqrt effective n
   post_pb_lnrr <- posterior_samples(model_full_lnrr_pb, "^b_sqrt1Dn_ef")[,1]
   
-  model_full_lncvr_pb <- brms::brm(effect_size | se(sqrt(V)) ~ max_temp_c +  c_accl_time + sqrt(n_ef) + habitat*life.hist*type + trait_category + (~1 | record_num) + (1 | gr(species_full, cov = A_CVR)) + (1 + max_temp_c| spp) + (1 | trait) + (1  | obs),  data2 = list(A_CVR=A_CVR), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 8, data = lnCVRQ10_data)
+  model_full_lncvr_pb <- brms::brm(effect_size | se(sqrt(V)) ~ max_temp_c +  c_accl_time + sqrt(n_ef) + habitat*life.hist*type + trait_category + (~1 | record_num) + (1 | gr(species_full, cov = A_CVR)) + (1 + max_temp_c| spp) + (1 | trait) + (1  | obs),  data2 = list(A_CVR=A_CVR), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 1, iter = 5000, warmup = 1000, cores = 8, data = lnCVRQ10_data)
   
   #Pull the posterior for the slope with sqrt effective n
   post_pb_lncvr <- posterior_samples(model_full_lncvr_pb, "^b_sqrt1Dn_ef")[,1]
 
-  model_full_lnvr_pb <- brms::brm(effect_size | se(sqrt(V)) ~  max_temp_c + c_accl_time + sqrt(n_ef) + habitat*life.hist*type + trait_category + (~1 | record_num) + (1 | gr(species_full, cov = A_VR)) + (1 + max_temp_c | spp) + (1 | trait) + (1  | obs),  data2 = list(A_VR=A_VR), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 8, data = lnVRQ10_data)
+  model_full_lnvr_pb <- brms::brm(effect_size | se(sqrt(V)) ~  max_temp_c + c_accl_time + sqrt(n_ef) + habitat*life.hist*type + trait_category + (~1 | record_num) + (1 | gr(species_full, cov = A_VR)) + (1 + max_temp_c | spp) + (1 | trait) + (1  | obs),  data2 = list(A_VR=A_VR), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 1, iter = 5000, warmup = 1000, cores = 8, data = lnVRQ10_data)
 
   #Pull the posterior for the slope with sqrt effective n
   model_full_lnvr_pb <- posterior_samples(model_full_lnvr_pb, "^b_sqrt1Dn_ef")[,1]

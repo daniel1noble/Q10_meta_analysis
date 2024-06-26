@@ -1447,34 +1447,36 @@ if(rerun){
 ##################################################
 
 # Bring in  historial climate data
-climate <- read.csv("./output/climate_data/ERA5_air_and_SST_timeseries.csv")
+  climate <- read.csv("./output/climate_data/ERA5_air_and_SST_timeseries.csv")
 
 # Create a match column.
-climate2 <- climate %>% mutate(match = interaction(Species, Latitude, Longitude)) %>% dplyr::select(Species, Latitude, Longitude, match, cv, sd, mean, acf_lag1, acf_all)
+  climate2 <- climate %>% mutate(match = interaction(Species, Latitude, Longitude)) %>% 
+                          dplyr::select(Species, Latitude, Longitude, match, cv, sd, mean, acf_lag1, acf_all)
 
 # Populations and species?
-pop_spp_w <- climate2[complete.cases(climate2),]
+  pop_spp_w <- climate2[complete.cases(climate2),]
 
 # Subset the data
-lnCVRQ10_data_wild <- data_long2 %>% filter(grepl("lnCVR", name) & !is.na(effect_size) & !is.na(V) & !V == 0 & !is.na(acclim_period) & source == "w") %>% 
-                              mutate(spp = species_full, 
+  lnCVRQ10_data_wild <- data_long2 %>% 
+    filter(grepl("lnCVR", name) & !is.na(effect_size) & !is.na(V) & !V == 0 & !is.na(acclim_period) & source == "w") %>% 
+                        mutate(spp = species_full, 
                                      c_accl_time = acclim_period - mean(acclim_period, na.rm = TRUE), 
                                      match = interaction(spp, lat, long),
                                      max_temp_c = scale(temp_2, scale = FALSE))
 
 # Now, join climate data to full data. This will give us all the climate variability data for each site across time
-lnCVRQ10_data_wild <- left_join(lnCVRQ10_data_wild, climate2, by = "match")
+  lnCVRQ10_data_wild <- left_join(lnCVRQ10_data_wild, climate2, by = "match")
 
-# Look at the environment details across different habitats. Seems very similar.
-  lnCVRQ10_data_wild  %>% group_by(habitat) %>% summarise(mean(cv), mean(acf_all))
+# Look at the environment details across different habitats. 
+  lnCVRQ10_data_wild  %>% group_by(habitat) %>% summarise(mean(sd))
 
 # Check and prune tree
-tree_lncvr_wild <- tree_checks(data = lnCVRQ10_data_wild, tree = tree_p0.7, dataCol = "species_full", type = "prune")
-tree_checks(data = lnCVRQ10_data_wild, tree = tree_lncvr_wild, dataCol = "species_full", type = "check") # Good
+  tree_lncvr_wild <- tree_checks(data = lnCVRQ10_data_wild, tree = tree_p0.7, dataCol = "species_full", type = "prune")
+  tree_checks(data = lnCVRQ10_data_wild, tree = tree_lncvr_wild, dataCol = "species_full", type = "check") # Good
 
 # Create the phylo correlation matrix
-phylo_cor_wild_cvr <- vcv(tree_lncvr_wild, cor = TRUE)
-        A_wild_cvr <- vcv(tree_lncvr_wild, cor = FALSE) # For bayes, need cov matrix
+  phylo_cor_wild_cvr <- vcv(tree_lncvr_wild, cor = TRUE)
+          A_wild_cvr <- vcv(tree_lncvr_wild, cor = FALSE) # For bayes, need cov matrix
 
 # Scale environment variables
     lnCVRQ10_data_wild <- lnCVRQ10_data_wild %>% mutate(     cv_c = scale(cv),
@@ -1737,9 +1739,10 @@ p_t_cv <-  bubble_plot(model4.9_t, mod = "cv_c", group = "spp", ylab = TeX("$lnC
 ####################
 
 
-p_cv <- (p_t_rr + p_m_rr + p_f_rr) / (p_t_cv + p_m_cv + p_f_cv) + plot_annotation(tag_levels = "A") & theme(plot.tag = element_text(size = 36))
+  p_cv <- (p_t_rr + p_m_rr + p_f_rr) / (p_t_cv + p_m_cv + p_f_cv) + 
+            plot_annotation(tag_levels = "A") & theme(plot.tag = element_text(size = 36))
 
-ggsave(p_cv, width = 18, height = 10, filename = "./output/figures/fig_p_cv_r1.pdf")
+  ggsave(p_cv, width = 18, height = 10, filename = "./output/figures/fig_p_cv_r1.pdf")
 
   p_cv <- image_read("./output/figures/fig_p_cv_r1.png")
   p_cv 
@@ -1758,9 +1761,19 @@ ggsave(p_cv, width = 18, height = 10, filename = "./output/figures/fig_p_cv_r1.p
 rerun = FALSE
 if(rerun){
   
-  # Model lat and long. Need to exclude missing acclimdation data. That will make it easier to create predcitions and explore the model fit.
+  # Model lat and long. Need to exclude missing acclimdation data. That will make it easier to create predcitions and explore the model fit. Include max temp to correct predictions for possible decrease at higher temps.
     
-   model5_bayes <- brms::brm(effect_size | se(sqrt(V)) ~  max_temp_c + c_accl_time + type*habitat + t2(Longitude, Latitude) + (~1 | record_num) + (1 | gr(species_full, cov = A_wild_cvr)) + (1 + max_temp_c| spp) + (1|trait) + (1|obs), data2 = list(A_wild_cvr=A_wild_cvr), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.99, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 8, data = lnCVRQ10_data_wild[complete.cases(lnCVRQ10_data_wild$c_accl_time),])
+   model5_bayes <- brms::brm(effect_size | se(sqrt(V)) ~  max_temp_c + c_accl_time + type*habitat + t2(Longitude, Latitude) +
+                               (1 | record_num) + 
+                               (1 | gr(species_full, cov = A_wild_cvr)) + 
+                               (1 + max_temp_c | spp) + 
+                               (1 | trait) + 
+                               (1 | obs), 
+                      data2 = list(A_wild_cvr=A_wild_cvr), family = gaussian(), 
+                      prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), 
+                      control = list(adapt_delta = 0.99, max_treedepth = 12), 
+                      chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 8, 
+                      data = lnCVRQ10_data_wild[complete.cases(lnCVRQ10_data_wild$c_accl_time),])
          
   saveRDS(model5_bayes, file = "./output/models/lnCVRQ10_5_bayes")
 
@@ -1775,10 +1788,13 @@ if(rerun){
   data_w_pred <- cbind(data_w, predict(model5_bayes))
 
 # Fitted vs actual data
-  ggplot(data = data_w_pred, aes(x = Estimate, y = effect_size)) + geom_point() + geom_smooth(method = "lm") + labs(x = "Predicted Effect Size", y = "Observed Effect Size") + theme_classic() + 
-  geom_abline(intercept = 0, slope = 1)
+  ggplot(data = data_w_pred, aes(x = Estimate, y = effect_size))      + 
+        geom_point() + geom_smooth(method = "lm")                     + 
+        labs(x = "Predicted Effect Size", y = "Observed Effect Size") + 
+        theme_classic()                                               + 
+        geom_abline(intercept = 0, slope = 1)
 
-# Seems to be OK, but over and under-predciting at times. Lets explore the data for odd ball predictions to see if there are any obvious reasons why. T here are very few for the most part but lets see why sign changes occur which are most stricking differences. Sign changes indicate the observed data is completely opposite in sign to the predcited data
+# Seems to be OK, but over and under-predciting at times. Lets explore the data for odd ball predictions to see if there are any obvious reasons why. There are very few for the most part but lets see why sign changes occur which are most stricking differences. Sign changes indicate the observed data is completely opposite in sign to the predcited data
 
 #  Spot check of a bunch of studies doesn't show any obvious issues with the data. Note that data is repeated because acute and acclimated rates are calculated. We expect the rows of raw data for acute and acclim to be repeated even though these data are NOT all used to make the calculation.
   sign_change_dat <- data_w_pred  %>% filter(sign(Estimate) != sign(effect_size))
@@ -1819,14 +1835,14 @@ sub_data <- lnCVRQ10_data_wild[complete.cases(lnCVRQ10_data_wild$c_accl_time),]
 # Now, calculate r2 marginal, by subtracting the random effect variance from the fixed effect variance (which includes random effects). Need to check this as it may not be this intuitive
     r2 <- (v_fix - tot_re - sigma2_v) / (v_fix - sigma2_v) # Need to remove sampling variance too
 
-    mean(r2) # Seems a bit high 0.5
-  quantile(r2, probs = c(0.025, 0.975)); #0.27-0.69
+    mean(r2) # Seems a bit high 0.53
+  quantile(r2, probs = c(0.025, 0.975)); #0.30-0.72
 
 # Now lets check with our different method. This should be close to the above. Which it is, so I think we're ok in our intuition.
   r2_2 <- (v_fix2 - tot_re) / (v_fix2) # Already removed sampling variance from v_fix2
   
-  mean(r2_2) #  0.48
-  quantile(r2_2, probs = c(0.025, 0.975)); #0.31-0.60
+  mean(r2_2) #  0.50
+  quantile(r2_2, probs = c(0.025, 0.975)); #0.33-0.62
 
 ######################################################################
 # Model predictions for terrestrial, marine and freshwater ectotherms
@@ -1869,12 +1885,12 @@ sub_data <- lnCVRQ10_data_wild[complete.cases(lnCVRQ10_data_wild$c_accl_time),]
   marine_data <- sub_data  %>% filter(habitat == "m") %>% distinct(spp, species_full, habitat, type, Latitude, Longitude)
   
   new_data_m <- data.frame(
-    max_temp_c = 0, 
+       max_temp_c = 0, 
       c_accl_time = 0,
-      V = 0,
-      trait = 0,
-      obs = 0, 
-      record_num = 0
+                V = 0,
+            trait = 0,
+              obs = 0, 
+       record_num = 0
     )
 
   # Create new dataframe with only unique values for predcition.
@@ -1895,12 +1911,12 @@ sub_data <- lnCVRQ10_data_wild[complete.cases(lnCVRQ10_data_wild$c_accl_time),]
   fresh_data <- sub_data  %>% filter(habitat == "f")%>% distinct(spp, species_full, habitat, type, Latitude, Longitude)
   
   new_data_f <- data.frame(
-    max_temp_c = 0, 
+       max_temp_c = 0, 
       c_accl_time = 0,
-      V = 0,
-      trait = 0,
-      obs = 0, 
-      record_num = 0
+                V = 0,
+            trait = 0,
+              obs = 0, 
+       record_num = 0
     )
 
   # Create new dataframe with only unique values for predcition.
@@ -1972,7 +1988,7 @@ world_map = map_data("world") %>%
   # Simplify columns 
   climate_data_new <- climate_data  %>% dplyr::select(-Latitude, -Longitude)
 
-  # Merge with model predcitions. This is the predcited lnCVRq10 for 10C change AT the specific latitude and longitude. We must assume that there is no plasticity or adaptation at each site to make projections
+  # Merge with model predictions. This is the predicted lnCVRQ10 for 10C change AT the specific latitude and longitude. We must assume that there is no plasticity or adaptation at each site to make projections.
   all_pred2 <- all_pred %>% mutate(match = interaction(spp, Latitude, Longitude)) %>% 
               left_join(., climate_data_new, by = "match")  %>% 
               mutate(lnCVR_future = (Estimate / 10) * T_change,
@@ -1982,13 +1998,13 @@ world_map = map_data("world") %>%
                       per_change_l95 = (exp(lnCVR_F_l95) - 1) * 100,
                       per_change_u95 = (exp(lnCVR_F_u95) - 1) * 100)
 
-  # First, lets merge the climate data with the predcitions, but here predcitions are not summarised. We have the entire posteior
+  # First, lets merge the climate data with the predictions, but here predictions are not summarised. We have the entire posteior
    
     all_pred2_no_sum <-  all_pred_no_sum %>% 
                         mutate(match = interaction(spp, Latitude, Longitude))  %>% 
                         left_join(., climate_data_new, by = "match") 
    
-  # Second, lets convert each estimate to lncvr 1 degree C instead of 10...
+  # Second, lets convert each estimate to lncvr to 1 degree C instead of 10...
    all_pred2_no_sum2 <- all_pred2_no_sum %>%  
                         mutate_if(colnames(.) %in% c(1:3200), lncvr_1c) 
 
@@ -1998,8 +2014,8 @@ world_map = map_data("world") %>%
   # Fourth, we can calculate the percentage change on the posterior
     all_pred2_no_sum2[,paste0("perc", c(1:3200))]  <- (exp(all_pred2_no_sum2[,colnames(all_pred2_no_sum2) %in% c(1:3200)]) - 1)*100
 
-  # Now we can summarise each. Here, what we are doing is taking the mean for each column. Effectively pooling across all the iterations for each dataset. This gives us an estimation of the mean change in variance across all locations/species., but it gives us 3200 point estimates of this mean. We can then use this to calculate the 95% CI's.
-    mean_perc <-  apply(all_pred2_no_sum2[,paste0("perc", c(1:3200))], 1, mean, na.rm = TRUE) # Fixed an error here. It was applying the mean across columns, not rows!
+  # Now we can summarise each. Here, what we are doing is taking the mean for each column. Effectively pooling across all the iterations for each dataset. This gives us an estimation of the mean change in variance across all locations/species, but it gives us 3200 point estimates of this mean. We can then use this to calculate the 95% CI's.
+    mean_perc <-  apply(all_pred2_no_sum2[,paste0("perc", c(1:3200))], 1, mean, na.rm = TRUE) 
     mean(mean_perc)
     quantile(mean_perc, 0.025)
     quantile(mean_perc, 0.975)
@@ -2011,11 +2027,7 @@ world_map = map_data("world") %>%
   lapply(mean_perc_habitat, function(x) quantile(x, c(0.025, 0.975)))
   #lapply(mean_perc_habitat, hist)
 
-# Need to take a step back
-  # 1. Why do we have NA in this data set? Thats because some species in the Future projections don't have data!
-  # 2. Why are l95 and u95 for marine not working...Fixed
-  # 3. Apply to the posteriors, rather than summary. Done
-
+# Create a table to summarise everything
 tables_future <- all_pred2 %>% group_by(habitat) %>% summarise(mean = mean(per_change, na.rm = TRUE), 
                                                                 l95 = mean(per_change_l95, na.rm = TRUE), 
                                                                 u95 = mean(per_change_u95, na.rm = TRUE))
@@ -2034,7 +2046,7 @@ Using the ERA5 climate model, predictions of current global changes in physiolog
 #| echo: false
 #| warning: false
 #| message: false
-#| fig-cap: Model predictions for the expected change in acclimation $lnCVR_{Q_{10}}$ across the globe for terrestrial, marine and freshwater ecthotherms. Predictions consider the uncertainty in random effects (i.e., species, phylogeny, study).  Predicted change in relative physiological rate variance for each population based on current temperatures (average from 2018-2022; A-C) as well as the expected change from current temperatures based on future temperature predictions (average from 2096-2100, D). Future climate predictions are the reduction in relative variance expected under a RCP8.5 climate scenario relative to current climate conditions (% change).
+#| fig-cap: "Model predictions for the expected change in acclimation $lnCVR_{Q_{10}}$ across the globe for terrestrial, marine and freshwater ecthotherms. Predictions consider the uncertainty in random effects (i.e., species, phylogeny, study).  Predicted change in relative physiological rate variance for each population based on current temperatures (average from 2018-2022; A-C) as well as the expected change from current temperatures based on future temperature predictions (average from 2096-2100, D). Future climate predictions are the reduction in relative variance expected under a RCP8.5 climate scenario relative to current climate conditions (% change)."
 
 #devtools::install_github("hughjonesd/ggmagnify") #https://github.com/hughjonesd/ggmagnify
 
@@ -2174,7 +2186,7 @@ ggplot2::geom_smooth(data = mod_table, ggplot2::aes(x = moderator, y = upperCL),
             formula = y ~ x, se = FALSE, lty = "dashed", colour = "black") + 
 ggplot2::geom_smooth(data = mod_table, ggplot2::aes(x = moderator, y = estimate), method = "loess", 
             formula = y ~ x, se = FALSE, colour = "black") + 
-            scale_fill_manual(labels = c("f" = "Freshwater", "m" = "Marine", "t" = "Terrestrial"), values = col)+ 
+            scale_fill_manual(labels = c("f" = "Freshwater", "m" = "Marine", "t" = "Terrestrial"), values = col)+ labs(fill = "Habitat") +
 theme_classic() + theme(axis.title  = element_text(size = 30), 
                         axis.text = element_text(size = 26), 
                         axis.text.y = element_text(size = 26),
@@ -2475,7 +2487,6 @@ if(rerun){
     t_VR_mean_ef  <- abs((exp(t_VR_mean) - 1)*100) 
 
 ```
-
 
 Analysis of $lnVR_{Q_{10}}$ suggested that variance increases with higher temperatures across all habitat types, with terrestrial ectotherms having the smallest increase in variance (@fig-s1). @tbl-s1
 

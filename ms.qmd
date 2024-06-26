@@ -1,5 +1,5 @@
 ---
-title: "Reduced plasticity and relative variance in physiological rates of ectotherm populations under climate change"
+title: "Limited physiological plasticity and reduced relative variance in physiological rates of ectotherm populations under climate change"
 bibliography: ./bib/refs.bib
 csl: ./bib/ecology-letters.csl
 format:

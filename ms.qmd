@@ -2251,7 +2251,7 @@ orchard_plot(model1.s1_int, mod = "name", by = "habitat", xlab = TeX("$lnRR_{Q_{
 
 In addition to the broader trait categories we fit models to understand how acute and acclimation effect sizes varied across trait categories. To achieve this, we categorized each effect size into one of 12 trait categories. These categories included measures of whole organism performance measures including cardiac (i.e., 'cardiac') and muscle ('muscle') function, sprint speed ('sprint') and endurance ('endurance') and metabolic rates (i.e., maximal and resting metabolic rate; max MR', 'rest MR', respectively). Studies also quantified various enzymatic reaction rates, including enzymes involved in general metabolic responses (categorized as 'metabolic enzyme'), various parts of the electron transport chain, including ATPase activity ('ATPase'), mitochondrial leak ('Proton Leak') and oxidation ('OXPHOS', short for Oxidative Phosphorylation), as well as antioxidant enzymes ('antiox'). All other traits not falling within these categories were placed into 'other'.
 
-@fig-cvrtrait; @fig-cvrtrait
+@fig-lnrrtrait; @fig-cvrtrait
 
 ```{r, detail_trait}
 #| label: detail_trait

@@ -1861,7 +1861,7 @@ sub_data <- lnCVRQ10_data_wild[complete.cases(lnCVRQ10_data_wild$c_accl_time),]
 # Now we need to make predictions for new data. We first need to create new data. We need to do this for each habitat type because they are all a little different. Lets do terrestrial first.
 
 #############################
-## Terrestrial Ectotherms
+## Terrestrial ectotherms
 #############################
 
   terrest_data <- sub_data  %>% filter(habitat == "t")  %>% distinct(spp, species_full, habitat, type, Latitude, Longitude)
@@ -1904,13 +1904,13 @@ sub_data <- lnCVRQ10_data_wild[complete.cases(lnCVRQ10_data_wild$c_accl_time),]
        record_num = 0
     )
 
-  # Create new dataframe with only unique values for predcition.
+  # Create new data frame with only unique values for prediction.
   new_data_m  <- cbind(marine_data, new_data_m)
 
-  # We'll now make the predcitions from the model object using the new dataframe
+  # We'll now make the predictions from the model object using the new data frame
   marine_pred <- predict(model5_bayes, newdata = new_data_m, summary = TRUE, allow_new_levels = TRUE, sample_new_levels = "uncertainty", robust = FALSE, intervals = "confidence")
 
-  # We'll also keep the whole postriopr which we'll use later on. We need to transpose so that the data match. Each numbered columns is one sample of the posterior.
+  # We'll also keep the whole posterior which we'll use later on. We need to transpose so that the data match. Each numbered columns is one sample of the posterior.
   marine_pred_no_sum <- cbind(new_data_m, t(predict(model5_bayes, newdata = new_data_m, summary = FALSE, allow_new_levels = TRUE, sample_new_levels = "uncertainty")))
 
   # Lets merge predictions with the original data
@@ -1930,22 +1930,25 @@ sub_data <- lnCVRQ10_data_wild[complete.cases(lnCVRQ10_data_wild$c_accl_time),]
        record_num = 0
     )
 
-  # Create new dataframe with only unique values for predcition.
+  # Create new data frame with only unique values for prediction.
   new_data_f  <- cbind(fresh_data, new_data_f)
 
-  # We'll now make the predcitions from the model object using the new dataframe
+  # We'll now make the predictions from the model object using the new data frame
   fresh_pred <- predict(model5_bayes, newdata = new_data_f, summary = TRUE, allow_new_levels = TRUE, sample_new_levels = "uncertainty", robust = FALSE, intervals = "confidence")
 
-  # We'll also keep the whole postriopr which we'll use later on. We need to transpose so that the data match. Each numbered columns is one sample of the posterior.
+  # We'll also keep the whole posterior which we'll use later on. We need to transpose so that the data match. Each numbered columns is one sample of the posterior.
   fresh_pred_non_sum <- cbind(new_data_f, t(predict(model5_bayes, newdata = new_data_f, summary = FALSE, allow_new_levels = TRUE, sample_new_levels = "uncertainty")))
 
   # Lets merge predictions with the original data
   fresh_data <- cbind(fresh_data, fresh_pred)
 
-# Now that we have all the predictions we can merge the data together. Note that species itself is not really that useful because each prediction at each latitude and longitude should incoperate the species effect. So we'll remove it. While I retain spp, it's still not totally specific to the species, but left it there so it's clear how these data match with the wild data. Note there are only 134 species because this is subset of the wild data.
-  all_pred <- rbind(terrest_data, marine_data, fresh_data) %>% dplyr::select(-species_full)  %>% mutate(uniques = interaction(spp, Latitude, Longitude))
-  all_pred_no_sum <- rbind(terre_pred_no_sum, marine_pred_no_sum, fresh_pred_non_sum) %>% dplyr::select(-species_full)
-  spp_wild  <- length(unique(sub_data$spp))
+# Now that we have all the predictions we can merge the data together. Note that species itself is not really that useful because each prediction at each latitude and longitude should incorporate the species effect. So we'll remove it. While I retain spp, it's still not totally specific to the species, but left it there so it's clear how these data match with the wild data. Note there are only 134 species because this is subset of the wild data.
+         all_pred <- rbind(terrest_data, marine_data, fresh_data) %>% 
+                     dplyr::select(-species_full)  %>% 
+                     mutate(uniques = interaction(spp, Latitude, Longitude))
+  all_pred_no_sum <- rbind(terre_pred_no_sum, marine_pred_no_sum, fresh_pred_non_sum) %>% d
+                      plyr::select(-species_full)
+        spp_wild  <- length(unique(sub_data$spp))
 ```
 
 ```{r, future_clim}

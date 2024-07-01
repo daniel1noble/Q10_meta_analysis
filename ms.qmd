@@ -206,7 +206,7 @@ Following @Noble2022-ty we calculated a series of temperature-corrected effect s
 #| label: fig-concept
 #| fig-width: 8
 #| fig-height: 12
-#| fig-cap: "Calculations of acute and acclimation effect sizes. (A) Two idealised thermal performance curves for animals held at 'cold' ('blue') temperatures and warm ('red') temperatures. Shaded blue and red areas are the thermal optima of the performance curves. Physiological rates are measured for a sample of ectotherms at two different temperatures along the thermal performance curves ($T_{1}$ = 20$^\circ$C and $T_{2} = 30$^\circ$C) for both curves. At each temperature a mean physiological rate (R) (points) and its standard deviation (SD) (error bars above and below mean) are estimated. R1.1 and R1.2 are the rates and associated SD (subscripted) for the cold acclimated animals at temperature 1 and 2, respectively. R2.1 and R2.2 are the rates and associated SD (subscripted) for the warm acclimated animals at temperature 1 and 2, respectively. An example of how acute and acclimation $lnCVR_{Q_{10}}$ are calculated from the treatments within the study is provided on the right-hand side of the figure with reference to each of the four possible groups. Note that, two acute effect sizes can be calculated, one for the cold acclimated animals and one for the warm acclimated animals. (B) Species are expected, *a priori*, to vary in their thermal performance curves (thin lines) around an average (thick black line). We restricted our data to areas of each species' performance curve that fell within the natural thermal range of the species (thick lines on each species-level curve). However, given it was not possible to measure the full performance curve for each species some test temperatures within studies may have converged on or moved past the thermal optima. In such cases, we expected our $Q_{10}$ effect sizes to be smaller as indicated by comparing the black dashed lines to grey dashed lines." 
+#| fig-cap: "Calculations of acute and acclimation effect sizes. (A) Two idealised thermal performance curves for animals held at 'cold' ('blue') temperatures and warm ('red') temperatures. Shaded blue and red areas are the thermal optima of the performance curves. Physiological rates are measured for a sample of ectotherms at two different temperatures along the thermal performance curves ($T_{1}$ = 20$^\\circ$C and $T_{2} = 30$^\\circ$C) for both curves. At each temperature a mean physiological rate (R) (points) and its standard deviation (SD) (error bars above and below mean) are estimated. R1.1 and R1.2 are the rates and associated SD (subscripted) for the cold acclimated animals at temperature 1 and 2, respectively. R2.1 and R2.2 are the rates and associated SD (subscripted) for the warm acclimated animals at temperature 1 and 2, respectively. An example of how acute and acclimation $lnCVR_{Q_{10}}$ are calculated from the treatments within the study is provided on the right-hand side of the figure with reference to each of the four possible groups. Note that, two acute effect sizes can be calculated, one for the cold acclimated animals and one for the warm acclimated animals. (B) Species are expected, *a priori*, to vary in their thermal performance curves (thin lines) around an average (thick black line). We restricted our data to areas of each species' performance curve that fell within the natural thermal range of the species (thick lines on each species-level curve). However, given it was not possible to measure the full performance curve for each species some test temperatures within studies may have converged on or moved past the thermal optima. In such cases, we expected our $Q_{10}$ effect sizes to be smaller as indicated by comparing the black dashed lines to grey dashed lines." 
 
 fig_concept <- magick::image_read("output/figures/fig1_concept_full.png")
 plot(fig_concept)
@@ -816,7 +816,7 @@ Effect heterogeneity was high (only `r mean(tot_i2)`% of the variance was the re
 
 Overall, $lnRR_{Q_{10_{acclimation}}}$ was `r abs(mean(avg_change))`% lower than  $lnRR_{Q_{10_{acute}}}$ across all habitats (95%CI: `r quantile(avg_change, c(0.025, 0.975))[1]` to `r quantile(avg_change, c(0.025, 0.975))[2]`%). Ectotherms in marine and freshwater environments showed partial compensation of physiological rates ([@fig-2]A) amounting to reduced $lnRR_{Q_{10_{acclimation}}}$ of `r abs(mean(change_f))`% (95% CI: `r quantile(change_f, c(0.025, 0.975))[1]` to `r quantile(change_f, c(0.025, 0.975))[2]`) in freshwater and `r abs(mean(change_m))`% (95% CI: `r quantile(change_m, c(0.025, 0.975))[1]` to `r quantile(change_m, c(0.025, 0.975))[2]`) in marine environments. In contrast, terrestrial ectotherms showed no acclimation (possibly even inverse acclimation) -- showing a `r abs(mean(change_t))`% increase in $lnRR_{Q_{10_{acclimation}}}$ (95% CI: `r quantile(change_t, c(0.025, 0.975))[1]` to `r quantile(change_t, c(0.025, 0.975))[2]`, [@fig-2]B). All results are from Model 2 (see “Meta-Analysis” above).
 
-Different trait categories showed different acclimation responses across habitat types (see Supplement; @fig-S2). Acclimation capacity also did not vary by life-history stage and there were no differences between $lnRR_{Q_{10_{acclimation}}}$ and $lnRR_{Q_{10_{acute}}}$ between adult and juveniles (@fig-cvrlh A-C) (Adult-Juvenile (Acute): `r mean(acute_all_lh)`, 95% CI: `r quantile(acute_all_lh, 0.025)[1]` to `r quantile(acute_all_lh, 0.975)[1]`, $p_{MCMC}$ = `r pmcmc(acute_all_lh)`; Adult-Juvenile (Acclimation): `r mean(acclim_all_lh)`, 95% CI: `r quantile(acclim_all_lh, 0.025)[1]` to `r quantile(acclim_all_lh, 0.975)[1]`, $p_{MCMC}$ = `r pmcmc(acclim_all_lh)`).
+Different trait categories showed different acclimation responses across habitat types (@fig-btrait and see Supplement; @fig-S2). Acclimation capacity also did not vary by life-history stage and there were no differences between $lnRR_{Q_{10_{acclimation}}}$ and $lnRR_{Q_{10_{acute}}}$ between adult and juveniles (@fig-cvrlh A-C) (Adult-Juvenile (Acute): `r mean(acute_all_lh)`, 95% CI: `r quantile(acute_all_lh, 0.025)[1]` to `r quantile(acute_all_lh, 0.975)[1]`, $p_{MCMC}$ = `r pmcmc(acute_all_lh)`; Adult-Juvenile (Acclimation): `r mean(acclim_all_lh)`, 95% CI: `r quantile(acclim_all_lh, 0.025)[1]` to `r quantile(acclim_all_lh, 0.975)[1]`, $p_{MCMC}$ = `r pmcmc(acclim_all_lh)`).
 
 ```{r, lncvrq10}
 #| label: lncvrq10
@@ -1148,7 +1148,7 @@ if(rerun){
 
 Relative variance in physiological rates ($lnCVR_{Q_{10}}$) showed a decrease with increasing temperature across all habitat types, which was especially pronounced in terrestrial and marine ectotherms. There were no differences between $lnCVR_{Q_{10}}$ and $lnCVR_{Q_{10}}$. Reductions in variance were driven by slower increases in the variance in physiological rates relative to the mean with scaling relationships between log standard deviation and log mean all being smaller than 1 and varying across habitats (See Supplementary Materials). There was a `r mean(t_cvr_mean_ef)`% (95% CI: `r quantile(t_cvr_mean_ef, 0.025)[1]` to `r quantile(t_cvr_mean_ef, 0.975)[1]`, $p_{MCMC}$ = `r pmcmc(t_cvr_mean)`) reduction in relative physiological rate variance for terrestrial ectotherms and a `r mean(m_cvr_mean_ef)`% (95% CI: `r quantile(m_cvr_mean_ef, 0.025)[1]` to `r quantile(m_cvr_mean_ef, 0.975)[1]`, $p_{MCMC}$ = `r pmcmc(m_cvr_mean)`) reduction in relative variation for marine ectotherms when temperatures increased by 10$^\circ$C. In contrast, freshwater ectotherms exhibited a smaller reduction in relative physiological rate variance at high temperatures (`r mean(f_cvr_mean_ef)`%, 95% CI: `r quantile(f_cvr_mean_ef, 0.025)[1]` to `r quantile(f_cvr_mean_ef, 0.975)[1]`, $p_{MCMC}$ = `r pmcmc(f_cvr_mean)`). 
 
-The total proportion of heterogeneity in $lnCVR_{Q_{10}}$ was lower compared to $lnRR_{Q_{10}}$ ($I^2_{sv}$ = `r mean(tot_i2_cvr)`, 95% CI: `r quantile(tot_i2_cvr, 0.025)` to `r quantile(tot_i2_cvr, 0.975)`), with most variation being driven by between-study and trait differences (see Supplement;  @fig-s3). Each life-history stage exhibited the same pattern of variance change in each of the habitats (@fig-cvrlh). Reduced relative variance was particularly prominent for resting metabolic rates and sprint speed although traits differed in whether they exhibited a reduction in variation in physiological rates at high temperatures (@fig-cvrtrait). 
+The total proportion of heterogeneity in $lnCVR_{Q_{10}}$ was lower compared to $lnRR_{Q_{10}}$ ($I^2_{sv}$ = `r mean(tot_i2_cvr)`, 95% CI: `r quantile(tot_i2_cvr, 0.025)` to `r quantile(tot_i2_cvr, 0.975)`), with most variation being driven by between-study and trait differences (see Supplement;  @fig-s3). Each life-history stage exhibited the same pattern of variance change in each of the habitats (@fig-cvrlh). Reduced relative variance was particularly prominent for resting metabolic rates and sprint speed although traits differed in whether they exhibited a reduction in variation in physiological rates at high temperatures (@fig-btrait). 
 
 ```{r, fig-btrait}
 #| label: fig-btrait
@@ -2254,15 +2254,13 @@ In addition to the broader trait categories we fit models to understand how acut
 @fig-S2; @fig-cvrtrait
 
 ```{r, detail_trait}
+#| label: detail_trait
+#| echo: false
+#| include: false
+#| warning: false
 
 ## Detailed trait category analyses for lnRR
-rerun = FALSE
-if(rerun){
-#################################
-  # Detailed Trait Categories
-  # For supplement
-#################################
-  
+
   # Filter out antioxidant and NAs. For terrestrial, need to filter out endurance and max_MR because only 3 effect sizes
   lnRRQ10_data_m <- lnRRQ10_data %>% filter(habitat = "m" & !trait_category =="antiox") %>% filter(!is.na(c_accl_time))
   lnRRQ10_data_f <- lnRRQ10_data %>% filter(habitat = "f" & !is.na(c_accl_time))
@@ -2280,7 +2278,13 @@ if(rerun){
        A_f <- vcv(tree_f, corr = FALSE)
    t_phylo <- vcv(tree_t, corr = TRUE)
        A_t <- vcv(tree_t, corr = FALSE)
-  
+
+rerun = FALSE
+if(rerun){
+#################################
+  # Detailed Trait Categories
+  # For supplement
+#################################
   # More realistic model with traits in marine species. Remove antioxidants because there are just too few effects. Note that, for orchardplot we can only fit one random slope, so we'll just use obs as results are unchanged and Bayesian models have it accounted for
    model1.3_m <- metafor::rma.mv(effect_size ~  max_temp_c + c_accl_time + type + trait_category + type:trait_category, V = V, 
                               random = list(~1 | record_num,
@@ -2311,11 +2315,17 @@ if(rerun){
     AICc1.3_m_het <- AIC(model1.3_m_het) + AICc_correction(model1.3_m_het)
   # Clear support for this model. We'll go with this.
     AICc1.3_m - AICc1.3_m_het
-  
-  orchard_plot(model1.3_m_het, mod = "trait_category", at = list(type = c("acclim", "acute")), by = "type", xlab = TeX("$lnRR_{Q_{10}}$"), group = "spp", angle = 0)
-  
+
   # Cannot model heterogeneous variance across traits if use sigma + TRUE, so just use obs.
-   model1.3_m_bayes <- brms::brm(effect_size | se(sqrt(V)) ~  max_temp_c + c_accl_time + type + trait_category + type:trait_category + (~1 | record_num) + (1 | gr(species_full, cov = A_m)) + (1 + max_temp_c | spp) +(1|trait) + (1 + trait_category |gr(obs, cor = FALSE)),  data2 = list(A_m=A_m), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 8, data = lnRRQ10_data_m)
+   model1.3_m_bayes <- brms::brm(effect_size | se(sqrt(V)) ~  max_temp_c + c_accl_time + type + trait_category + type:trait_category + 
+                                   (~1 | record_num) + 
+                                   (1 | gr(species_full, cov = A_m)) + 
+                                   (1 + max_temp_c | spp) +(1|trait) + 
+                                   (1 + trait_category |gr(obs, cor = FALSE)),  
+                                 data2 = list(A_m=A_m), family = gaussian(), 
+                                 prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), 
+                                 control = list(adapt_delta = 0.98, max_treedepth = 12), 
+                                 chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 8, data = lnRRQ10_data_m)
   
     # More realistic model with traits in freshwater species
   model1.3_f <- metafor::rma.mv(effect_size ~  max_temp_c+c_accl_time + type + trait_category + type:trait_category, V = V, 
@@ -2343,7 +2353,15 @@ if(rerun){
   delat_AICc_model1.3_f <- AICc_model1.3_f - AICc_model1.3_f_het
   
   # Run the Bayesian equivalent of the top supported model. 
-   model1.3_f_bayes <- brms::brm(effect_size | se(sqrt(V)) ~  max_temp_c + c_accl_time + type + trait_category + type:trait_category + (~1 | record_num) + (1 | gr(species_full, cov = A_f)) + (1 + max_temp_c| spp) + (1|trait) + (1+trait_category|gr(obs, cor = FALSE)), data2 = list(A_f=A_f), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 8, data = lnRRQ10_data_f)
+   model1.3_f_bayes <- brms::brm(effect_size | se(sqrt(V)) ~  max_temp_c + c_accl_time + type + trait_category + type:trait_category + 
+                                   (~1 | record_num) + 
+                                   (1 | gr(species_full, cov = A_f)) + 
+                                   (1 + max_temp_c| spp) + (1|trait) + 
+                                   (1+trait_category|gr(obs, cor = FALSE)), 
+                                 data2 = list(A_f=A_f), family = gaussian(), 
+                                 prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), 
+                                 control = list(adapt_delta = 0.98, max_treedepth = 12), 
+                                 chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 8, data = lnRRQ10_data_f)
    
     # More realistic model with traits in terrestrial species
   model1.3_t <- metafor::rma.mv(effect_size ~  max_temp_c + c_accl_time + type + trait_category + type:trait_category, V = V, 
@@ -2372,9 +2390,17 @@ if(rerun){
   #  Delta
     AICc_model1.3_t - AICc_model1.3_t_het
     
-    
   # Bayesian model
-   model1.3_t_bayes <- brms::brm(effect_size | se(sqrt(V)) ~ max_temp_c + c_accl_time + type + trait_category + type:trait_category + (~1 | record_num) + (1 | gr(species_full, cov = A_t)) + (1 + max_temp_c| spp) + (1 | trait) + (1 + trait_category | gr(obs, cor = FALSE)), data2 = list(A_t=A_t), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 8, thin = 5, iter = 3000, warmup = 1000, cores = 8, data = lnRRQ10_data_t)
+   model1.3_t_bayes <- brms::brm(effect_size | se(sqrt(V)) ~ max_temp_c + c_accl_time + type + trait_category + type:trait_category + 
+                                   (~1 | record_num) + 
+                                   (1 | gr(species_full, cov = A_t)) + 
+                                   (1 + max_temp_c| spp) + 
+                                   (1 | trait) + 
+                                   (1 + trait_category | gr(obs, cor = FALSE)), 
+                                 data2 = list(A_t=A_t), family = gaussian(), 
+                                 prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), 
+                                 control = list(adapt_delta = 0.98, max_treedepth = 12), 
+                                 chains = 8, thin = 5, iter = 3000, warmup = 1000, cores = 8, data = lnRRQ10_data_t)
                       
     # Save models
   saveRDS(model1.3_m, file = "./output/models/lnRRQ10_1.3m")
@@ -2433,7 +2459,15 @@ if(rerun){
                               R = list(species_full = phylo_cor_CVR), dfs = "contain", 
                               test = "t", data = lnCVRQ10_data)
   
-   model2.3_bayes <- brms::brm(effect_size | se(sqrt(V), sigma = TRUE) ~  max_temp_c + c_accl_time + type + trait_category + type:trait_category + (~1 | record_num) + (1 | gr(species_full, cov = A_CVR)) + (1 + max_temp_c| spp) + (1|trait), data2 = list(A_CVR=A_CVR), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 4, data = lnCVRQ10_data)
+   model2.3_bayes <- brms::brm(effect_size | se(sqrt(V), sigma = TRUE) ~  max_temp_c + c_accl_time + type + trait_category + type:trait_category + 
+                                 (~1 | record_num) + 
+                                 (1 | gr(species_full, cov = A_CVR)) + 
+                                 (1 + max_temp_c| spp) + 
+                                 (1|trait), 
+                               data2 = list(A_CVR=A_CVR), family = gaussian(), 
+                               prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), 
+                               control = list(adapt_delta = 0.98, max_treedepth = 12), 
+                               chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 4, data = lnCVRQ10_data)
                                   
   # Save model1.2
   saveRDS(model2.3, file = "./output/models/lnCVRQ10_2.3")
@@ -2458,10 +2492,10 @@ if(rerun){
                                             ~1 | trait,
                                             ~1 + trait_category| obs),
                               R = list(species_full = m_phylo_cvr), dfs = "contain", 
-                              test = "t", struct = c("GEN", "HCS"),  phi = 0, data = lnCVRQ10_data_m))
+                              test = "t", struct = c("GEN", "HCS"),  phi = 0, data = lnCVRQ10_data_m)
   saveRDS(model2.3m, file = "./output/models/lnCVRQ10_model2.3m")
 
-  # NOte that we need to drop interaction for terestrial as it's not able to estimate. 
+  # Note that we need to drop interaction for terrestrial as it's not able to estimate. 
   model2.3t <- metafor::rma.mv(effect_size ~  max_temp_c + c_accl_time + type + trait_category, V = V, 
                               random = list(~1 | record_num,
                                             ~1 | species_full,
@@ -2818,7 +2852,7 @@ k_vr <- manual_extract(model3.2, mod = "habitat", group = "spp", exclude = NULL)
     flextable(tabs1) %>% bold(part = "header") %>% autofit() %>% add_body_row(values = as_paragraph(as_b("Fixed Effects")), top = TRUE, colwidths = 5) %>% compose(value = as_paragraph(as_b(c(("Random Effects"), rep("", 4)))), i = 8)
 ```
 
-#### *Plots of $I^2$ for multi-level models*
+#### *Plots of $I^2$ for multilevel models*
 ```{r, fig-s3}
 #| label: fig-s3
 #| fig-cap: "$I^2$ estimates. A) $lnRR_{Q_{10}}$ B) $lnCVR_{Q_{10}}$ and C) $lnVR_{Q_{10}}$." 

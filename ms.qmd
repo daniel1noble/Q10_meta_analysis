@@ -518,14 +518,9 @@ if(rerun){
                                                 "biochemical", trait_category)))
   
   # Filter to different habitats
-   lnRRQ10_data_m <- lnRRQ10_data %>% filter(habitat == "m") 
-   lnRRQ10_data_f <- lnRRQ10_data %>% filter(habitat == "f") 
-   lnRRQ10_data_t <- lnRRQ10_data %>% filter(habitat == "t")
-  
-  # Filter out antioxidant and NAs. For terrestrial, need to filter out endurance and max_MR because only 3 effect sizes
-  lnRRQ10_data_m <- lnRRQ10_data_m %>% filter(!trait_category =="antiox") %>% filter(!is.na(c_accl_time))
-  lnRRQ10_data_f <- lnRRQ10_data_f %>% filter(!is.na(c_accl_time))
-  lnRRQ10_data_t <- lnRRQ10_data_t %>% filter(!is.na(c_accl_time)) %>% filter(!trait_category %in% c("endurance", "max_MR", "other"))
+   lnRRQ10_data_m <- lnRRQ10_data %>% filter(habitat == "m" & trait_broad != "other") 
+   lnRRQ10_data_f <- lnRRQ10_data %>% filter(habitat == "f" & trait_broad != "other") 
+   lnRRQ10_data_t <- lnRRQ10_data %>% filter(habitat == "t" & trait_broad != "other")
   
   # Prune tree
    tree_m <- tree_checks(lnRRQ10_data_m, tree = tree_lnrr, dataCol = "species_full", type = "prune")
@@ -541,8 +536,14 @@ if(rerun){
        A_t <- vcv(tree_t, corr = FALSE)
     
 if(rerun){
-  # Trait model. Subset to only trait categories that are clear. Remove 'other'
-      model1.3_btrait_bayes <- brms::brm(effect_size | se(sqrt(V)) ~  max_temp_c + c_accl_time + type*trait_broad*habitat + 
+  
+#################################
+  # Broad Trait Category Models
+  # Subset to only trait categories 
+  # that are clear. Remove 'other'
+#################################
+  # Full Bayesian model   
+   model1.3_btrait_bayes <- brms::brm(effect_size | se(sqrt(V)) ~  max_temp_c + c_accl_time + type*trait_broad*habitat + 
                                            (1 | record_num) + 
                                            (1 | gr(species_full, cov = A)) + 
                                            (1 + max_temp_c | spp) +(1|trait) + 
@@ -551,125 +552,50 @@ if(rerun){
                                          prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), 
                                          control = list(adapt_delta = 0.98, max_treedepth = 12), 
                                          chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 8, data = filter(lnRRQ10_data, trait_broad != "other"))
-      
-  # More realistic model with traits in marine species. Remove antioxidants because there are just too few effects. Note that, for orchardplot we can only fit one random slope, so we'll just use obs as results are unchanged and Bayesian models have it accounted for
-   model1.3_m <- metafor::rma.mv(effect_size ~  max_temp_c + c_accl_time + type + trait_category + type:trait_category, V = V, 
+    saveRDS(model1.3_btrait_bayes, "./output/models/model1.3_btrait_bayes")
+    
+  # Metafor models for creating plots. Subset by habitat to make this easier
+      # Marine
+         model1.3_m_broad <- metafor::rma.mv(effect_size ~  max_temp_c + c_accl_time + type + trait_broad + type:trait_broad, V = V, 
                               random = list(~1 | record_num,
                                             ~1 | species_full,
-                                            ~1 + max_temp_c | spp,
+                                            ~1 + max_temp_c| spp,
                                             ~1 | trait,
-                                            ~1 | obs),
+                                            ~1 + trait_broad| obs),
                               R = list(species_full = m_phylo), dfs = "contain", 
-                              test = "t", 
+                              test = "t", struct = c("GEN","HCS"),  phi = 0,
                               data = lnRRQ10_data_m)
-
-  # Robust variance estimator.
-    model1.3_m_rve <- robust(model1.3_m, cluster = lnRRQ10_data_m$record_num) # Mostly Consistent but some changes to p for some traits.
-
-  # Baeysian model
-  model1.3_m_het <- metafor::rma.mv(effect_size ~  max_temp_c + c_accl_time + type + trait_category + type:trait_category, V = V, 
-                              random = list(~1 | record_num,
-                                            ~1 | species_full,
-                                            ~1 + max_temp_c | spp,
-                                            ~1 | trait,
-                                            ~1 + trait_category | obs),
-                              R = list(species_full = m_phylo), 
-                              struct = "HCS", rho = 0,  dfs = "contain", 
-                              test = "t", data = lnRRQ10_data_m, control = list(iter.max=1000, rel.tol=1e-8))
-  
-  # Check k is the same for both models (yes) and check which model is best supported
-    AICc1.3_m     <- AIC(model1.3_m) + AICc_correction(model1.3_m)
-    AICc1.3_m_het <- AIC(model1.3_m_het) + AICc_correction(model1.3_m_het)
-  # Clear support for this model. We'll go with this.
-    AICc1.3_m - AICc1.3_m_het
-  
-  orchard_plot(model1.3_m_het, mod = "trait_category", at = list(type = c("acclim", "acute")), by = "type", xlab = TeX("$lnRR_{Q_{10}}$"), group = "spp", angle = 0)
-  
-  # Cannot model heterogeneous variance across traits if use sigma + TRUE, so just use obs.
-   model1.3_m_bayes <- brms::brm(effect_size | se(sqrt(V)) ~  max_temp_c + c_accl_time + type + trait_category + type:trait_category + (~1 | record_num) + (1 | gr(species_full, cov = A_m)) + (1 + max_temp_c | spp) +(1|trait) + (1 + trait_category |gr(obs, cor = FALSE)),  data2 = list(A_m=A_m), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 8, data = lnRRQ10_data_m)
-  
-    # More realistic model with traits in freshwater species
-  model1.3_f <- metafor::rma.mv(effect_size ~  max_temp_c+c_accl_time + type + trait_category + type:trait_category, V = V, 
-                              random = list(~1 | record_num,
-                                            ~1 | species_full,
-                                            ~1 + max_temp_c | spp,
-                                            ~1 | trait,
-                                            ~1 | obs),
-                              R = list(species_full =f_phylo), dfs = "contain", 
-                              test = "t", data = lnRRQ10_data_f)
-  
-  # Heteroscedastic variance model for freshwater
-  model1.3_f_het <- metafor::rma.mv(effect_size ~  max_temp_c + c_accl_time + type + trait_category + type:trait_category, V = V, 
-                              random = list(~1 | record_num,
-                                            ~1 | species_full,
-                                            ~1 + max_temp_c | spp,
-                                            ~1 | trait,
-                                            ~1 + trait_category | obs),
-                              R = list(species_full =f_phylo), struct = "HCS", rho = 0, dfs = "contain", 
-                              test = "t", data = lnRRQ10_data_f, method = "REML", control=list(iter.max=1000, rel.tol=1e-8))
-  
-  ## Check support for two models
-  AICc_model1.3_f_het <- AIC(model1.3_f_het) + AICc_correction(model1.3_f_het) # Clearly better supported.
-      AICc_model1.3_f <- AIC(model1.3_f) + AICc_correction(model1.3_f)
-  delat_AICc_model1.3_f <- AICc_model1.3_f - AICc_model1.3_f_het
-  
-  # Run the Bayesian equivalent of the top supported model. 
-   model1.3_f_bayes <- brms::brm(effect_size | se(sqrt(V)) ~  max_temp_c + c_accl_time + type + trait_category + type:trait_category + (~1 | record_num) + (1 | gr(species_full, cov = A_f)) + (1 + max_temp_c| spp) + (1|trait) + (1+trait_category|gr(obs, cor = FALSE)), data2 = list(A_f=A_f), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 8, data = lnRRQ10_data_f)
-   
-    # More realistic model with traits in terrestrial species
-  model1.3_t <- metafor::rma.mv(effect_size ~  max_temp_c + c_accl_time + type + trait_category + type:trait_category, V = V, 
-                              random = list(~1 | record_num,
-                                            ~1 | species_full,
-                                            ~1 + max_temp_c | spp,
-                                            ~1 | trait,
-                                            ~1 | obs),
-                              R = list(species_full =t_phylo), dfs = "contain", 
-                              test = "t", data = lnRRQ10_data_t)
-  
-  # Heteroscedastic variance model for terrestrial
-  model1.3_t_het <- metafor::rma.mv(effect_size ~  max_temp_c + c_accl_time + type + trait_category + type:trait_category, V = V, 
-                              random = list(~1 | record_num,
-                                            ~1 | species_full,
-                                            ~1 + max_temp_c | spp,
-                                            ~1 | trait,
-                                            ~1 + trait_category | obs),
-                              R = list(species_full =t_phylo), struct = "HCS", rho = 0, dfs = "contain", 
-                              test = "t", data = lnRRQ10_data_t)
-  
-  # Check which model is better
-    AICc_model1.3_t     <- AIC(model1.3_t) + AICc_correction(model1.3_t)
-    AICc_model1.3_t_het <- AIC(model1.3_t_het) + AICc_correction(model1.3_t_het)
-  
-  #  Delta
-    AICc_model1.3_t - AICc_model1.3_t_het
+         saveRDS(model1.3_m_broad, "./output/models/model1.3_m_broad")
     
-    
-  # Bayesian model
-   model1.3_t_bayes <- brms::brm(effect_size | se(sqrt(V)) ~ max_temp_c + c_accl_time + type + trait_category + type:trait_category + (~1 | record_num) + (1 | gr(species_full, cov = A_t)) + (1 + max_temp_c| spp) + (1 | trait) + (1 + trait_category | gr(obs, cor = FALSE)), data2 = list(A_t=A_t), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 8, thin = 5, iter = 3000, warmup = 1000, cores = 8, data = lnRRQ10_data_t)
-                      
-    # Save models
-  saveRDS(model1.3_m, file = "./output/models/lnRRQ10_1.3m")
-  saveRDS(model1.3_m_het, file = "./output/models/lnRRQ10_1.3m_het")
-  saveRDS(model1.3_m_bayes, file = "./output/models/lnRRQ10_1.3_bayes_m")
-  
-  saveRDS(model1.3_f, file = "./output/models/lnRRQ10_1.3f")
-  saveRDS(model1.3_f_het, file = "./output/models/lnRRQ10_1.3f_het")
-  saveRDS(model1.3_f_bayes, file = "./output/models/lnRRQ10_1.3_bayes_f")
-  
-  saveRDS(model1.3_t, file = "./output/models/lnRRQ10_1.3t")
-  saveRDS(model1.3_t_het, file = "./output/models/lnRRQ10_1.3t_het")
-  saveRDS(model1.3_t_bayes, file = "./output/models/lnRRQ10_1.3_bayes_t")
-
+      # Freshwater
+         model1.3_f_broad <- metafor::rma.mv(effect_size ~  max_temp_c + c_accl_time + type + trait_broad + type:trait_broad, V = V, 
+                              random = list(~1 | record_num,
+                                            ~1 | species_full,
+                                            ~1 + max_temp_c| spp,
+                                            ~1 | trait,
+                                            ~1 + trait_broad| obs),
+                              R = list(species_full = f_phylo), dfs = "contain", 
+                              test = "t", struct = c("GEN","HCS"), phi = 0,
+                              data = lnRRQ10_data_f)
+          saveRDS(model1.3_f_broad, "output/models/model1.3_f_broad")
+      
+      # Terrestrial
+         model1.3_t_broad <- metafor::rma.mv(effect_size ~  max_temp_c + c_accl_time + type + trait_broad + type:trait_broad, V = V, 
+                              random = list(~1 | record_num,
+                                            ~1 | species_full,
+                                            ~1 + max_temp_c| spp,
+                                            ~1 | trait,
+                                            ~1 + trait_broad| obs),
+                              R = list(species_full = t_phylo), dfs = "contain", 
+                              test = "t", struct = c("GEN","HCS"), phi = 0,
+                              data = lnRRQ10_data_t)
+         saveRDS(model1.3_t_broad, "output/models/model1.3_t_broad")
+          
   } else{
-        model1.3_m <- readRDS("./output/models/lnRRQ10_1.3m")
-    model1.3_m_het <- readRDS("./output/models/lnRRQ10_1.3m_het")
-  model1.3_m_bayes <- readRDS("./output/models/lnRRQ10_1.3_bayes_m")
-        model1.3_f <- readRDS("./output/models/lnRRQ10_1.3f")
-    model1.3_f_het <- readRDS("./output/models/lnRRQ10_1.3f_het")
-  model1.3_f_bayes <- readRDS("./output/models/lnRRQ10_1.3_bayes_f")
-        model1.3_t <- readRDS("./output/models/lnRRQ10_1.3t")
-    model1.3_t_het <- readRDS("./output/models/lnRRQ10_1.3t_het")
-  model1.3_t_bayes <- readRDS("./output/models/lnRRQ10_1.3_bayes_t")
+    model1.3_btrait_bayes <- readRDS("./output/models/model1.3_btrait_bayes")
+         model1.3_m_broad <- readRDS("./output/models/model1.3_m_broad")
+         model1.3_f_broad <- readRDS("./output/models/model1.3_f_broad")
+         model1.3_t_broad <- readRDS("./output/models/model1.3_t_broad")
 }
 
 ###########################################################
@@ -1032,75 +958,78 @@ if(rerun){
   # Model 2.3: Model controlling for acclimation time, 
   # type and trait category assuming type can vary by habitat
 ###################################################
-
-if(rerun){
-  # More realistic model 
-  model2.3 <- metafor::rma.mv(effect_size ~  max_temp_c + c_accl_time + type + trait_category + type:trait_category, V = V, 
-                              random = list(~1 | record_num,
-                                            ~1 | species_full,
-                                            ~1 + max_temp_c| spp,
-                                            ~1 | trait,
-                                            ~1 | obs),
-                              R = list(species_full = phylo_cor_CVR), dfs = "contain", 
-                              test = "t", data = lnCVRQ10_data)
-  
-   model2.3_bayes <- brms::brm(effect_size | se(sqrt(V), sigma = TRUE) ~  max_temp_c + c_accl_time + type + trait_category + type:trait_category + (~1 | record_num) + (1 | gr(species_full, cov = A_CVR)) + (1 + max_temp_c| spp) + (1|trait), data2 = list(A_CVR=A_CVR), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 4, data = lnCVRQ10_data)
-                                  
-  # Save model1.2
-  saveRDS(model2.3, file = "./output/models/lnCVRQ10_2.3")
-  saveRDS(model2.3_bayes, file = "./output/models/lnCVRQ10_2.3_bayes")
-
-  # We can also run subsets for each habitat
-   tree_m_cvr <- tree_checks(lnCVRQ10_data %>% filter(habitat == "m"), tree = tree_lnrr, dataCol = "species_full", type = "prune")
-   tree_f_cvr <- tree_checks(lnCVRQ10_data %>% filter(habitat == "f"), tree = tree_lnrr, dataCol = "species_full", type = "prune")
-   tree_t_cvr <- tree_checks(lnCVRQ10_data %>% filter(habitat == "t"), tree = tree_lnrr, dataCol = "species_full", type = "prune")
+  # Add two general trait categories to test for trait differences (whole-organism vs biochemical)
+    lnCVRQ10_data <- lnCVRQ10_data %>% 
+                    mutate(trait_broad = ifelse(trait_category %in% c("cardiac", "rest_MR", "sprint", "muscle", "endurance", "max_MR"), 
+                                                "tissue/organism",
+                                         ifelse(trait_category %in% c("ATPase", "metabolic_enzyme", "antiox", "mito_oxidation", "mito_leak"), 
+                                                "biochemical", trait_category)))
+ # We can also run subsets for each habitat
+   tree_m_cvr <- tree_checks(lnCVRQ10_data %>% filter(habitat == "m" & trait_broad != "other"), tree = tree_lncvr, dataCol = "species_full", type = "prune")
+   tree_f_cvr <- tree_checks(lnCVRQ10_data %>% filter(habitat == "f" & trait_broad != "other"), tree = tree_lncvr, dataCol = "species_full", type = "prune")
+   tree_t_cvr <- tree_checks(lnCVRQ10_data %>% filter(habitat == "t" & trait_broad != "other"), tree = tree_lncvr, dataCol = "species_full", type = "prune")
    
-   # cor matrices
+ # cor matrices
    m_phylo_cvr <- vcv(tree_m_cvr, corr = TRUE)
-       A_m_cvr <- vcv(tree_m_cvr, corr = FALSE)
    f_phylo_cvr <- vcv(tree_f_cvr, corr = TRUE)
-       A_f_cvr <- vcv(tree_f_cvr, corr = FALSE)
    t_phylo_cvr <- vcv(tree_t_cvr, corr = TRUE)
-       A_t_cvr <- vcv(tree_t_cvr, corr = FALSE)
-
-  model2.3f <- metafor::rma.mv(effect_size ~  max_temp_c + c_accl_time + type + trait_category + type:trait_category, V = V, 
+    
+if(rerun){
+  
+  # Full Bayesian model   
+   model2.3_btrait_bayes <- brms::brm(effect_size | se(sqrt(V)) ~  max_temp_c + c_accl_time + type*trait_broad*habitat + 
+                                           (1 | record_num) + 
+                                           (1 | gr(species_full, cov = A)) + 
+                                           (1 + max_temp_c | spp) +(1|trait) + 
+                                           (1 + trait_broad |gr(obs, cor = FALSE)),  
+                                         data2 = list(A=A), family = gaussian(), 
+                                         prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), 
+                                         control = list(adapt_delta = 0.98, max_treedepth = 12), 
+                                         chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 8, data = filter(lnCVRQ10_data, trait_broad != "other"))
+    saveRDS(model2.3_btrait_bayes, "./output/models/model2.3_btrait_bayes")
+    
+  # Metafor models for creating plots. Subset by habitat to make this easier
+      # Marine
+         model2.3_m_broad <- metafor::rma.mv(effect_size ~  max_temp_c + c_accl_time + type + trait_broad + type:trait_broad, V = V, 
                               random = list(~1 | record_num,
                                             ~1 | species_full,
                                             ~1 + max_temp_c| spp,
                                             ~1 | trait,
-                                            ~1 | obs),
-                              R = list(species_full = f_phylo_cvr), dfs = "contain", 
-                              test = "t", data = lnCVRQ10_data  %>% filter(habitat == "f"))
-
-  saveRDS(model2.3f, file = "./output/models/lnCVRQ10_model2.3f")
-
-  model2.3m <- metafor::rma.mv(effect_size ~  max_temp_c + c_accl_time + type + trait_category + type:trait_category, V = V, 
-                              random = list(~1 | record_num,
-                                            ~1 | species_full,
-                                            ~1 + max_temp_c| spp,
-                                            ~1 | trait,
-                                            ~1 | obs),
+                                            ~1 + trait_broad| obs),
                               R = list(species_full = m_phylo_cvr), dfs = "contain", 
-                              test = "t", data = lnCVRQ10_data  %>% filter(habitat == "m"))
-  saveRDS(model2.3m, file = "./output/models/lnCVRQ10_model2.3m")
-
-  # NOte that we need to drop interaction for terestrial as it's not able to estimate. 
-  model2.3t <- metafor::rma.mv(effect_size ~  max_temp_c + c_accl_time + type + trait_category, V = V, 
+                              test = "t", struct = c("GEN","HCS"), phi = 0,
+                              data = filter(lnCVRQ10_data, habitat == "m" & trait_broad != "other"))
+         saveRDS(model2.3_m_broad, "output/models/model2.3_m_broad")
+    
+      # Freshwater
+         model2.3_f_broad <- metafor::rma.mv(effect_size ~  max_temp_c + c_accl_time + type + trait_broad + type:trait_broad, V = V, 
                               random = list(~1 | record_num,
                                             ~1 | species_full,
                                             ~1 + max_temp_c| spp,
                                             ~1 | trait,
-                                            ~1 | obs),
+                                            ~1 + trait_broad| obs),
+                              R = list(species_full = f_phylo_cvr), dfs = "contain", 
+                              test = "t", struct = c("GEN","HCS"),  phi = 0,
+                              data = filter(lnCVRQ10_data, habitat == "f" & trait_broad != "other"))
+          saveRDS(model2.3_f_broad, "output/models/model2.3_f_broad")
+      
+      # Terrestrial
+         model2.3_t_broad <- metafor::rma.mv(effect_size ~  max_temp_c + c_accl_time + type + trait_broad + type:trait_broad, V = V, 
+                              random = list(~1 | record_num,
+                                            ~1 | species_full,
+                                            ~1 + max_temp_c| spp,
+                                            ~1 | trait,
+                                            ~1 + trait_broad| obs),
                               R = list(species_full = t_phylo_cvr), dfs = "contain", 
-                              test = "t", data = lnCVRQ10_data  %>% filter(habitat == "t"))
-  saveRDS(model2.3t, file = "./output/models/lnCVRQ10_model2.3t")
-
+                              test = "t", struct = c("GEN","HCS"), phi = 0,
+                              data = filter(lnCVRQ10_data, habitat == "t" & trait_broad != "other"))
+         saveRDS(model2.3_t_broad, "output/models/model2.3_t_broad")
+  
   } else{
-        model2.3 <- readRDS("./output/models/lnCVRQ10_2.3")
-        model2.3f <- readRDS("./output/models/lnCVRQ10_model2.3f")
-        model2.3m <- readRDS("./output/models/lnCVRQ10_model2.3m")
-        model2.3t <- readRDS("./output/models/lnCVRQ10_model2.3t")
-  model2.3_bayes <- readRDS("./output/models/lnCVRQ10_2.3_bayes")
+    model2.3_btrait_bayes <- readRDS("./output/models/model2.3_btrait_bayes")
+    model2.3_m_broad <- readRDS("output/models/model2.3_m_broad")
+    model2.3_f_broad <- readRDS("output/models/model2.3_f_broad")
+    model2.3_t_broad <- readRDS("output/models/model2.3_t_broad")
 }
 
 ###################################################
@@ -1220,6 +1149,67 @@ if(rerun){
 Relative variance in physiological rates ($lnCVR_{Q_{10}}$) showed a decrease with increasing temperature across all habitat types, which was especially pronounced in terrestrial and marine ectotherms. There were no differences between $lnCVR_{Q_{10}}$ and $lnCVR_{Q_{10}}$. Reductions in variance were driven by slower increases in the variance in physiological rates relative to the mean with scaling relationships between log standard deviation and log mean all being smaller than 1 and varying across habitats (See Supplementary Materials). There was a `r mean(t_cvr_mean_ef)`% (95% CI: `r quantile(t_cvr_mean_ef, 0.025)[1]` to `r quantile(t_cvr_mean_ef, 0.975)[1]`, $p_{MCMC}$ = `r pmcmc(t_cvr_mean)`) reduction in relative physiological rate variance for terrestrial ectotherms and a `r mean(m_cvr_mean_ef)`% (95% CI: `r quantile(m_cvr_mean_ef, 0.025)[1]` to `r quantile(m_cvr_mean_ef, 0.975)[1]`, $p_{MCMC}$ = `r pmcmc(m_cvr_mean)`) reduction in relative variation for marine ectotherms when temperatures increased by 10$^\circ$C. In contrast, freshwater ectotherms exhibited a smaller reduction in relative physiological rate variance at high temperatures (`r mean(f_cvr_mean_ef)`%, 95% CI: `r quantile(f_cvr_mean_ef, 0.025)[1]` to `r quantile(f_cvr_mean_ef, 0.975)[1]`, $p_{MCMC}$ = `r pmcmc(f_cvr_mean)`). 
 
 The total proportion of heterogeneity in $lnCVR_{Q_{10}}$ was lower compared to $lnRR_{Q_{10}}$ ($I^2_{sv}$ = `r mean(tot_i2_cvr)`, 95% CI: `r quantile(tot_i2_cvr, 0.025)` to `r quantile(tot_i2_cvr, 0.975)`), with most variation being driven by between-study and trait differences (see Supplement;  @fig-s3). Each life-history stage exhibited the same pattern of variance change in each of the habitats (@fig-cvrlh). Reduced relative variance was particularly prominent for resting metabolic rates and sprint speed although traits differed in whether they exhibited a reduction in variation in physiological rates at high temperatures (@fig-cvrtrait). 
+
+```{r, fig-btrait}
+#| label: fig-btrait
+#| fig-cap: "Estimated mean acclimation and acute $lnRR_{Q_{10}}$ (A-C) and $lnCVR_{Q_{10}}$ (D-F) effect sizes for tissue/whole-orgamism traits and biochemical traits across marine (A & D), freshwater (B & E) and terrestrial (C & F) habitats. Across all plots, thick bars indicate 95% confidence intervals and thin bars indicate 95% prediction intervals. k = total number of effect size estimates while the numbers in brackets indicate the number of species. For ease of visualisation, raw data for both trait categories are presented but points are not distinguished by different symbols. "
+#| echo: false
+#| warning: false
+
+add_theme  <- function(){theme(axis.title  = element_text(size = 30),
+                               axis.text.y = element_text(size = 30),
+                               axis.text.x = element_text(size = 30),
+                              legend.title = element_text(size = 30),
+                               legend.text = element_text(size = 24),
+                               title = element_text(size = 36))}
+
+branch.size = 2.8
+trunk.size = 1.8
+
+n_lnrr_btrait  <- lnRRQ10_data  %>% filter(trait_broad != "other") %>% 
+              group_by(habitat, trait_broad, type) %>% summarise(k = n(), spp = length(unique(spp))) %>% arrange(trait_broad, type, habitat)
+n_lncvr_btrait <- lnCVRQ10_data %>% filter(trait_broad != "other") %>% 
+              group_by(habitat, trait_broad, type) %>% summarise(k = n(), spp = length(unique(spp))) %>% arrange(trait_broad, type, habitat)
+
+       col <- c("#0871B9", "#F3B40D", "#1BB908")
+     x.pos <- c(0.7, 1.30, 1.70, 2.30)
+size_annot <- 5.5
+
+############
+# lnRR
+############
+m_r <- n_lnrr_btrait %>% filter(habitat == "m")
+f_r <- n_lnrr_btrait %>% filter(habitat == "f")
+t_r <- n_lnrr_btrait %>% filter(habitat == "t")
+
+p1 <- orchard_plot(model1.3_m_broad, mod = "trait_broad", at = list(c_accl_time = 0, habitat = "m"), group = "record_num", xlab = TeX("$lnRR_{Q_{10}}$"), condition.lab = "Type", by = "type",  g = FALSE, k = FALSE, angle = 45, branch.size = branch.size, trunk.size = trunk.size) + labs(title = "Marine") + add_theme() + ylim(-0.8, 1.8) + theme(legend.position = "none", axis.text.y = element_blank()) + annotate("text", x = x.pos, y = 1.3, label = TeX(paste0("\\it{k} = ", m_r$k, " (", m_r$spp, ")")), size = size_annot) + scale_fill_manual(values = rep(col[2],4)) + scale_color_manual(values = rep("black",4))
+
+p2 <- orchard_plot(model1.3_f_broad, mod = "trait_broad", at = list(c_accl_time = 0, habitat = "f"), group = "record_num", xlab = TeX("$lnRR_{Q_{10}}$"), condition.lab = "Type", by = "type",  g = FALSE, k = FALSE, branch.size = branch.size, trunk.size = trunk.size, angle = 45)+ labs(title = "Freshwater")  + add_theme() + theme(legend.position = "none", axis.text.y = element_blank()) + ylim(-0.4, 1.5) + annotate("text", x = x.pos, y = 1.3, label = TeX(paste0("\\it{k} = ", f_r$k, " (", f_r$spp, ")")), size = size_annot) + theme(legend.position = "right", legend.justification = c(1, 1)) + guides(shape = guide_legend(direction = "vertical"), size = guide_legend(direction = "vertical")) + scale_fill_manual(values = rep(col[1],4)) + scale_color_manual(values = rep("black", 4))
+
+p3 <- orchard_plot(model1.3_t_broad, mod = "trait_broad", at = list(c_accl_time = 0, habitat = "t", legend.pos = "none"), group = "record_num", xlab = TeX("$lnRR_{Q_{10}}$"), condition.lab = "Type", by = "type",  g = FALSE, k = FALSE, branch.size = branch.size, trunk.size = trunk.size, angle = 45)+ labs(title = "Terrestrial") + add_theme()  +  ylim(-0.3, 1.8) + theme(legend.position = "none") + annotate("text", x = x.pos, y = 1.5, label = TeX(paste0("\\it{k} = ", t_r$k, " (", t_r$spp, ")")), size = size_annot) + scale_fill_manual(values = rep(col[3], 4)) + scale_color_manual(values = rep("black", 4))
+
+############
+# CVR
+############
+m_cv <- n_lncvr_btrait %>% filter(habitat == "m")
+f_cv <- n_lncvr_btrait %>% filter(habitat == "f")
+t_cv <- n_lncvr_btrait %>% filter(habitat == "t")
+
+p1_cvr <- orchard_plot(model2.3_m_broad, mod = "trait_broad", at = list(c_accl_time = 0, habitat = "m"), group = "record_num", xlab = TeX("$lnCVR_{Q_{10}}$"), condition.lab = "Type", by = "type",  g = FALSE, k = FALSE, angle = 45, branch.size = branch.size, trunk.size = trunk.size) + ylim(c(-2, 2.2)) + add_theme() + ylim(-1.7, 1.6)  + annotate("text", x = x.pos, y = 0.8, label = TeX(paste0("\\it{k} = ", m_cv$k, " (", m_cv$spp, ")")), size = size_annot) + theme(legend.position = "none", axis.text.y = element_blank()) + scale_fill_manual(values = rep(col[2],4)) + scale_color_manual(values = rep("black", 4))
+
+p2_cvr <- orchard_plot(model2.3_f_broad, mod = "trait_broad", at = list(c_accl_time = 0, habitat = "f"), group = "record_num", xlab = TeX("$lnCVR_{Q_{10}}$"), condition.lab = "Type", by = "type", angle = 45, g = FALSE, k = FALSE, branch.size = branch.size, trunk.size = trunk.size)  + add_theme() + ylim(-1.6, 1.3) + annotate("text", x = x.pos, y = 0.8, label = TeX(paste0("\\it{k} = ", f_cv$k, " (", f_cv$spp, ")")), size = size_annot) + theme(legend.position = "right", legend.justification = c(1, 1), axis.text.y = element_blank()) + guides(shape = guide_legend(direction = "vertical"), size = guide_legend(direction = "vertical")) + scale_fill_manual(values = rep(col[1], 4)) + scale_color_manual(values = rep("black", 4))
+
+p3_cvr <- orchard_plot(model2.3_t_broad, mod = "trait_broad", at = list(c_accl_time = 0, habitat = "t"), angle = 45, group = "record_num", xlab = TeX("$lnCVR_{Q_{10}}$"), condition.lab = "Type", by = "type",  g = FALSE, k = FALSE, branch.size = branch.size, trunk.size = trunk.size)+ add_theme()  + ylim(-2, 2) + annotate("text", x = x.pos, y = 1.5, label = TeX(paste0("\\it{k} = ", t_cv$k, " (", t_cv$spp, ")")), size = size_annot) +  theme(legend.position = "none") + scale_fill_manual(values = rep(col[3], 4)) + scale_color_manual(values = rep("black", 4))
+
+############
+# Full fig
+############
+figbtrait <-(p3 | p1 | p2) / (p3_cvr | p1_cvr | p2_cvr) + plot_annotation(tag_levels = "A") 
+ggsave(figbtrait, filename = "./output/figures/fig4_btrait_r1.png", width = 22, height = 12, device = "png")
+
+figbtrait <- magick::image_read("./output/figures/fig4_btrait_r1.png")
+figbtrait
+```
 
 ```{r, fig-cvrlh}
 #| label: fig-cvrlh
@@ -2262,6 +2252,238 @@ orchard_plot(model1.s1_int, mod = "name", by = "habitat", xlab = TeX("$lnRR_{Q_{
 In addition to the broader trait categories we fit models to understand how acute and acclimation effect sizes varied across trait categories. To achieve this, we categorized each effect size into one of 12 trait categories. These categories included measures of whole organism performance measures including cardiac (i.e., 'cardiac') and muscle ('muscle') function, sprint speed ('sprint') and endurance ('endurance') and metabolic rates (i.e., maximal and resting metabolic rate; max MR', 'rest MR', respectively). Studies also quantified various enzymatic reaction rates, including enzymes involved in general metabolic responses (categorized as 'metabolic enzyme'), various parts of the electron transport chain, including ATPase activity ('ATPase'), mitochondrial leak ('Proton Leak') and oxidation ('OXPHOS', short for Oxidative Phosphorylation), as well as antioxidant enzymes ('antiox'). All other traits not falling within these categories were placed into 'other'.
 
 @fig-S2; @fig-cvrtrait
+
+```{r, detail_trait}
+
+## Detailed trait category analyses for lnRR
+rerun = FALSE
+if(rerun){
+#################################
+  # Detailed Trait Categories
+  # For supplement
+#################################
+  
+  # Filter out antioxidant and NAs. For terrestrial, need to filter out endurance and max_MR because only 3 effect sizes
+  lnRRQ10_data_m <- lnRRQ10_data %>% filter(habitat = "m" & !trait_category =="antiox") %>% filter(!is.na(c_accl_time))
+  lnRRQ10_data_f <- lnRRQ10_data %>% filter(habitat = "f" & !is.na(c_accl_time))
+  lnRRQ10_data_t <- lnRRQ10_data %>% filter(habitat = "t" & !is.na(c_accl_time)) %>% filter(!trait_category %in% c("endurance", "max_MR", "other"))
+  
+  # Prune tree
+   tree_m <- tree_checks(lnRRQ10_data_m, tree = tree_lnrr, dataCol = "species_full", type = "prune")
+   tree_f <- tree_checks(lnRRQ10_data_f, tree = tree_lnrr, dataCol = "species_full", type = "prune")
+   tree_t <- tree_checks(lnRRQ10_data_t, tree = tree_lnrr, dataCol = "species_full", type = "prune")
+   
+   # cor matrices
+   m_phylo <- vcv(tree_m, corr = TRUE)
+       A_m <- vcv(tree_m, corr = FALSE)
+   f_phylo <- vcv(tree_f, corr = TRUE)
+       A_f <- vcv(tree_f, corr = FALSE)
+   t_phylo <- vcv(tree_t, corr = TRUE)
+       A_t <- vcv(tree_t, corr = FALSE)
+  
+  # More realistic model with traits in marine species. Remove antioxidants because there are just too few effects. Note that, for orchardplot we can only fit one random slope, so we'll just use obs as results are unchanged and Bayesian models have it accounted for
+   model1.3_m <- metafor::rma.mv(effect_size ~  max_temp_c + c_accl_time + type + trait_category + type:trait_category, V = V, 
+                              random = list(~1 | record_num,
+                                            ~1 | species_full,
+                                            ~1 + max_temp_c | spp,
+                                            ~1 | trait,
+                                            ~1 | obs),
+                              R = list(species_full = m_phylo), dfs = "contain", 
+                              test = "t", 
+                              data = lnRRQ10_data_m)
+
+  # Robust variance estimator.
+    model1.3_m_rve <- robust(model1.3_m, cluster = lnRRQ10_data_m$record_num) # Mostly Consistent but some changes to p for some traits.
+
+  # Baeysian model
+  model1.3_m_het <- metafor::rma.mv(effect_size ~  max_temp_c + c_accl_time + type + trait_category + type:trait_category, V = V, 
+                              random = list(~1 | record_num,
+                                            ~1 | species_full,
+                                            ~1 + max_temp_c | spp,
+                                            ~1 | trait,
+                                            ~1 + trait_category | obs),
+                              R = list(species_full = m_phylo), 
+                              struct = c("GEN", "HCS"),  phi = 0, dfs = "contain", 
+                              test = "t", data = lnRRQ10_data_m, control = list(iter.max=1000, rel.tol=1e-8))
+  
+  # Check k is the same for both models (yes) and check which model is best supported
+    AICc1.3_m     <- AIC(model1.3_m) + AICc_correction(model1.3_m)
+    AICc1.3_m_het <- AIC(model1.3_m_het) + AICc_correction(model1.3_m_het)
+  # Clear support for this model. We'll go with this.
+    AICc1.3_m - AICc1.3_m_het
+  
+  orchard_plot(model1.3_m_het, mod = "trait_category", at = list(type = c("acclim", "acute")), by = "type", xlab = TeX("$lnRR_{Q_{10}}$"), group = "spp", angle = 0)
+  
+  # Cannot model heterogeneous variance across traits if use sigma + TRUE, so just use obs.
+   model1.3_m_bayes <- brms::brm(effect_size | se(sqrt(V)) ~  max_temp_c + c_accl_time + type + trait_category + type:trait_category + (~1 | record_num) + (1 | gr(species_full, cov = A_m)) + (1 + max_temp_c | spp) +(1|trait) + (1 + trait_category |gr(obs, cor = FALSE)),  data2 = list(A_m=A_m), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 8, data = lnRRQ10_data_m)
+  
+    # More realistic model with traits in freshwater species
+  model1.3_f <- metafor::rma.mv(effect_size ~  max_temp_c+c_accl_time + type + trait_category + type:trait_category, V = V, 
+                              random = list(~1 | record_num,
+                                            ~1 | species_full,
+                                            ~1 + max_temp_c | spp,
+                                            ~1 | trait,
+                                            ~1 | obs),
+                              R = list(species_full =f_phylo), dfs = "contain", 
+                              test = "t", data = lnRRQ10_data_f)
+  
+  # Heteroscedastic variance model for freshwater
+  model1.3_f_het <- metafor::rma.mv(effect_size ~  max_temp_c + c_accl_time + type + trait_category + type:trait_category, V = V, 
+                              random = list(~1 | record_num,
+                                            ~1 | species_full,
+                                            ~1 + max_temp_c | spp,
+                                            ~1 | trait,
+                                            ~1 + trait_category | obs),
+                              R = list(species_full =f_phylo), struct = c("GEN", "HCS"), phi = 0, dfs = "contain", 
+                              test = "t", data = lnRRQ10_data_f, method = "REML", control=list(iter.max=1000, rel.tol=1e-8))
+  
+  ## Check support for two models
+  AICc_model1.3_f_het <- AIC(model1.3_f_het) + AICc_correction(model1.3_f_het) # Clearly better supported.
+      AICc_model1.3_f <- AIC(model1.3_f) + AICc_correction(model1.3_f)
+  delat_AICc_model1.3_f <- AICc_model1.3_f - AICc_model1.3_f_het
+  
+  # Run the Bayesian equivalent of the top supported model. 
+   model1.3_f_bayes <- brms::brm(effect_size | se(sqrt(V)) ~  max_temp_c + c_accl_time + type + trait_category + type:trait_category + (~1 | record_num) + (1 | gr(species_full, cov = A_f)) + (1 + max_temp_c| spp) + (1|trait) + (1+trait_category|gr(obs, cor = FALSE)), data2 = list(A_f=A_f), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 8, data = lnRRQ10_data_f)
+   
+    # More realistic model with traits in terrestrial species
+  model1.3_t <- metafor::rma.mv(effect_size ~  max_temp_c + c_accl_time + type + trait_category + type:trait_category, V = V, 
+                              random = list(~1 | record_num,
+                                            ~1 | species_full,
+                                            ~1 + max_temp_c | spp,
+                                            ~1 | trait,
+                                            ~1 | obs),
+                              R = list(species_full =t_phylo), dfs = "contain", 
+                              test = "t", data = lnRRQ10_data_t)
+  
+  # Heteroscedastic variance model for terrestrial
+  model1.3_t_het <- metafor::rma.mv(effect_size ~  max_temp_c + c_accl_time + type + trait_category + type:trait_category, V = V, 
+                              random = list(~1 | record_num,
+                                            ~1 | species_full,
+                                            ~1 + max_temp_c | spp,
+                                            ~1 | trait,
+                                            ~1 + trait_category | obs),
+                              R = list(species_full =t_phylo), struct = c("GEN", "HCS"),  phi = 0, dfs = "contain", 
+                              test = "t", data = lnRRQ10_data_t)
+  
+  # Check which model is better
+    AICc_model1.3_t     <- AIC(model1.3_t) + AICc_correction(model1.3_t)
+    AICc_model1.3_t_het <- AIC(model1.3_t_het) + AICc_correction(model1.3_t_het)
+  
+  #  Delta
+    AICc_model1.3_t - AICc_model1.3_t_het
+    
+    
+  # Bayesian model
+   model1.3_t_bayes <- brms::brm(effect_size | se(sqrt(V)) ~ max_temp_c + c_accl_time + type + trait_category + type:trait_category + (~1 | record_num) + (1 | gr(species_full, cov = A_t)) + (1 + max_temp_c| spp) + (1 | trait) + (1 + trait_category | gr(obs, cor = FALSE)), data2 = list(A_t=A_t), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 8, thin = 5, iter = 3000, warmup = 1000, cores = 8, data = lnRRQ10_data_t)
+                      
+    # Save models
+  saveRDS(model1.3_m, file = "./output/models/lnRRQ10_1.3m")
+  saveRDS(model1.3_m_het, file = "./output/models/lnRRQ10_1.3m_het")
+  saveRDS(model1.3_m_bayes, file = "./output/models/lnRRQ10_1.3_bayes_m")
+  
+  saveRDS(model1.3_f, file = "./output/models/lnRRQ10_1.3f")
+  saveRDS(model1.3_f_het, file = "./output/models/lnRRQ10_1.3f_het")
+  saveRDS(model1.3_f_bayes, file = "./output/models/lnRRQ10_1.3_bayes_f")
+  
+  saveRDS(model1.3_t, file = "./output/models/lnRRQ10_1.3t")
+  saveRDS(model1.3_t_het, file = "./output/models/lnRRQ10_1.3t_het")
+  saveRDS(model1.3_t_bayes, file = "./output/models/lnRRQ10_1.3_bayes_t")
+
+  } else{
+        model1.3_m <- readRDS("./output/models/lnRRQ10_1.3m")
+    model1.3_m_het <- readRDS("./output/models/lnRRQ10_1.3m_het")
+  model1.3_m_bayes <- readRDS("./output/models/lnRRQ10_1.3_bayes_m")
+        model1.3_f <- readRDS("./output/models/lnRRQ10_1.3f")
+    model1.3_f_het <- readRDS("./output/models/lnRRQ10_1.3f_het")
+  model1.3_f_bayes <- readRDS("./output/models/lnRRQ10_1.3_bayes_f")
+        model1.3_t <- readRDS("./output/models/lnRRQ10_1.3t")
+    model1.3_t_het <- readRDS("./output/models/lnRRQ10_1.3t_het")
+  model1.3_t_bayes <- readRDS("./output/models/lnRRQ10_1.3_bayes_t")
+}
+
+## Detailed trait category analyses for lnCVR
+
+  # Filter out antioxidant and NAs. For terrestrial, need to filter out endurance and max_MR because only 3 effect sizes
+  lnCVRQ10_data_m <- lnCVRQ10_data %>% filter(habitat == "m" & !trait_category =="antiox") %>% filter(!is.na(c_accl_time))
+  lnCVRQ10_data_f <- lnCVRQ10_data %>% filter(habitat == "f" & !is.na(c_accl_time))
+  lnCVRQ10_data_t <- lnCVRQ10_data %>% filter(habitat == "t" & !is.na(c_accl_time)) %>% filter(!trait_category %in% c("endurance", "max_MR", "other"))
+  
+  # Prune tree
+   tree_m_cvr <- tree_checks(lnCVRQ10_data_m, tree = tree_lncvr, dataCol = "species_full", type = "prune")
+   tree_f_cvr <- tree_checks(lnCVRQ10_data_f, tree = tree_lncvr, dataCol = "species_full", type = "prune")
+   tree_t_cvr <- tree_checks(lnCVRQ10_data_t, tree = tree_lncvr, dataCol = "species_full", type = "prune")
+   
+   # cor matrices
+   m_phylo_cvr <- vcv(tree_m_cvr, corr = TRUE)
+   f_phylo_cvr <- vcv(tree_f_cvr, corr = TRUE)
+   t_phylo_cvr <- vcv(tree_t_cvr, corr = TRUE)
+    
+if(rerun){
+#########################
+  # Detailed Trait Categories
+  # Models for the supplement
+#########################
+  # More realistic model 
+  model2.3 <- metafor::rma.mv(effect_size ~  max_temp_c + c_accl_time + type + trait_category + type:trait_category, V = V, 
+                              random = list(~1 | record_num,
+                                            ~1 | species_full,
+                                            ~1 + max_temp_c| spp,
+                                            ~1 | trait,
+                                            ~1 | obs),
+                              R = list(species_full = phylo_cor_CVR), dfs = "contain", 
+                              test = "t", data = lnCVRQ10_data)
+  
+   model2.3_bayes <- brms::brm(effect_size | se(sqrt(V), sigma = TRUE) ~  max_temp_c + c_accl_time + type + trait_category + type:trait_category + (~1 | record_num) + (1 | gr(species_full, cov = A_CVR)) + (1 + max_temp_c| spp) + (1|trait), data2 = list(A_CVR=A_CVR), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 4, data = lnCVRQ10_data)
+                                  
+  # Save model1.2
+  saveRDS(model2.3, file = "./output/models/lnCVRQ10_2.3")
+  saveRDS(model2.3_bayes, file = "./output/models/lnCVRQ10_2.3_bayes")
+
+ 
+  model2.3f <- metafor::rma.mv(effect_size ~  max_temp_c + c_accl_time + type + trait_category + type:trait_category, V = V, 
+                              random = list(~1 | record_num,
+                                            ~1 | species_full,
+                                            ~1 + max_temp_c| spp,
+                                            ~1 | trait,
+                                            ~1 + trait_category | obs),
+                              R = list(species_full = f_phylo_cvr), dfs = "contain", 
+                              test = "t", struct = c("GEN", "HCS"), phi = 0, data = lnCVRQ10_data_f)
+
+  saveRDS(model2.3f, file = "./output/models/lnCVRQ10_model2.3f")
+
+  model2.3m <- metafor::rma.mv(effect_size ~  max_temp_c + c_accl_time + type + trait_category + type:trait_category, V = V, 
+                              random = list(~1 | record_num,
+                                            ~1 | species_full,
+                                            ~1 + max_temp_c| spp,
+                                            ~1 | trait,
+                                            ~1 + trait_category| obs),
+                              R = list(species_full = m_phylo_cvr), dfs = "contain", 
+                              test = "t", struct = c("GEN", "HCS"),  phi = 0, data = lnCVRQ10_data_m))
+  saveRDS(model2.3m, file = "./output/models/lnCVRQ10_model2.3m")
+
+  # NOte that we need to drop interaction for terestrial as it's not able to estimate. 
+  model2.3t <- metafor::rma.mv(effect_size ~  max_temp_c + c_accl_time + type + trait_category, V = V, 
+                              random = list(~1 | record_num,
+                                            ~1 | species_full,
+                                            ~1 + max_temp_c | spp,
+                                            ~1 | trait,
+                                            ~1 + trait_category | obs),
+                              R = list(species_full = t_phylo_cvr), dfs = "contain", 
+                              test = "t", struct = c("GEN", "HCS"),  phi = 0, data = lnCVRQ10_data_t)
+  saveRDS(model2.3t, file = "./output/models/lnCVRQ10_model2.3t")
+
+  } else{
+#########################
+  # Detailed Trait Categories
+  # Models for the supplement
+#########################
+        model2.3 <- readRDS("./output/models/lnCVRQ10_2.3")
+        model2.3f <- readRDS("./output/models/lnCVRQ10_model2.3f")
+        model2.3m <- readRDS("./output/models/lnCVRQ10_model2.3m")
+        model2.3t <- readRDS("./output/models/lnCVRQ10_model2.3t")
+  model2.3_bayes <- readRDS("./output/models/lnCVRQ10_2.3_bayes")
+}
+```
 
 ```{r, fig-S2}
 #| label: fig-S2

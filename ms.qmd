@@ -2251,7 +2251,7 @@ orchard_plot(model1.s1_int, mod = "name", by = "habitat", xlab = TeX("$lnRR_{Q_{
 
 In addition to the broader trait categories we fit models to understand how acute and acclimation effect sizes varied across trait categories. To achieve this, we categorized each effect size into one of 12 trait categories. These categories included measures of whole organism performance measures including cardiac (i.e., 'cardiac') and muscle ('muscle') function, sprint speed ('sprint') and endurance ('endurance') and metabolic rates (i.e., maximal and resting metabolic rate; max MR', 'rest MR', respectively). Studies also quantified various enzymatic reaction rates, including enzymes involved in general metabolic responses (categorized as 'metabolic enzyme'), various parts of the electron transport chain, including ATPase activity ('ATPase'), mitochondrial leak ('Proton Leak') and oxidation ('OXPHOS', short for Oxidative Phosphorylation), as well as antioxidant enzymes ('antiox'). All other traits not falling within these categories were placed into 'other'.
 
-@fig-S2; @fig-cvrtrait
+@fig-cvrtrait; @fig-cvrtrait
 
 ```{r, detail_trait}
 #| label: detail_trait
@@ -2262,9 +2262,9 @@ In addition to the broader trait categories we fit models to understand how acut
 ## Detailed trait category analyses for lnRR
 
   # Filter out antioxidant and NAs. For terrestrial, need to filter out endurance and max_MR because only 3 effect sizes
-  lnRRQ10_data_m <- lnRRQ10_data %>% filter(habitat = "m" & !trait_category =="antiox") %>% filter(!is.na(c_accl_time))
-  lnRRQ10_data_f <- lnRRQ10_data %>% filter(habitat = "f" & !is.na(c_accl_time))
-  lnRRQ10_data_t <- lnRRQ10_data %>% filter(habitat = "t" & !is.na(c_accl_time)) %>% filter(!trait_category %in% c("endurance", "max_MR", "other"))
+  lnRRQ10_data_m <- lnRRQ10_data %>% filter(habitat == "m" & !trait_category =="antiox") %>% filter(!is.na(c_accl_time))
+  lnRRQ10_data_f <- lnRRQ10_data %>% filter(habitat == "f" & !is.na(c_accl_time))
+  lnRRQ10_data_t <- lnRRQ10_data %>% filter(habitat == "t" & !is.na(c_accl_time)) %>% filter(!trait_category %in% c("endurance", "max_MR", "other"))
   
   # Prune tree
    tree_m <- tree_checks(lnRRQ10_data_m, tree = tree_lnrr, dataCol = "species_full", type = "prune")
@@ -2519,8 +2519,8 @@ if(rerun){
 }
 ```
 
-```{r, fig-S2}
-#| label: fig-S2
+```{r, fig-lnrrtrait}
+#| label: fig-lnrrtrait
 #| fig-cap: "Acute and Acclimation $lnRR_{Q_{10}}$ across detailed trait categories for A) marine, B) freshwater and C) terrestrial systems. k = total number of effect size estimates while the numbers in brackets indicate the number of species. Thick bars indicate 95% confidence intervals and thin bars indicate 95% prediction intervals. The x-axis is truncated for ease of visualisation. See methods section “Moderator Variables” for a full description of the trait categories. "
 #| echo: false
 
@@ -2603,16 +2603,13 @@ img_figcvrtrait
 ```
 
 #### *Mean-variance relationships to understand patterns in $lnCVR_{Q_{10}}$*
-We explored mean-variance relationships for the acute and acclimation responses across all traits and habitats. We estimated the scaling relationship between log standard deviation in physiological rates [log(SD)] and log mean physiological rates [log(mean)], accounting for non-independence resulting from effects coming from the same species, study and traits (i.e., random effects of species, study and trait) as done in our main analyses. We also included an interaction between log(mean) and habitat type to better understand how the scaling relationship between log(SD) and log(mean) varies across habitats.
 
-Overall, we found that the relationship between log(mean) and log(SD) of the acute and acclimation responses was generally linear, suggesting that the use of $lnCVR_{Q_{10}}$ was justified (@fig-mv). Overall, the scaling relationship between log(SD) and log(mean) was sub-linear across all habitats (Freshwater = $\Beta$ = `r fixef(model_mv1)[2]`, 95% CI: `r fixef(model_mv1)[2,3]` to  `r fixef(model_mv1)[2,4]`; Marine = $\Beta$ = `r fixef(model_mv1)[2] + fixef(model_mv1)[5]`, 95% CI: `r fixef(model_mv1)[2,3] + fixef(model_mv1)[5,3]` to `r fixef(model_mv1)[2,4] + fixef(model_mv1)[5,4]`; Terrestrial: $\Beta$ = `r fixef(model_mv1)[2] + fixef(model_mv1)[6]`, 95% CI: `r fixef(model_mv1)[2,3] + fixef(model_mv1)[6,3]` to `r fixef(model_mv1)[2,4] + fixef(model_mv1)[6,4]`) suggesting that the variance in physiological rates does not increase proportionally as the mean increases. Importantly, the scaling relationship between log(SD) and log(mean) differed significantly between habitats (Freshwater compared to Marine: Contrast = `r fixef(model_mv1)[5]`, 95% CI: `r fixef(model_mv1)[5,3]` to `r fixef(model_mv1)[5,4]` and Terrestrial to Marine: Contrast = `r fixef(model_mv1)[6]`, 95% CI: `r fixef(model_mv1)[6,3]` to `r fixef(model_mv1)[6,4]`), which helps explain the relative .
+```{r, mc_models}
+#| label: mc_models
+#| echo: false
+#| include: false
 
-```{r, fig-mv}
-  #| label: fig-mv
-  #| fig-cap: "Mean-standard deviation relationships for the acute and acclimation responses across all habitats. Relationships are depicted for the low temperature treatment of the study (A) and high temperature treatment (B)."
-    col <- c("#0871B9", "#F3B40D", "#1BB908")
-
-  # Model mean variance relationships to estimate the relationship. Two additonal models to address reviewer comments about what exactly is changing in the effect size
+ # Model mean variance relationships to estimate the relationship. Two additonal models to address reviewer comments about what exactly is changing in the effect size
 rerun = FALSE
 if(rerun) { 
       model_mv1  <- brm(log(r1.1_sd) ~ log(r1.1)*habitat + (1|record_num) + (1|spp) + (1|trait), chains = 4, cores = 4, iter = 4000, warmup = 1000, thin = 1, control = list(adapt_delta = 0.98), data = lnRRQ10_data)
@@ -2625,6 +2622,18 @@ if(rerun) {
         model_mv2 <- readRDS("./output/models/model_mv2")
 }
 
+```
+
+We explored mean-variance relationships for the acute and acclimation responses across all traits and habitats. We estimated the scaling relationship between log standard deviation in physiological rates [log(SD)] and log mean physiological rates [log(mean)], accounting for non-independence resulting from effects coming from the same species, study and traits (i.e., random effects of species, study and trait) as done in our main analyses. We also included an interaction between log(mean) and habitat type to better understand how the scaling relationship between log(SD) and log(mean) varies across habitats.
+
+Overall, we found that the relationship between log(mean) and log(SD) of the acute and acclimation responses was generally linear, suggesting that the use of $lnCVR_{Q_{10}}$ was justified (@fig-mv). Overall, the scaling relationship between log(SD) and log(mean) was sub-linear across all habitats (Freshwater = $\Beta$ = `r fixef(model_mv1)[2]`, 95% CI: `r fixef(model_mv1)[2,3]` to  `r fixef(model_mv1)[2,4]`; Marine = $\Beta$ = `r fixef(model_mv1)[2] + fixef(model_mv1)[5]`, 95% CI: `r fixef(model_mv1)[2,3] + fixef(model_mv1)[5,3]` to `r fixef(model_mv1)[2,4] + fixef(model_mv1)[5,4]`; Terrestrial: $\Beta$ = `r fixef(model_mv1)[2] + fixef(model_mv1)[6]`, 95% CI: `r fixef(model_mv1)[2,3] + fixef(model_mv1)[6,3]` to `r fixef(model_mv1)[2,4] + fixef(model_mv1)[6,4]`) suggesting that the variance in physiological rates does not increase proportionally as the mean increases. Importantly, the scaling relationship between log(SD) and log(mean) differed significantly between habitats (Freshwater compared to Marine: Contrast = `r fixef(model_mv1)[5]`, 95% CI: `r fixef(model_mv1)[5,3]` to `r fixef(model_mv1)[5,4]` and Terrestrial to Marine: Contrast = `r fixef(model_mv1)[6]`, 95% CI: `r fixef(model_mv1)[6,3]` to `r fixef(model_mv1)[6,4]`), which helps explain the relative .
+
+```{r, fig-mv}
+  #| label: fig-mv
+  #| fig-cap: "Mean-standard deviation relationships for the acute and acclimation responses across all habitats. Relationships are depicted for the low temperature treatment of the study (A) and high temperature treatment (B)."
+    col <- c("#0871B9", "#F3B40D", "#1BB908")
+
+ 
   mv1 <- ggplot2::ggplot(lnRRQ10_data, aes(x = log(r1.1), y = log(r1.1_sd),color = habitat)) +
                   geom_point(aes(color = habitat), size = 2.2) + 
                   geom_smooth(method = "lm", se = FALSE) + 

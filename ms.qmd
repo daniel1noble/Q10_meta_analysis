@@ -599,7 +599,40 @@ if(rerun){
 }
 
 ###########################################################
-## Model 1.4 - whether chance between q10 depends on life stage and habita
+  # Processing Bayesian Posteriors
+###########################################################
+      # Create new data for predictions
+       trait_b_data <- data.frame(  type = c("acclim", "acute"),
+                              max_temp_c = 0,
+                             c_accl_time = 0,
+                                       V = 0,
+                                 habitat = rep(c("t", "m", "f"), each = 4),
+                             trait_broad = rep(c("tissue/organism", "biochemical"), each = 2))     
+      
+       # Predict from model. Note this is the summary.
+         pred_lnrr_traitb <- fitted(model1.3_btrait_bayes, 
+                                     newdata = trait_b_data, re_formula = NA,
+                                     summary = TRUE, 
+                                     robust = FALSE)
+         pred_lnrr_traitb <- cbind(trait_b_data, pred_lnrr_traitb)
+    
+       # Predict to get the posterior. Note that we have the full posterior distribution here for each of the 12 categories in the new data. Here, we want to look at the difference between acute and acclimation within each of the categories. 
+            pred_lnrr_trait_post <- fitted(model1.3_btrait_bayes, 
+                                     newdata = trait_b_data, re_formula = NA,
+                                     summary = FALSE, 
+                                     robust = FALSE)
+        contrast_lnrr_trait_post <-  pred_lnrr_trait_post[,c(1,3,5,7,9,11)] - pred_lnrr_trait_post[,c(2,4,6,8,10,12)] # Acclimation - acute.
+            
+        # Contrast statistics
+            contrast_lnrr_trait_stats <- data.frame( habitat = rep(c("t", "m", "f"), each = 2),
+                                                     trait = rep(c("tissue/organism", "biochemical"), each = 1),
+                                                    diff = sapply(data.frame(contrast_lnrr_trait_post), mean),
+                                                     l95 = sapply(data.frame(contrast_lnrr_trait_post), function(x) quantile(x, 0.025)),
+                                                     u95 = sapply(data.frame(contrast_lnrr_trait_post), function(x) quantile(x, 0.975)),
+                                                       p = sapply(data.frame(contrast_lnrr_trait_post), function(x) p_value(pmcmc(x))))
+
+###########################################################
+## Model 1.4 - whether chance between q10 depends on life stage and habitat
 ###########################################################
 rerun = FALSE
 if(rerun){
@@ -816,7 +849,9 @@ Effect heterogeneity was high (only `r mean(tot_i2)`% of the variance was the re
 
 Overall, $lnRR_{Q_{10_{acclimation}}}$ was `r abs(mean(avg_change))`% lower than  $lnRR_{Q_{10_{acute}}}$ across all habitats (95%CI: `r quantile(avg_change, c(0.025, 0.975))[1]` to `r quantile(avg_change, c(0.025, 0.975))[2]`%). Ectotherms in marine and freshwater environments showed partial compensation of physiological rates ([@fig-2]A) amounting to reduced $lnRR_{Q_{10_{acclimation}}}$ of `r abs(mean(change_f))`% (95% CI: `r quantile(change_f, c(0.025, 0.975))[1]` to `r quantile(change_f, c(0.025, 0.975))[2]`) in freshwater and `r abs(mean(change_m))`% (95% CI: `r quantile(change_m, c(0.025, 0.975))[1]` to `r quantile(change_m, c(0.025, 0.975))[2]`) in marine environments. In contrast, terrestrial ectotherms showed no acclimation (possibly even inverse acclimation) -- showing a `r abs(mean(change_t))`% increase in $lnRR_{Q_{10_{acclimation}}}$ (95% CI: `r quantile(change_t, c(0.025, 0.975))[1]` to `r quantile(change_t, c(0.025, 0.975))[2]`, [@fig-2]B). All results are from Model 2 (see “Meta-Analysis” above).
 
-Different trait categories showed different acclimation responses across habitat types (@fig-btrait and see Supplement; @fig-S2). Acclimation capacity also did not vary by life-history stage and there were no differences between $lnRR_{Q_{10_{acclimation}}}$ and $lnRR_{Q_{10_{acute}}}$ between adult and juveniles (@fig-cvrlh A-C) (Adult-Juvenile (Acute): `r mean(acute_all_lh)`, 95% CI: `r quantile(acute_all_lh, 0.025)[1]` to `r quantile(acute_all_lh, 0.975)[1]`, $p_{MCMC}$ = `r pmcmc(acute_all_lh)`; Adult-Juvenile (Acclimation): `r mean(acclim_all_lh)`, 95% CI: `r quantile(acclim_all_lh, 0.025)[1]` to `r quantile(acclim_all_lh, 0.975)[1]`, $p_{MCMC}$ = `r pmcmc(acclim_all_lh)`).
+Different trait categories showed different acclimation responses across habitat types (@fig-btrait and see Supplement; @fig-S2). 
+
+Acclimation capacity also did not vary by life-history stage and there were no differences between $lnRR_{Q_{10_{acclimation}}}$ and $lnRR_{Q_{10_{acute}}}$ between adult and juveniles (@fig-cvrlh A-C) (Adult-Juvenile (Acute): `r mean(acute_all_lh)`, 95% CI: `r quantile(acute_all_lh, 0.025)[1]` to `r quantile(acute_all_lh, 0.975)[1]`, $p_{MCMC}$ = `r pmcmc(acute_all_lh)`; Adult-Juvenile (Acclimation): `r mean(acclim_all_lh)`, 95% CI: `r quantile(acclim_all_lh, 0.025)[1]` to `r quantile(acclim_all_lh, 0.975)[1]`, $p_{MCMC}$ = `r pmcmc(acclim_all_lh)`).
 
 ```{r, lncvrq10}
 #| label: lncvrq10
@@ -1032,6 +1067,40 @@ if(rerun){
     model2.3_t_broad <- readRDS("output/models/model2.3_t_broad")
 }
 
+###########################################################
+  # Processing Bayesian Posteriors
+###########################################################
+      # Create new data for predictions
+       trait_b_data <- data.frame(  type = c("acclim", "acute"),
+                              max_temp_c = 0,
+                             c_accl_time = 0,
+                                       V = 0,
+                                 habitat = rep(c("t", "m", "f"), each = 4),
+                             trait_broad = rep(c("tissue/organism", "biochemical"), each = 2))     
+      
+       # Predict from model. Note this is the summary.
+         pred_lncvr_traitb <- fitted(model2.3_btrait_bayes, 
+                                     newdata = trait_b_data, re_formula = NA,
+                                     summary = TRUE, 
+                                     robust = FALSE)
+         pred_lncvr_traitb <- cbind(trait_b_data, pred_lncvr_traitb)
+    
+       # Predict to get the posterior. Note that we have the full posterior distribution here for each of the 12 categories in the new data. Here, we want to look at the difference between acute and acclimation within each of the categories. 
+            pred_lncvr_traitb_post <- fitted(model2.3_btrait_bayes, 
+                                     newdata = trait_b_data, re_formula = NA,
+                                     summary = FALSE, 
+                                     robust = FALSE)
+        contrast_lncvr_trait_post <-  pred_lncvr_traitb_post[,c(1,3,5,7,9,11)] - pred_lncvr_traitb_post[,c(2,4,6,8,10,12)] # Acclimation - acute.
+            
+        # Contrast statistics
+            contrast_lncvr_trait_stats <- data.frame( habitat = rep(c("t", "m", "f"), each = 2),
+                                                     trait = rep(c("tissue/organism", "biochemical"), each = 1),
+                                                    diff = sapply(data.frame(contrast_lncvr_trait_post), mean),
+                                                     l95 = sapply(data.frame(contrast_lncvr_trait_post), function(x) quantile(x, 0.025)),
+                                                     u95 = sapply(data.frame(contrast_lncvr_trait_post), function(x) quantile(x, 0.975)),
+                                                       p = sapply(data.frame(contrast_lncvr_trait_post), function(x) p_value(pmcmc(x))))
+
+   
 ###################################################
   # Model 2.4: Model controlling for acclimation time, 
   # type and life history stage assuming type can vary by habitat
@@ -1182,11 +1251,17 @@ m_r <- n_lnrr_btrait %>% filter(habitat == "m")
 f_r <- n_lnrr_btrait %>% filter(habitat == "f")
 t_r <- n_lnrr_btrait %>% filter(habitat == "t")
 
-p1 <- orchard_plot(model1.3_m_broad, mod = "trait_broad", at = list(c_accl_time = 0, habitat = "m"), group = "record_num", xlab = TeX("$lnRR_{Q_{10}}$"), condition.lab = "Type", by = "type",  g = FALSE, k = FALSE, angle = 45, branch.size = branch.size, trunk.size = trunk.size) + labs(title = "Marine") + add_theme() + ylim(-0.8, 1.8) + theme(legend.position = "none", axis.text.y = element_blank()) + annotate("text", x = x.pos, y = 1.3, label = TeX(paste0("\\it{k} = ", m_r$k, " (", m_r$spp, ")")), size = size_annot) + scale_fill_manual(values = rep(col[2],4)) + scale_color_manual(values = rep("black",4))
+t_trait_b <- contrast_lnrr_trait_stats %>% filter(habitat == "t") %>% purrr::modify_if(~is.numeric(.), ~round(., 2)) %>% arrange(trait)
+m_trait_b <- contrast_lnrr_trait_stats %>% filter(habitat == "m") %>% purrr::modify_if(~is.numeric(.), ~round(., 2)) %>% arrange(trait)
+f_trait_b <- contrast_lnrr_trait_stats %>% filter(habitat == "f") %>% purrr::modify_if(~is.numeric(.), ~round(., 2)) %>% arrange(trait)
 
-p2 <- orchard_plot(model1.3_f_broad, mod = "trait_broad", at = list(c_accl_time = 0, habitat = "f"), group = "record_num", xlab = TeX("$lnRR_{Q_{10}}$"), condition.lab = "Type", by = "type",  g = FALSE, k = FALSE, branch.size = branch.size, trunk.size = trunk.size, angle = 45)+ labs(title = "Freshwater")  + add_theme() + theme(legend.position = "none", axis.text.y = element_blank()) + ylim(-0.4, 1.5) + annotate("text", x = x.pos, y = 1.3, label = TeX(paste0("\\it{k} = ", f_r$k, " (", f_r$spp, ")")), size = size_annot) + theme(legend.position = "right", legend.justification = c(1, 1)) + guides(shape = guide_legend(direction = "vertical"), size = guide_legend(direction = "vertical")) + scale_fill_manual(values = rep(col[1],4)) + scale_color_manual(values = rep("black", 4))
+yloc = c(1.5, 2.5)
 
-p3 <- orchard_plot(model1.3_t_broad, mod = "trait_broad", at = list(c_accl_time = 0, habitat = "t", legend.pos = "none"), group = "record_num", xlab = TeX("$lnRR_{Q_{10}}$"), condition.lab = "Type", by = "type",  g = FALSE, k = FALSE, branch.size = branch.size, trunk.size = trunk.size, angle = 45)+ labs(title = "Terrestrial") + add_theme()  +  ylim(-0.3, 1.8) + theme(legend.position = "none") + annotate("text", x = x.pos, y = 1.5, label = TeX(paste0("\\it{k} = ", t_r$k, " (", t_r$spp, ")")), size = size_annot) + scale_fill_manual(values = rep(col[3], 4)) + scale_color_manual(values = rep("black", 4))
+p1 <- orchard_plot(model1.3_m_broad, mod = "trait_broad", at = list(c_accl_time = 0, habitat = "m"), group = "record_num", xlab = TeX("$lnRR_{Q_{10}}$"), condition.lab = "Type", by = "type",  g = FALSE, k = FALSE, angle = 45, branch.size = branch.size, trunk.size = trunk.size) + labs(title = "Marine") + add_theme() + ylim(-0.8, 1.8) + theme(legend.position = "none", axis.text.y = element_blank()) + annotate("text", x = x.pos, y = 1.3, label = TeX(paste0("\\it{k} = ", m_r$k, " (", m_r$spp, ")")), size = size_annot) + scale_fill_manual(values = rep(col[2],4)) + scale_color_manual(values = rep("black",4)) + annotate("text", x = yloc, y = -0.8, label = TeX(paste0("$\\beta$ = ", m_trait_b$diff, " [", m_trait_b$l95, " to ", m_trait_b$u95, "] ", "$\\,p_{MCMC}$ = ", m_trait_b$p)), hjust = 0, size = 8)
+
+p2 <- orchard_plot(model1.3_f_broad, mod = "trait_broad", at = list(c_accl_time = 0, habitat = "f"), group = "record_num", xlab = TeX("$lnRR_{Q_{10}}$"), condition.lab = "Type", by = "type",  g = FALSE, k = FALSE, branch.size = branch.size, trunk.size = trunk.size, angle = 45)+ labs(title = "Freshwater")  + add_theme() + theme(legend.position = "none", axis.text.y = element_blank()) + ylim(-0.5, 2) + annotate("text", x = x.pos, y = 1.3, label = TeX(paste0("\\it{k} = ", f_r$k, " (", f_r$spp, ")")), size = size_annot) + theme(legend.position = "right", legend.justification = c(1, 1)) + guides(shape = guide_legend(direction = "vertical"), size = guide_legend(direction = "vertical")) + scale_fill_manual(values = rep(col[1],4)) + scale_color_manual(values = rep("black", 4)) + annotate("text", x = yloc, y = -0.5, label = TeX(paste0("$\\beta$ = ", f_trait_b$diff, " [", f_trait_b$l95, " to ", f_trait_b$u95, "] ", "$\\,p_{MCMC}$ = ", f_trait_b$p)), hjust = 0, size = 8)
+
+p3 <- orchard_plot(model1.3_t_broad, mod = "trait_broad", at = list(c_accl_time = 0, habitat = "t", legend.pos = "none"), group = "record_num", xlab = TeX("$lnRR_{Q_{10}}$"), condition.lab = "Type", by = "type",  g = FALSE, k = FALSE, branch.size = branch.size, trunk.size = trunk.size, angle = 45)+ labs(title = "Terrestrial") + add_theme()  +  ylim(-0.3, 1.8) + theme(legend.position = "none") + annotate("text", x = x.pos, y = 1.5, label = TeX(paste0("\\it{k} = ", t_r$k, " (", t_r$spp, ")")), size = size_annot) + scale_fill_manual(values = rep(col[3], 4)) + scale_color_manual(values = rep("black", 4)) + annotate("text", x = yloc, y = -0.25, label = TeX(paste0("$\\beta$ = ", t_trait_b$diff, " [", t_trait_b$l95, " to ", t_trait_b$u95, "] ", "$\\,p_{MCMC}$ = ", t_trait_b$p)), hjust = 0, size = 8)
 
 ############
 # CVR
@@ -1195,17 +1270,22 @@ m_cv <- n_lncvr_btrait %>% filter(habitat == "m")
 f_cv <- n_lncvr_btrait %>% filter(habitat == "f")
 t_cv <- n_lncvr_btrait %>% filter(habitat == "t")
 
-p1_cvr <- orchard_plot(model2.3_m_broad, mod = "trait_broad", at = list(c_accl_time = 0, habitat = "m"), group = "record_num", xlab = TeX("$lnCVR_{Q_{10}}$"), condition.lab = "Type", by = "type",  g = FALSE, k = FALSE, angle = 45, branch.size = branch.size, trunk.size = trunk.size) + ylim(c(-2, 2.2)) + add_theme() + ylim(-1.7, 1.6)  + annotate("text", x = x.pos, y = 0.8, label = TeX(paste0("\\it{k} = ", m_cv$k, " (", m_cv$spp, ")")), size = size_annot) + theme(legend.position = "none", axis.text.y = element_blank()) + scale_fill_manual(values = rep(col[2],4)) + scale_color_manual(values = rep("black", 4))
+t_trait_b_cvr <- contrast_lncvr_trait_stats %>% filter(habitat == "t") %>% purrr::modify_if(~is.numeric(.), ~round(., 2)) %>% arrange(trait)
+m_trait_b_cvr <- contrast_lncvr_trait_stats %>% filter(habitat == "m") %>% purrr::modify_if(~is.numeric(.), ~round(., 2)) %>% arrange(trait)
+f_trait_b_cvr <- contrast_lncvr_trait_stats %>% filter(habitat == "f") %>% purrr::modify_if(~is.numeric(.), ~round(., 2)) %>% arrange(trait)
 
-p2_cvr <- orchard_plot(model2.3_f_broad, mod = "trait_broad", at = list(c_accl_time = 0, habitat = "f"), group = "record_num", xlab = TeX("$lnCVR_{Q_{10}}$"), condition.lab = "Type", by = "type", angle = 45, g = FALSE, k = FALSE, branch.size = branch.size, trunk.size = trunk.size)  + add_theme() + ylim(-1.6, 1.3) + annotate("text", x = x.pos, y = 0.8, label = TeX(paste0("\\it{k} = ", f_cv$k, " (", f_cv$spp, ")")), size = size_annot) + theme(legend.position = "right", legend.justification = c(1, 1), axis.text.y = element_blank()) + guides(shape = guide_legend(direction = "vertical"), size = guide_legend(direction = "vertical")) + scale_fill_manual(values = rep(col[1], 4)) + scale_color_manual(values = rep("black", 4))
 
-p3_cvr <- orchard_plot(model2.3_t_broad, mod = "trait_broad", at = list(c_accl_time = 0, habitat = "t"), angle = 45, group = "record_num", xlab = TeX("$lnCVR_{Q_{10}}$"), condition.lab = "Type", by = "type",  g = FALSE, k = FALSE, branch.size = branch.size, trunk.size = trunk.size)+ add_theme()  + ylim(-2, 2) + annotate("text", x = x.pos, y = 1.5, label = TeX(paste0("\\it{k} = ", t_cv$k, " (", t_cv$spp, ")")), size = size_annot) +  theme(legend.position = "none") + scale_fill_manual(values = rep(col[3], 4)) + scale_color_manual(values = rep("black", 4))
+p1_cvr <- orchard_plot(model2.3_m_broad, mod = "trait_broad", at = list(c_accl_time = 0, habitat = "m"), group = "record_num", xlab = TeX("$lnCVR_{Q_{10}}$"), condition.lab = "Type", by = "type",  g = FALSE, k = FALSE, angle = 45, branch.size = branch.size, trunk.size = trunk.size) + ylim(c(-2, 2.2)) + add_theme() + ylim(-1.7, 1.6)  + annotate("text", x = x.pos, y = 0.8, label = TeX(paste0("\\it{k} = ", m_cv$k, " (", m_cv$spp, ")")), size = size_annot) + theme(legend.position = "none", axis.text.y = element_blank()) + scale_fill_manual(values = rep(col[2],4)) + scale_color_manual(values = rep("black", 4)) + annotate("text", x = yloc, y = -1.7, label = TeX(paste0("$\\beta$ = ", m_trait_b_cvr$diff, " [", m_trait_b_cvr$l95, " to ", m_trait_b_cvr$u95, "] ", "$\\,p_{MCMC}$ = ", m_trait_b_cvr$p)), hjust = 0, size = 8)
+
+p2_cvr <- orchard_plot(model2.3_f_broad, mod = "trait_broad", at = list(c_accl_time = 0, habitat = "f"), group = "record_num", xlab = TeX("$lnCVR_{Q_{10}}$"), condition.lab = "Type", by = "type", angle = 45, g = FALSE, k = FALSE, branch.size = branch.size, trunk.size = trunk.size)  + add_theme() + ylim(-1.6, 1.3) + annotate("text", x = x.pos, y = 0.8, label = TeX(paste0("\\it{k} = ", f_cv$k, " (", f_cv$spp, ")")), size = size_annot) + theme(legend.position = "right", legend.justification = c(1, 1), axis.text.y = element_blank()) + guides(shape = guide_legend(direction = "vertical"), size = guide_legend(direction = "vertical")) + scale_fill_manual(values = rep(col[1], 4)) + scale_color_manual(values = rep("black", 4)) + annotate("text", x = yloc, y = -1.6, label = TeX(paste0("$\\beta$ = ", f_trait_b_cvr$diff, " [", f_trait_b_cvr$l95, " to ", f_trait_b_cvr$u95, "] ", "$\\,p_{MCMC}$ = ", f_trait_b_cvr$p)), hjust = 0, size = 8)
+
+p3_cvr <- orchard_plot(model2.3_t_broad, mod = "trait_broad", at = list(c_accl_time = 0, habitat = "t"), angle = 45, group = "record_num", xlab = TeX("$lnCVR_{Q_{10}}$"), condition.lab = "Type", by = "type",  g = FALSE, k = FALSE, branch.size = branch.size, trunk.size = trunk.size)+ add_theme()  + ylim(-2, 2) + annotate("text", x = x.pos, y = 1.5, label = TeX(paste0("\\it{k} = ", t_cv$k, " (", t_cv$spp, ")")), size = size_annot) +  theme(legend.position = "none") + scale_fill_manual(values = rep(col[3], 4)) + scale_color_manual(values = rep("black", 4)) + annotate("text", x = yloc, y = -2, label = TeX(paste0("$\\beta$ = ", t_trait_b_cvr$diff, " [", t_trait_b_cvr$l95, " to ", t_trait_b_cvr$u95, "] ", "$\\,p_{MCMC}$ = ", t_trait_b_cvr$p)), hjust = 0, size = 8)
 
 ############
 # Full fig
 ############
 figbtrait <-(p3 | p1 | p2) / (p3_cvr | p1_cvr | p2_cvr) + plot_annotation(tag_levels = "A") 
-ggsave(figbtrait, filename = "./output/figures/fig4_btrait_r1.png", width = 22, height = 12, device = "png")
+ggsave(figbtrait, filename = "./output/figures/fig4_btrait_r1.png", width = 28, height = 14, device = "png")
 
 figbtrait <- magick::image_read("./output/figures/fig4_btrait_r1.png")
 figbtrait
@@ -1792,7 +1872,7 @@ if(rerun){
   model5_bayes <- readRDS("./output/models/lnCVRQ10_5_bayes")
 }
 
-# Lets explore the model and how it's predciting the real data
+# Lets explore the model and how it's predicting the real data
   data_w <- lnCVRQ10_data_wild[complete.cases(lnCVRQ10_data_wild$c_accl_time),]
 
 # combine with predictions
@@ -1805,7 +1885,7 @@ if(rerun){
         theme_classic()                                               + 
         geom_abline(intercept = 0, slope = 1)
 
-# Seems to be OK, but over and under-predciting at times. Lets explore the data for odd ball predictions to see if there are any obvious reasons why. There are very few for the most part but lets see why sign changes occur which are most stricking differences. Sign changes indicate the observed data is completely opposite in sign to the predcited data
+# Seems to be OK, but over and under-predicting at times. Lets explore the data for odd ball predictions to see if there are any obvious reasons why. There are very few for the most part but lets see why sign changes occur which are most striking differences. Sign changes indicate the observed data is completely opposite in sign to the predicted data
 
 #  Spot check of a bunch of studies doesn't show any obvious issues with the data. Note that data is repeated because acute and acclimated rates are calculated. We expect the rows of raw data for acute and acclim to be repeated even though these data are NOT all used to make the calculation.
   sign_change_dat <- data_w_pred  %>% filter(sign(Estimate) != sign(effect_size))
@@ -1874,13 +1954,13 @@ sub_data <- lnCVRQ10_data_wild[complete.cases(lnCVRQ10_data_wild$c_accl_time),]
       record_num = 0
     )
 
-  # Create new dataframe with only unique values for predcition.
+  # Create new data frame with only unique values for prediction.
   new_data_t2  <- cbind(terrest_data, new_data_t)
 
-  # We'll now make the predcitions from the model object using the new dataframe
+  # We'll now make the predictions from the model object using the new data frame
   terre_pred <- predict(model5_bayes, newdata = new_data_t2, summary = TRUE, allow_new_levels = TRUE, sample_new_levels = "uncertainty", robust = FALSE, intervals = "confidence")
 
-  # We'll also keep the whole postriopr which we'll use later on. We need to transpose so that the data match. Each numbered columns is one sample of the posterior.
+  # We'll also keep the whole posterior which we'll use later on. We need to transpose so that the data match. Each numbered columns is one sample of the posterior.
   terre_pred_no_sum <- cbind(new_data_t2, t(predict(model5_bayes, newdata = new_data_t2, summary = FALSE, allow_new_levels = TRUE, sample_new_levels = "uncertainty")))
   
   # Lets merge predictions with the original data

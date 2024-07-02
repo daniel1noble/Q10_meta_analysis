@@ -849,7 +849,7 @@ Effect heterogeneity was high (only `r mean(tot_i2)`% of the variance was the re
 
 Overall, $lnRR_{Q_{10_{acclimation}}}$ was `r abs(mean(avg_change))`% lower than  $lnRR_{Q_{10_{acute}}}$ across all habitats (95%CI: `r quantile(avg_change, c(0.025, 0.975))[1]` to `r quantile(avg_change, c(0.025, 0.975))[2]`%). Ectotherms in marine and freshwater environments showed partial compensation of physiological rates ([@fig-2]A) amounting to reduced $lnRR_{Q_{10_{acclimation}}}$ of `r abs(mean(change_f))`% (95% CI: `r quantile(change_f, c(0.025, 0.975))[1]` to `r quantile(change_f, c(0.025, 0.975))[2]`) in freshwater and `r abs(mean(change_m))`% (95% CI: `r quantile(change_m, c(0.025, 0.975))[1]` to `r quantile(change_m, c(0.025, 0.975))[2]`) in marine environments. In contrast, terrestrial ectotherms showed no acclimation (possibly even inverse acclimation) -- showing a `r abs(mean(change_t))`% increase in $lnRR_{Q_{10_{acclimation}}}$ (95% CI: `r quantile(change_t, c(0.025, 0.975))[1]` to `r quantile(change_t, c(0.025, 0.975))[2]`, [@fig-2]B). All results are from Model 2 (see “Meta-Analysis” above).
 
-Different trait categories showed different acclimation responses across habitat types (@fig-btrait and see Supplement; @fig-S2). 
+Across habitats the extent to which whole-organism versus biochemical processes acclimated varied (@fig-btrait A-C; and see Supplement [@fig-S2] for more detailed trait analysis). Biochemical processes were more effective at acclimating compared to whole-organism traits for ectotherms occupying marine habitats (@fig-btrait B), whereas both whole-organism and biochemical traits acclimated in freshwater ectotherms (@fig-btrait C). Unsurprisingly, neither broad trait category showed evidence of acclimation in terrestrial ectotherms (@fig-btrait A). 
 
 Acclimation capacity also did not vary by life-history stage and there were no differences between $lnRR_{Q_{10_{acclimation}}}$ and $lnRR_{Q_{10_{acute}}}$ between adult and juveniles (@fig-cvrlh A-C) (Adult-Juvenile (Acute): `r mean(acute_all_lh)`, 95% CI: `r quantile(acute_all_lh, 0.025)[1]` to `r quantile(acute_all_lh, 0.975)[1]`, $p_{MCMC}$ = `r pmcmc(acute_all_lh)`; Adult-Juvenile (Acclimation): `r mean(acclim_all_lh)`, 95% CI: `r quantile(acclim_all_lh, 0.025)[1]` to `r quantile(acclim_all_lh, 0.975)[1]`, $p_{MCMC}$ = `r pmcmc(acclim_all_lh)`).
 
@@ -1119,7 +1119,16 @@ if(rerun){
   # Save model
   saveRDS(model2.4, file = "./output/models/lnCVRQ10_2.4")
 
-   model2.4_bayes <- brms::brm(effect_size | se(sqrt(V), sigma = TRUE) ~  max_temp_c + c_accl_time + type*habitat*life.hist + (~1 | record_num) + (1 | gr(species_full, cov = A_CVR)) + (1 + max_temp_c| spp) + (1|trait), data2 = list(A_CVR=A_CVR), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 4, data = lnCVRQ10_data)
+   model2.4_bayes <- brms::brm(effect_size | se(sqrt(V)) ~  max_temp_c + c_accl_time + type*habitat*life.hist + 
+                                 (~1 | record_num) + 
+                                 (1 | gr(species_full, cov = A_CVR)) + 
+                                 (1 + max_temp_c| spp) + 
+                                 (1|trait) +
+                                 (1|obs), 
+                               data2 = list(A_CVR=A_CVR), family = gaussian(), 
+                               prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), 
+                               control = list(adapt_delta = 0.98, max_treedepth = 12), 
+                               chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 4, data = lnCVRQ10_data)
                                   
   # Save model
   saveRDS(model2.4_bayes, file = "./output/models/lnCVRQ10_2.4_bayes")
@@ -1129,6 +1138,42 @@ if(rerun){
   model2.4_bayes <- readRDS("./output/models/lnCVRQ10_2.4_bayes")
 }
 
+###########################################################
+  # Processing Bayesian Posteriors
+###########################################################
+      # Create new data for predictions
+       lh_b_data <- data.frame(     type = c("acclim", "acute"),
+                              max_temp_c = 0,
+                             c_accl_time = 0,
+                                       V = 0,
+                                 habitat = rep(c("t", "m", "f"), each = 4),
+                               life.hist = rep(c("j", "a"), each = 2))     
+      
+       # Predict from model. Note this is the summary.
+         pred_lncvr_lh_cvr <- fitted(model2.4_bayes, 
+                                     newdata = lh_b_data, 
+                                     re_formula = NA,
+                                     summary = TRUE, 
+                                     robust = FALSE)
+         pred_lncvr_lh_cvr <- cbind(lh_b_data, pred_lncvr_lh_cvr)
+    
+       # Predict to get the posterior. Note that we have the full posterior distribution here for each of the 12 categories in the new data. Here, we want to look at the difference between acute and acclimation within each of the categories. 
+            pred_lncvr_lh_post <- fitted(model2.4_bayes, 
+                                     newdata = lh_b_data, re_formula = NA,
+                                     summary = FALSE, 
+                                     robust = FALSE)
+        contrast_lncvr_lh_post <-  pred_lncvr_lh_post[,c(1,3,5,7,9,11)] - pred_lncvr_lh_post[,c(2,4,6,8,10,12)] # Acclimation - acute.
+            
+        # Contrast statistics
+            contrast_lncvr_lh_stats <- data.frame( habitat = rep(c("t", "m", "f"), each = 2),
+                                                     trait = rep(c("tissue/organism", "biochemical"), each = 1),
+                                                    diff = sapply(data.frame(contrast_lncvr_lh_post), mean),
+                                                     l95 = sapply(data.frame(contrast_lncvr_lh_post), function(x) quantile(x, 0.025)),
+                                                     u95 = sapply(data.frame(contrast_lncvr_lh_post), function(x) quantile(x, 0.975)),
+                                                       p = sapply(data.frame(contrast_lncvr_lh_post), function(x) p_value(pmcmc(x))))
+
+   
+            
 ```
 
 ```{r, fig-2}
@@ -1215,9 +1260,9 @@ if(rerun){
 
 ### *Relative variation in physiological rates is reduced in terrestrial and marine ectotherms*
 
-Relative variance in physiological rates ($lnCVR_{Q_{10}}$) showed a decrease with increasing temperature across all habitat types, which was especially pronounced in terrestrial and marine ectotherms. There were no differences between $lnCVR_{Q_{10}}$ and $lnCVR_{Q_{10}}$. Reductions in variance were driven by slower increases in the variance in physiological rates relative to the mean with scaling relationships between log standard deviation and log mean all being smaller than 1 and varying across habitats (See Supplementary Materials). There was a `r mean(t_cvr_mean_ef)`% (95% CI: `r quantile(t_cvr_mean_ef, 0.025)[1]` to `r quantile(t_cvr_mean_ef, 0.975)[1]`, $p_{MCMC}$ = `r pmcmc(t_cvr_mean)`) reduction in relative physiological rate variance for terrestrial ectotherms and a `r mean(m_cvr_mean_ef)`% (95% CI: `r quantile(m_cvr_mean_ef, 0.025)[1]` to `r quantile(m_cvr_mean_ef, 0.975)[1]`, $p_{MCMC}$ = `r pmcmc(m_cvr_mean)`) reduction in relative variation for marine ectotherms when temperatures increased by 10$^\circ$C. In contrast, freshwater ectotherms exhibited a smaller reduction in relative physiological rate variance at high temperatures (`r mean(f_cvr_mean_ef)`%, 95% CI: `r quantile(f_cvr_mean_ef, 0.025)[1]` to `r quantile(f_cvr_mean_ef, 0.975)[1]`, $p_{MCMC}$ = `r pmcmc(f_cvr_mean)`). 
+Relative variance in physiological rates ($lnCVR_{Q_{10}}$) showed a decrease with increasing temperature across all habitat types, which was especially pronounced in terrestrial and marine ectotherms. The total proportion of heterogeneity in $lnCVR_{Q_{10}}$ was lower compared to $lnRR_{Q_{10}}$ ($I^2_{sv}$ = `r mean(tot_i2_cvr)`, 95% CI: `r quantile(tot_i2_cvr, 0.025)` to `r quantile(tot_i2_cvr, 0.975)`), with most variation being driven by between-study and trait differences (see Supplement;  @fig-s3). There were no differences between $lnCVR_{Q_{10_{acute}}}$ and $lnCVR_{Q_{10_{acclimation}}}$. Reductions in variance were driven by slower increases in the variance in physiological rates relative to the mean with scaling relationships between log standard deviation and log mean all being smaller than 1 and varying across habitats (See Supplementary Materials). There was a `r mean(t_cvr_mean_ef)`% (95% CI: `r quantile(t_cvr_mean_ef, 0.025)[1]` to `r quantile(t_cvr_mean_ef, 0.975)[1]`, $p_{MCMC}$ = `r pmcmc(t_cvr_mean)`) reduction in relative physiological rate variance for terrestrial ectotherms and a `r mean(m_cvr_mean_ef)`% (95% CI: `r quantile(m_cvr_mean_ef, 0.025)[1]` to `r quantile(m_cvr_mean_ef, 0.975)[1]`, $p_{MCMC}$ = `r pmcmc(m_cvr_mean)`) reduction in relative variation for marine ectotherms when temperatures increased by 10$^\circ$C. In contrast, freshwater ectotherms exhibited a smaller reduction in relative physiological rate variance at high temperatures (`r mean(f_cvr_mean_ef)`%, 95% CI: `r quantile(f_cvr_mean_ef, 0.025)[1]` to `r quantile(f_cvr_mean_ef, 0.975)[1]`, $p_{MCMC}$ = `r pmcmc(f_cvr_mean)`). 
 
-The total proportion of heterogeneity in $lnCVR_{Q_{10}}$ was lower compared to $lnRR_{Q_{10}}$ ($I^2_{sv}$ = `r mean(tot_i2_cvr)`, 95% CI: `r quantile(tot_i2_cvr, 0.025)` to `r quantile(tot_i2_cvr, 0.975)`), with most variation being driven by between-study and trait differences (see Supplement;  @fig-s3). Each life-history stage exhibited the same pattern of variance change in each of the habitats (@fig-cvrlh). Reduced relative variance was particularly prominent for resting metabolic rates and sprint speed although traits differed in whether they exhibited a reduction in variation in physiological rates at high temperatures (@fig-btrait). 
+Across habitats whole-organism versus biochemical processes showed a similar decrease in relative variance in physiological rates (@fig-btrait D-F; see Supplement [@fig-S2] for more detailed trait analysis), except for biochemical processes in ectotherms occupying freshwater habitats, which showed small, albeit significant increase in relative variance when acclimated (@fig-btrait F). Reduced relative variance was particularly prominent for resting metabolic rates and sprint speed although traits differed in whether they exhibited a reduction in variation in physiological rates at high temperatures (see supplemental @fig-S2). Each life-history stage exhibited the same pattern of relative variance change in each of the habitats (@fig-cvrlh). 
 
 ```{r, fig-btrait}
 #| label: fig-btrait
@@ -1313,15 +1358,19 @@ n_lncvr_lh <- lnCVRQ10_data %>% group_by(habitat, life.hist, type) %>% summarise
 x.pos = c(0.7, 1.30, 1.70, 2.30)
 size_annot <- 5.5
 
+## lnRR Q10
+
+
+
 m_r <- n_lnrr_lh %>% filter(habitat == "m")
 f_r <- n_lnrr_lh %>% filter(habitat == "f")
 t_r <- n_lnrr_lh %>% filter(habitat == "t")
 
-p1 <- orchard_plot(model1.4, mod = "type", at = list(c_accl_time = 0, habitat = "m"), group = "record_num", xlab = TeX("$lnRR_{Q_{10}}$"), condition.lab = "Life Stage", by = "life.hist",  g = FALSE, k = FALSE, angle = 45, branch.size = branch.size, trunk.size = trunk.size) + labs(title = "Marine") + add_theme() + ylim(-0.4, 1.5) + theme(legend.position = "none", axis.text.y = element_blank()) + annotate("text", x = x.pos, y = 1.3, label = TeX(paste0("\\it{k} = ", m_r$k, " (", m_r$spp, ")")), size = size_annot)
+p1 <- orchard_plot(model1.4, mod = "life.hist", at = list(c_accl_time = 0, habitat = "m"), group = "spp", xlab = TeX("$lnRR_{Q_{10}}$"), condition.lab = "Type", by = "type",  g = FALSE, k = FALSE, angle = 45, branch.size = branch.size, trunk.size = trunk.size) + labs(title = "Marine") + add_theme() + ylim(-0.4, 1.5) + theme(legend.position = "none", axis.text.y = element_blank()) + annotate("text", x = x.pos, y = 1.3, label = TeX(paste0("\\it{k} = ", m_r$k, " (", m_r$spp, ")")), size = size_annot)
 
-p2 <- orchard_plot(model1.4, mod = "type", at = list(c_accl_time = 0, habitat = "f"), group = "record_num", xlab = TeX("$lnRR_{Q_{10}}$"), condition.lab = "Life Stage", by = "life.hist",  g = FALSE, k = FALSE, branch.size = branch.size, trunk.size = trunk.size, angle = 45)+ labs(title = "Freshwater")  + add_theme() + theme(legend.position = "none", axis.text.y = element_blank()) + ylim(-0.4, 1.5) + annotate("text", x = x.pos, y = 1.3, label = TeX(paste0("\\it{k} = ", f_r$k, " (", f_r$spp, ")")), size = size_annot) + theme(legend.position = "right", legend.justification = c(1, 1)) + guides(shape = guide_legend(direction = "vertical"), size = guide_legend(direction = "vertical")) 
+p2 <- orchard_plot(model1.4, mod = "life.hist", at = list(c_accl_time = 0, habitat = "f"), group = "record_num", xlab = TeX("$lnRR_{Q_{10}}$"), condition.lab = "Type", by = "type",  g = FALSE, k = FALSE, branch.size = branch.size, trunk.size = trunk.size, angle = 45)+ labs(title = "Freshwater")  + add_theme() + theme(legend.position = "none", axis.text.y = element_blank()) + ylim(-0.4, 1.5) + annotate("text", x = x.pos, y = 1.3, label = TeX(paste0("\\it{k} = ", f_r$k, " (", f_r$spp, ")")), size = size_annot) + theme(legend.position = "right", legend.justification = c(1, 1)) + guides(shape = guide_legend(direction = "vertical"), size = guide_legend(direction = "vertical")) 
 
-p3 <- orchard_plot(model1.4, mod = "type", at = list(c_accl_time = 0, habitat = "t", legend.pos = "none"), group = "record_num", xlab = TeX("$lnRR_{Q_{10}}$"), condition.lab = "Life Stage", by = "life.hist",  g = FALSE, k = FALSE, branch.size = branch.size, trunk.size = trunk.size, angle = 45)+ labs(title = "Terrestrial") + add_theme()  +  ylim(-0.3, 1.8) + theme(legend.position = "none") + annotate("text", x = x.pos, y = 1.3, label = TeX(paste0("\\it{k} = ", t_r$k, " (", t_r$spp, ")")), size = size_annot)
+p3 <- orchard_plot(model1.4, mod = "life.hist", at = list(c_accl_time = 0, habitat = "t", legend.pos = "none"), group = "record_num", xlab = TeX("$lnRR_{Q_{10}}$"), condition.lab = "Type", by = "type",  g = FALSE, k = FALSE, branch.size = branch.size, trunk.size = trunk.size, angle = 45)+ labs(title = "Terrestrial") + add_theme()  +  ylim(-0.3, 1.8) + theme(legend.position = "none") + annotate("text", x = x.pos, y = 1.3, label = TeX(paste0("\\it{k} = ", t_r$k, " (", t_r$spp, ")")), size = size_annot) + scale_x_discrete(labels = c("A" = "Adult","J" = "Juvenile")) 
 
 # CVR
 
@@ -1329,11 +1378,11 @@ m_cv <- n_lncvr_lh %>% filter(habitat == "m")
 f_cv <- n_lncvr_lh %>% filter(habitat == "f")
 t_cv <- n_lncvr_lh %>% filter(habitat == "t")
 
-p1_cvr <- orchard_plot(model2.4, mod = "type", at = list(c_accl_time = 0, habitat = "m"), group = "record_num", xlab = TeX("$lnCVR_{Q_{10}}$"), condition.lab = "Life Stage", by = "life.hist",  g = FALSE, k = FALSE, angle = 45, branch.size = branch.size, trunk.size = trunk.size) + ylim(c(-2, 2.2)) + add_theme() + ylim(-1.5, 1.1)  + annotate("text", x = x.pos, y = 0.8, label = TeX(paste0("\\it{k} = ", m_cv$k, " (", m_cv$spp, ")")), size = size_annot) + theme(legend.position = "none", axis.text.y = element_blank())
+p1_cvr <- orchard_plot(model2.4, mod = "life.hist", at = list(c_accl_time = 0, habitat = "m"), group = "record_num", xlab = TeX("$lnCVR_{Q_{10}}$"), condition.lab = "Type", by = "type",  g = FALSE, k = FALSE, angle = 45, branch.size = branch.size, trunk.size = trunk.size) + ylim(c(-2, 2.2)) + add_theme() + ylim(-1.5, 1.1)  + annotate("text", x = x.pos, y = 0.8, label = TeX(paste0("\\it{k} = ", m_cv$k, " (", m_cv$spp, ")")), size = size_annot) + theme(legend.position = "none", axis.text.y = element_blank())
 
-p2_cvr <- orchard_plot(model2.4, mod = "type", at = list(c_accl_time = 0, habitat = "f"), group = "record_num", xlab = TeX("$lnCVR_{Q_{10}}$"), condition.lab = "Life Stage", by = "life.hist", angle = 45, g = FALSE, k = FALSE, branch.size = branch.size, trunk.size = trunk.size)  + add_theme() + ylim(-1.3, 1.1) + annotate("text", x = x.pos, y = 0.8, label = TeX(paste0("\\it{k} = ", f_cv$k, " (", f_cv$spp, ")")), size = size_annot) + theme(legend.position = "right", legend.justification = c(1, 1), axis.text.y = element_blank()) + guides(shape = guide_legend(direction = "vertical"), size = guide_legend(direction = "vertical")) 
+p2_cvr <- orchard_plot(model2.4, mod = "life.hist", at = list(c_accl_time = 0, habitat = "f"), group = "record_num", xlab = TeX("$lnCVR_{Q_{10}}$"), condition.lab = "Type", by = "type", angle = 45, g = FALSE, k = FALSE, branch.size = branch.size, trunk.size = trunk.size)  + add_theme() + ylim(-1.3, 1.1) + annotate("text", x = x.pos, y = 0.8, label = TeX(paste0("\\it{k} = ", f_cv$k, " (", f_cv$spp, ")")), size = size_annot) + theme(legend.position = "right", legend.justification = c(1, 1), axis.text.y = element_blank()) + guides(shape = guide_legend(direction = "vertical"), size = guide_legend(direction = "vertical")) 
 
-p3_cvr <- orchard_plot(model2.4, mod = "type", at = list(c_accl_time = 0, habitat = "t"), angle = 45, group = "record_num", xlab = TeX("$lnCVR_{Q_{10}}$"), condition.lab = "Life Stage", by = "life.hist",  g = FALSE, k = FALSE, branch.size = branch.size, trunk.size = trunk.size)+ add_theme()  + ylim(-1.55, 1.1) + annotate("text", x = x.pos, y = 0.6, label = TeX(paste0("\\it{k} = ", t_cv$k, " (", t_cv$spp, ")")), size = size_annot) +  theme(legend.position = "none")
+p3_cvr <- orchard_plot(model2.4, mod = "life.hist", at = list(c_accl_time = 0, habitat = "t"), angle = 45, group = "record_num", xlab = TeX("$lnCVR_{Q_{10}}$"), condition.lab = "Type", by = "type",  g = FALSE, k = FALSE, branch.size = branch.size, trunk.size = trunk.size)+ add_theme()  + ylim(-1.55, 1.1) + annotate("text", x = x.pos, y = 0.6, label = TeX(paste0("\\it{k} = ", t_cv$k, " (", t_cv$spp, ")")), size = size_annot) +  theme(legend.position = "none") + scale_x_discrete(labels = c("A" = "Adult","J" = "Juvenile")) 
 
 fig4 <-(p3 | p1 | p2) / (p3_cvr | p1_cvr | p2_cvr) + plot_annotation(tag_levels = "A") 
 ggsave(fig4, filename = "./output/figures/fig4_lh_r1.pdf", width = 22, height = 12, device = "pdf")

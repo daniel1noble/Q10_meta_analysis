@@ -1142,10 +1142,10 @@ if(rerun){
   # Processing Bayesian Posteriors
 ###########################################################
       # Create new data for predictions
-       lh_b_data <- data.frame(     type = c("acclim", "acute"),
+       lh_b_data <- data.frame(     
                               max_temp_c = 0,
                              c_accl_time = 0,
-                                       V = 0,
+                                    type = c("acclim", "acute"),
                                  habitat = rep(c("t", "m", "f"), each = 4),
                                life.hist = rep(c("j", "a"), each = 2))     
       
@@ -1166,7 +1166,7 @@ if(rerun){
             
         # Contrast statistics
             contrast_lncvr_lh_stats <- data.frame( habitat = rep(c("t", "m", "f"), each = 2),
-                                                     trait = rep(c("tissue/organism", "biochemical"), each = 1),
+                                                     trait = rep(c("", ""), each = 1),
                                                     diff = sapply(data.frame(contrast_lncvr_lh_post), mean),
                                                      l95 = sapply(data.frame(contrast_lncvr_lh_post), function(x) quantile(x, 0.025)),
                                                      u95 = sapply(data.frame(contrast_lncvr_lh_post), function(x) quantile(x, 0.975)),

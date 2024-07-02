@@ -691,7 +691,7 @@ if(rerun){
   contrast_lnrr_lh_post <-  pred[c(1,3,5,7,9,11),] - pred[c(2,4,6,8,10,12),] # Acclimation - acute.
             
         # Contrast statistics
-            contrast_type_lnrr_lh_stats <- data.frame( habitat = rep(c("m", "f", "t"), each = 2),
+            contrast_stage_lnrr_lh_stats <- data.frame( habitat = rep(c("m", "f", "t"), each = 2),
                                                      stage = rep(c("j", "a"), each = 1),
                                                     diff = apply(data.frame(contrast_lnrr_lh_post), 1, mean),
                                                      l95 = apply(data.frame(contrast_lnrr_lh_post), 1, function(x) quantile(x, 0.025)),
@@ -1352,9 +1352,9 @@ size_annot <- 5.5
 ## lnRR Q10
 ###############
 
-t_trait_b <- contrast_type_lnrr_lh_stats %>% filter(habitat == "t") %>% purrr::modify_if(~is.numeric(.), ~round(., 2)) %>% arrange(stage)
-m_trait_b <- contrast_type_lnrr_lh_stats %>% filter(habitat == "m") %>% purrr::modify_if(~is.numeric(.), ~round(., 2)) %>% arrange(stage)
-f_trait_b <- contrast_type_lnrr_lh_stats %>% filter(habitat == "f") %>% purrr::modify_if(~is.numeric(.), ~round(., 2)) %>% arrange(stage)
+t_trait_b <- contrast_stage_lnrr_lh_stats %>% filter(habitat == "t") %>% purrr::modify_if(~is.numeric(.), ~round(., 2)) %>% arrange(stage)
+m_trait_b <- contrast_stage_lnrr_lh_stats %>% filter(habitat == "m") %>% purrr::modify_if(~is.numeric(.), ~round(., 2)) %>% arrange(stage)
+f_trait_b <- contrast_stage_lnrr_lh_stats %>% filter(habitat == "f") %>% purrr::modify_if(~is.numeric(.), ~round(., 2)) %>% arrange(stage)
 
 yloc = c(1.5, 2.5)
 

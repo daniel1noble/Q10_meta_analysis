@@ -685,8 +685,9 @@ if(rerun){
   newdata <- cbind(newdata, est = sum_pred, L = sum_predL95, u = sum_predU95, p = p)  
 
 # Now, lets calculate the contrasts between acute and acclim for a and j within each habitat. We need to use pred for that because it's the entire posterior distribution
-  
+  ############
     # Contrast between Acclimation and Acute WITHIN each life-history stage. Double checked a bunch of calculations to make sure the right contrasts were being done. 
+  ############
   contrast_lnrr_lh_post <-  pred[c(1,3,5,7,9,11),] - pred[c(2,4,6,8,10,12),] # Acclimation - acute.
             
         # Contrast statistics
@@ -696,53 +697,22 @@ if(rerun){
                                                      l95 = apply(data.frame(contrast_lnrr_lh_post), 1, function(x) quantile(x, 0.025)),
                                                      u95 = apply(data.frame(contrast_lnrr_lh_post), 1, function(x) quantile(x, 0.975)),
                                                        p = apply(data.frame(contrast_lnrr_lh_post), 1, function(x) p_value(pmcmc(x))))
-    
+    ############
     # Contrast between Acclimation and Acute ACROSS each life-history stage. Double checked a bunch of comparisons.
+    ############
           contrast_lnrr_lh_post_type <-  pred[c(4,3,8,7,12,11),] - pred[c(2,1,6,5,10,9),] # Adult - Jeu.
             
         # Contrast statistics
             contrast_type_lnrr_lh_stats <- data.frame( habitat = rep(c("m", "f", "t"), each = 2),
-                                                     tyoe = rep(c("acute", "acclim"), each = 1),
+                                                     type = rep(c("acute", "acclim"), each = 1),
                                                     diff = apply(data.frame(contrast_lnrr_lh_post_type), 1, mean),
                                                      l95 = apply(data.frame(contrast_lnrr_lh_post_type), 1, function(x) quantile(x, 0.025)),
                                                      u95 = apply(data.frame(contrast_lnrr_lh_post_type), 1, function(x) quantile(x, 0.975)),
                                                        p = apply(data.frame(contrast_lnrr_lh_post_type), 1, function(x) p_value(pmcmc(x))))
-  ######## OLD CODE BELOW>
-        m_adult <- pred[2,] - pred[3,] # Posterior contrast between acclimation and acute effects for adult, marine species
-        m_jeuv <-  pred[4,] - pred[1,] # Posterior contrast between acclimation and acute effects for j, marine species
     
-    # Freshwater
-        f_ad <- 4
-        f_adult <- pred[2+f_ad,] - pred[3+f_ad,] # Posterior contrast between acclimation and acute effects for adult, freshwater species
-        f_jeuv <-  pred[4+f_ad,] - pred[1+f_ad,] # Posterior contrast between acclimation and acute effects for j, freshwater species
-    
-    # Terrestrial
-        t_ad <- 8
-        t_adult <- pred[2+t_ad,] - pred[3+t_ad,] # Posterior contrast between acclimation and acute effects for adult, terrestrial species
-        t_jeuv <-  pred[4+t_ad,] - pred[1+t_ad,] # Posterior contrast between acclimation and acute effects for j, terrestrial species
-
-# Now, lets calculate the contrasts between acute a and j as well as acclim a and j within each habitat. We need to use pred for that because it's the entire posterior distribution
-    # Marine 
-         m_acute_lh <-  pred[1,] - pred[3,] # Contrasts acute a and acute j values for marine species
-        m_acclim_lh <-  pred[4,] - pred[2,] # Contrasts acclim a and acute j values for marine species
-    
-    # Freshwater
-            f_ad <- 4
-         f_acute_lh <- pred[1+f_ad,] - pred[3+f_ad,] # Contrasts acute a and acute j values for freshwater species
-        f_acclim_lh <-  pred[4+f_ad,] - pred[2+f_ad,] # Contrasts acclim a and acute j values for freshwater species
-    
-    # Terrestrial
-            t_ad <- 8
-         t_acute_lh <- pred[1+t_ad,] - pred[3+t_ad,] # Contrasts acute a and acute j values for terrestrial species
-        t_acclim_lh <-  pred[4+t_ad,] - pred[2+t_ad,]  # Contrasts acclim a and acute j values for terrestrial species
-
   # Acute differences between a and j across all habitats
-     acute_all_lh <- c(m_acute_lh, f_acute_lh, t_acute_lh); mean(acute_all_lh); quantile(acute_all_lh, c(0.025, 0.975)); pmcmc(acute_all_lh)
-    acclim_all_lh <- c(m_acclim_lh, f_acclim_lh, t_acclim_lh)
-
-# Now lets do a quick. Note that I fixed up some design matrix issues which made acclim the ref level, which was wrong. These two lines of code should roughly match
-#  mod_results(model1.4, mod = "type", at = list(c_accl_time = 0, habitat = "t"), group = "record_num",  by = "life.hist", data = lnRRQ10_data)
-#  newdata %>% arrange(habitat, life.hist, type) %>% filter(habitat == "t")
+     acute_all_lh <- c(contrast_lnrr_lh_post_type[1,], contrast_lnrr_lh_post_type[3,], contrast_lnrr_lh_post_type[5,]) 
+    acclim_all_lh <- c(contrast_lnrr_lh_post_type[2,], contrast_lnrr_lh_post_type[4,], contrast_lnrr_lh_post_type[6,])
 
 ####################################################
 # Sensitivity analysis -- Do Acute Q10's (hot / cold) differ?
@@ -877,7 +847,7 @@ Overall, $lnRR_{Q_{10_{acclimation}}}$ was `r abs(mean(avg_change))`% lower than
 
 Across habitats the extent to which whole-organism versus biochemical processes acclimated varied (@fig-btrait A-C; and see Supplement [@fig-S2] for more detailed trait analysis). Biochemical processes were more effective at acclimating compared to whole-organism traits for ectotherms occupying marine habitats (@fig-btrait B), whereas both whole-organism and biochemical traits acclimated in freshwater ectotherms (@fig-btrait C). Unsurprisingly, neither broad trait category showed evidence of acclimation in terrestrial ectotherms (@fig-btrait A). 
 
-Acclimation capacity also did not vary by life-history stage and there were no differences between $lnRR_{Q_{10_{acclimation}}}$ and $lnRR_{Q_{10_{acute}}}$ between adult and juveniles (@fig-cvrlh A-C) (Adult-Juvenile (Acute): `r mean(acute_all_lh)`, 95% CI: `r quantile(acute_all_lh, 0.025)[1]` to `r quantile(acute_all_lh, 0.975)[1]`, $p_{MCMC}$ = `r pmcmc(acute_all_lh)`; Adult-Juvenile (Acclimation): `r mean(acclim_all_lh)`, 95% CI: `r quantile(acclim_all_lh, 0.025)[1]` to `r quantile(acclim_all_lh, 0.975)[1]`, $p_{MCMC}$ = `r pmcmc(acclim_all_lh)`).
+Acclimation capacity did not vary consistently by life-history stage with no differences between $lnRR_{Q_{10_{acclimation}}}$ and $lnRR_{Q_{10_{acute}}}$ between adult and juveniles, except for marine habitats where adults appeared to be able to acclimate to a greater extent, although the effect size was small and in the same direction and magnitude of juveniles (@fig-cvrlh A-C). When comparing between acute and acclimation responses between adults and juveniles there were also no differences across habitats (Adult-Juvenile (Acute): `r mean(acute_all_lh)`, 95% CI: `r quantile(acute_all_lh, 0.025)[1]` to `r quantile(acute_all_lh, 0.975)[1]`, $p_{MCMC}$ = `r pmcmc(acute_all_lh)`; Adult-Juvenile (Acclimation): `r mean(acclim_all_lh)`, 95% CI: `r quantile(acclim_all_lh, 0.025)[1]` to `r quantile(acclim_all_lh, 0.975)[1]`, $p_{MCMC}$ = `r pmcmc(acclim_all_lh)`).
 
 ```{r, lncvrq10}
 #| label: lncvrq10

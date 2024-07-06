@@ -2753,6 +2753,17 @@ img_figcvrtrait
  # Model mean variance relationships to estimate the relationship. Two additonal models to address reviewer comments about what exactly is changing in the effect size
 rerun = FALSE
 if(rerun) { 
+  
+      r_11_m <- bf(log(r1.1_sd) ~ log(r1.1)*habitat + (1|record_num) + (1|spp) + (1|trait)) + gaussian()
+      r_12_m <- bf(log(r1.2_sd) ~ log(r1.2)*habitat + (1|record_num) + (1|spp) + (1|trait)) + gaussian()
+      r_21_m <- bf(log(r2.1_sd) ~ log(r2.1)*habitat + (1|record_num) + (1|spp) + (1|trait)) + gaussian()
+      r_22_m <- bf(log(r2.2_sd) ~ log(r2.2)*habitat + (1|record_num) + (1|spp) + (1|trait)) + gaussian()
+  
+      mv_model_all <- brm(r_11_m + r_12_m + r_21_m + r_22_m + set_rescor(TRUE), 
+                          chains = 4, cores = 4, iter = 4000, warmup = 1000, thin = 1, 
+                          control = list(adapt_delta = 0.98), data = lnRRQ10_data)
+       saveRDS(mv_model_all, file = "./output/models/mv_model_all")
+       
       model_mv1  <- brm(log(r1.1_sd) ~ log(r1.1)*habitat + (1|record_num) + (1|spp) + (1|trait), chains = 4, cores = 4, iter = 4000, warmup = 1000, thin = 1, control = list(adapt_delta = 0.98), data = lnRRQ10_data)
       saveRDS(model_mv1, file = "./output/models/model_mv1")
       

@@ -163,19 +163,14 @@ Seebacher^3^ $\dagger$, & Shinichi Nakagawa^2^ $\dagger$
 ## Affiliations:
 
 ^1^ Division of Ecology and Evolution, Research School of Biology, The
-Australian National University, Canberra, ACT 2600, Australia
-\
+Australian National University, Canberra, ACT 2600, Australia\
 ^2^ Ecology and Evolution Research Centre, School of Biological, Earth
 and Environmental Sciences, University of New South Wales, Sydney, NSW,
-Australia
-\
+Australia\
 ^3^ School of Life and Environmental Sciences, University of Sydney,
-Sydney, NSW 2006, Australia
-\
-^4^ Department of Biology, Lancaster University, Liverpool, UK
-\
-$\dagger$ contributed equally
-\
+Sydney, NSW 2006, Australia\
+^4^ Department of Biology, Lancaster University, Liverpool, UK\
+$\dagger$ contributed equally\
 $\ddagger$ corresponding author, daniel.noble\@anu.edu.au
 
 **Running head**: Reduced physiological rate variation in ectotherms
@@ -270,13 +265,12 @@ Changes in variability of traits governing energy demand are expected to
 have important consequences on the flow of energy within and between
 populations, communities, and ecosystems [@hendry2016key;
 @seebacher2023can; @barneche2021warming; @Sanderson2023; @Bolnick2011].
-More variable populations, genetically and/or phenotypically, are
-predicted to be associated with broader niches, reduced intraspecific
-competition, increased growth rate, decreased vulnerability to
+More variable populations, genetically and/or phenotypically, are also 
+predicted to be associated with broader niches, have increased growth rate, decreased vulnerability to
 environmental change and lower extinction risk [@forsman2015rethinking;
 @forsman2014effects; @Bolnick2011; @hendry2016key; @hart2016variation].
 In addition, if phenotypic and genetic variation are correlated and
-traits are linked to fitness, changes in variation can limit responses
+traits are linked to fitness, changes in variation may limit responses
 to selection impacting a populations capacity to evolve
 [@Pelletier2012]. Therefore, maintaining intrapopulation variability in
 physiological rates in a warmer world may be important for population
@@ -347,9 +341,9 @@ meta-analytic modelling approaches.
 #| label: fig-concept
 #| fig-width: 8
 #| fig-height: 12
-#| fig-cap: "Calculations of acute and acclimation effect sizes. (A) Two idealised thermal performance curves for animals held at 'cold' ('blue') temperatures and warm ('red') temperatures. Shaded blue and red areas are the thermal optima of the performance curves. Physiological rates are measured for a sample of ectotherms at two different temperatures along the thermal performance curves ($T_{1}$ = 20$^\\circ$C and $T_{2} = 30$^\\circ$C) for both curves. At each temperature a mean physiological rate (R) (points) and its standard deviation (SD) (error bars above and below mean) are estimated. R1.1 and R1.2 are the rates and associated SD (subscripted) for the cold acclimated animals at temperature 1 and 2, respectively. R2.1 and R2.2 are the rates and associated SD (subscripted) for the warm acclimated animals at temperature 1 and 2, respectively. An example of how acute and acclimation $lnCVR_{Q_{10}}$ are calculated from the treatments within the study is provided on the right-hand side of the figure with reference to each of the four possible groups. Note that, two acute effect sizes can be calculated, one for the cold acclimated animals and one for the warm acclimated animals. (B) Species are expected, *a priori*, to vary in their thermal performance curves (thin lines) around an average (thick black line). We restricted our data to areas of each species' performance curve that fell within the natural thermal range of the species (thick lines on each species-level curve). However, given it was not possible to measure the full performance curve for each species some test temperatures within studies may have converged on or moved past the thermal optima. In such cases, we expected our $Q_{10}$ effect sizes to be smaller as indicated by comparing the black dashed lines to grey dashed lines." 
+#| fig-cap: "Calculations of acute and acclimation effect sizes. (A) Two idealised thermal performance curves for animals held at 'cold' ('blue') temperatures and warm ('red') temperatures. Shaded blue and red areas are the thermal optima of the performance curves. Physiological rates are measured for a sample of ectotherms at two different temperatures along the thermal performance curves ($T_{1}$ = 20°C and $T_{2}$ = 30°C) for both curves. At each temperature a mean physiological rate (R) (points) and its standard deviation (SD) (error bars above and below mean) are estimated. R1.1 and R1.2 are the rates and associated SD (subscripted) for the cold acclimated animals at temperature 1 and 2, respectively. R2.1 and R2.2 are the rates and associated SD (subscripted) for the warm acclimated animals at temperature 1 and 2, respectively. An example of how acute and acclimation $lnCVR_{Q_{10}}$ are calculated from the treatments within the study is provided on the right-hand side of the figure with reference to each of the four possible groups. Note that, two acute effect sizes can be calculated, one for the cold acclimated animals and one for the warm acclimated animals. (B) Species are expected, *a priori*, to vary in their thermal performance curves (thin lines) around an average (thick black line). We restricted our data to areas of each species' performance curve that fell within the natural thermal range of the species (thick lines on each species-level curve). However, given it was not possible to measure the full performance curve for each species some test temperatures within studies may have converged on or moved past the thermal optima. In such cases, we expected our $Q_{10}$ effect sizes to be smaller as indicated by comparing the black dashed lines to grey dashed lines." 
 
-fig_concept <- magick::image_read("output/figures/fig1_concept_full.png")
+fig_concept <- magick::image_read("output/figures/fig1.png")
 plot(fig_concept)
 ```
 
@@ -370,7 +364,7 @@ temperature corrected equivalent to the log response ratio (lnRR)
 are measured at different temperatures. This allows comparisons of the
 means from two temperature treatments directly regardless of the
 absolute measurement temperatures. The sampling variance for @eq-lnq10
-can be computed as follows (as described in @Noble2022-ty):
+can be computed as follows [as described in @Noble2022-ty]:
 
 $$
   s_{lnRR_{Q_{10}}} = \left( \frac{SD_{2}^2}{R^2_{2}N_{2}} + \frac{SD_{1}^2}{R^2_{1}N_{1}} \right){ \left(\ \frac{10^{\circ}C}{T_{2}-T_{1}} \right) }^2
@@ -378,7 +372,7 @@ $$ {#eq-Vlnq10}
 
 Here, $SD_{1}^2$ and $SD_{2}^2$ are the standard deviations, and $N_{1}$
 and $N_{2}$ are the sample sizes, of the groups measured at $T_{1}$ and
-$T_{2}$, respectively (@fig-concept A).
+$T_{2}$, respectively ([@fig-concept]A).
 
 #### *Comparing variance in physiological rates*
 
@@ -419,7 +413,7 @@ relative to the mean.
 
 $R_{1}$, $R_{2}$, $SD_{1}^2$ and $SD_{2}^2$ can all be taken from
 samples of organisms measured acutely at two temperatures or after
-having been acclimated these same temperatures (@fig-concept A). For
+having been acclimated these same temperatures ([@fig-concept]A). For
 studies that measure acute and acclimated responses we used the mean,
 standard deviation, and sample size to derive both acute and acclimation
 $lnRR_{Q_{10}}$, $lnVR_{Q_{10}}$ and $lnCVR_{Q_{10}}$ estimates. For
@@ -433,9 +427,9 @@ at the higher of the two temperatures (numerator) when standardized to
 10°C. Importantly, $lnRR_{Q_{10}}$, $lnCVR_{Q_{10}}$ and
 $lnVR_{Q_{10}}$, as with $Q_{10}$ more generally, all assume that the
 effect of temperature on physiological rates (or changes in relative
-variance) is log-linear (see *Supplementary Materials* for further
+variance) is log-linear (see [@fig-concept]B & *Supplementary Materials* for further
 discussion). We test and control for any violations of these assumptions
-in our analysis (see below) ([@fig-concept]B).
+in our analysis (see below).
 
 ### *Moderator Variables*
 
@@ -1314,7 +1308,7 @@ $N_{effects}$ =
   #ggsave(filename = "fig2_unedited_18June.pdf", path = "./output/figures/", phylo, device = "pdf", width = 10, height = 9, units = "in")
 
 # Load and plot Figure 1. Note that this figure was derived using 3 separate code chunks described below. Figures were exported, imported into Adobe Illustrator for minor formatting changes and grid organisation. 
-  fig2 <- image_read("./output/figures/Fig2_r1.png")
+  fig2 <- image_read("./output/figures/Fig2.png")
   plot(fig2)
 
 ```
@@ -1355,7 +1349,7 @@ from Model 2 (see “Meta-Analysis” above).
 
 Across habitats the extent to which whole-organism versus biochemical
 processes acclimated varied ("Model 3"; [@fig-btrait]A-C; and see
-Supplement, @fig-S2) for more detailed trait analysis). Biochemical
+*Supplementary Materials*, @fig-lnrrtrait for more detailed trait analysis). Biochemical
 processes were more effective at acclimating compared to whole-organism
 traits for ectotherms occupying marine habitats ([@fig-btrait]B),
 whereas both whole-organism and biochemical traits acclimated in
@@ -1697,7 +1691,7 @@ if(rerun){
 
 ```{r, fig-2}
 #| label: fig-2
-#| fig-cap: "A Mean acute and acclimation $lnRR_{Q_{10}}$ across ectotherms in marine, freshwater, and terrestrial habitats. B Mean acute and acclimation $lnCVR_{Q_{10}}$ across ectotherms in marine, freshwater and terrestrial habitats. For both plots, k = total number of effect size estimates while the numbers in brackets indicate the number of species. Sample sizes are the same for panel A and B. In panels A and B, thick bars are 95% confidence intervals (CI) and thin bars 95% prediction intervals (PI). $\\Beta$ values are the contrasts between acute and acclimation means within each habitat. $\\mu$ values are the overall meta-analytic means averaged across acute and acclimation types within each habitat type. In both cases, their 95% CI's are indicated within square brackets. $p_{MCMC}$ values are the posterior probability of the contrast or overall meta-analytic mean being different from zero. For ease of visualisation, all the raw data plotted for both acute and acclimation type effect sizes are presented as circles."
+#| fig-cap: "A) Mean acute and acclimation $lnRR_{Q_{10}}$ across ectotherms in marine, freshwater, and terrestrial habitats. B) Mean acute and acclimation $lnCVR_{Q_{10}}$ across ectotherms in marine, freshwater and terrestrial habitats. For both plots, k = total number of effect size estimates while the numbers in brackets indicate the number of species. Sample sizes are the same for panel A) and B). In panels A) and B), thick bars are 95% confidence intervals (CI) and thin bars 95% prediction intervals (PI). $\\Beta$ values are the contrasts between acute and acclimation means within each habitat. $\\mu$ values are the overall meta-analytic means averaged across acute and acclimation types within each habitat type. In both cases, their 95% CI's are indicated within square brackets. $p_{MCMC}$ values are the posterior probability of the contrast or overall meta-analytic mean being different from zero. For ease of visualisation, all the raw data plotted for both acute and acclimation type effect sizes are presented as circles."
 #| warning: false
 #| echo: false
 
@@ -1771,9 +1765,9 @@ if(rerun){
                                title = element_text(size = 24), legend.position = "top") + guides(shape = "none")
   
   fig3 <- (p3a + p3b) + plot_annotation(tag_levels = "A")
-  ggsave(fig3, filename = "./output/figures/fig3_r1.png", width = 21.88, height = 9)
+  ggsave(fig3, filename = "./output/figures/fig3.png", width = 21.88, height = 9)
   
-  fig3 <- magick::image_read("./output/figures/fig3_r1.png")
+  fig3 <- magick::image_read("./output/figures/fig3.png")
   fig3
 ```
 
@@ -1809,14 +1803,14 @@ to `r quantile(f_cvr_mean_ef, 0.975)[1]`, $p_{MCMC}$ =
 
 Across habitats whole-organism versus biochemical processes showed a
 similar decrease in relative variance in physiological rates
-([@fig-btrait]D-F; see Supplement @fig-S2) for more detailed trait
+([@fig-btrait]D-F; see *Supplementary Materials*, @fig-cvrtrait) for more detailed trait
 analysis), except for biochemical processes in ectotherms occupying
 freshwater habitats, which showed small, albeit significant increase in
 relative variance when acclimated ([@fig-btrait]F). Reduced relative
 variance was particularly prominent for resting metabolic rates and
 sprint speed although traits differed in whether they exhibited a
 reduction in variation in physiological rates at high temperatures (see
-*Supplemental Material*, @fig-S2) ("Model 3"). Each life-history stage
+*Supplemental Material*, @fig-cvrtrait) ("Model 3"). Each life-history stage
 exhibited the same pattern of relative variance change in each of the
 habitats ("Model 4"; @fig-cvrlh).
 
@@ -1886,9 +1880,9 @@ p3_cvr <- orchard_plot(model2.3_t_broad, mod = "trait_broad", at = list(c_accl_t
 # Full fig
 ############
 figbtrait <-(p3 | p1 | p2) / (p3_cvr | p1_cvr | p2_cvr) + plot_annotation(tag_levels = "A") 
-ggsave(figbtrait, filename = "./output/figures/fig4_btrait_r1.png", width = 28, height = 14, device = "png")
+ggsave(figbtrait, filename = "./output/figures/fig4.png", width = 28, height = 14, device = "png")
 
-figbtrait <- magick::image_read("./output/figures/fig4_btrait_r1.png")
+figbtrait <- magick::image_read("./output/figures/fig4.png")
 figbtrait
 ```
 
@@ -1953,9 +1947,9 @@ p2_cvr <- orchard_plot(model2.4, mod = "life.hist", at = list(c_accl_time = 0, h
 p3_cvr <- orchard_plot(model2.4, mod = "life.hist", at = list(c_accl_time = 0, habitat = "t"), angle = 45, group = "record_num", xlab = TeX("$lnCVR_{Q_{10}}$"), condition.lab = "Type", by = "type",  g = FALSE, k = FALSE, branch.size = branch.size, trunk.size = trunk.size)+ add_theme()  + ylim(-1.55, 1.1) + annotate("text", x = x.pos, y = 0.6, label = TeX(paste0("\\it{k} = ", t_cv$k, " (", t_cv$spp, ")")), size = size_annot) +  theme(legend.position = "none") + annotate("text", x = yloc, y = -1.55, label = TeX(paste0("$\\beta$ = ", t_trait_cvr$diff, " [", t_trait_cvr$l95, " to ", t_trait_cvr$u95, "] ", "$\\,p_{MCMC}$ = ", t_trait_cvr$p)), hjust = 0, size = 8) + scale_x_discrete(labels = c("A" = "Adult","J" = "Juvenile")) 
 
 fig4 <-(p3 | p1 | p2) / (p3_cvr | p1_cvr | p2_cvr) + plot_annotation(tag_levels = "A") 
-ggsave(fig4, filename = "./output/figures/fig4_lh_r1.pdf", width = 28, height = 14, device = "pdf")
+ggsave(fig4, filename = "./output/figures/fig5.pdf", width = 28, height = 14, device = "pdf")
 
-fig4 <- magick::image_read("./output/figures/fig4_lh_r1.pdf")
+fig4 <- magick::image_read("./output/figures/fig5.pdf")
 fig4
 ```
 
@@ -2453,9 +2447,9 @@ p_t_cv <-  bubble_plot(model4.9_t, mod = "cv_c", group = "spp", ylab = TeX("$lnC
   p_cv <- (p_t_rr + p_m_rr + p_f_rr) / (p_t_cv + p_m_cv + p_f_cv) + 
             plot_annotation(tag_levels = "A") & theme(plot.tag = element_text(size = 36))
 
-  ggsave(p_cv, width = 18, height = 10, filename = "./output/figures/fig_p_cv_r1.png")
+  ggsave(p_cv, width = 18, height = 10, filename = "./output/figures/fig6.png")
 
-  p_cv <- image_read("./output/figures/fig_p_cv_r1.png")
+  p_cv <- image_read("./output/figures/fig6.png")
   p_cv 
 ```
 
@@ -2848,9 +2842,9 @@ map2_future <- ggplot() +
 
 p <- (((zoom_plots[[1]] | zoom_plots[[2]]) / map1_current) + map2_future) + plot_layout(heights  = c(1, 2, 2)) + plot_annotation(tag_levels = "A", tag_suffix = ")") & theme(plot.tag = element_text(size = 20, face = "bold"), plot.margin = unit(c(0, 0, 0, 0), "cm"))
 
-ggsave(p, filename = "./output/figures/fig-preds.png", width = 7.8, height = 10.1)
+ggsave(p, filename = "./output/figures/fig7.png", width = 7.8, height = 10.1)
 
-image_read("./output/figures/fig-preds.png")
+image_read("./output/figures/fig7.png")
 ```
 
 ## **Discussion**
@@ -2883,18 +2877,23 @@ supports that of @Seebacher2015-wi, @Gunderson2015-hz and
 @morley2019physiological that all show a general inability of
 terrestrial ectotherms to physiologically acclimate. The change in
 acclimation $Q_{10}$ we found was similar to @Seebacher2015-wi for
-freshwater organisms (\~17%), but higher in marine ectotherms (decrease
-of 16% versus \~10% in @Seebacher2015-wi), and opposite in terrestrial
-ectotherms (increase of \~6% compared to an \~8% decrease in
-@Seebacher2015-wi), possibly due to the use of new $Q_{10}$ based effect
-sizes that allow us to control for sampling variance. Greater capacity
-for acclimation in aquatic organisms may be the result of fewer
-opportunities for behavioural thermoregulation in aquatic environments
-making physiological remodeling important for maintaining homeostasis
-[@Gunderson2015-hz; @morley2019physiological]. While marine and
-freshwater ectotherms were capable of partial acclimation it is still
-important to recognise that, on average, the effect size was small
-(amounting to $Q_{10}$ dropping from \~1.8 to 1.6).
+freshwater organisms (~17%), but higher in marine ectotherms [decrease
+of 16% versus ~10% in @Seebacher2015-wi], and opposite in terrestrial
+ectotherms [increase of ~6% compared to an ~8% decrease in
+@Seebacher2015-wi], possibly due to the use of newly derived
+$Q_{10}$ effect sizes that allow us to control for sampling variance.
+Greater capacity for acclimation in aquatic organisms may be the result
+of fewer opportunities for behavioural thermoregulation in aquatic
+environments making physiological remodeling important for maintaining
+homeostasis [@Gunderson2015-hz; @morley2019physiological].
+Additionally, aquatic and terrestrial environments can vary in
+nutritional resources [e.g., fatty acid content of prey;
+@twining2019aquatic] that can impact physiological rates and their
+variability by affecting performance curves and acclimation responses
+[@hardison2024diet]. While marine and freshwater ectotherms were
+capable of partial acclimation it is still important to recognise that,
+on average, the effect size was small (amounting to $Q_{10}$ dropping
+from ~1.8 to 1.6).
 
 Changes in relative variance in physiological rates across habitats was
 nearly equivalent (marine) or larger (terrestrial) compared to their
@@ -2929,7 +2928,7 @@ physiological rates at higher temperatures due to the expression of
 alternative enzyme forms or intracellular stabalising compounds/solutes
 that impact enzyme function [@fields2001protein].
 
-Our results further highlight the potential vulnerability of terrestrial
+Our results further highlight the vulnerability of terrestrial
 ectotherms to climate change, while calling into question if acclimation
 in marine systems will be able to counteract the potentially negative
 effects of reductions in relative variance. Assuming changes in relative
@@ -3111,11 +3110,14 @@ Authors declare that they have no competing interests.
 
 ## References
 
-<br> 
-<div id ="refs"></div>
 <br>
 
-## Supplemental Results and Figures
+::: {#refs}
+:::
+
+<br>
+
+## Supplemental Materials
 
 #### *Literature Search Protocol and PRISMA flow diagram*
 
@@ -3178,7 +3180,7 @@ temperatures within normal thermal ranges for the species.
 #| fig-cap: "PRISMA flow diagram of the literature search and screening process."
 #| echo: false
 
-prisma <- magick::image_read("./output/figures/PRISMA.png")
+prisma <- magick::image_read("./output/figures/figS1.png")
 prisma
 ```
 
@@ -3244,9 +3246,9 @@ theme_classic() + theme(axis.title  = element_text(size = 30),
                         legend.text = element_text(size = 24), 
                         legend.title = element_text(size = 26))
 
-ggsave(lnrrq10_temp, file = "./output/figures/lnrrq10_temp.png", height = 6, width = 8)
+ggsave(lnrrq10_temp, file = "./output/figures/figS2.png", height = 6, width = 8)
 
-lnrrq10_temp <- magick::image_read("./output/figures/lnrrq10_temp.png")
+lnrrq10_temp <- magick::image_read("./output/figures/figS2.png")
 lnrrq10_temp
 
 ```
@@ -3264,9 +3266,9 @@ lnrrq10_temp
                         legend.text = element_text(size = 24), 
                         legend.title = element_text(size = 26))
 
-  ggsave(accl_time, file = "./output/figures/accl_time.png", height = 6, width = 8.5)
+  ggsave(accl_time, file = "./output/figures/figS3.png", height = 6, width = 8.5)
 
-accl_time <- magick::image_read("./output/figures/accl_time.png")
+accl_time <- magick::image_read("./output/figures/figS3.png")
 accl_time
 ```
 
@@ -3280,13 +3282,16 @@ accl_time
 #| echo: false
 
 col_acute <- c("#3F5FAC", "#EF3D25")
-orchard_plot(model1.s1_int, mod = "name", by = "habitat", xlab = TeX("$lnRR_{Q_{10}}$"), group = "spp", angle = 45, trunk.size = 1.8, branch.size = 2.8, alpha = 0.4, condition.lab = "Habitat") + scale_x_discrete(labels = c("LnRR_Q10_acute_t2" = "Warm - Acute", "LnRR_Q10_acute_t1" = "Cool - Acute")) + scale_fill_manual(values = col_acute) + scale_colour_manual(values = col_acute) + ylim (-0.5, 2.5) +  theme_classic() + theme(axis.title  = element_text(size = 24),
+Sacute <- orchard_plot(model1.s1_int, mod = "name", by = "habitat", xlab = TeX("$lnRR_{Q_{10}}$"), group = "spp", angle = 45, trunk.size = 1.8, branch.size = 2.8, alpha = 0.4, condition.lab = "Habitat") + scale_x_discrete(labels = c("LnRR_Q10_acute_t2" = "Warm - Acute", "LnRR_Q10_acute_t1" = "Cool - Acute")) + scale_fill_manual(values = col_acute) + scale_colour_manual(values = col_acute) + ylim (-0.5, 2.5) +  theme_classic() + theme(axis.title  = element_text(size = 24),
                                        axis.text = element_text(size = 24),
                                        axis.text.y = element_text(angle = 45, size = 24),
                                        legend.title = element_text(size = 30),
                                legend.text = element_text(size = 24),
                                title = element_text(size = 24), legend.position = "top") 
                                #annotate("text", label= paste0("k = ", k_lnrr_acute$k, " (", k_lnrr_acute$sdy, ")"), x = c(1.2, 2.2), y = 2)
+
+Sacute
+ggsave(Sacute, file = "./output/figures/figS4.png", height = 10, width = 12)
 ```
 
 #### *Acute and acclimation* $lnRR_{Q_{10}}$ for detailed trait categories across marine, freshwater and terrestrial taxa
@@ -3307,7 +3312,7 @@ Oxidative Phosphorylation), as well as antioxidant enzymes ('antiox').
 All other traits not falling within these categories were placed into
 'other'.
 
-@fig-lnrrtrait; @fig-cvrtrait
+Acclimation capacity varied across trait categories and habiats with measures of resting metabolic rate, including associated biochemical reactions like oxidative phosphorylation (OXPHOS) and ATPase activity, acclimating in marine and freshwater ectotherms (@fig-lnrrtrait). Whether relative variation in physiological rates changes also depended on trait type, with freshwater ectotherms generally maintaining relative variance in physiological rates better than marine and freshwater ectotherms (@fig-cvrtrait). We note though that some traits have very small sample sizes on their own and should be interpreted with caution.
 
 ```{r, detail_trait}
 #| label: detail_trait
@@ -3611,9 +3616,9 @@ ptt <- orchard_plot(model1.3_t_het, mod = "trait_category", at = list(type = c("
 
 
 fig2 <- (ptm / ptf / ptt) + plot_annotation(tag_levels = "A")
-ggsave(fig2, filename = "./output/figures/fig2_trait.png", height = 20, width = 15)
+ggsave(fig2, filename = "./output/figures/figS5.png", height = 20, width = 15)
 
-img_fig2 <- magick::image_read("./output/figures/fig2_trait.png")
+img_fig2 <- magick::image_read("./output/figures/figS5.png")
 img_fig2
 ```
 
@@ -3652,9 +3657,9 @@ ptt <- orchard_plot(model2.3t, mod = "trait_category",  group = "record_num", we
 
 
 figcvrtrait <- (ptm / ptf / ptt) + plot_annotation(tag_levels = "A", tag_suffix = ")")
-ggsave(figcvrtrait, filename = "./output/figures/figcvrtrait.png", height = 20, width = 15)
+ggsave(figcvrtrait, filename = "./output/figures/figS6.png", height = 20, width = 15)
 
-img_figcvrtrait <- magick::image_read("./output/figures/figcvrtrait.png")
+img_figcvrtrait <- magick::image_read("./output/figures/figS6.png")
 img_figcvrtrait
 ```
 
@@ -3739,7 +3744,7 @@ if(rerun) {
 We explored mean-variance relationships for the acute and acclimation
 responses across all traits and habitats. We estimated the scaling
 relationship between log standard deviation in physiological rates
-\[log(SD)\] and log mean physiological rates \[log(mean)\], accounting
+[log(SD)] and log mean physiological rates [log(mean)], accounting
 for non-independence resulting from effects coming from the same
 species, study and traits (i.e., random effects of species, study and
 trait) as done in our main analyses. We also included an interaction
@@ -3760,11 +3765,11 @@ temperatures, wheeras the slope was suppressed when acclimated and/or
 measured at higher temperatures (i.e., r.1. compared to r1.2, r2.1,
 r2.2) (@tbl-slopes). In freshwater ectotherms, there we some differences
 in scaling relationships but they were all fairly comparable no matter
-what acclimatin and test temperature (@tbl-slopes).
+what acclimation and test temperature (@tbl-slopes).
 
 ```{r, fig-mv}
-  #| label: fig-mv
-  #| fig-cap: "Mean-standard deviation relationships for the acute and acclimation responses across all habitats. Relationships are depicted for the low temperature treatment of the study (A) and high temperature treatment (B)."
+#| label: fig-mv
+#| fig-cap: "Mean-standard deviation relationships for the acute and acclimation responses across all habitats. Relationships are depicted for the low temperature treatment of the study (A) and high temperature treatment (B)."
     col <- c("#0871B9", "#F3B40D", "#1BB908")
 
  
@@ -3785,9 +3790,9 @@ what acclimatin and test temperature (@tbl-slopes).
                   legend.text = element_text(size = 14), legend.title = element_text(size = 16), strip.text = element_text(size = 16))
 
  p_mv <-  (mv1 / mv2)  + plot_annotation(tag_levels = "A") + theme(plot.tag = element_text(size = 20))
-  ggsave(p_mv, file = "./output/figures/plot_mv.png", height = 8, width = 8)
+  ggsave(p_mv, file = "./output/figures/figS7.png", height = 8, width = 8)
   
-  p_mv <- magick::image_read("./output/figures/plot_mv.png")
+  p_mv <- magick::image_read("./output/figures/figS7.png")
   p_mv
 ```
 
@@ -3977,9 +3982,9 @@ k_vr <- manual_extract(model3.2, mod = "habitat", group = "spp", exclude = NULL)
                                legend.text = element_text(size = 24),
                                title = element_text(size = 24), legend.position = "top") 
   
-  ggsave(p3, filename = "./output/figures/figS1.pdf", width = 11.5, height = 8)
+  ggsave(p3, filename = "./output/figures/figS8.pdf", width = 11.5, height = 8)
 
-  figs1 <- image_read("./output/figures/figS1.pdf")
+  figs1 <- image_read("./output/figures/figS8.pdf")
   figs1
 ```
 
@@ -4018,9 +4023,9 @@ ps3_2 <- ggplot(i2_lncvr, aes(x = est, y = name)) + xlim(0, 50) + geom_point(siz
 ps3_3 <- ggplot(i2_lnVR, aes(x = est, y = name)) + xlim(0, 50) + geom_point(size = 5) + geom_errorbar(aes(xmin = lci, xmax = uci), width = 0.15) + theme_bw() + labs(x = "Percentage of Variation (%)") + theme(axis.title.y = element_blank(), axis.text = element_blank(), axis.title = element_text(size = 24)) + geom_text(aes(label = paste0(round(est, 2), "% ", "[", round(lci, 2), " - ", round(uci, 2), "%]")), position = position_nudge(x = 5, y = 0.2)) + annotate("text", x = 30, y = 1.5, label = TeX(paste0("$I^2_{sv}$ = ", round(mean(tot_i2_cvr), 2), "%")), size = 10)
 
 figs3 <- (ps3_1 | ps3_2 | ps3_3) + plot_annotation(tag_levels = "A", tag_suffix = ")") & theme(plot.tag = element_text(size = 20))
-ggsave(figs3, width = 16, height = 5.7, filename = "./output/figures/figs3.png")
+ggsave(figs3, width = 16, height = 5.7, filename = "./output/figures/figS9.png")
 
-figs3 <- image_read("./output/figures/figs3.png")
+figs3 <- image_read("./output/figures/figS9.png")
 figs3
 ```
 
@@ -4394,9 +4399,9 @@ p_t_cv_acf <-  bubble_plot(model4.8_t, mod = "acf_lag1_c", group = "spp", ylab =
 
 p_acf <- (p_t_rr_acf + p_m_rr_acf + p_f_rr_acf) / (p_t_cv_acf + p_m_cv_acf + p_f_cv_acf) + plot_annotation(tag_levels = "A") & theme(plot.tag = element_text(size = 36))
 
-ggsave(p_acf, width = 18, height = 10, filename = "./output/figures/fig_p_acf_r1.pdf")
+ggsave(p_acf, width = 18, height = 10, filename = "./output/figures/figS10.pdf")
 
-  p_acf <- image_read("./output/figures/fig_p_acf_r1.pdf")
+  p_acf <- image_read("./output/figures/figS10.pdf")
   p_acf 
 ```
 
@@ -4458,9 +4463,9 @@ ps2_2 <- ggplot(lnCVRQ10_data, aes(y = 1/sqrt(V), x = effect_size, color = type)
 ps2_3 <- ggplot(lnVRQ10_data, aes(y = 1/sqrt(V), x = effect_size, color = type)) + geom_point() + theme_classic() + labs(y = TeX("Precision\\ $\\left( \\frac{1}{\\sqrt{V}} \\right)$"), x = TeX("$lnVR_{Q_{10}}$"))+geom_vline(xintercept = 0, linetype = 3) + theme(legend.title  = element_text(size = 15), legend.text = element_text(size = 15), axis.title = element_text(size = 15), axis.text = element_text(size = 15),  axis.title.y = element_blank())+ scale_color_manual(name = "Type", values = cols)
 
 figs2 <- (ps2_1 | ps2_2 | ps2_3) + plot_annotation(tag_levels = "A", tag_suffix = ")") & theme(plot.tag = element_text(size = 20))
-ggsave(figs2, width = 11.5, height = 4.8, filename = "./output/figures/figS2.png")
+ggsave(figs2, width = 11.5, height = 4.8, filename = "./output/figures/figS11.png")
 
-figs2 <- image_read("./output/figures/figS2.png")
+figs2 <- image_read("./output/figures/figS11.png")
 figs2
 ```
 
@@ -4480,4 +4485,3 @@ $p_{MCMC}$ = `r p_value(pmcmc(post_pb_lnrr))`), $lnCVR_{Q_{10}}$
 `r quantile(post_full_lnvr_pb, 0.975)`, $p_{MCMC}$ =
 `r p_value(pmcmc(post_full_lnvr_pb))`) was not significant indicating
 little evidence for publication bias.
-

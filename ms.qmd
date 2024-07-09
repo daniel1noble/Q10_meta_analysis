@@ -2048,7 +2048,16 @@ if(rerun){
 # Model 3.9: Acclimatization lnRRQ10 only. Test if environmental variance explains 
 # differently in each habitat
 ############################################################################################          
-lnRRQ10_data_wild_acclim <- lnRRQ10_data_wild %>%  filter(type == "acclim") 
+lnRRQ10_data_wild_acclim <- lnRRQ10_data_wild %>%  filter(type == "acclim")
+
+  # Create the phylo correlation matrix
+  
+  # Check and prune tree
+tree_lnrr_wild_acclim <- tree_checks(data = lnRRQ10_data_wild_acclim, tree = tree_p0.7, dataCol = "species_full", type = "prune")
+tree_checks(data = lnRRQ10_data_wild_acclim, tree = tree_lnrr_wild_acclim, dataCol = "species_full", type = "check")
+
+phylo_cor_wild_acclim <- vcv(tree_lnrr_wild_acclim, cor = TRUE)
+        A_wild_acclim <- vcv(tree_lnrr_wild_acclim, cor = FALSE) # For bayes, need cov matrix
 
 if(rerun){
   # More realistic model with 
@@ -2191,16 +2200,16 @@ if(rerun){
 rerun = FALSE
 if(rerun){
   # More realistic model with 
-  model4.3          <- metafor::rma.mv(effect_size ~ c_accl_time + cv_c + type + type:cv_c, V = V,
+  model4.3          <- metafor::rma.mv(effect_size ~ max_temp_c + c_accl_time + cv_c + type + type:cv_c, V = V,
                                        random = list(~1 | record_num,
                                             ~1 | species_full,
                                             ~1 | trait,
-                                            ~1 | spp,
+                                            ~1 + max_temp_c| spp,
                                             ~1 | obs),
                               R = list(species_full = phylo_cor_wild_cvr), dfs = "contain", 
                               test = "t", data = lnCVRQ10_data_wild)
   
-   model4.3_bayes <- brms::brm(effect_size | se(sqrt(V), sigma = TRUE) ~  c_accl_time + cv_c + type + type:cv_c + (~1 | record_num) + (1 | gr(species_full, cov = A_wild_cvr)) + (1 | spp) + (1|trait), data2 = list(A_wild_cvr=A_wild_cvr), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 8, data = lnCVRQ10_data_wild)
+   model4.3_bayes <- brms::brm(effect_size | se(sqrt(V), sigma = TRUE) ~  max_temp_c + c_accl_time + cv_c + type + type:cv_c + (~1 | record_num) + (1 | gr(species_full, cov = A_wild_cvr)) + (1 + max_temp_c| spp) + (1|trait), data2 = list(A_wild_cvr=A_wild_cvr), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 8, data = lnCVRQ10_data_wild)
                                   
   # Save model4.3
   saveRDS(model4.3, file = "./output/models/lnCVRQ10_4.3")
@@ -3905,7 +3914,15 @@ if(rerun){
                               R = list(species_full = phylo_cor_VR), dfs = "contain", 
                               test = "t", data = lnVRQ10_data)
   
-   model3.2_bayes <- brms::brm(effect_size | se(sqrt(V), sigma = TRUE) ~  max_temp_c + c_accl_time + type + habitat + type:habitat + (~1 | record_num) + (1 | gr(species_full, cov = A_VR)) + (1 + max_temp_c| spp) + (1|trait), data2 = list(A_VR=A_VR), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 4, data = lnVRQ10_data)
+   model3.2_bayes <- brms::brm(effect_size | se(sqrt(V), sigma = TRUE) ~  max_temp_c + c_accl_time + type + habitat + type:habitat + 
+        (~1 | record_num) + 
+        (1 | gr(species_full, cov = A_VR)) + 
+        (1 + max_temp_c| spp) + 
+        (1|trait), 
+        data2 = list(A_VR=A_VR), family = gaussian(), 
+        prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), 
+        control = list(adapt_delta = 0.98, max_treedepth = 12), 
+        chains = 4, thin = 5, iter = 8000, warmup = 1000, cores = 4, data = lnVRQ10_data)
                               
   # Save model1.2
   saveRDS(model3.2, file = "./output/models/lnVRQ10_3.2")
@@ -3995,18 +4012,18 @@ k_vr <- manual_extract(model3.2, mod = "habitat", group = "spp", exclude = NULL)
  
  # Extract the fixed / population-level effect summaries of the posterior
     fixed <- do.call(rbind, apply(posterior_samples(model3.2_bayes, pars = "^b"), 2,  function(x) post_summary(x)))
-    fixed <- cbind(Parameter = c("Intercept", "Acclimation Time (z scaled)", "Acclimation Effect", "Habitat (Marine)", "Habitat (Terrestrial)", "Acclimation*Marine", "Acclimation*Terrestrial"), fixed)
+    fixed <- cbind(Parameter = c("Intercept", "Mximum Temperature (centered)", "Acclimation Time (centered)", "Acclimation Effect", "Habitat (Marine)", "Habitat (Terrestrial)", "Acclimation*Marine", "Acclimation*Terrestrial"), fixed)
     rownames(fixed) <- NULL
 
  # Extract the random effect summaries of the posteriors (SDs)
-    random <- do.call(rbind, apply(posterior_samples(model3.2_bayes, pars = "^sd"), 2,  function(x) post_summary(x)))
-    random <- cbind(Parameter = c( "Study", "Phylogeny", "Species", "Trait"), random)
+    random <- rbind(header = rep(0, 4), do.call(rbind, apply(posterior_samples(model3.2_bayes, pars = "^sd"), 2,  function(x) post_summary(x))))
+    random <- cbind(Parameter = c(" ", "Study", "Phylogeny", "Species (intercept)", "Species (slope max temp)", "Trait"), random)
     rownames(random) <- NULL
 
 # Create the table
     tabs1 <- rbind(fixed, random)
 
-    flextable(tabs1) %>% bold(part = "header") %>% autofit() %>% add_body_row(values = as_paragraph(as_b("Fixed Effects")), top = TRUE, colwidths = 5) %>% compose(value = as_paragraph(as_b(c(("Random Effects"), rep("", 4)))), i = 8)
+    flextable(tabs1) %>% bold(part = "header") %>% autofit() %>% add_body_row(values = as_paragraph(as_b("Fixed Effects")), top = TRUE, colwidths = 5) %>% compose(value = as_paragraph(as_b(c(("Random Effects"), rep("", 4)))), i = 10)
 ```
 
 #### *Plots of* $I^2$ for multilevel models

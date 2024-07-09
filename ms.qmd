@@ -2899,7 +2899,7 @@ Additionally, aquatic and terrestrial environments can vary in
 nutritional resources [e.g., fatty acid content of prey;
 @twining2019aquatic] that can impact physiological rates and their
 variability by affecting performance curves and acclimation responses
-[@hardison2024diet]. While marine and freshwater ectotherms were
+[@hardison2024diet; @sinclair2016can]. While marine and freshwater ectotherms were
 capable of partial acclimation it is still important to recognise that,
 on average, the effect size was small (amounting to $Q_{10}$ dropping
 from ~1.8 to 1.6).
@@ -2967,7 +2967,7 @@ that force earlier life stages to cope with more variable environmental
 conditions which can also lead to developmental constraints on how
 physiological systems respond later in life [@martin2015age;
 @stearns1976life; @angilletta2009thermal; @noble2018developmental;
-@o2019developmental; @Pottier2022]. In addition, plastic responses are
+@o2019developmental; @Pottier2022; @sinclair2016can]. In addition, plastic responses are
 also expected to be costly [@angilletta2009thermal; @Dewitt1998], and
 such costs can be magnified in late life reducing the capacity for
 plasticity [e.g., @rossi2019ageing]. These processes can also result in

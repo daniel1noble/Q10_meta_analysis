@@ -4505,13 +4505,19 @@ little evidence for publication bias.
 
 #### *Performance Curve Simulations*
 
-To better understand the characteristics of the performance curves in a sample that would lead to observed changes in variance (and relative variance) across temperature we conducted a simple simulation. To simulate the performance curves, we used a modified Gaussian function (@eq-sim):
+To better understand the characteristics of the performance curves in a sample that would lead to observed changes in variance (and relative variance) across temperature we conducted a simple simulation. To simulate the performance curves, we used a asymmetrical Gaussian function (@eq-sim):
 
 $$
 P_{z} = 2\epsilon^{-\frac{(z-\delta)^2}{2\sigma^2}}\Phi\left(\alpha\frac{z-\delta}{\sigma}\right)
 $$ {#eq-sim}
 
-where $z$ is the temperature gradient, $\delta$ is the optimal temperature (the temperature where fitness is maximised), $\sigma$ is the performance breadth, and $\alpha$ is the skewness of the fitness function or rate variation. We simulated 40 individuals with varying performance breadth, optima and rate variation. We then calculated the relative variance in fitness across the temperature gradient as the variance in fitness at each temperature divided by the maximum fitness at that temperature. The results are shown in @fig-sim.
+where $z$ is the temperature gradient, $\delta$ is the optimal temperature (the temperature where performance is maximised), $\sigma$ is the performance breadth, and $\alpha$ is the skewness of the performance function or rate variation.  
+
+We first explored four hypothetical examples to identify key parameters (@fig-sim). We simulated 40 individuals with varying performance breadth, optima and rate variation. We then calculated the relative variance in performance across the temperature gradient as the variance in performance at each temperature divided by the maximum performance at that temperature.
+
+We then conducted a larger simulaton manipulating the level of between individual variation in the optima and performance breadth while holding constant rate variation because optima and breadth appeared to be most important (@fig-sim). We simulated *n* = 1000 individual performance curves and took the mean and standard deviation of the performance at two temperatures 10 degrees apart (18 and 28 degrees) to calculate the log coefficient of variation (CV) and log variance ratio in performance.
+
+Our simulations recovered parameter space for $lnVR_{Q_{10}}$ that matched our empirical results (@fig-sim2). 
 
 ```{r, sim}
 #| label: sim

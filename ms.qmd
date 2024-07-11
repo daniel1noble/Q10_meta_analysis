@@ -4502,3 +4502,234 @@ $p_{MCMC}$ = `r p_value(pmcmc(post_pb_lnrr))`), $lnCVR_{Q_{10}}$
 `r quantile(post_full_lnvr_pb, 0.975)`, $p_{MCMC}$ =
 `r p_value(pmcmc(post_full_lnvr_pb))`) was not significant indicating
 little evidence for publication bias.
+
+#### *Performance Curve Simulations*
+
+To better understand the characteristics of the performance curves in a sample that would lead to observed changes in variance (and relative variance) across temperature we conducted a simple simulation. To simulate the performance curves, we used a modified Gaussian function (@eq-sim):
+
+$$
+P_{z} = 2\epsilon^{-\frac{(z-\delta)^2}{2\sigma^2}}\Phi\left(\alpha\frac{z-\delta}{\sigma}\right)
+$$ {#eq-sim}
+
+where $z$ is the temperature gradient, $\delta$ is the optimal temperature (the temperature where fitness is maximised), $\sigma$ is the performance breadth, and $\alpha$ is the skewness of the fitness function or rate variation. We simulated 40 individuals with varying performance breadth, optima and rate variation. We then calculated the relative variance in fitness across the temperature gradient as the variance in fitness at each temperature divided by the maximum fitness at that temperature. The results are shown in @fig-sim.
+
+```{r, sim}
+#| label: sim
+#| echo: false
+
+# Library
+pacman::p_load(latex2exp, ggplot2, dplyr, tidyr, viridis)
+
+# delta; Optimal environment (the optimal temperature where fitness is maximised)
+# sigma; Niche breadth (this is the variation in the fitness surface)
+# alpha; Skewness of the fitness function
+
+# Environmental Temperature
+  set.seed(23)
+     z = seq(0,45,0.1) # Temperature gradient
+     n = 40            # Number of individuals
+ind_sd = 0.5           # Standard deviation among individuals
+
+# Simulation 1. Assume optimum is rather constant among individuals 
+#parameters
+delta =  35  
+sigma =  9 + rnorm(n, 0, ind_sd)
+alpha = -15 + rnorm(n, 0, ind_sd)
+
+ws1<- list()
+for(i in 1:length(alpha)){
+ws1[[i]] <- 2*exp(-(z-delta)^2/(2*sigma[i]^2))*pnorm(alpha[i]*(z-delta)/sigma)
+}
+
+ws1 <- data.frame(do.call(cbind, ws1)) %>% pivot_longer(everything(), names_to = "run", values_to = "fitness")  %>% mutate(z = rep(z,each = n))
+
+# Simulation 2: Assume optimum varies but sigma and alpha the same
+#parameters
+
+delta =  35 + rnorm(n, 0, 1) 
+sigma =  9  
+alpha = -15 
+
+ws2<- list()
+for(i in 1:length(delta)){
+ws2[[i]] <- 2*exp(-(z-delta[i])^2/(2*sigma^2))*pnorm(alpha*(z-delta[i])/sigma)
+}
+
+ws2 <- data.frame(do.call(cbind, ws2)) %>% pivot_longer(everything(), names_to = "run", values_to = "fitness")  %>% mutate(z = rep(z,each = n))
+
+# Simulation 3: Assume optimum sigma and alpha vary
+#parameters
+
+delta =  35 + rnorm(n, 0, 1) 
+sigma =  9  + rnorm(n, 0, ind_sd) 
+alpha = -15 + rnorm(n, 0, ind_sd)
+
+ws3<- list()
+for(i in 1:length(delta)){
+ws3[[i]] <- 2*exp(-(z-delta[i])^2/(2*sigma[i]^2))*pnorm(alpha[i]*(z-delta[i])/sigma[i])
+}
+
+ws3 <- data.frame(do.call(cbind, ws3)) %>% pivot_longer(everything(), names_to = "run", values_to = "fitness")  %>% mutate(z = rep(z,each = n))
+
+
+# Simulation 4: Assume optimum varies but sigma and alpha the same
+#parameters
+
+delta =  35 
+sigma =  9  + rnorm(n, 0, ind_sd) 
+alpha = -15 
+
+ws4<- list()
+for(i in 1:length(sigma)){
+ws4[[i]] <- 2*exp(-(z-delta)^2/(2*sigma[i]^2))*pnorm(alpha*(z-delta)/sigma[i])
+}
+
+ws4 <- data.frame(do.call(cbind, ws4)) %>% pivot_longer(everything(), names_to = "run", values_to = "fitness")  %>% mutate(z = rep(z,each = n))
+
+```
+
+```{r, sim2}
+#| label: sim2
+#| echo: false
+#| eval: false
+##### Larger simulation
+
+#parameters
+set.seed(23)
+ delta_ind_sd = seq(0.01, 2, by =0.20)
+ alpha_ind_sd = 0.05
+ sigma_ind_sd = seq(0.01, 2, by =0.20)
+        delta =  35 
+        sigma =  9  
+        alpha = -15
+            n = 1000
+
+# create all combuinations of sd
+sims <- expand.grid(delta_ind_sd, alpha_ind_sd, sigma_ind_sd) %>% 
+  mutate(sim = row_number())  %>% rename(delta = Var1, alpha = Var2, sigma = Var3)
+
+sim_results <- data.frame()
+
+for(i in 1:nrow(sims)){
+      optima_sim <- delta + rnorm(n, 0, sims[i, "delta"])
+       alpha_sim <- alpha + rnorm(n, 0, sims[i, "alpha"])
+       sigma_sim <- sigma + rnorm(n, 0, sims[i, "sigma"])
+
+    ws = list()
+    for(j in 1:length(optima_sim)){
+     ws[[j]] <- 2*exp(-(z-optima_sim[j])^2/(2*sigma_sim[j]^2))*pnorm(alpha_sim[j]*(z-optima_sim[j])/sigma_sim[j])
+    }
+    
+    # Aggregate the list
+    data <- data.frame(do.call(cbind, ws)) %>% pivot_longer(everything(), names_to = "run", values_to = "fitness")  %>% mutate(z = rep(z,each = n))
+
+    # Summarise data
+    sum_sim <- data %>% 
+              filter(z %in% c(18, 28)) %>% 
+              group_by(z) %>% 
+              summarise(mean = mean(fitness), sd = sd(fitness), cv = sd/mean, n = n())
+
+    sim_results[i,1:5] <- cbind(delta = sims[i, "delta"], alpha = sims[i, "alpha"], sigma = sims[i, "sigma"], lnCVR = log(sum_sim$cv[2]/sum_sim$cv[1]), lnVR = log(sum_sim$sd[2]/sum_sim$sd[1]))
+    print(paste0("Simulation is ", round(i/nrow(sims)*100, 2), "% complete"))
+}
+
+colnames(sim_results) <- c("delta", "alpha", "sigma", "lnCVR", "lnVR")
+
+# Save simulation so that we don't have to re-run each time
+  saveRDS(sim_results, file = "./output/sim_results")
+
+```
+
+```{r, fig-sim}
+#| label: fig-sim
+#| fig-align: center
+#| fig-cap: "Simulated performance curves for *n* = 40 individuals in four hypothetical scenerios with varying performance breadth ($\\sigma$), optima ($\\delta$) and skewness ($\\alpha$). Individual performance curves are different colours. $lnCVR_{Q_{10}}$ is calculated as the log transformed ratio of the coefficient of variance (CV) in performance at the higher temperature divided by the CV in performance at that temperature at each point along the curve. $lnVR_{Q_{10}}$ is calculated as the log transformed ratio of the standard deviation in performance at the higher temperature divided by the standard deviation in performance at that temperature. The dashed red line indicates the higher temperature (28$^\\circ$C) and the dashed blue line indicates the lower temperature (18$^\\circ$C). Note that the mean ($\\mu$) and standard deviation ($\\sigma$) of physiological rates are shown for each temperature. In all simulations, $\\delta$ = 35, $\\sigma$ = 9 and $\\alpha$ = -15, while between individual variation for $\\sigma_{_b_{\\delta}}$ = 1,  $\\sigma_{_b_{\\sigma}}$ = 0.5 and $\\sigma_{_b_{\\alpha}}$ = 0.5."
+
+my_theme <- function(){
+  theme(
+           axis.title.y = element_text(size = 20), 
+           axis.title.x = element_text(size = 20),
+           axis.text.x = element_text(size = 18),
+            axis.text.y = element_text(size = 18),
+            plot.title = element_text(size = 28))
+}
+
+my_annotate  <- function(data, size_ano){
+  list(annotate("text", x = 18-15, y = 2, label = TeX("18$^\\circ$C"), size = size_ano), 
+  annotate("text", x = 28-15, y =2, label = TeX("28$^\\circ$C"), size = size_ano),
+  annotate("text", x = 28-16, y = 1.8, label = TeX(paste0("$\\sigma = $", round(data$sd[2], 2))), size = size_ano),
+  annotate("text", x = 18-16, y = 1.8, label = TeX(paste0("$\\sigma = $", round(data$sd[1], 2))), size = size_ano),
+  annotate("text", x = 28-16, y = 1.6, label = TeX(paste0("$\\mu = $", round(data$mean[2], 2))), size = size_ano),
+  annotate("text", x = 18-16, y = 1.6, label = TeX(paste0("$\\mu = $", round(data$mean[1], 2))), size = size_ano),
+  annotate("text", x = 8, y = 1, label = TeX(paste0("$lnCVR_{Q_{10}}$ = ", round(log(data$cv[2]/data$cv[1]), 2))), size = size_ano),
+  annotate("text", x = 8, y = 0.8, label = TeX(paste0("$lnVR_{Q_{10}}$ = ", round(log(data$sd[2]/data$sd[1]), 2))), size = size_ano))
+}
+size_ano = 10
+
+# mean, SD and CV
+  sum_sim1 <- ws1 %>% 
+              filter(z %in% c(18, 28)) %>% 
+              group_by(z) %>% 
+              summarise(mean = mean(fitness), sd = sd(fitness), cv = sd/mean, n = n())
+
+sim1 <- ggplot(ws1, aes(x = z, y = fitness, color = run)) + geom_line() + theme_classic() + labs(y = "Physiological Rate", x = TeX("Temperature ($^\\circ$C)"), color = "Individual", title = "Thermal Breadth & Rate") + scale_color_viridis_d() + my_theme()+ geom_vline(xintercept = 28, linetype = "dashed", color = "red") + geom_vline(xintercept = 18, linetype = "dashed", color = "blue") + my_annotate(sum_sim1, size_ano)
+  
+
+# mean, SD and CV
+  sum_sim2 <- ws2 %>% 
+              filter(z %in% c(18, 28)) %>% 
+              group_by(z) %>% 
+              summarise(mean = mean(fitness), sd = sd(fitness), cv = sd/mean, n = n())
+
+sim2 <- ggplot(ws2, aes(x = z, y = fitness, color = run)) + geom_line() + theme_classic() + labs(y = "Physiological Rate", x = TeX("Temperature ($^\\circ$C)"), color = "Individual", title = "Thermal Optima") + scale_color_viridis_d() + my_theme()+ geom_vline(xintercept = 28, linetype = "dashed", color = "red") +     geom_vline(xintercept = 18, linetype = "dashed", color = "blue")   + my_annotate(sum_sim2, size_ano)
+  
+# mean, SD and CV
+  sum_sim3 <- ws3 %>% 
+              filter(z %in% c(18, 28)) %>% 
+              group_by(z) %>% 
+              summarise(mean = mean(fitness), sd = sd(fitness), cv = sd/mean, n = n())
+
+sim3 <- ggplot(ws3, aes(x = z, y = fitness, color = run)) + geom_line() + theme_classic() + labs(y = "Physiological Rate", x = TeX("Temperature ($^\\circ$C)"), color = "Individual", title = "Thermal Breadth, Optima & Rate") + scale_color_viridis_d() + my_theme()+ geom_vline(xintercept = 28, linetype = "dashed", color = "red") +     geom_vline(xintercept = 18, linetype = "dashed", color = "blue")   + my_annotate(sum_sim3, size_ano)
+
+# mean, SD and CV
+  sum_sim4 <- ws4 %>% 
+              filter(z %in% c(18, 28)) %>% 
+              group_by(z) %>% 
+              summarise(mean = mean(fitness), sd = sd(fitness), cv = sd/mean, n = n())
+
+sim4 <- ggplot(ws4, aes(x = z, y = fitness, color = run)) + geom_line() + theme_classic() + labs(y = "Physiological Rate", x = TeX("Temperature ($^\\circ$C)"), color = "Individual", title = "Thermal Breadth") + scale_color_viridis_d() + my_theme()+ geom_vline(xintercept = 28, linetype = "dashed", color = "red") +     geom_vline(xintercept = 18, linetype = "dashed", color = "blue")   + my_annotate(sum_sim4, size_ano)
+
+p_sim <- ((sim1 + sim2) / (sim4 + sim3)) +plot_annotation(tag_levels = "A") & theme(plot.tag = element_text(size = 30))
+ggsave(p_sim, width = 18.5, height = 18, filename = "./output/figures/figS12.png")
+ 
+p_sim
+```
+
+
+```{r, fig-sim2}
+#| label: fig-sim2
+#| fig-align: center
+#| fig-cap: "Expected $lnCVR_{Q_{10}}$ and $lnVR_{Q_{10}}$ when varying $\\sigma_{_b_{\\delta}}$ = {0.01, 2} and  $\\sigma_{_b_{\\sigma}}$ = {0.01, 2} while fixing $\\sigma_{_b_{\\alpha}}$ = 0.05. In all simulations, $\\delta$ = 35, $\\sigma$ = 9, $\\alpha$ = -15, and *n* = 1000 individuals were simulated for each combination of $\\sigma_{_b_{\\delta}}$, $\\sigma_{_b_{\\sigma}}$ and $\\sigma_{_b_{\\alpha}}$."
+
+sim_results <- readRDS("./output/sim_results")
+bins_cvr = 20
+bins_vr = 20
+
+lncvr_sim_delta_sigma <- ggplot(sim_results, aes(x = delta, y = sigma, z = lnCVR)) +
+  geom_contour_filled(bins = bins_cvr) +
+  scale_color_viridis(direction = -1) +
+  labs(x = TeX("Variation in Thermal Optima ($\\sigma_{\\delta}$)"),
+       y = TeX("Variation in Thermal Breadth ($\\sigma_{\\sigma}$)"),
+       fill = TeX("$lnCVR_{Q_{10}}$")) + theme_classic()+ my_theme() + theme(legend.title = element_text(size = 20), legend.text = element_text(size = 12))
+
+lnvr_sim_delta_sigma <- ggplot(sim_results, aes(x = delta, y = sigma, z = lnVR)) +
+  geom_contour_filled(bins = bins_vr) +
+  scale_color_viridis() +
+  labs(x = TeX("Variation in Thermal Optima ($\\sigma_{\\delta}$)"),
+       y = TeX("Variation in Thermal Breadth ($\\sigma_{\\sigma}$)"),
+       fill = TeX("$lnVR_{Q_{10}}$")) + theme_classic() + my_theme() + theme(legend.title = element_text(size = 20), legend.text = element_text(size = 12))
+
+
+p_sim2 <- (lncvr_sim_delta_sigma + lnvr_sim_delta_sigma) + plot_annotation(tag_levels = "A") & theme(plot.tag = element_text(size = 30))
+p_sim2
+```

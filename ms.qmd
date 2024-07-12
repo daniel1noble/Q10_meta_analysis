@@ -3959,6 +3959,183 @@ if(rerun){
     m_VR_mean_ef  <- abs((exp(m_VR_mean) - 1)*100) 
     t_VR_mean_ef  <- abs((exp(t_VR_mean) - 1)*100) 
 
+###################################################
+  # Model 3.3: Model controlling for acclimation time, 
+  # type and trait category assuming type can vary by habitat
+###################################################
+  # Add two general trait categories to test for trait differences (whole-organism vs biochemical)
+    lnVRQ10_data <- lnVRQ10_data %>% 
+                    mutate(trait_broad = ifelse(trait_category %in% c("cardiac", "rest_MR", "sprint", "muscle", "endurance", "max_MR"), 
+                                                "tissue/organism",
+                                         ifelse(trait_category %in% c("ATPase", "metabolic_enzyme", "antiox", "mito_oxidation", "mito_leak"), 
+                                                "biochemical", trait_category)))
+ # We can also run subsets for each habitat
+   tree_m_vr <- tree_checks(lnVRQ10_data %>% filter(habitat == "m" & trait_broad != "other"), tree = tree_lnVR, dataCol = "species_full", type = "prune")
+   tree_f_vr <- tree_checks(lnVRQ10_data %>% filter(habitat == "f" & trait_broad != "other"), tree = tree_lnVR, dataCol = "species_full", type = "prune")
+   tree_t_vr <- tree_checks(lnVRQ10_data %>% filter(habitat == "t" & trait_broad != "other"), tree = tree_lnVR, dataCol = "species_full", type = "prune")
+   
+ # cor matrices
+   m_phylo_vr <- vcv(tree_m_vr, corr = TRUE)
+   f_phylo_vr <- vcv(tree_f_vr, corr = TRUE)
+   t_phylo_vr <- vcv(tree_t_vr, corr = TRUE)
+    
+if(rerun){
+  
+  # Full Bayesian model   
+   model3.3_btrait_bayes <- brms::brm(effect_size | se(sqrt(V)) ~  max_temp_c + c_accl_time + type*trait_broad*habitat + 
+                                           (1 | record_num) + 
+                                           (1 | gr(species_full, cov = A_VR)) + 
+                                           (1 + max_temp_c | spp) +(1|trait) + 
+                                           (1 + trait_broad |gr(obs, cor = FALSE)),  
+                                         data2 = list(A_VR=A_VR), family = gaussian(), 
+                                         prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), 
+                                         control = list(adapt_delta = 0.98, max_treedepth = 12), 
+                                         chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 8, data = filter(lnVRQ10_data, trait_broad != "other"))
+    saveRDS(model3.3_btrait_bayes, "./output/models/model3.3_btrait_bayes")
+    
+  # Metafor models for creating plots. Subset by habitat to make this easier
+      # Marine
+         model3.3_m_broad <- metafor::rma.mv(effect_size ~  max_temp_c + c_accl_time + type + trait_broad + type:trait_broad, V = V, 
+                              random = list(~1 | record_num,
+                                            ~1 | species_full,
+                                            ~1 + max_temp_c| spp,
+                                            ~1 | trait,
+                                            ~1 + trait_broad| obs),
+                              R = list(species_full = m_phylo_vr), dfs = "contain", 
+                              test = "t", struct = c("GEN","HCS"), phi = 0,
+                              data = filter(lnVRQ10_data, habitat == "m" & trait_broad != "other"))
+         saveRDS(model3.3_m_broad, "output/models/model3.3_m_broad")
+    
+      # Freshwater
+         model3.3_f_broad <- metafor::rma.mv(effect_size ~  max_temp_c + c_accl_time + type + trait_broad + type:trait_broad, V = V, 
+                              random = list(~1 | record_num,
+                                            ~1 | species_full,
+                                            ~1 + max_temp_c| spp,
+                                            ~1 | trait,
+                                            ~1 + trait_broad| obs),
+                              R = list(species_full = f_phylo_vr), dfs = "contain", 
+                              test = "t", struct = c("GEN","HCS"),  phi = 0,
+                              data = filter(lnVRQ10_data, habitat == "f" & trait_broad != "other"))
+          saveRDS(model3.3_f_broad, "output/models/model3.3_f_broad")
+      
+      # Terrestrial
+         model3.3_t_broad <- metafor::rma.mv(effect_size ~  max_temp_c + c_accl_time + type + trait_broad + type:trait_broad, V = V, 
+                              random = list(~1 | record_num,
+                                            ~1 | species_full,
+                                            ~1 + max_temp_c| spp,
+                                            ~1 | trait,
+                                            ~1 + trait_broad| obs),
+                              R = list(species_full = t_phylo_vr), dfs = "contain", 
+                              test = "t", struct = c("GEN","HCS"), phi = 0,
+                              data = filter(lnVRQ10_data, habitat == "t" & trait_broad != "other"))
+         saveRDS(model3.3_t_broad, "output/models/model3.3_t_broad")
+  
+  } else{
+    model3.3_btrait_bayes <- readRDS("./output/models/model3.3_btrait_bayes")
+    model3.3_m_broad <- readRDS("output/models/model3.3_m_broad")
+    model3.3_f_broad <- readRDS("output/models/model3.3_f_broad")
+    model3.3_t_broad <- readRDS("output/models/model3.3_t_broad")
+}
+    
+    
+###########################################################
+  # Processing Bayesian Posteriors
+###########################################################
+      # Create new data for predictions
+       trait_b_data <- data.frame(  type = c("acclim", "acute"),
+                              max_temp_c = 0,
+                             c_accl_time = 0,
+                                       V = 0,
+                                 habitat = rep(c("t", "m", "f"), each = 4),
+                             trait_broad = rep(c("tissue/organism", "biochemical"), each = 2))     
+      
+       # Predict from model. Note this is the summary.
+         pred_lnvr_traitb <- fitted(model3.3_btrait_bayes, 
+                                     newdata = trait_b_data, re_formula = NA,
+                                     summary = TRUE, 
+                                     robust = FALSE)
+         pred_lnvr_traitb <- cbind(trait_b_data, pred_lnvr_traitb)
+    
+       # Predict to get the posterior. Note that we have the full posterior distribution here for each of the 12 categories in the new data. Here, we want to look at the difference between acute and acclimation within each of the categories. 
+            pred_lnvr_traitb_post <- fitted(model3.3_btrait_bayes, 
+                                     newdata = trait_b_data, re_formula = NA,
+                                     summary = FALSE, 
+                                     robust = FALSE)
+        contrast_lnvr_trait_post <-  pred_lnvr_traitb_post[,c(1,3,5,7,9,11)] - pred_lnvr_traitb_post[,c(2,4,6,8,10,12)] # Acclimation - acute.
+            
+        # Contrast statistics
+            contrast_lnvr_trait_stats <- data.frame( habitat = rep(c("t", "m", "f"), each = 2),
+                                                     trait = rep(c("tissue/organism", "biochemical"), each = 1),
+                                                    diff = sapply(data.frame(contrast_lnvr_trait_post), mean),
+                                                     l95 = sapply(data.frame(contrast_lnvr_trait_post), function(x) quantile(x, 0.025)),
+                                                     u95 = sapply(data.frame(contrast_lnvr_trait_post), function(x) quantile(x, 0.975)),
+                                                       p = sapply(data.frame(contrast_lnvr_trait_post), function(x) p_value(pmcmc(x))))
+
+###################################################
+  # Model 3.4: Model controlling for acclimation time, 
+  # type and life history stage assuming type can vary by habitat
+###################################################
+
+if(rerun){
+  # More realistic model 
+  model3.4 <- metafor::rma.mv(effect_size ~  max_temp_c + c_accl_time + type*habitat*life.hist, V = V, 
+                              random = list(~1 | record_num,
+                                            ~1 | species_full,
+                                            ~1 + max_temp_c| spp,
+                                            ~1 | trait,
+                                            ~1 | obs),
+                              R = list(species_full = phylo_cor_VR), dfs = "contain", 
+                              test = "t", data = lnVRQ10_data)
+  # Save model
+  saveRDS(model3.4, file = "./output/models/lnVRQ10_3.4")
+
+   model3.4_bayes <- brms::brm(effect_size | se(sqrt(V)) ~  max_temp_c + c_accl_time + type*habitat*life.hist + 
+                                 (~1 | record_num) + 
+                                 (1 | gr(species_full, cov = A_VR)) + 
+                                 (1 + max_temp_c| spp) + 
+                                 (1|trait) +
+                                 (1|obs), 
+                               data2 = list(A_VR=A_VR), family = gaussian(), 
+                               prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), 
+                               control = list(adapt_delta = 0.98, max_treedepth = 12), 
+                               chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 4, data = lnCVRQ10_data)
+                                  
+  # Save model
+  saveRDS(model3.4_bayes, file = "./output/models/lnVRQ10_3.4_bayes")
+
+  } else{
+        model3.4 <- readRDS("./output/models/lnVRQ10_3.4")
+  model3.4_bayes <- readRDS("./output/models/lnVRQ10_3.4_bayes")
+}
+
+###########################################################
+  # Processing Bayesian Posteriors
+###########################################################
+      # Create new data for predictions
+       lh_b_data <- data.frame( c_accl_time = 0, 
+                          max_temp_c = 0, 
+                                type = relevel(factor(c("acclim", "acute")), ref = "acute"), 
+                             habitat = rep(c("m", "f", "t"), each = 4), 
+                           life.hist = rep(c("j", "a"), each = 2))    
+       
+            # I have no idea why the fitted function is not working on this model. We're doing this the old fashioned way
+            X <- model.matrix(~max_temp_c + c_accl_time + type*habitat*life.hist, data = lh_b_data) 
+   
+            # Extract posteriors
+              post_lh_vr <- posterior_samples(model3.4_bayes, pars = "^b")
+        
+        # Now we can do all the calculations in one shot.# Predict to get the posterior. Note that we have the full posterior distribution here for each of the 12 categories in the new data. Here, we want to look at the difference between acute and acclimation within each of the categories. 
+            pred_lh_vr <- apply(t(post_lh_vr),2 , function(x) as.matrix(X)%*%x)
+
+        contrast_lnvr_lh_post <-  pred_lh_vr[c(1,3,5,7,9,11),] - pred_lh_vr[c(2,4,6,8,10,12),] # Acclimation - acute.
+            
+        # Contrast statistics
+            contrast_lnvr_lh_stats <- data.frame( habitat = rep(c("t", "m", "f"), each = 2),
+                                                     stage = rep(c("j", "a"), each = 1),
+                                                    diff = apply(data.frame(contrast_lnvr_lh_post), 1, mean),
+                                                     l95 = apply(data.frame(contrast_lnvr_lh_post), 1, function(x) quantile(x, 0.025)),
+                                                     u95 = apply(data.frame(contrast_lnvr_lh_post), 1, function(x) quantile(x, 0.975)),
+                                                       p = apply(data.frame(contrast_lnvr_lh_post), 1, function(x) p_value(pmcmc(x))))
 ```
 
 Analysis of $lnVR_{Q_{10}}$ suggested that variance increases with
@@ -4505,19 +4682,21 @@ little evidence for publication bias.
 
 #### *Performance Curve Simulations*
 
-To better understand the characteristics of the performance curves in a sample that would lead to observed changes in variance (and relative variance) across temperature we conducted a simple simulation. To simulate the performance curves, we used a asymmetrical Gaussian function (@eq-sim):
+To better understand the characteristics of the performance curves in a sample that would lead to observed changes in variance (and relative variance) across temperature we conducted a simple simulation. To simulate performance curves, we used a asymmetrical Gaussian function (@eq-sim):
 
 $$
 P_{z} = 2\epsilon^{-\frac{(z-\delta)^2}{2\sigma^2}}\Phi\left(\alpha\frac{z-\delta}{\sigma}\right)
 $$ {#eq-sim}
 
-where $z$ is the temperature gradient, $\delta$ is the optimal temperature (the temperature where performance is maximised), $\sigma$ is the performance breadth, and $\alpha$ is the skewness of the performance function or rate variation.  
+where $z$ is the temperature gradient, $\delta$ is the optimal temperature (the temperature where performance is maximized), $\sigma$ is the performance breadth, and $\alpha$ is the skewness of the performance function or rate variation.  While we could have used other performance curve functions (e.g., Arrhenius), our intentions were not to model the exact curves (which are not know) but rather identify what might vary across the major habitat types that could contribute to the different patterns of variance change at higher temperatures we observed across habitats.
 
-We first explored four hypothetical examples to identify key parameters (@fig-sim). We simulated 40 individuals with varying performance breadth, optima and rate variation. We then calculated the relative variance in performance across the temperature gradient as the variance in performance at each temperature divided by the maximum performance at that temperature.
+We first explored four hypothetical examples to identify key parameters from this function that appear to impact $lnVR_{Q_{10}}$ and $lnCVR_{Q_{10}}$ the most (@fig-sim). To achieve this, we simulated 40 individuals with varying amounts of between individual variation in performance breadth, optima and rate variation. We then calculated the relative variance in performance across the temperature gradient as the variance in performance at each temperature divided by the maximum performance at that temperature. This simple analysis identified thermal optima and breath as being the major factors likely leading to the observed patterns in $lnVR_{Q_{10}}$ and $lnCVR_{Q_{10}}$ we identify in our meta-analysis.
 
-We then conducted a larger simulaton manipulating the level of between individual variation in the optima and performance breadth while holding constant rate variation because optima and breadth appeared to be most important (@fig-sim). We simulated *n* = 1000 individual performance curves and took the mean and standard deviation of the performance at two temperatures 10 degrees apart (18 and 28 degrees) to calculate the log coefficient of variation (CV) and log variance ratio in performance.
+We then conducted a larger simulation that expanded the parameter space by manipulating the level of between individual variation in both the thermal optima and performance breadth while holding constant rate variation because optima and breadth appeared to be most important (@fig-sim). We simulated *n* = 1000 individual performance curves and took the mean and standard deviation of the performance at two temperatures 10 degrees apart (18 and 28 degrees) to calculate the log coefficient of variation (CV) and log variance ratio in performance. Our simulations assume that the value of variance does not change depending on the temperatures choose, but given our analysis restricts the data to temperatures within the normal thermal range of each species, standardising a temperature window in this way is likely comparable.  
 
-Our simulations recovered parameter space for $lnVR_{Q_{10}}$ that matched our empirical results (@fig-sim2). 
+Overall, our simulations recovered plausible parameter space for levels of between individual variation in thermal optima and breath that matched some of our empirical results (@fig-sim2). While $lnCVR_{Q_{10}}$ ([@fig-sim2]A) values were overestimated compared to our empirical results, $lnVR_{Q_{10}}$ nicely matched ([@fig-sim2]B). Overestimation of $lnCVR_{Q_{10}}$ is likely the result of the rate parameter being too steep in our model (i.e., $Q_{10}$ being too high) compared to what is typical in nature resulting in rates at higher temperatures to be larger than what is expected. This would inflate the coefficient of variation because the variance is standardised by the rates at the respective temperatures. Using alternative performance functions may correct this deviation, but this question is out of scope here and would require a much larger simulation. Regardless, $lnCVR_{Q_{10}}$ largely showed similar patterns to $lnVR_{Q_{10}}$.
+
+Importantly, our $lnVR_{Q_{10}}$ values matched our empirical results quite nicely. Interestingly, for a given between individual variance in thermal breadth, terrestrial ectotherms are predicted to have lower levels of between individual variation in thermal optima compared to marine and freshwater ectotherms ([@fig-sim2]B). In contrast, terrestrial ectotherms are expected to have higher levels of between individual variation in thermal breadth when controlling for between individual variation in thermal optima ([@fig-sim2]B). 
 
 ```{r, sim}
 #| label: sim
@@ -4594,7 +4773,6 @@ ws4 <- data.frame(do.call(cbind, ws4)) %>% pivot_longer(everything(), names_to =
 
 ```
 
-
 ```{r, fig-sim}
 #| label: fig-sim
 #| fig-align: center
@@ -4627,7 +4805,7 @@ size_ano = 10
               group_by(z) %>% 
               summarise(mean = mean(fitness), sd = sd(fitness), cv = sd/mean, n = n())
 
-sim1 <- ggplot(ws1, aes(x = z, y = fitness, color = run)) + geom_line() + theme_classic() + labs(y = "Physiological Rate", x = TeX("Temperature ($^\\circ$C)"), color = "Individual", title = "Thermal Breadth & Rate") + scale_color_viridis_d() + my_theme()+ geom_vline(xintercept = 28, linetype = "dashed", color = "red") + geom_vline(xintercept = 18, linetype = "dashed", color = "blue") + my_annotate(sum_sim1, size_ano)
+sim1 <- ggplot(ws1, aes(x = z, y = fitness, color = run)) + geom_line() + theme_classic() + labs(y = "Physiological Rate", x = TeX("Temperature ($^\\circ$C)"), color = "Individual", title = "Thermal Breadth & Rate") + scale_color_viridis_d() + my_theme()+ geom_vline(xintercept = 28, linetype = "dashed", color = "red") + geom_vline(xintercept = 18, linetype = "dashed", color = "blue") + my_annotate(sum_sim1, size_ano) + theme(legend.position = "none")
   
 
 # mean, SD and CV
@@ -4636,7 +4814,7 @@ sim1 <- ggplot(ws1, aes(x = z, y = fitness, color = run)) + geom_line() + theme_
               group_by(z) %>% 
               summarise(mean = mean(fitness), sd = sd(fitness), cv = sd/mean, n = n())
 
-sim2 <- ggplot(ws2, aes(x = z, y = fitness, color = run)) + geom_line() + theme_classic() + labs(y = "Physiological Rate", x = TeX("Temperature ($^\\circ$C)"), color = "Individual", title = "Thermal Optima") + scale_color_viridis_d() + my_theme()+ geom_vline(xintercept = 28, linetype = "dashed", color = "red") +     geom_vline(xintercept = 18, linetype = "dashed", color = "blue")   + my_annotate(sum_sim2, size_ano)
+sim2 <- ggplot(ws2, aes(x = z, y = fitness, color = run)) + geom_line() + theme_classic() + labs(y = "Physiological Rate", x = TeX("Temperature ($^\\circ$C)"), color = "Individual", title = "Thermal Optima") + scale_color_viridis_d() + my_theme()+ geom_vline(xintercept = 28, linetype = "dashed", color = "red") +     geom_vline(xintercept = 18, linetype = "dashed", color = "blue")   + my_annotate(sum_sim2, size_ano)+ theme(legend.position = "none")
   
 # mean, SD and CV
   sum_sim3 <- ws3 %>% 
@@ -4644,7 +4822,7 @@ sim2 <- ggplot(ws2, aes(x = z, y = fitness, color = run)) + geom_line() + theme_
               group_by(z) %>% 
               summarise(mean = mean(fitness), sd = sd(fitness), cv = sd/mean, n = n())
 
-sim3 <- ggplot(ws3, aes(x = z, y = fitness, color = run)) + geom_line() + theme_classic() + labs(y = "Physiological Rate", x = TeX("Temperature ($^\\circ$C)"), color = "Individual", title = "Thermal Breadth, Optima & Rate") + scale_color_viridis_d() + my_theme()+ geom_vline(xintercept = 28, linetype = "dashed", color = "red") +     geom_vline(xintercept = 18, linetype = "dashed", color = "blue")   + my_annotate(sum_sim3, size_ano)
+sim3 <- ggplot(ws3, aes(x = z, y = fitness, color = run)) + geom_line() + theme_classic() + labs(y = "Physiological Rate", x = TeX("Temperature ($^\\circ$C)"), color = "Individual", title = "Thermal Breadth, Optima & Rate") + scale_color_viridis_d() + my_theme()+ geom_vline(xintercept = 28, linetype = "dashed", color = "red") +     geom_vline(xintercept = 18, linetype = "dashed", color = "blue")   + my_annotate(sum_sim3, size_ano)+ theme(legend.position = "none")
 
 # mean, SD and CV
   sum_sim4 <- ws4 %>% 
@@ -4652,14 +4830,13 @@ sim3 <- ggplot(ws3, aes(x = z, y = fitness, color = run)) + geom_line() + theme_
               group_by(z) %>% 
               summarise(mean = mean(fitness), sd = sd(fitness), cv = sd/mean, n = n())
 
-sim4 <- ggplot(ws4, aes(x = z, y = fitness, color = run)) + geom_line() + theme_classic() + labs(y = "Physiological Rate", x = TeX("Temperature ($^\\circ$C)"), color = "Individual", title = "Thermal Breadth") + scale_color_viridis_d() + my_theme()+ geom_vline(xintercept = 28, linetype = "dashed", color = "red") +     geom_vline(xintercept = 18, linetype = "dashed", color = "blue")   + my_annotate(sum_sim4, size_ano)
+sim4 <- ggplot(ws4, aes(x = z, y = fitness, color = run)) + geom_line() + theme_classic() + labs(y = "Physiological Rate", x = TeX("Temperature ($^\\circ$C)"), color = "Individual", title = "Thermal Breadth") + scale_color_viridis_d() + my_theme()+ geom_vline(xintercept = 28, linetype = "dashed", color = "red") +     geom_vline(xintercept = 18, linetype = "dashed", color = "blue")   + my_annotate(sum_sim4, size_ano)+ theme(legend.position = "none")
 
 p_sim <- ((sim1 + sim2) / (sim4 + sim3)) +plot_annotation(tag_levels = "A") & theme(plot.tag = element_text(size = 30))
-ggsave(p_sim, width = 18.5, height = 18, filename = "./output/figures/figS12.png")
+ggsave(p_sim, width = 22.5, height = 18, filename = "./output/figures/figS12.png")
  
 p_sim
 ```
-
 
 ```{r, sim2}
 #| label: sim2
@@ -4717,7 +4894,7 @@ colnames(sim_results) <- c("delta", "alpha", "sigma", "lnCVR", "lnVR")
 ```{r, fig-sim2}
 #| label: fig-sim2
 #| fig-align: center
-#| fig-cap: "Expected $lnCVR_{Q_{10}}$ and $lnVR_{Q_{10}}$ when varying $\\sigma_{_b_{\\delta}}$ = {0.01, 2} and  $\\sigma_{_b_{\\sigma}}$ = {0.01, 2} while fixing $\\sigma_{_b_{\\alpha}}$ = 0.05. In all simulations, $\\delta$ = 35, $\\sigma$ = 9, $\\alpha$ = -15, and *n* = 1000 individuals were simulated for each combination of $\\sigma_{_b_{\\delta}}$, $\\sigma_{_b_{\\sigma}}$ and $\\sigma_{_b_{\\alpha}}$."
+#| fig-cap: "Expected $lnCVR_{Q_{10}}$ (A) and $lnVR_{Q_{10}}$ (B) when varying $\\sigma_{_b_{\\delta}}$ = {0.01, 2} and  $\\sigma_{_b_{\\sigma}}$ = {0.01, 2} while fixing $\\sigma_{_b_{\\alpha}}$ = 0.01. In all simulations, $\\delta$ = 35, $\\sigma$ = 9, $\\alpha$ = -15, and *n* = 1000 individuals were simulated for each combination of $\\sigma_{_b_{\\delta}}$, $\\sigma_{_b_{\\sigma}}$ and $\\sigma_{_b_{\\alpha}}$. (B) The parameter space that match observed mean $lnVR_{Q_{10}}$ for terrestrial (green), marine (orange) and freshwater (blue) ectotherms. Dashed lines indicate the relative differences between the three habitat types when holding one parameter constant."
 
 sim_results <- readRDS("./output/sim_results")
 bins_cvr = 20

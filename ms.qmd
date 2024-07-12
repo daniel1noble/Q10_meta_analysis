@@ -1888,7 +1888,7 @@ figbtrait
 
 ```{r, fig-cvrlh}
 #| label: fig-cvrlh
-#| fig-cap: "Estimated mean acclimation and acute $lnRR_{Q_{10}}$ (A-C) and $lnCVR_{Q_{10}}$ (D-F) for adult (a) and juvenile (j) life-history stages for marine (A & D), freshwater (B & E) and terrestrial (C & F) ectotherms. Across all plots, thick bars indicate 95% confidence intervals and thin bars indicate 95% prediction intervals. k = total number of effect size estimates while the numbers in brackets indicate the number of species. For ease of visualisation, raw data for both adult and juvenile life-history stages are presented but points are not distinguished by different symbols. "
+#| fig-cap: "Estimated mean acclimation and acute $lnRR_{Q_{10}}$ (A-C) and $lnCVR_{Q_{10}}$ (D-F) for adult (a) and juvenile (j) life-history stages for marine (A & D), freshwater (B & E) and terrestrial (C & F) ectotherms. Across all plots, thick bars indicate 95% confidence intervals and thin bars indicate 95% prediction intervals. k = total number of effect size estimates while the numbers in brackets indicate the number of species. For ease of visualisation, raw data for both adult and juvenile life-history stages are presented but points are not distinguished by different symbols. $\\Beta$ values are the contrasts between acute and acclimation means within each life stage. $p_{MCMC}$ values are the posterior probability of the contrast being different from zero."
 #| echo: false
 #| warning: false
 
@@ -4201,6 +4201,54 @@ k_vr <- manual_extract(model3.2, mod = "habitat", group = "spp", exclude = NULL)
     tabs1 <- rbind(fixed, random)
 
     flextable(tabs1) %>% bold(part = "header") %>% autofit() %>% add_body_row(values = as_paragraph(as_b("Fixed Effects")), top = TRUE, colwidths = 5) %>% compose(value = as_paragraph(as_b(c(("Random Effects"), rep("", 4)))), i = 10)
+```
+
+```{r, fig-lnvrlh}
+#| label: fig-lnvrlh
+#| echo: false
+#| fig-cap: "Estimated mean acclimation and acute $lnVR_{Q_{10}}$ for adult (a) and juvenile (j) life-history stages for marine (A), freshwater (B) and terrestrial (C) ectotherms. Across all plots, thick bars indicate 95% confidence intervals and thin bars indicate 95% prediction intervals. k = total number of effect size estimates while the numbers in brackets indicate the number of species. For ease of visualisation, raw data for both adult and juvenile life-history stages are presented but points are not distinguished by different symbols. $\\Beta$ values are the contrasts between acute and acclimation means within each life stage. $p_{MCMC}$ values are the posterior probability of the contrast being different from zero."
+
+add_theme  <- function(){theme(axis.title  = element_text(size = 30),
+                               axis.text.y = element_text(size = 30),
+                               axis.text.x = element_text(size = 30),
+                              legend.title = element_text(size = 30),
+                               legend.text = element_text(size = 24),
+                               title = element_text(size = 36))}
+
+branch.size = 2.8
+trunk.size = 1.8
+
+n_lnvr_lh <- lnVRQ10_data %>% group_by(habitat, life.hist, type) %>% summarise(k = n(), spp = length(unique(spp))) %>% arrange(type, life.hist, habitat)
+
+x.pos = c(0.7, 1.30, 1.70, 2.30)
+size_annot <- 5.5
+
+###############
+## lnVR Q10
+###############
+
+t_trait_b <- contrast_lnvr_lh_stats %>% filter(habitat == "t") %>% purrr::modify_if(~is.numeric(.), ~round(., 2)) %>% arrange(stage)
+m_trait_b <- contrast_lnvr_lh_stats %>% filter(habitat == "m") %>% purrr::modify_if(~is.numeric(.), ~round(., 2)) %>% arrange(stage)
+f_trait_b <- contrast_lnvr_lh_stats %>% filter(habitat == "f") %>% purrr::modify_if(~is.numeric(.), ~round(., 2)) %>% arrange(stage)
+
+yloc = c(1.5, 2.5)
+
+m_r <- n_lnvr_lh %>% filter(habitat == "m")
+f_r <- n_lnvr_lh %>% filter(habitat == "f")
+t_r <- n_lnvr_lh %>% filter(habitat == "t")
+
+p1_vr <- orchard_plot(model3.4, mod = "life.hist", at = list(c_accl_time = 0, habitat = "m"), group = "spp", xlab = TeX("$lnVR_{Q_{10}}$"), condition.lab = "Type", by = "type",  g = FALSE, k = FALSE, angle = 45, branch.size = branch.size, trunk.size = trunk.size) + labs(title = "Marine") + add_theme() + ylim(-1.5, 3) + theme(legend.position = "none", axis.text.y = element_blank()) + annotate("text", x = x.pos, y = 2.5, label = TeX(paste0("\\it{k} = ", m_r$k, " (", m_r$spp, ")")), size = size_annot) + annotate("text", x = yloc, y = -1.5, label = TeX(paste0("$\\beta$ = ", m_trait_b$diff, " [", m_trait_b$l95, " to ", m_trait_b$u95, "] ", "$\\,p_{MCMC}$ = ", m_trait_b$p)), hjust = 0, size = 8)
+
+p2_vr <- orchard_plot(model3.4, mod = "life.hist", at = list(c_accl_time = 0, habitat = "f"), group = "record_num", xlab = TeX("$lnVR_{Q_{10}}$"), condition.lab = "Type", by = "type",  g = FALSE, k = FALSE, branch.size = branch.size, trunk.size = trunk.size, angle = 45)+ labs(title = "Freshwater")  + add_theme() + theme(legend.position = "none", axis.text.y = element_blank()) + ylim(-1.5, 3) + annotate("text", x = x.pos, y = 2.5, label = TeX(paste0("\\it{k} = ", f_r$k, " (", f_r$spp, ")")), size = size_annot) + theme(legend.position = "right", legend.justification = c(1, 1)) + guides(shape = guide_legend(direction = "vertical"), size = guide_legend(direction = "vertical")) + annotate("text", x = yloc, y = -1.5, label = TeX(paste0("$\\beta$ = ", f_trait_b$diff, " [", f_trait_b$l95, " to ", f_trait_b$u95, "] ", "$\\,p_{MCMC}$ = ", f_trait_b$p)), hjust = 0, size = 8)
+
+p3_vr <- orchard_plot(model3.4, mod = "life.hist", at = list(c_accl_time = 0, habitat = "t", legend.pos = "none"), group = "record_num", xlab = TeX("$lnVR_{Q_{10}}$"), condition.lab = "Type", by = "type",  g = FALSE, k = FALSE, branch.size = branch.size, trunk.size = trunk.size, angle = 45)+ labs(title = "Terrestrial") + add_theme()  +  ylim(-1.5,3) + theme(legend.position = "none") + annotate("text", x = x.pos, y = 2.5, label = TeX(paste0("\\it{k} = ", t_r$k, " (", t_r$spp, ")")), size = size_annot) + annotate("text", x = yloc, y = -1.5, label = TeX(paste0("$\\beta$ = ", t_trait_b$diff, " [", t_trait_b$l95, " to ", t_trait_b$u95, "] ", "$\\,p_{MCMC}$ = ", t_trait_b$p)), hjust = 0, size = 8) +scale_x_discrete(labels = c("A" = "Adult","J" = "Juvenile")) 
+
+figvr_lh <-(p3_vr | p1_vr | p2_vr) + plot_annotation(tag_levels = "A") 
+ggsave(figvr_lh, filename = "./output/figures/figSlh.pdf", width = 28, height = 10, device = "pdf")
+
+figvr_lh <- magick::image_read("./output/figures/figSlh.pdf")
+figvr_lh
+
 ```
 
 #### *Plots of* $I^2$ for multilevel models

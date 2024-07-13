@@ -466,4 +466,31 @@ post_summary <- function(x){
 #' @description Converts a single estimate of lnCVR10 into a 1 degree Celsius estimate
  lncvr_1c <-  function(x){
         return(x/10)
-  }
+ }
+ 
+ 
+ #' @title get_whole_bio
+ #' @description Takes posterior predictions of acute and acclimation effect sizes across habitats and broad trait categories, pools the acute and acclimation effects and then calculates a contrasts between biochem and whole-orgamism for effects sizes. Returns a data frame.
+ get_whole_bio <- function(post, habitat, trait_b_data){
+   # Find columns that match and subset cols from posterior
+   cols_habit <- as.numeric(rownames(trait_b_data)[trait_b_data$habitat == habitat])
+   
+   hab_type <- post[,cols_habit]
+   
+   # Find cols that match names
+   type1 <- c(hab_type[,1], hab_type[,1])  # Tissue Traits Pooled
+   type2 <- c(hab_type[,3], hab_type[,4])  # Biochem Traits Pooled
+   
+   # Now, find the contrast
+   contrast <-  type2 - type1
+   
+   # Summarise info about contrast
+   data_sum <- data.frame( habitat = habitat,
+                           comparison = paste0("Biochem - Tissue"),
+                           Est. = mean(contrast),
+                           `95% L CI` = quantile(contrast, 0.025),
+                           `95% U CI` = quantile(contrast, 0.975),
+                           `pmcmc` = p_value(pmcmc(contrast)), check.names = FALSE, row.names = NULL)
+   return(data_sum)
+   
+ }

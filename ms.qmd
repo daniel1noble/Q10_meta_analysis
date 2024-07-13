@@ -1,5 +1,5 @@
 ---
-title: "Limited physiological plasticity and reduced relative variance in physiological rates of ectotherm populations under climate change"
+title: "Physiological plasticity and variance in physiological rates vary across ectotherm populations"
 bibliography: ./bib/refs.bib
 csl: ./bib/ecology-letters.csl
 format:
@@ -391,13 +391,12 @@ $$ {#eq-lnq10VR} $$
 s_{lnVR_{Q_{10}}} = \left( \frac{1}{2\left( N_{2}-1 \right)} + \frac{1}{2\left(N_{1} - 1\right)} \right){ \left(\ \frac{10^{\circ}C}{T_{2}-T_{1}} \right) }^2
 $$ {#eq-slnq10VR}
 
-@eq-lnq10VR and @eq-slnq10VR describe the change in physiological rate
+where parameters are defined above. @eq-lnq10VR and @eq-slnq10VR describe the change in physiological rate
 variance (@eq-lnq10VR) across a 10°C temperature change along with its
-sampling variance (@eq-slnq10VR). While this is a useful metric, as
+sampling variance (@eq-slnq10VR). As
 discussed by @Nakagawa2015-fo there is often a strong mean-variance
-relationship that needs to be accounted for in analysing changes in
-variance. As such, we calculated the coefficient of variation, which
-standardizes changes in variance for changes in means as follows:
+relationship. As such, the coefficient of variation is often used because it allows one to
+standardize changes in variance as the mean changes as follows:
 
 $$
 lnCVR_{Q_{10}} = ln\left( \frac{\text{CV}_{2}}{\text{CV}_{1}} \right){ \left(\ \frac{10^{\circ}C}{T_{2}-T_{1}} \right) }
@@ -407,7 +406,7 @@ $$ {#eq-slncvr}
 
 where $CV$ is the coefficient of variation defined as $SD / R$. We refer
 to $lnCVR_{Q_{10}}$ as relative variance because variance changes are
-relative to the mean.
+relative to the mean. While we analyse $lnCVR_{Q_{10}}$ it does make certain assumptions about mean-variance relationships, and given that we are analysing the mean alongside the variance we present results on $lnCVR_{Q_{10}}$ in the supplement.
 
 #### *Calculating acute and acclimation* $lnRR_{Q_{10}}$, $lnVR_{Q_{10}}$ and $lnCVR_{Q_{10}}$ estimates
 
@@ -422,11 +421,10 @@ acutely we could only calculate acute versions of these effect size
 estimates. For all effect sizes the higher temperature was in the
 numerator and the lower of the two temperatures in the denominator. As
 such, positive effect sizes suggest that the mean (i.e.,
-$lnRR_{Q_{10}}$) or relative variance (i.e., $lnCVR_{Q_{10}}$) is larger
+$lnRR_{Q_{10}}$), variance ($lnVR_{Q_{10}}$) or relative variance (i.e., $lnCVR_{Q_{10}}$) is larger
 at the higher of the two temperatures (numerator) when standardized to
-10°C. Importantly, $lnRR_{Q_{10}}$, $lnCVR_{Q_{10}}$ and
-$lnVR_{Q_{10}}$, as with $Q_{10}$ more generally, all assume that the
-effect of temperature on physiological rates (or changes in relative
+10°C. Importantly, our effect sizes, as with $Q_{10}$ more generally, all assume that the
+effect of temperature on physiological rates (or changes in
 variance) is log-linear (see [@fig-concept]B & *Supplementary Materials* for further
 discussion). We test and control for any violations of these assumptions
 in our analysis (see below).
@@ -908,6 +906,11 @@ if(rerun){
   change_t <- ((t_acclim - t_acute) / t_acute)*100; quantile(change_t, c(0.025, 0.975))
   avg_change <- (change_f + change_m + change_t) / 3; quantile(avg_change, c(0.025, 0.975)) # Could use weighted mean, but for now this seems fine.
 
+  # Calculated weighted mean by sample size. 
+    f_RR_mean <- (f_acute * N[1,"n"][[1]] + f_acclim * N[2,"n"][[1]]) / sum(N[1:2, "n"]); pmcmc(f_RR_mean)
+    m_RR_mean <- (m_acute * N[3,"n"][[1]] + m_acclim * N[3,"n"][[1]]) / sum(N[3:4, "n"]); pmcmc(m_RR_mean)
+    t_RR_mean <- (t_acute * N[5,"n"][[1]] + t_acclim * N[6,"n"][[1]]) / sum(N[5:6, "n"]); pmcmc(t_RR_mean)
+    
 ####################################################
 # Model 1.3's: Trait type varied by acclimation type
 # but data is separated by habitat to simplify
@@ -1032,7 +1035,11 @@ if(rerun){
                                                      l95 = sapply(data.frame(contrast_lnrr_trait_post), function(x) quantile(x, 0.025)),
                                                      u95 = sapply(data.frame(contrast_lnrr_trait_post), function(x) quantile(x, 0.975)),
                                                        p = sapply(data.frame(contrast_lnrr_trait_post), function(x) p_value(pmcmc(x))))
-
+       # Contrasts for pooled acute and acclimation across trait categories
+            
+            contrast_lnrr_trait_cat_stats <- rbind(get_whole_bio(pred_lnrr_trait_post, habitat = "t", trait_b_data),
+                                                        get_whole_bio(pred_lnrr_trait_post, habitat = "m", trait_b_data),
+                                                        get_whole_bio(pred_lnrr_trait_post, habitat = "f", trait_b_data))
 ###########################################################
 ## Model 1.4 - whether chance between q10 depends on life stage and habitat
 ###########################################################
@@ -1372,220 +1379,235 @@ there were also no differences across habitats (Adult-Juvenile (Acute):
 to `r quantile(acclim_all_lh, 0.975)[1]`, $p_{MCMC}$ =
 `r pmcmc(acclim_all_lh)`).
 
-```{r, lncvrq10}
-#| label: lncvrq10
+```{r, lnvrq10}
+#| label: lnvrq10
 #| echo: false
 #| warning: false
 #| error: false
 #| include: false
-#| cache: false
+#| cache: true
 
 #############
-  ## lnCVRQ10
+  ## lnVRQ10
 #############
 ##################################################
   # Organise the data and prune tree
 #################################################
-  lnCVRQ10_data <- data_long2 %>% filter(grepl("lnCVR", name) & !is.na(effect_size) & !is.na(V) & !V == 0 & !is.na(acclim_period)) %>% 
+  lnVRQ10_data <- data_long2 %>% filter(grepl("lnVR", name) & !is.na(effect_size) & !is.na(V) & !V == 0 & !is.na(acclim_period)) %>% 
                               mutate(spp = species_full, c_accl_time = acclim_period - mean(acclim_period, na.rm = TRUE),
                                     max_temp_c = scale(temp_2, scale = FALSE))
 
 # Check and prune tree
-  tree_lncvr <- tree_checks(data = lnCVRQ10_data, tree = tree_p0.7, dataCol = "species_full", type = "prune")
-  tree_checks(data = lnCVRQ10_data, tree = tree_lncvr, dataCol = "species_full", type = "check") # Good
+  tree_lnVR <- tree_checks(data = lnVRQ10_data, tree = tree_p0.7, dataCol = "species_full", type = "prune")
+  tree_checks(data = lnVRQ10_data, tree = tree_lnVR, dataCol = "species_full", type = "check") # Good
 
 # Create the phylo correlation matrix
-  phylo_cor_CVR <- vcv(tree_lncvr, cor = TRUE)
-          A_CVR <- vcv(tree_lncvr, cor = FALSE) # For bayes, need cov matrix
+  phylo_cor_VR <- vcv(tree_lnVR, cor = TRUE)
+          A_VR <- vcv(tree_lnVR, cor = FALSE) # For bayes, need cov matrix
+
 
 ###################################################
-  # Model 2.1: Intercept only model.
+  # Model 3.1: Intercept only model.
   # Used for heterogeneity analysis
 ###################################################
 rerun = FALSE
 if(rerun){
-  model2.1 <- metafor::rma.mv(effect_size ~ 1, V = V, 
+  model3.1 <- metafor::rma.mv(effect_size ~ 1, V = V, 
                               random = list(~1 | record_num,
                                             ~1 | species_full,
                                             ~1 | spp,
                                             ~1 | trait,
                                             ~1 | obs),
-                              R = list(species_full = phylo_cor_CVR), dfs = "contain", 
-                              test = "t", data = lnCVRQ10_data) 
+                              R = list(species_full = phylo_cor_VR), dfs = "contain", 
+                              test = "t", data = lnVRQ10_data) 
   
-  model2.1_bayes <- brms::brm(effect_size | se(sqrt(V), sigma = TRUE) ~  1 + (~1 | record_num) + (1 | gr(species_full, cov = A_CVR)) + (1 | spp) + (1|trait), data2 = list(A_CVR=A_CVR), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.99, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 4, data = lnCVRQ10_data)
+  model3.1_bayes <- brms::brm(effect_size | se(sqrt(V), sigma = TRUE) ~  1 + (~1 | record_num) + (1 | gr(species_full, cov = A_VR)) + (1 | spp) + (1|trait), data2 = list(A_VR=A_VR), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 4, data = lnVRQ10_data)
   
   # Save model1.1
-  saveRDS(model2.1, file = "./output/models/lnCVRQ10_2.1")
-  saveRDS(model2.1_bayes, file = "./output/models/lnCVRQ10_2.1_bayes")
+  saveRDS(model3.1, file = "./output/models/lnVRQ10_3.1")
+  saveRDS(model3.1_bayes, file = "./output/models/lnVRQ10_3.1_bayes")
 } else{ 
-        model2.1 <- readRDS("./output/models/lnCVRQ10_2.1")
-  model2.1_bayes <- readRDS("./output/models/lnCVRQ10_2.1_bayes")
+        model3.1 <- readRDS("./output/models/lnVRQ10_3.1")
+  model3.1_bayes <- readRDS("./output/models/lnVRQ10_3.1_bayes")
 }
 
 # Heterogeneity analysis
-   w_cvr <- with(lnCVRQ10_data, 1/V) # weights
-  sv_cvr <- sum(w_cvr*(dim(lnCVRQ10_data)[1]-1)) / (sum(w_cvr)^2 + sum(w_cvr^2))
+   w_VR <- with(lnVRQ10_data, 1/V) # weights
+  sv_VR <- sum(w_VR*(dim(lnVRQ10_data)[1]-1)) / (sum(w_VR)^2 + sum(w_VR^2))
 
 # extract posterior sds, but square them to turn to variance
-  posteriors_2.1 <- posterior_samples(model2.1_bayes, pars = c("^sd", "sigma"))^2
-  colnames(posteriors_2.1) <- gsub("__Intercept", "", colnames(posteriors_2.1))
-  colnames(posteriors_2.1) <- gsub("sd_", "", colnames(posteriors_2.1))
+  posteriors_3.1 <- posterior_samples(model3.1_bayes, pars = c("^sd", "sigma"))^2
+  colnames(posteriors_3.1) <- gsub("__Intercept", "", colnames(posteriors_3.1))
+  colnames(posteriors_3.1) <- gsub("sd_", "", colnames(posteriors_3.1))
   
-    res_cvr <- posteriors_2.1[,"sigma"]
-   stdy_cvr <- posteriors_2.1[,"record_num"]
-  phylo_cvr <- posteriors_2.1[,"species_full"]
-    spp_cvr <- posteriors_2.1[,"spp"]
-  trait_cvr <- posteriors_2.1[,"trait"]
-  total_cvr <- phylo_cvr + spp_cvr + res_cvr + sv_cvr + stdy_cvr + trait_cvr
+    res_VR <- posteriors_3.1[,"sigma"]
+   stdy_VR <- posteriors_3.1[,"record_num"]
+  phylo_VR <- posteriors_3.1[,"species_full"]
+    spp_VR <- posteriors_3.1[,"spp"]
+  trait_VR <- posteriors_3.1[,"trait"]
+  total_VR <- phylo_VR + spp_VR + res_VR + sv_VR + stdy_VR + trait_VR
  
   # Calculate I2
-     tot_i2_cvr <- (sv_cvr / total_cvr)*100    ; mean(tot_i2_cvr)  ; quantile(tot_i2_cvr, c(0.025, 0.975))
-   phylo_i2_cvr <- (phylo_cvr / total_cvr)*100 ; mean(phylo_i2_cvr); quantile(phylo_i2_cvr, c(0.025, 0.975))
-     spp_i2_cvr <- (spp_cvr / total_cvr)*100   ; mean(spp_i2_cvr)  ; quantile(spp_i2_cvr, c(0.025, 0.975))
-    stdy_i2_cvr <- (stdy_cvr / total_cvr)*100  ; mean(stdy_i2_cvr) ; quantile(stdy_i2_cvr, c(0.025, 0.975))
-   trait_i2_cvr <- (trait_cvr / total_cvr)*100 ; mean(trait_i2_cvr); quantile(trait_i2_cvr, c(0.025, 0.975))
-     res_i2_cvr <- (res_cvr / total_cvr)*100   ; mean(res_i2_cvr)  ; quantile(res_i2_cvr, c(0.025, 0.975))
+     tot_i2_VR <- (sv_VR / total_VR)*100    ; mean(tot_i2_VR)  ; quantile(tot_i2_VR, c(0.025, 0.975))
+   phylo_i2_VR <- (phylo_VR / total_VR)*100 ; mean(phylo_i2_VR); quantile(phylo_i2_VR, c(0.025, 0.975))
+     spp_i2_VR <- (spp_VR / total_VR)*100   ; mean(spp_i2_VR)  ; quantile(spp_i2_VR, c(0.025, 0.975))
+    stdy_i2_VR <- (stdy_VR / total_VR)*100  ; mean(stdy_i2_VR) ; quantile(stdy_i2_VR, c(0.025, 0.975))
+   trait_i2_VR <- (trait_VR / total_VR)*100 ; mean(trait_i2_VR); quantile(trait_i2_VR, c(0.025, 0.975))
+     res_i2_VR <- (res_VR / total_VR)*100   ; mean(res_i2_VR)  ; quantile(res_i2_VR, c(0.025, 0.975))
   
   # Table
-     i2_lncvr <- data.frame(name = c("Phylogeny", "Species", "Study", "Trait"),
-                           est = c(mean(phylo_i2_cvr),mean(spp_i2_cvr), mean(stdy_i2_cvr), mean(trait_i2_cvr)),
-                           lci = c(quantile(phylo_i2_cvr, c(0.025, 0.975))[1], quantile(spp_i2_cvr, c(0.025, 0.975))[1],
-                                   quantile(stdy_i2_cvr, c(0.025, 0.975))[1], quantile(trait_i2_cvr, c(0.025, 0.975))[1]),
-                           uci = c(quantile(phylo_i2_cvr, c(0.025, 0.975))[2], quantile(spp_i2_cvr, c(0.025, 0.975))[2],
-                                   quantile(stdy_i2_cvr, c(0.025, 0.975))[2], quantile(trait_i2_cvr, c(0.025, 0.975))[2]))  
+     i2_lnVR <- data.frame(name = c("Phylogeny", "Species", "Study", "Trait"),
+                           est = c(mean(phylo_i2_VR),mean(spp_i2_VR), mean(stdy_i2_VR), mean(trait_i2_VR)),
+                           lci = c(quantile(phylo_i2_VR, c(0.025, 0.975))[1], quantile(spp_i2_VR, c(0.025, 0.975))[1],
+                                   quantile(stdy_i2_VR, c(0.025, 0.975))[1], quantile(trait_i2_VR, c(0.025, 0.975))[1]),
+                           uci = c(quantile(phylo_i2_VR, c(0.025, 0.975))[2], quantile(spp_i2_VR, c(0.025, 0.975))[2],
+                                   quantile(stdy_i2_VR, c(0.025, 0.975))[2], quantile(trait_i2_VR, c(0.025, 0.975))[2]))  
   
 ###################################################
-  # Model 2.2: Model controlling for acclimation time, 
+  # Model 3.2: Model controlling for acclimation time, 
   # type and habitat assuming type can vary by habitat
 ###################################################
 
 if(rerun){
   # More realistic model 
-  model2.2 <- metafor::rma.mv(effect_size ~  max_temp_c + c_accl_time + type + habitat + type:habitat, V = V, 
+  model3.2 <- metafor::rma.mv(effect_size ~  max_temp_c + c_accl_time + type + habitat + type:habitat, V = V, 
                               random = list(~1 | record_num,
                                             ~1 | species_full,
                                             ~1 + max_temp_c| spp,
                                             ~1 | trait,
                                             ~1 | obs),
-                              R = list(species_full = phylo_cor_CVR), dfs = "contain", 
-                              test = "t", data = lnCVRQ10_data)
+                              R = list(species_full = phylo_cor_VR), dfs = "contain", 
+                              test = "t", data = lnVRQ10_data)
   
-   model2.2_bayes <- brms::brm(effect_size | se(sqrt(V), sigma = TRUE) ~  max_temp_c + c_accl_time + type + habitat + type:habitat + (~1 | record_num) + (1 | gr(species_full, cov = A_CVR)) + (1 + max_temp_c| spp) + (1|trait), data2 = list(A_CVR=A_CVR), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 4, data = lnCVRQ10_data)
-                                  
+   model3.2_bayes <- brms::brm(effect_size | se(sqrt(V), sigma = TRUE) ~  max_temp_c + c_accl_time + type + habitat + type:habitat + 
+        (~1 | record_num) + 
+        (1 | gr(species_full, cov = A_VR)) + 
+        (1 + max_temp_c| spp) + 
+        (1|trait), 
+        data2 = list(A_VR=A_VR), family = gaussian(), 
+        prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), 
+        control = list(adapt_delta = 0.98, max_treedepth = 12), 
+        chains = 4, thin = 5, iter = 8000, warmup = 1000, cores = 4, data = lnVRQ10_data)
+                              
   # Save model1.2
-  saveRDS(model2.2, file = "./output/models/lnCVRQ10_2.2")
-  saveRDS(model2.2_bayes, file = "./output/models/lnCVRQ10_2.2_bayes")
+  saveRDS(model3.2, file = "./output/models/lnVRQ10_3.2")
+  saveRDS(model3.2_bayes, file = "./output/models/lnVRQ10_3.2_bayes")
 
   } else{
-        model2.2 <- readRDS("./output/models/lnCVRQ10_2.2")
-  model2.2_bayes <- readRDS("./output/models/lnCVRQ10_2.2_bayes")
+        model3.2 <- readRDS("./output/models/lnVRQ10_3.2")
+  model3.2_bayes <- readRDS("./output/models/lnVRQ10_3.2_bayes")
 }
 
 ######################################################
   # Bayesian Contrasts
 ######################################################
 
-  posteriors_2.2 <- posterior_samples(model2.2_bayes, pars = "^b")
-  f_acute_cvr  <- posteriors_2.2[,"b_Intercept"]; pmcmc(f_acute_cvr)
-  f_acclim_cvr <- posteriors_2.2[,"b_Intercept"] + posteriors_2.2[,"b_typeacclim"]
-  m_acute_cvr  <- posteriors_2.2[,"b_Intercept"] + posteriors_2.2[,"b_habitatm"]
-  m_acclim_cvr <- posteriors_2.2[,"b_Intercept"] + posteriors_2.2[,"b_habitatm"] + posteriors_2.2[,"b_typeacclim"] + posteriors_2.2[,"b_typeacclim:habitatm"]
-  t_acute_cvr  <- posteriors_2.2[,"b_Intercept"] + posteriors_2.2[,"b_habitatt"]
-  t_acclim_cvr <- posteriors_2.2[,"b_Intercept"] + posteriors_2.2[,"b_habitatt"] + posteriors_2.2[,"b_typeacclim"] + posteriors_2.2[,"b_typeacclim:habitatt"]
+  posteriors_3.2 <- posterior_samples(model3.2_bayes, pars = "^b")
+  f_acute_VR  <- posteriors_3.2[,"b_Intercept"]; pmcmc(f_acute_VR)
+  f_acclim_VR <- posteriors_3.2[,"b_Intercept"] + posteriors_3.2[,"b_typeacclim"]
+  m_acute_VR  <- posteriors_3.2[,"b_Intercept"] + posteriors_3.2[,"b_habitatm"]
+  m_acclim_VR <- posteriors_3.2[,"b_Intercept"] + posteriors_3.2[,"b_habitatm"] + posteriors_3.2[,"b_typeacclim"] + posteriors_3.2[,"b_typeacclim:habitatm"]
+  t_acute_VR  <- posteriors_3.2[,"b_Intercept"] + posteriors_3.2[,"b_habitatt"]
+  t_acclim_VR <- posteriors_3.2[,"b_Intercept"] + posteriors_3.2[,"b_habitatt"] + posteriors_3.2[,"b_typeacclim"] + posteriors_3.2[,"b_typeacclim:habitatt"]
 
 # We'll take the marginalised mean for each type as there is no difference between acclimation and acute really except for in freshwater, but this effect size is so tiny. It's a 10% reduction at high temps and acclim is only a 2% reduction in variance at high temps.
   # First get sample sizes
-    N <- lnCVRQ10_data %>% group_by(habitat, type) %>% summarise(n=n())
+    N <- lnVRQ10_data %>% group_by(habitat, type) %>% summarise(n=n())
   
   # Calculated weighted mean by sample size. 
-    f_cvr_mean <- (f_acute_cvr * N[1,"n"][[1]] + f_acclim_cvr * N[2,"n"][[1]]) / sum(N[1:2, "n"]); pmcmc(f_cvr_mean)
-    m_cvr_mean <- (m_acute_cvr * N[3,"n"][[1]] + m_acclim_cvr * N[3,"n"][[1]]) / sum(N[3:4, "n"]); pmcmc(m_cvr_mean)
-    t_cvr_mean <- (t_acute_cvr * N[5,"n"][[1]] + t_acclim_cvr * N[6,"n"][[1]]) / sum(N[5:6, "n"]); pmcmc(t_cvr_mean)
+    f_VR_mean <- (f_acute_VR * N[1,"n"][[1]] + f_acclim_VR * N[2,"n"][[1]]) / sum(N[1:2, "n"]); pmcmc(f_VR_mean)
+    m_VR_mean <- (m_acute_VR * N[3,"n"][[1]] + m_acclim_VR * N[3,"n"][[1]]) / sum(N[3:4, "n"]); pmcmc(m_VR_mean)
+    t_VR_mean <- (t_acute_VR * N[5,"n"][[1]] + t_acclim_VR * N[6,"n"][[1]]) / sum(N[5:6, "n"]); pmcmc(t_VR_mean)
   
   # Lets now convert these to a %
-    f_cvr_mean_ef  <- abs((exp(f_cvr_mean) - 1)*100) # ~8.4% reduction
-    m_cvr_mean_ef  <- abs((exp(m_cvr_mean) - 1)*100) # ~15% reduction
-    t_cvr_mean_ef  <- abs((exp(t_cvr_mean) - 1)*100) # ~30% reduction
+    f_VR_mean_ef  <- abs((exp(f_VR_mean) - 1)*100) 
+    m_VR_mean_ef  <- abs((exp(m_VR_mean) - 1)*100) 
+    t_VR_mean_ef  <- abs((exp(t_VR_mean) - 1)*100) 
 
+  # Now, lets get contrasts between habitats averaged over type
+      f_m_c <- f_VR_mean - m_VR_mean   ; pmcmc(f_m_c); mean(f_m_c)
+      f_t_c <- t_VR_mean_ef - f_VR_mean; pmcmc(f_t_c); mean(f_t_c)
+      m_t_c <- t_VR_mean_ef - m_VR_mean; pmcmc(m_t_c); mean(m_t_c)
+      
 ###################################################
-  # Model 2.3: Model controlling for acclimation time, 
+  # Model 3.3: Model controlling for acclimation time, 
   # type and trait category assuming type can vary by habitat
 ###################################################
   # Add two general trait categories to test for trait differences (whole-organism vs biochemical)
-    lnCVRQ10_data <- lnCVRQ10_data %>% 
+    lnVRQ10_data <- lnVRQ10_data %>% 
                     mutate(trait_broad = ifelse(trait_category %in% c("cardiac", "rest_MR", "sprint", "muscle", "endurance", "max_MR"), 
                                                 "tissue/organism",
                                          ifelse(trait_category %in% c("ATPase", "metabolic_enzyme", "antiox", "mito_oxidation", "mito_leak"), 
                                                 "biochemical", trait_category)))
  # We can also run subsets for each habitat
-   tree_m_cvr <- tree_checks(lnCVRQ10_data %>% filter(habitat == "m" & trait_broad != "other"), tree = tree_lncvr, dataCol = "species_full", type = "prune")
-   tree_f_cvr <- tree_checks(lnCVRQ10_data %>% filter(habitat == "f" & trait_broad != "other"), tree = tree_lncvr, dataCol = "species_full", type = "prune")
-   tree_t_cvr <- tree_checks(lnCVRQ10_data %>% filter(habitat == "t" & trait_broad != "other"), tree = tree_lncvr, dataCol = "species_full", type = "prune")
+   tree_m_vr <- tree_checks(lnVRQ10_data %>% filter(habitat == "m" & trait_broad != "other"), tree = tree_lnVR, dataCol = "species_full", type = "prune")
+   tree_f_vr <- tree_checks(lnVRQ10_data %>% filter(habitat == "f" & trait_broad != "other"), tree = tree_lnVR, dataCol = "species_full", type = "prune")
+   tree_t_vr <- tree_checks(lnVRQ10_data %>% filter(habitat == "t" & trait_broad != "other"), tree = tree_lnVR, dataCol = "species_full", type = "prune")
    
  # cor matrices
-   m_phylo_cvr <- vcv(tree_m_cvr, corr = TRUE)
-   f_phylo_cvr <- vcv(tree_f_cvr, corr = TRUE)
-   t_phylo_cvr <- vcv(tree_t_cvr, corr = TRUE)
+   m_phylo_vr <- vcv(tree_m_vr, corr = TRUE)
+   f_phylo_vr <- vcv(tree_f_vr, corr = TRUE)
+   t_phylo_vr <- vcv(tree_t_vr, corr = TRUE)
     
 if(rerun){
   
   # Full Bayesian model   
-   model2.3_btrait_bayes <- brms::brm(effect_size | se(sqrt(V)) ~  max_temp_c + c_accl_time + type*trait_broad*habitat + 
+   model3.3_btrait_bayes <- brms::brm(effect_size | se(sqrt(V)) ~  max_temp_c + c_accl_time + type*trait_broad*habitat + 
                                            (1 | record_num) + 
-                                           (1 | gr(species_full, cov = A)) + 
+                                           (1 | gr(species_full, cov = A_VR)) + 
                                            (1 + max_temp_c | spp) +(1|trait) + 
                                            (1 + trait_broad |gr(obs, cor = FALSE)),  
-                                         data2 = list(A=A), family = gaussian(), 
+                                         data2 = list(A_VR=A_VR), family = gaussian(), 
                                          prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), 
                                          control = list(adapt_delta = 0.98, max_treedepth = 12), 
-                                         chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 8, data = filter(lnCVRQ10_data, trait_broad != "other"))
-    saveRDS(model2.3_btrait_bayes, "./output/models/model2.3_btrait_bayes")
+                                         chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 8, data = filter(lnVRQ10_data, trait_broad != "other"))
+    saveRDS(model3.3_btrait_bayes, "./output/models/model3.3_btrait_bayes")
     
   # Metafor models for creating plots. Subset by habitat to make this easier
       # Marine
-         model2.3_m_broad <- metafor::rma.mv(effect_size ~  max_temp_c + c_accl_time + type + trait_broad + type:trait_broad, V = V, 
+         model3.3_m_broad <- metafor::rma.mv(effect_size ~  max_temp_c + c_accl_time + type + trait_broad + type:trait_broad, V = V, 
                               random = list(~1 | record_num,
                                             ~1 | species_full,
                                             ~1 + max_temp_c| spp,
                                             ~1 | trait,
                                             ~1 + trait_broad| obs),
-                              R = list(species_full = m_phylo_cvr), dfs = "contain", 
+                              R = list(species_full = m_phylo_vr), dfs = "contain", 
                               test = "t", struct = c("GEN","HCS"), phi = 0,
-                              data = filter(lnCVRQ10_data, habitat == "m" & trait_broad != "other"))
-         saveRDS(model2.3_m_broad, "output/models/model2.3_m_broad")
+                              data = filter(lnVRQ10_data, habitat == "m" & trait_broad != "other"))
+         saveRDS(model3.3_m_broad, "output/models/model3.3_m_broad")
     
       # Freshwater
-         model2.3_f_broad <- metafor::rma.mv(effect_size ~  max_temp_c + c_accl_time + type + trait_broad + type:trait_broad, V = V, 
+         model3.3_f_broad <- metafor::rma.mv(effect_size ~  max_temp_c + c_accl_time + type + trait_broad + type:trait_broad, V = V, 
                               random = list(~1 | record_num,
                                             ~1 | species_full,
                                             ~1 + max_temp_c| spp,
                                             ~1 | trait,
                                             ~1 + trait_broad| obs),
-                              R = list(species_full = f_phylo_cvr), dfs = "contain", 
+                              R = list(species_full = f_phylo_vr), dfs = "contain", 
                               test = "t", struct = c("GEN","HCS"),  phi = 0,
-                              data = filter(lnCVRQ10_data, habitat == "f" & trait_broad != "other"))
-          saveRDS(model2.3_f_broad, "output/models/model2.3_f_broad")
+                              data = filter(lnVRQ10_data, habitat == "f" & trait_broad != "other"))
+          saveRDS(model3.3_f_broad, "output/models/model3.3_f_broad")
       
       # Terrestrial
-         model2.3_t_broad <- metafor::rma.mv(effect_size ~  max_temp_c + c_accl_time + type + trait_broad + type:trait_broad, V = V, 
+         model3.3_t_broad <- metafor::rma.mv(effect_size ~  max_temp_c + c_accl_time + type + trait_broad + type:trait_broad, V = V, 
                               random = list(~1 | record_num,
                                             ~1 | species_full,
                                             ~1 + max_temp_c| spp,
                                             ~1 | trait,
                                             ~1 + trait_broad| obs),
-                              R = list(species_full = t_phylo_cvr), dfs = "contain", 
+                              R = list(species_full = t_phylo_vr), dfs = "contain", 
                               test = "t", struct = c("GEN","HCS"), phi = 0,
-                              data = filter(lnCVRQ10_data, habitat == "t" & trait_broad != "other"))
-         saveRDS(model2.3_t_broad, "output/models/model2.3_t_broad")
+                              data = filter(lnVRQ10_data, habitat == "t" & trait_broad != "other"))
+         saveRDS(model3.3_t_broad, "output/models/model3.3_t_broad")
   
   } else{
-    model2.3_btrait_bayes <- readRDS("./output/models/model2.3_btrait_bayes")
-    model2.3_m_broad <- readRDS("output/models/model2.3_m_broad")
-    model2.3_f_broad <- readRDS("output/models/model2.3_f_broad")
-    model2.3_t_broad <- readRDS("output/models/model2.3_t_broad")
+    model3.3_btrait_bayes <- readRDS("./output/models/model3.3_btrait_bayes")
+    model3.3_m_broad <- readRDS("output/models/model3.3_m_broad")
+    model3.3_f_broad <- readRDS("output/models/model3.3_f_broad")
+    model3.3_t_broad <- readRDS("output/models/model3.3_t_broad")
 }
-
+    
+    
 ###########################################################
   # Processing Bayesian Posteriors
 ###########################################################
@@ -1598,65 +1620,72 @@ if(rerun){
                              trait_broad = rep(c("tissue/organism", "biochemical"), each = 2))     
       
        # Predict from model. Note this is the summary.
-         pred_lncvr_traitb <- fitted(model2.3_btrait_bayes, 
+         pred_lnvr_traitb <- fitted(model3.3_btrait_bayes, 
                                      newdata = trait_b_data, re_formula = NA,
                                      summary = TRUE, 
                                      robust = FALSE)
-         pred_lncvr_traitb <- cbind(trait_b_data, pred_lncvr_traitb)
-    
+         pred_lnvr_traitb <- cbind(trait_b_data, pred_lnvr_traitb)
+         
+
+         
+      
        # Predict to get the posterior. Note that we have the full posterior distribution here for each of the 12 categories in the new data. Here, we want to look at the difference between acute and acclimation within each of the categories. 
-            pred_lncvr_traitb_post <- fitted(model2.3_btrait_bayes, 
+            pred_lnvr_traitb_post <- fitted(model3.3_btrait_bayes, 
                                      newdata = trait_b_data, re_formula = NA,
                                      summary = FALSE, 
                                      robust = FALSE)
-        contrast_lncvr_trait_post <-  pred_lncvr_traitb_post[,c(1,3,5,7,9,11)] - pred_lncvr_traitb_post[,c(2,4,6,8,10,12)] # Acclimation - acute.
-            
+        contrast_lnvr_trait_post <-  pred_lnvr_traitb_post[,c(1,3,5,7,9,11)] - pred_lnvr_traitb_post[,c(2,4,6,8,10,12)] # Acclimation - acute.
+          
+    
         # Contrast statistics
-            contrast_lncvr_trait_stats <- data.frame( habitat = rep(c("t", "m", "f"), each = 2),
+            contrast_lnvr_trait_stats <- data.frame( habitat = rep(c("t", "m", "f"), each = 2),
                                                      trait = rep(c("tissue/organism", "biochemical"), each = 1),
-                                                    diff = sapply(data.frame(contrast_lncvr_trait_post), mean),
-                                                     l95 = sapply(data.frame(contrast_lncvr_trait_post), function(x) quantile(x, 0.025)),
-                                                     u95 = sapply(data.frame(contrast_lncvr_trait_post), function(x) quantile(x, 0.975)),
-                                                       p = sapply(data.frame(contrast_lncvr_trait_post), function(x) p_value(pmcmc(x))))
-
-   # Calculate the design matrix using this new data. Need to be careful here to check that the levels are set up the same as the posterior.
-
-
+                                                    diff = sapply(data.frame(contrast_lnvr_trait_post), mean),
+                                                     l95 = sapply(data.frame(contrast_lnvr_trait_post), function(x) quantile(x, 0.025)),
+                                                     u95 = sapply(data.frame(contrast_lnvr_trait_post), function(x) quantile(x, 0.975)),
+                                                       p = sapply(data.frame(contrast_lnvr_trait_post), function(x) p_value(pmcmc(x))))
+        # Contrasts for pooled acute and acclimation across trait categories
+            
+            contrast_lnvr_trait_cat_stats <- rbind(get_whole_bio(pred_lnvr_traitb_post, habitat = "t", trait_b_data),
+                                                        get_whole_bio(pred_lnvr_traitb_post, habitat = "m", trait_b_data),
+                                                        get_whole_bio(pred_lnvr_traitb_post, habitat = "f", trait_b_data))
+      
+        
 ###################################################
-  # Model 2.4: Model controlling for acclimation time, 
+  # Model 3.4: Model controlling for acclimation time, 
   # type and life history stage assuming type can vary by habitat
 ###################################################
 
 if(rerun){
   # More realistic model 
-  model2.4 <- metafor::rma.mv(effect_size ~  max_temp_c + c_accl_time + type*habitat*life.hist, V = V, 
+  model3.4 <- metafor::rma.mv(effect_size ~  max_temp_c + c_accl_time + type*habitat*life.hist, V = V, 
                               random = list(~1 | record_num,
                                             ~1 | species_full,
                                             ~1 + max_temp_c| spp,
                                             ~1 | trait,
                                             ~1 | obs),
-                              R = list(species_full = phylo_cor_CVR), dfs = "contain", 
-                              test = "t", data = lnCVRQ10_data)
+                              R = list(species_full = phylo_cor_VR), dfs = "contain", 
+                              test = "t", data = lnVRQ10_data)
   # Save model
-  saveRDS(model2.4, file = "./output/models/lnCVRQ10_2.4")
+  saveRDS(model3.4, file = "./output/models/lnVRQ10_3.4")
 
-   model2.4_bayes <- brms::brm(effect_size | se(sqrt(V)) ~  max_temp_c + c_accl_time + type*habitat*life.hist + 
+   model3.4_bayes <- brms::brm(effect_size | se(sqrt(V)) ~  max_temp_c + c_accl_time + type*habitat*life.hist + 
                                  (~1 | record_num) + 
-                                 (1 | gr(species_full, cov = A_CVR)) + 
+                                 (1 | gr(species_full, cov = A_VR)) + 
                                  (1 + max_temp_c| spp) + 
                                  (1|trait) +
                                  (1|obs), 
-                               data2 = list(A_CVR=A_CVR), family = gaussian(), 
+                               data2 = list(A_VR=A_VR), family = gaussian(), 
                                prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), 
                                control = list(adapt_delta = 0.98, max_treedepth = 12), 
                                chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 4, data = lnCVRQ10_data)
                                   
   # Save model
-  saveRDS(model2.4_bayes, file = "./output/models/lnCVRQ10_2.4_bayes")
+  saveRDS(model3.4_bayes, file = "./output/models/lnVRQ10_3.4_bayes")
 
   } else{
-        model2.4 <- readRDS("./output/models/lnCVRQ10_2.4")
-  model2.4_bayes <- readRDS("./output/models/lnCVRQ10_2.4_bayes")
+        model3.4 <- readRDS("./output/models/lnVRQ10_3.4")
+  model3.4_bayes <- readRDS("./output/models/lnVRQ10_3.4_bayes")
 }
 
 ###########################################################
@@ -1673,25 +1702,25 @@ if(rerun){
             X <- model.matrix(~max_temp_c + c_accl_time + type*habitat*life.hist, data = lh_b_data) 
    
             # Extract posteriors
-              post_lh <- posterior_samples(model2.4_bayes, pars = "^b")
+              post_lh_vr <- posterior_samples(model3.4_bayes, pars = "^b")
         
         # Now we can do all the calculations in one shot.# Predict to get the posterior. Note that we have the full posterior distribution here for each of the 12 categories in the new data. Here, we want to look at the difference between acute and acclimation within each of the categories. 
-            pred_lh <- apply(t(post_lh),2 , function(x) as.matrix(X)%*%x)
+            pred_lh_vr <- apply(t(post_lh_vr),2 , function(x) as.matrix(X)%*%x)
 
-        contrast_lncvr_lh_post <-  pred_lh[c(1,3,5,7,9,11),] - pred_lh[c(2,4,6,8,10,12),] # Acclimation - acute.
+        contrast_lnvr_lh_post <-  pred_lh_vr[c(1,3,5,7,9,11),] - pred_lh_vr[c(2,4,6,8,10,12),] # Acclimation - acute.
             
         # Contrast statistics
-            contrast_lncvr_lh_stats <- data.frame( habitat = rep(c("t", "m", "f"), each = 2),
+            contrast_lnvr_lh_stats <- data.frame( habitat = rep(c("t", "m", "f"), each = 2),
                                                      stage = rep(c("j", "a"), each = 1),
-                                                    diff = apply(data.frame(contrast_lncvr_lh_post), 1, mean),
-                                                     l95 = apply(data.frame(contrast_lncvr_lh_post), 1, function(x) quantile(x, 0.025)),
-                                                     u95 = apply(data.frame(contrast_lncvr_lh_post), 1, function(x) quantile(x, 0.975)),
-                                                       p = apply(data.frame(contrast_lncvr_lh_post), 1, function(x) p_value(pmcmc(x))))
+                                                    diff = apply(data.frame(contrast_lnvr_lh_post), 1, mean),
+                                                     l95 = apply(data.frame(contrast_lnvr_lh_post), 1, function(x) quantile(x, 0.025)),
+                                                     u95 = apply(data.frame(contrast_lnvr_lh_post), 1, function(x) quantile(x, 0.975)),
+                                                       p = apply(data.frame(contrast_lnvr_lh_post), 1, function(x) p_value(pmcmc(x))))
 ```
 
 ```{r, fig-2}
 #| label: fig-2
-#| fig-cap: "A) Mean acute and acclimation $lnRR_{Q_{10}}$ across ectotherms in marine, freshwater, and terrestrial habitats. B) Mean acute and acclimation $lnCVR_{Q_{10}}$ across ectotherms in marine, freshwater and terrestrial habitats. For both plots, k = total number of effect size estimates while the numbers in brackets indicate the number of species. Sample sizes are the same for panel A) and B). In panels A) and B), thick bars are 95% confidence intervals (CI) and thin bars 95% prediction intervals (PI). $\\Beta$ values are the contrasts between acute and acclimation means within each habitat. $\\mu$ values are the overall meta-analytic means averaged across acute and acclimation types within each habitat type. In both cases, their 95% CI's are indicated within square brackets. $p_{MCMC}$ values are the posterior probability of the contrast or overall meta-analytic mean being different from zero. For ease of visualisation, all the raw data plotted for both acute and acclimation type effect sizes are presented as circles."
+#| fig-cap: "A) Mean acute and acclimation $lnRR_{Q_{10}}$ across ectotherms in marine, freshwater, and terrestrial habitats. B) Mean acute and acclimation $lnVR_{Q_{10}}$ across ectotherms in marine, freshwater and terrestrial habitats. For both plots, k = total number of effect size estimates while the numbers in brackets indicate the number of species. Sample sizes are the same for panel A) and B). In panels A) and B), thick bars are 95% confidence intervals (CI) and thin bars 95% prediction intervals (PI). $\\Beta$ values are the contrasts between acute and acclimation means within each habitat. $\\mu$ values are the overall meta-analytic means averaged across acute and acclimation types within each habitat type. In both cases, their 95% CI's are indicated within square brackets. $p_{MCMC}$ values are the posterior probability of the contrast or overall meta-analytic mean being different from zero. For ease of visualisation, all the raw data plotted for both acute and acclimation type effect sizes are presented as circles."
 #| warning: false
 #| echo: false
 
@@ -1726,43 +1755,30 @@ if(rerun){
 ##################
   # Figure 3b plot
 ################## 
-  # Clear from the model that there really is no difference between the change in variance for acute or acclimation CVR. But, there is a clear reduction in between individual variance for terrestrial species. As temperature get hotter then the variance in physiological rates decreases. This is not true of aquatic systems. 
-
-  k_cvr <- manual_extract(model2.2, mod = "habitat", group = "record_num", exclude = NULL)
-
-  x1 = 1.4
-  x2 = 2.4
-  x3 = 3.4
+    # Sensitivity analysis that looks at how variance changes but not controlling for the mean.
+  k_vr <- manual_extract(model3.2, mod = "habitat", group = "spp", exclude = NULL)
   
-  p3b <- orchard_plot(model2.2, xlab = TeX("$lnCVR_{Q_{10}}$"), by = "type", at = list(type = c("acute", "acclim")), mod = "habitat", group  = "record_num", weights = "prop", angle = 45, trunk.size = 1.8, branch.size = 2.8,  k.pos = "none")  +
-              scale_x_discrete(labels = c("T" = "Terrestrial","M" = "Marine" ,"F" = "Freshwater")) +  
-  
-  scale_fill_manual(values = col) + scale_color_manual(values = rep("black",3)) +
-  
-  annotate("text", x = x1, y = -1.5, label =TeX(paste0("$\\mu = $", round(mean(f_cvr_mean), 3), "[", round(quantile(f_cvr_mean, 0.025), 2)," to ", round(quantile(f_cvr_mean, 0.975),2), "] ")), hjust = 0, size = 8) + 
-         annotate("text", x = x1, y = 0.5, label =TeX(paste0("$\\beta = $", "NS")), hjust = 0, size = 8) +
-  annotate("text", x = x1-0.20, y = -1.5, label = TeX(paste0("$p_{MCMC} = $", round(pmcmc(f_cvr_mean), digit = 2))), hjust = 0, size = 8) + 
-  annotate("text", x = x1-0.20, y = 1, label =paste0(round(mean(exp(f_cvr_mean)-1)*100, 2), "%"), hjust = 0, size = 8) + 
-  
-  annotate("text", x = x2, y = -1.5, label =TeX(paste0("$\\mu = $", round(mean(m_cvr_mean), 3), "[", round(quantile(m_cvr_mean, 0.025), 2)," to ", round(quantile(m_cvr_mean, 0.975),2), "] ")), hjust = 0, size = 8) + 
-     annotate("text", x = x2, y = 0.5, label =TeX(paste0("$\\beta = $", "NS")), hjust = 0, size = 8) +
-  annotate("text", x = x2-0.20, y = -1.5, label = TeX(paste0("$p_{MCMC} = $", round(pmcmc(m_cvr_mean), digit = 2))), hjust = 0, size = 8) +
-  annotate("text", x = x2-0.20, y = 1, label =paste0(round(mean(exp(m_cvr_mean)-1)*100, 2), "%"), hjust = 0, size = 8) + 
-  
-  annotate("text", x = x3+0.10, y = -1.5, label =TeX(paste0("$\\mu = $", round(mean(t_cvr_mean), 3), "[", round(quantile(t_cvr_mean, 0.025), 2)," to ", round(quantile(t_cvr_mean, 0.975),2), "] ")), hjust = 0, size = 8) + 
-  annotate("text", x = x3+0.10, y = 0.5, label =TeX(paste0("$\\beta = $", "NS")), hjust = 0, size = 8) +
-  annotate("text", x = x3-0.10, y = 1, label =paste0(round(mean(exp(t_cvr_mean)-1)*100, 2), "%"), hjust = 0, size = 8) + 
-  annotate("text", x = x3-0.10, y = -1.5, label = TeX(paste0("$p_{MCMC} = $", round(pmcmc(t_cvr_mean), digit = 3))), hjust = 0, size = 8) + 
+  p3b <- orchard_plot(model3.2, xlab = TeX("$lnVR_{Q_{10}}$"), mod = "habitat", by = "type", group  = "record_num", weights = "prop", angle = 45, trunk.size = 1.8, branch.size = 2.8) +
+              scale_x_discrete(labels = c("T" = "Terrestrial","M" = "Marine" ,"F" = "Freshwater")) + ylim(-2,3) +
     
-    labs(shape = "Type") +
-    annotate("text", label= paste0("k = ", k_cvr$k, " (", k_cvr$sdy, ")"), x = c(0.8, 1.8, 2.8), y = 1.3, size = 5) + ylim (-1.5, 1.5) 
-   
+     annotate("text", x = 1.5, y = -2, label =TeX(paste0("$\\mu = $", round(mean(f_VR_mean), 2), " [", round(quantile(f_VR_mean, 0.025), 2)," to ", round(quantile(f_VR_mean, 0.975),2), "] ", " $\\,p_{MCMC}$", p_value(round(pmcmc(f_VR_mean), digit = 2)))), hjust = 0, size = 8) + 
+    annotate("text", x = 1.2, y = 1.5, label =TeX(paste0("$\\beta = $", "NS")), hjust = 0, size = 8) +
+  annotate("text", x = 1.20, y = -2, label =paste0(round(mean(f_VR_mean_ef), 1), "%"), hjust = 0, size = 8) + labs(shape = "Type") +
+    
+    annotate("text", x = 2.5, y = -2, label =TeX(paste0("$\\mu = $", round(mean(m_VR_mean), 2), " [", round(quantile(m_VR_mean, 0.025), 2)," to ", round(quantile(m_VR_mean, 0.975),2), "] ", " $\\,p_{MCMC}$", p_value(round(pmcmc(m_VR_mean), digit = 2)))), hjust = 0, size = 8) + 
+    annotate("text", x = 2.2, y = 1.5, label =TeX(paste0("$\\beta = $", "NS")), hjust = 0, size = 8) +
+  annotate("text", x = 2.20, y = -2, label =paste0(round(mean(m_VR_mean_ef), 1), "%"), hjust = 0, size = 8) + labs(shape = "Type") +
+    
+        annotate("text", x = 3.5, y = -2, label =TeX(paste0("$\\mu = $", round(mean(t_VR_mean), 2), " [", round(quantile(t_VR_mean, 0.025), 2)," to ", round(quantile(t_VR_mean, 0.975),2), "] ", " $\\,p_{MCMC}$ = ", p_value(round(pmcmc(t_VR_mean), digit = 2)))), hjust = 0, size = 8) + 
+    annotate("text", x = 3.2, y = 1.5, label =TeX(paste0("$\\beta = $", "NS")), hjust = 0, size = 8) +
+  annotate("text", x = 3.20, y = -2, label =paste0(round(mean(t_VR_mean_ef), 1), "%"), hjust = 0, size = 8) + labs(shape = "Type") + scale_fill_manual(values = c(col)) + annotate("text", y = 2.5, x = c(1.3, 2.3, 3.3)+0.1, label = TeX(paste0("\\it{k} = ", k_vr$k, " (", k_vr$sdy, ")")), size = 6) + scale_fill_manual(values = col) + scale_color_manual(values = rep("black",3))
+  
   p3b <- p3b + theme_classic() + theme(axis.title  = element_text(size = 24),
                                        axis.text = element_text(size = 24),
-                                       axis.text.y = element_blank(),
+                                       axis.text.y = element_text(angle = 45, size = 24),
                                        legend.title = element_text(size = 30),
                                legend.text = element_text(size = 24),
-                               title = element_text(size = 24), legend.position = "top") + guides(shape = "none")
+                               title = element_text(size = 24), legend.position = "top") 
   
   fig3 <- (p3a + p3b) + plot_annotation(tag_levels = "A")
   ggsave(fig3, filename = "./output/figures/fig3.png", width = 21.88, height = 9)
@@ -1771,38 +1787,37 @@ if(rerun){
   fig3
 ```
 
-### *Relative variation in physiological rates is reduced in terrestrial and marine ectotherms*
+### *Variation in physiological rates increases in aquatic but not terrestrial ectotherms*
 
-Relative variance in physiological rates ($lnCVR_{Q_{10}}$) showed a
-decrease with increasing temperature across all habitat types, which was
-especially pronounced in terrestrial and marine ectotherms. The total
-proportion of heterogeneity in $lnCVR_{Q_{10}}$ was lower compared to
-$lnRR_{Q_{10}}$ ($I^2_{sv}$ = `r mean(tot_i2_cvr)`, 95% CI:
-`r quantile(tot_i2_cvr, 0.025)` to `r quantile(tot_i2_cvr, 0.975)`),
+Variance in physiological rates ($lnVR_{Q_{10}}$) showed an
+increase with increasing temperature across all habitat types. However, physiological rate variance increase significantly more in freshwater (freshwater vs terrestrial: $\beta$ = `r mean(f_t_c)`, 95% CI: `r quantile(f_t_c, 0.025)` to `r quantile(f_t_c, 0.975)`, $p_{MCMC}$ = `r p_value(pmcmc(f_t_c))`) and marine ectotherms (marine vs terrestrial: $\beta$ = `r mean(m_t_c)`, 95% CI: `r quantile(m_t_c, 0.025)` to `r quantile(m_t_c, 0.975)`, $p_{MCMC}$ = `r p_value(pmcmc(m_t_c))`) compared to the limited increase in terrestrial ecotherms (@fig-2). The total
+proportion of heterogeneity in $lnVR_{Q_{10}}$ was lower compared to
+$lnRR_{Q_{10}}$ ($I^2_{sv}$ = `r mean(tot_i2_VR)`, 95% CI:
+`r quantile(tot_i2_VR, 0.025)` to `r quantile(tot_i2_VR, 0.975)`),
 with most variation being driven by between-study and trait differences
-("Model 1"; see Supplement @fig-s3). There were no differences between
-$lnCVR_{Q_{10_{acute}}}$ and $lnCVR_{Q_{10_{acclimation}}}$. Reductions
+("Model 1"; see *Supplementary Materials* @fig-s3). There were no differences between
+$lnVR_{Q_{10_{acute}}}$ and $lnVR_{Q_{10_{acclimation}}}$. Reductions
 in variance were driven by slower increases in the variance in
 physiological rates as mean physiological rates increased with scaling
 relationships between log standard deviation and log mean all being
 smaller than 1 and varying across habitats (see *Supplementary
-Materials*; @tbl-slopes & @fig-mv). There was a `r mean(t_cvr_mean_ef)`%
-(95% CI: `r quantile(t_cvr_mean_ef, 0.025)[1]` to
-`r quantile(t_cvr_mean_ef, 0.975)[1]`, $p_{MCMC}$ =
-`r pmcmc(t_cvr_mean)`) reduction in relative physiological rate variance
-for terrestrial ectotherms and a `r mean(m_cvr_mean_ef)`% (95% CI:
-`r quantile(m_cvr_mean_ef, 0.025)[1]` to
-`r quantile(m_cvr_mean_ef, 0.975)[1]`, $p_{MCMC}$ =
-`r pmcmc(m_cvr_mean)`) reduction in relative variation for marine
+Materials*; @tbl-slopes & @fig-mv). There was a `r mean(t_VR_mean_ef)`%
+(95% CI: `r quantile(t_VR_mean_ef, 0.025)[1]` to
+`r quantile(t_VR_mean_ef, 0.975)[1]`, $p_{MCMC}$ =
+`r pmcmc(t_VR_mean)`) reduction in relative physiological rate variance
+for terrestrial ectotherms and a `r mean(m_VR_mean_ef)`% (95% CI:
+`r quantile(m_VR_mean_ef, 0.025)[1]` to
+`r quantile(m_VR_mean_ef, 0.975)[1]`, $p_{MCMC}$ =
+`r pmcmc(m_VR_mean)`) reduction in relative variation for marine
 ectotherms when temperatures increased by 10$^\circ$C. In contrast,
 freshwater ectotherms exhibited a smaller reduction in relative
 physiological rate variance at high temperatures
-(`r mean(f_cvr_mean_ef)`%, 95% CI: `r quantile(f_cvr_mean_ef, 0.025)[1]`
-to `r quantile(f_cvr_mean_ef, 0.975)[1]`, $p_{MCMC}$ =
-`r pmcmc(f_cvr_mean)`) (results from "Model 2").
+(`r mean(f_VR_mean_ef)`%, 95% CI: `r quantile(f_VR_mean_ef, 0.025)[1]`
+to `r quantile(f_VR_mean_ef, 0.975)[1]`, $p_{MCMC}$ =
+`r pmcmc(f_VR_mean)`) (results from "Model 2"). The relative differences between habitats were similar when considering $lnCVR_{Q_{10}}$ (See *Supplementary Materials*).
 
 Across habitats whole-organism versus biochemical processes showed a
-similar decrease in relative variance in physiological rates
+similar change in variance in physiological rates
 ([@fig-btrait]D-F; see *Supplementary Materials*, @fig-cvrtrait) for more detailed trait
 analysis), except for biochemical processes in ectotherms occupying
 freshwater habitats, which showed small, albeit significant increase in
@@ -1816,7 +1831,7 @@ habitats ("Model 4"; @fig-cvrlh).
 
 ```{r, fig-btrait}
 #| label: fig-btrait
-#| fig-cap: "Estimated mean acclimation and acute $lnRR_{Q_{10}}$ (A-C) and $lnCVR_{Q_{10}}$ (D-F) effect sizes for tissue/whole-orgamism traits and biochemical traits across marine (A & D), freshwater (B & E) and terrestrial (C & F) habitats. Across all plots, thick bars indicate 95% confidence intervals and thin bars indicate 95% prediction intervals. k = total number of effect size estimates while the numbers in brackets indicate the number of species. For ease of visualisation, raw data for both trait categories are presented but points are not distinguished by different symbols. "
+#| fig-cap: "Estimated mean acclimation and acute $lnRR_{Q_{10}}$ (A-C) and $lnVR_{Q_{10}}$ (D-F) effect sizes for tissue/whole-orgamism traits and biochemical traits across marine (A & D), freshwater (B & E) and terrestrial (C & F) habitats. Across all plots, thick bars indicate 95% confidence intervals and thin bars indicate 95% prediction intervals. k = total number of effect size estimates while the numbers in brackets indicate the number of species. For ease of visualisation, raw data for both trait categories are presented but points are not distinguished by different symbols. "
 #| echo: false
 #| warning: false
 
@@ -1832,7 +1847,7 @@ trunk.size = 1.8
 
 n_lnrr_btrait  <- lnRRQ10_data  %>% filter(trait_broad != "other") %>% 
               group_by(habitat, trait_broad, type) %>% summarise(k = n(), spp = length(unique(spp))) %>% arrange(trait_broad, type, habitat)
-n_lncvr_btrait <- lnCVRQ10_data %>% filter(trait_broad != "other") %>% 
+n_lnvr_btrait <- lnVRQ10_data %>% filter(trait_broad != "other") %>% 
               group_by(habitat, trait_broad, type) %>% summarise(k = n(), spp = length(unique(spp))) %>% arrange(trait_broad, type, habitat)
 
        col <- c("#0871B9", "#F3B40D", "#1BB908")
@@ -1859,27 +1874,28 @@ p2 <- orchard_plot(model1.3_f_broad, mod = "trait_broad", at = list(c_accl_time 
 p3 <- orchard_plot(model1.3_t_broad, mod = "trait_broad", at = list(c_accl_time = 0, habitat = "t", legend.pos = "none"), group = "record_num", xlab = TeX("$lnRR_{Q_{10}}$"), condition.lab = "Type", by = "type",  g = FALSE, k = FALSE, branch.size = branch.size, trunk.size = trunk.size, angle = 45)+ labs(title = "Terrestrial") + add_theme()  +  ylim(-0.3, 1.8) + theme(legend.position = "none") + annotate("text", x = x.pos, y = 1.5, label = TeX(paste0("\\it{k} = ", t_r$k, " (", t_r$spp, ")")), size = size_annot) + scale_fill_manual(values = rep(col[3], 4)) + scale_color_manual(values = rep("black", 4)) + annotate("text", x = yloc, y = -0.25, label = TeX(paste0("$\\beta$ = ", t_trait_b$diff, " [", t_trait_b$l95, " to ", t_trait_b$u95, "] ", "$\\,p_{MCMC}$ = ", t_trait_b$p)), hjust = 0, size = 8)
 
 ############
-# CVR
+# lnVR
 ############
-m_cv <- n_lncvr_btrait %>% filter(habitat == "m")
-f_cv <- n_lncvr_btrait %>% filter(habitat == "f")
-t_cv <- n_lncvr_btrait %>% filter(habitat == "t")
+m_r_vr <- n_lnvr_btrait %>% filter(habitat == "m")
+f_r_vr <- n_lnvr_btrait %>% filter(habitat == "f")
+t_r_vr <- n_lnvr_btrait %>% filter(habitat == "t")
 
-t_trait_b_cvr <- contrast_lncvr_trait_stats %>% filter(habitat == "t") %>% purrr::modify_if(~is.numeric(.), ~round(., 2)) %>% arrange(trait)
-m_trait_b_cvr <- contrast_lncvr_trait_stats %>% filter(habitat == "m") %>% purrr::modify_if(~is.numeric(.), ~round(., 2)) %>% arrange(trait)
-f_trait_b_cvr <- contrast_lncvr_trait_stats %>% filter(habitat == "f") %>% purrr::modify_if(~is.numeric(.), ~round(., 2)) %>% arrange(trait)
+t_trait_b_vr <- contrast_lnvr_trait_stats %>% filter(habitat == "t") %>% purrr::modify_if(~is.numeric(.), ~round(., 2)) %>% arrange(trait)
+m_trait_b_vr <- contrast_lnvr_trait_stats %>% filter(habitat == "m") %>% purrr::modify_if(~is.numeric(.), ~round(., 2)) %>% arrange(trait)
+f_trait_b_vr <- contrast_lnvr_trait_stats %>% filter(habitat == "f") %>% purrr::modify_if(~is.numeric(.), ~round(., 2)) %>% arrange(trait)
 
+yloc = c(1.5, 2.5)
 
-p1_cvr <- orchard_plot(model2.3_m_broad, mod = "trait_broad", at = list(c_accl_time = 0, habitat = "m"), group = "record_num", xlab = TeX("$lnCVR_{Q_{10}}$"), condition.lab = "Type", by = "type",  g = FALSE, k = FALSE, angle = 45, branch.size = branch.size, trunk.size = trunk.size) + ylim(c(-2, 2.2)) + add_theme() + ylim(-1.7, 1.6)  + annotate("text", x = x.pos, y = 0.8, label = TeX(paste0("\\it{k} = ", m_cv$k, " (", m_cv$spp, ")")), size = size_annot) + theme(legend.position = "none", axis.text.y = element_blank()) + scale_fill_manual(values = rep(col[2],4)) + scale_color_manual(values = rep("black", 4)) + annotate("text", x = yloc, y = -1.7, label = TeX(paste0("$\\beta$ = ", m_trait_b_cvr$diff, " [", m_trait_b_cvr$l95, " to ", m_trait_b_cvr$u95, "] ", "$\\,p_{MCMC}$ = ", m_trait_b_cvr$p)), hjust = 0, size = 8)
+p1_vr_trait <- orchard_plot(model3.3_m_broad, mod = "trait_broad", at = list(c_accl_time = 0, habitat = "m"), group = "record_num", xlab = TeX("$lnVR_{Q_{10}}$"), condition.lab = "Type", by = "type",  g = FALSE, k = FALSE, angle = 45, branch.size = branch.size, trunk.size = trunk.size) + labs(title = "Marine") + add_theme() + ylim(-1.5, 3) + theme(legend.position = "none", axis.text.y = element_blank()) + annotate("text", x = x.pos, y = 2.5, label = TeX(paste0("\\it{k} = ", m_r_vr$k, " (", m_r_vr$spp, ")")), size = size_annot) + scale_fill_manual(values = rep(col[2],4)) + scale_color_manual(values = rep("black",4)) + annotate("text", x = yloc, y = -1.5, label = TeX(paste0("$\\beta$ = ", m_trait_b_vr$diff, " [", m_trait_b_vr$l95, " to ", m_trait_b_vr$u95, "] ", "$\\,p_{MCMC}$ = ", m_trait_b_vr$p)), hjust = 0, size = 8)
 
-p2_cvr <- orchard_plot(model2.3_f_broad, mod = "trait_broad", at = list(c_accl_time = 0, habitat = "f"), group = "record_num", xlab = TeX("$lnCVR_{Q_{10}}$"), condition.lab = "Type", by = "type", angle = 45, g = FALSE, k = FALSE, branch.size = branch.size, trunk.size = trunk.size)  + add_theme() + ylim(-1.6, 1.3) + annotate("text", x = x.pos, y = 0.8, label = TeX(paste0("\\it{k} = ", f_cv$k, " (", f_cv$spp, ")")), size = size_annot) + theme(legend.position = "right", legend.justification = c(1, 1), axis.text.y = element_blank()) + guides(shape = guide_legend(direction = "vertical"), size = guide_legend(direction = "vertical")) + scale_fill_manual(values = rep(col[1], 4)) + scale_color_manual(values = rep("black", 4)) + annotate("text", x = yloc, y = -1.6, label = TeX(paste0("$\\beta$ = ", f_trait_b_cvr$diff, " [", f_trait_b_cvr$l95, " to ", f_trait_b_cvr$u95, "] ", "$\\,p_{MCMC}$ = ", f_trait_b_cvr$p)), hjust = 0, size = 8)
+p2_vr_trait <- orchard_plot(model3.3_f_broad, mod = "trait_broad", at = list(c_accl_time = 0, habitat = "f"), group = "record_num", xlab = TeX("$lnVR_{Q_{10}}$"), condition.lab = "Type", by = "type",  g = FALSE, k = FALSE, branch.size = branch.size, trunk.size = trunk.size, angle = 45)+ labs(title = "Freshwater")  + add_theme() + theme(legend.position = "none", axis.text.y = element_blank()) + ylim(-1.5, 3) + annotate("text", x = x.pos, y = 2.5, label = TeX(paste0("\\it{k} = ", f_r_vr$k, " (", f_r_vr$spp, ")")), size = size_annot) + theme(legend.position = "right", legend.justification = c(1, 1)) + guides(shape = guide_legend(direction = "vertical"), size = guide_legend(direction = "vertical")) + scale_fill_manual(values = rep(col[1],4)) + scale_color_manual(values = rep("black", 4)) + annotate("text", x = yloc, y = -1.5, label = TeX(paste0("$\\beta$ = ", f_trait_b_vr$diff, " [", f_trait_b_vr$l95, " to ", f_trait_b_vr$u95, "] ", "$\\,p_{MCMC}$ = ", f_trait_b_vr$p)), hjust = 0, size = 8)
 
-p3_cvr <- orchard_plot(model2.3_t_broad, mod = "trait_broad", at = list(c_accl_time = 0, habitat = "t"), angle = 45, group = "record_num", xlab = TeX("$lnCVR_{Q_{10}}$"), condition.lab = "Type", by = "type",  g = FALSE, k = FALSE, branch.size = branch.size, trunk.size = trunk.size)+ add_theme()  + ylim(-2, 2) + annotate("text", x = x.pos, y = 1.5, label = TeX(paste0("\\it{k} = ", t_cv$k, " (", t_cv$spp, ")")), size = size_annot) +  theme(legend.position = "none") + scale_fill_manual(values = rep(col[3], 4)) + scale_color_manual(values = rep("black", 4)) + annotate("text", x = yloc, y = -2, label = TeX(paste0("$\\beta$ = ", t_trait_b_cvr$diff, " [", t_trait_b_cvr$l95, " to ", t_trait_b_cvr$u95, "] ", "$\\,p_{MCMC}$ = ", t_trait_b_cvr$p)), hjust = 0, size = 8)
+p3_vr_trait <- orchard_plot(model3.3_t_broad, mod = "trait_broad", at = list(c_accl_time = 0, habitat = "t", legend.pos = "none"), group = "record_num", xlab = TeX("$lnVR_{Q_{10}}$"), condition.lab = "Type", by = "type",  g = FALSE, k = FALSE, branch.size = branch.size, trunk.size = trunk.size, angle = 45)+ labs(title = "Terrestrial") + add_theme()  +  ylim(-1.5, 3) + theme(legend.position = "none") + annotate("text", x = x.pos, y = 2.5, label = TeX(paste0("\\it{k} = ", t_r_vr$k, " (", t_r_vr$spp, ")")), size = size_annot) + scale_fill_manual(values = rep(col[3], 4)) + scale_color_manual(values = rep("black", 4)) + annotate("text", x = yloc, y = -1.5, label = TeX(paste0("$\\beta$ = ", t_trait_b_vr$diff, " [", t_trait_b_vr$l95, " to ", t_trait_b_vr$u95, "] ", "$\\,p_{MCMC}$ = ", t_trait_b_vr$p)), hjust = 0, size = 8)
 
 ############
 # Full fig
 ############
-figbtrait <-(p3 | p1 | p2) / (p3_cvr | p1_cvr | p2_cvr) + plot_annotation(tag_levels = "A") 
+figbtrait <-(p3 | p1 | p2) / (p3_vr_trait | p1_vr_trait | p2_vr_trait) + plot_annotation(tag_levels = "A") 
 ggsave(figbtrait, filename = "./output/figures/fig4.png", width = 28, height = 14, device = "png")
 
 figbtrait <- magick::image_read("./output/figures/fig4.png")
@@ -1888,7 +1904,7 @@ figbtrait
 
 ```{r, fig-cvrlh}
 #| label: fig-cvrlh
-#| fig-cap: "Estimated mean acclimation and acute $lnRR_{Q_{10}}$ (A-C) and $lnCVR_{Q_{10}}$ (D-F) for adult (a) and juvenile (j) life-history stages for marine (A & D), freshwater (B & E) and terrestrial (C & F) ectotherms. Across all plots, thick bars indicate 95% confidence intervals and thin bars indicate 95% prediction intervals. k = total number of effect size estimates while the numbers in brackets indicate the number of species. For ease of visualisation, raw data for both adult and juvenile life-history stages are presented but points are not distinguished by different symbols. $\\Beta$ values are the contrasts between acute and acclimation means within each life stage. $p_{MCMC}$ values are the posterior probability of the contrast being different from zero."
+#| fig-cap: "Estimated mean acclimation and acute $lnRR_{Q_{10}}$ (A-C) and $lnVR_{Q_{10}}$ (D-F) for adult (a) and juvenile (j) life-history stages for marine (A & D), freshwater (B & E) and terrestrial (C & F) ectotherms. Across all plots, thick bars indicate 95% confidence intervals and thin bars indicate 95% prediction intervals. k = total number of effect size estimates while the numbers in brackets indicate the number of species. For ease of visualisation, raw data for both adult and juvenile life-history stages are presented but points are not distinguished by different symbols. $\\Beta$ values are the contrasts between acute and acclimation means within each life stage. $p_{MCMC}$ values are the posterior probability of the contrast being different from zero."
 #| echo: false
 #| warning: false
 
@@ -1903,7 +1919,7 @@ branch.size = 2.8
 trunk.size = 1.8
 
 n_lnrr_lh  <- lnRRQ10_data  %>% group_by(habitat, life.hist, type) %>% summarise(k = n(), spp = length(unique(spp))) %>% arrange(type, life.hist, habitat)
-n_lncvr_lh <- lnCVRQ10_data %>% group_by(habitat, life.hist, type) %>% summarise(k = n(), spp = length(unique(spp))) %>% arrange(type, life.hist, habitat)
+n_lnvr_lh <- lnVRQ10_data %>% group_by(habitat, life.hist, type) %>% summarise(k = n(), spp = length(unique(spp))) %>% arrange(type, life.hist, habitat)
 
 x.pos = c(0.7, 1.30, 1.70, 2.30)
 size_annot <- 5.5
@@ -1929,24 +1945,28 @@ p2 <- orchard_plot(model1.4, mod = "life.hist", at = list(c_accl_time = 0, habit
 p3 <- orchard_plot(model1.4, mod = "life.hist", at = list(c_accl_time = 0, habitat = "t", legend.pos = "none"), group = "record_num", xlab = TeX("$lnRR_{Q_{10}}$"), condition.lab = "Type", by = "type",  g = FALSE, k = FALSE, branch.size = branch.size, trunk.size = trunk.size, angle = 45)+ labs(title = "Terrestrial") + add_theme()  +  ylim(-0.3, 1.8) + theme(legend.position = "none") + annotate("text", x = x.pos, y = 1.3, label = TeX(paste0("\\it{k} = ", t_r$k, " (", t_r$spp, ")")), size = size_annot) + annotate("text", x = yloc, y = -0.3, label = TeX(paste0("$\\beta$ = ", t_trait_b$diff, " [", t_trait_b$l95, " to ", t_trait_b$u95, "] ", "$\\,p_{MCMC}$ = ", t_trait_b$p)), hjust = 0, size = 8) +scale_x_discrete(labels = c("A" = "Adult","J" = "Juvenile")) 
 
 ###############
-# ln CVR
+## lnVR Q10
 ###############
-m_cv <- n_lncvr_lh %>% filter(habitat == "m")
-f_cv <- n_lncvr_lh %>% filter(habitat == "f")
-t_cv <- n_lncvr_lh %>% filter(habitat == "t")
 
-  t_trait_cvr <- contrast_lncvr_lh_stats %>% filter(habitat == "t") %>% purrr::modify_if(~is.numeric(.), ~round(., 2)) %>% arrange(stage)
-m_trait_b_cvr <- contrast_lncvr_lh_stats %>% filter(habitat == "m") %>% purrr::modify_if(~is.numeric(.), ~round(., 2)) %>% arrange(stage)
-f_trait_b_cvr <- contrast_lncvr_lh_stats %>% filter(habitat == "f") %>% purrr::modify_if(~is.numeric(.), ~round(., 2)) %>% arrange(stage)
+t_trait_b <- contrast_lnvr_lh_stats %>% filter(habitat == "t") %>% purrr::modify_if(~is.numeric(.), ~round(., 2)) %>% arrange(stage)
+m_trait_b <- contrast_lnvr_lh_stats %>% filter(habitat == "m") %>% purrr::modify_if(~is.numeric(.), ~round(., 2)) %>% arrange(stage)
+f_trait_b <- contrast_lnvr_lh_stats %>% filter(habitat == "f") %>% purrr::modify_if(~is.numeric(.), ~round(., 2)) %>% arrange(stage)
+
+yloc = c(1.5, 2.5)
+
+m_r <- n_lnvr_lh %>% filter(habitat == "m")
+f_r <- n_lnvr_lh %>% filter(habitat == "f")
+t_r <- n_lnvr_lh %>% filter(habitat == "t")
+
+p1_vr <- orchard_plot(model3.4, mod = "life.hist", at = list(c_accl_time = 0, habitat = "m"), group = "spp", xlab = TeX("$lnVR_{Q_{10}}$"), condition.lab = "Type", by = "type",  g = FALSE, k = FALSE, angle = 45, branch.size = branch.size, trunk.size = trunk.size) + labs(title = "Marine") + add_theme() + ylim(-1.5, 3) + theme(legend.position = "none", axis.text.y = element_blank()) + annotate("text", x = x.pos, y = 2.5, label = TeX(paste0("\\it{k} = ", m_r$k, " (", m_r$spp, ")")), size = size_annot) + annotate("text", x = yloc, y = -1.5, label = TeX(paste0("$\\beta$ = ", m_trait_b$diff, " [", m_trait_b$l95, " to ", m_trait_b$u95, "] ", "$\\,p_{MCMC}$ = ", m_trait_b$p)), hjust = 0, size = 8)
+
+p2_vr <- orchard_plot(model3.4, mod = "life.hist", at = list(c_accl_time = 0, habitat = "f"), group = "record_num", xlab = TeX("$lnVR_{Q_{10}}$"), condition.lab = "Type", by = "type",  g = FALSE, k = FALSE, branch.size = branch.size, trunk.size = trunk.size, angle = 45)+ labs(title = "Freshwater")  + add_theme() + theme(legend.position = "none", axis.text.y = element_blank()) + ylim(-1.5, 3) + annotate("text", x = x.pos, y = 2.5, label = TeX(paste0("\\it{k} = ", f_r$k, " (", f_r$spp, ")")), size = size_annot) + theme(legend.position = "right", legend.justification = c(1, 1)) + guides(shape = guide_legend(direction = "vertical"), size = guide_legend(direction = "vertical")) + annotate("text", x = yloc, y = -1.5, label = TeX(paste0("$\\beta$ = ", f_trait_b$diff, " [", f_trait_b$l95, " to ", f_trait_b$u95, "] ", "$\\,p_{MCMC}$ = ", f_trait_b$p)), hjust = 0, size = 8)
+
+p3_vr <- orchard_plot(model3.4, mod = "life.hist", at = list(c_accl_time = 0, habitat = "t", legend.pos = "none"), group = "record_num", xlab = TeX("$lnVR_{Q_{10}}$"), condition.lab = "Type", by = "type",  g = FALSE, k = FALSE, branch.size = branch.size, trunk.size = trunk.size, angle = 45)+ labs(title = "Terrestrial") + add_theme()  +  ylim(-1.5,3) + theme(legend.position = "none") + annotate("text", x = x.pos, y = 2.5, label = TeX(paste0("\\it{k} = ", t_r$k, " (", t_r$spp, ")")), size = size_annot) + annotate("text", x = yloc, y = -1.5, label = TeX(paste0("$\\beta$ = ", t_trait_b$diff, " [", t_trait_b$l95, " to ", t_trait_b$u95, "] ", "$\\,p_{MCMC}$ = ", t_trait_b$p)), hjust = 0, size = 8) +scale_x_discrete(labels = c("A" = "Adult","J" = "Juvenile")) 
 
 
-p1_cvr <- orchard_plot(model2.4, mod = "life.hist", at = list(c_accl_time = 0, habitat = "m"), group = "record_num", xlab = TeX("$lnCVR_{Q_{10}}$"), condition.lab = "Type", by = "type",  g = FALSE, k = FALSE, angle = 45, branch.size = branch.size, trunk.size = trunk.size) + ylim(c(-2, 2.2)) + add_theme() + ylim(-1.5, 1.1)  + annotate("text", x = x.pos, y = 0.8, label = TeX(paste0("\\it{k} = ", m_cv$k, " (", m_cv$spp, ")")), size = size_annot) + theme(legend.position = "none", axis.text.y = element_blank()) + annotate("text", x = yloc, y = -1.3, label = TeX(paste0("$\\beta$ = ", m_trait_b_cvr$diff, " [", m_trait_b_cvr$l95, " to ", m_trait_b_cvr$u95, "] ", "$\\,p_{MCMC}$ = ", m_trait_b_cvr$p)), hjust = 0, size = 8)
 
-p2_cvr <- orchard_plot(model2.4, mod = "life.hist", at = list(c_accl_time = 0, habitat = "f"), group = "record_num", xlab = TeX("$lnCVR_{Q_{10}}$"), condition.lab = "Type", by = "type", angle = 45, g = FALSE, k = FALSE, branch.size = branch.size, trunk.size = trunk.size)  + add_theme() + ylim(-1.3, 1.1) + annotate("text", x = x.pos, y = 0.8, label = TeX(paste0("\\it{k} = ", f_cv$k, " (", f_cv$spp, ")")), size = size_annot) + theme(legend.position = "right", legend.justification = c(1, 1), axis.text.y = element_blank()) + guides(shape = guide_legend(direction = "vertical"), size = guide_legend(direction = "vertical")) + annotate("text", x = yloc, y = -1.3, label = TeX(paste0("$\\beta$ = ", f_trait_b_cvr$diff, " [", f_trait_b_cvr$l95, " to ", f_trait_b_cvr$u95, "] ", "$\\,p_{MCMC}$ = ", f_trait_b_cvr$p)), hjust = 0, size = 8)
-
-p3_cvr <- orchard_plot(model2.4, mod = "life.hist", at = list(c_accl_time = 0, habitat = "t"), angle = 45, group = "record_num", xlab = TeX("$lnCVR_{Q_{10}}$"), condition.lab = "Type", by = "type",  g = FALSE, k = FALSE, branch.size = branch.size, trunk.size = trunk.size)+ add_theme()  + ylim(-1.55, 1.1) + annotate("text", x = x.pos, y = 0.6, label = TeX(paste0("\\it{k} = ", t_cv$k, " (", t_cv$spp, ")")), size = size_annot) +  theme(legend.position = "none") + annotate("text", x = yloc, y = -1.55, label = TeX(paste0("$\\beta$ = ", t_trait_cvr$diff, " [", t_trait_cvr$l95, " to ", t_trait_cvr$u95, "] ", "$\\,p_{MCMC}$ = ", t_trait_cvr$p)), hjust = 0, size = 8) + scale_x_discrete(labels = c("A" = "Adult","J" = "Juvenile")) 
-
-fig4 <-(p3 | p1 | p2) / (p3_cvr | p1_cvr | p2_cvr) + plot_annotation(tag_levels = "A") 
+fig4 <-(p3 | p1 | p2) / (p3_vr | p1_vr | p2_vr) + plot_annotation(tag_levels = "A") 
 ggsave(fig4, filename = "./output/figures/fig5.pdf", width = 28, height = 14, device = "pdf")
 
 fig4 <- magick::image_read("./output/figures/fig5.pdf")
@@ -2143,8 +2163,8 @@ if(rerun){
 
 ```
 
-```{r wildlncvr}
-#| label: wildlncvr
+```{r wildlnvr}
+#| label: wildlnvr
 #| cache: true
 #| include: false
 #| echo: false
@@ -2168,56 +2188,56 @@ if(rerun){
   pop_spp_w <- climate2[complete.cases(climate2),]
 
 # Subset the data
-  lnCVRQ10_data_wild <- data_long2 %>% 
-    filter(grepl("lnCVR", name) & !is.na(effect_size) & !is.na(V) & !V == 0 & !is.na(acclim_period) & source == "w") %>% 
+  lnVRQ10_data_wild <- data_long2 %>% 
+    filter(grepl("lnVR", name) & !is.na(effect_size) & !is.na(V) & !V == 0 & !is.na(acclim_period) & source == "w") %>% 
                         mutate(spp = species_full, 
                                      c_accl_time = acclim_period - mean(acclim_period, na.rm = TRUE), 
                                      match = interaction(spp, lat, long),
                                      max_temp_c = scale(temp_2, scale = FALSE))
 
 # Now, join climate data to full data. This will give us all the climate variability data for each site across time
-  lnCVRQ10_data_wild <- left_join(lnCVRQ10_data_wild, climate2, by = "match")
+  lnVRQ10_data_wild <- left_join(lnVRQ10_data_wild, climate2, by = "match")
 
 # Look at the environment details across different habitats. 
   lnCVRQ10_data_wild  %>% group_by(habitat) %>% summarise(mean(sd))
 
 # Check and prune tree
-  tree_lncvr_wild <- tree_checks(data = lnCVRQ10_data_wild, tree = tree_p0.7, dataCol = "species_full", type = "prune")
-  tree_checks(data = lnCVRQ10_data_wild, tree = tree_lncvr_wild, dataCol = "species_full", type = "check") # Good
+  tree_lnvr_wild <- tree_checks(data = lnVRQ10_data_wild, tree = tree_p0.7, dataCol = "species_full", type = "prune")
+  tree_checks(data = lnVRQ10_data_wild, tree = tree_lnvr_wild, dataCol = "species_full", type = "check") # Good
 
 # Create the phylo correlation matrix
-  phylo_cor_wild_cvr <- vcv(tree_lncvr_wild, cor = TRUE)
-          A_wild_cvr <- vcv(tree_lncvr_wild, cor = FALSE) # For bayes, need cov matrix
+  phylo_cor_wild_vr <- vcv(tree_lnvr_wild, cor = TRUE)
+          A_wild_vr <- vcv(tree_lnvr_wild, cor = FALSE) # For bayes, need cov matrix
 
 # Scale environment variables
-    lnCVRQ10_data_wild <- lnCVRQ10_data_wild %>% mutate(     cv_c = scale(cv),
+    lnVRQ10_data_wild <- lnVRQ10_data_wild %>% mutate(     cv_c = scale(cv),
                                                         acf_all_c = scale(acf_all),
                                                         acf_lag1_c = scale(acf_lag1))
 
 ####################################################
-  # Model 4.3: Model environmental variability by acute/acclim
+  # Model 5.3: Model environmental variability by acute/acclim
 ####################################################
 rerun = FALSE
 if(rerun){
   # More realistic model with 
-  model4.3          <- metafor::rma.mv(effect_size ~ max_temp_c + c_accl_time + cv_c + type + type:cv_c, V = V,
+  model5.3          <- metafor::rma.mv(effect_size ~ max_temp_c + c_accl_time + cv_c + type + type:cv_c, V = V,
                                        random = list(~1 | record_num,
                                             ~1 | species_full,
                                             ~1 | trait,
                                             ~1 + max_temp_c| spp,
                                             ~1 | obs),
-                              R = list(species_full = phylo_cor_wild_cvr), dfs = "contain", 
-                              test = "t", data = lnCVRQ10_data_wild)
+                              R = list(species_full = phylo_cor_wild_vr), dfs = "contain", 
+                              test = "t", data = lnVRQ10_data_wild)
   
-   model4.3_bayes <- brms::brm(effect_size | se(sqrt(V), sigma = TRUE) ~  max_temp_c + c_accl_time + cv_c + type + type:cv_c + (~1 | record_num) + (1 | gr(species_full, cov = A_wild_cvr)) + (1 + max_temp_c| spp) + (1|trait), data2 = list(A_wild_cvr=A_wild_cvr), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 8, data = lnCVRQ10_data_wild)
+   model5.3_bayes <- brms::brm(effect_size | se(sqrt(V), sigma = TRUE) ~  max_temp_c + c_accl_time + cv_c + type + type:cv_c + (~1 | record_num) + (1 | gr(species_full, cov = A_wild_vr)) + (1 + max_temp_c| spp) + (1|trait), data2 = list(A_wild_vr=A_wild_vr), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 8, data = lnVRQ10_data_wild)
                                   
-  # Save model4.3
-  saveRDS(model4.3, file = "./output/models/lnCVRQ10_4.3")
-  saveRDS(model4.3_bayes, file = "./output/models/lnCVRQ10_4.3_bayes")
+  # Save model5.3
+  saveRDS(model5.3, file = "./output/models/lnVRQ10_5.3")
+  saveRDS(model5.3_bayes, file = "./output/models/lnVRQ10_5.3_bayes")
 
   } else{
-        model4.3 <- readRDS("./output/models/lnCVRQ10_4.3")
-  model4.3_bayes <- readRDS("./output/models/lnCVRQ10_4.3_bayes")
+        model5.3 <- readRDS("./output/models/lnVRQ10_5.3")
+  model5.3_bayes <- readRDS("./output/models/lnVRQ10_5.3_bayes")
 }
   
 
@@ -3303,7 +3323,7 @@ Sacute
 ggsave(Sacute, file = "./output/figures/figS4.png", height = 10, width = 12)
 ```
 
-#### *Acute and acclimation* $lnRR_{Q_{10}}$ for detailed trait categories across marine, freshwater and terrestrial taxa
+#### *Acute and acclimation* $lnRR_{Q_{10}}$ for detailed trait categories across marine, freshwater and terrestrial taxa (REMOVE)
 
 In addition to the broader trait categories we fit models to understand
 how acute and acclimation effect sizes varied across trait categories.
@@ -3812,232 +3832,222 @@ what acclimation and test temperature (@tbl-slopes).
 flextable(table) %>% bold(part = "header") %>% autofit()
 ```
 
-#### *Comparing raw variance changes using* $lnVR_{Q_{10}}$
+#### *Comparing relative variance changes using* $lnCVR_{Q_{10}}$
 
-```{r, lnvrq10}
-#| label: lnvrq10
+```{r, lncvrq10}
+#| label: lncvrq10
 #| echo: false
 #| warning: false
 #| error: false
 #| include: false
-#| cache: true
+#| cache: false
 
 #############
-  ## lnVRQ10
+  ## lnCVRQ10
 #############
 ##################################################
   # Organise the data and prune tree
 #################################################
-  lnVRQ10_data <- data_long2 %>% filter(grepl("lnVR", name) & !is.na(effect_size) & !is.na(V) & !V == 0 & !is.na(acclim_period)) %>% 
+  lnCVRQ10_data <- data_long2 %>% filter(grepl("lnCVR", name) & !is.na(effect_size) & !is.na(V) & !V == 0 & !is.na(acclim_period)) %>% 
                               mutate(spp = species_full, c_accl_time = acclim_period - mean(acclim_period, na.rm = TRUE),
                                     max_temp_c = scale(temp_2, scale = FALSE))
 
 # Check and prune tree
-  tree_lnVR <- tree_checks(data = lnVRQ10_data, tree = tree_p0.7, dataCol = "species_full", type = "prune")
-  tree_checks(data = lnVRQ10_data, tree = tree_lnVR, dataCol = "species_full", type = "check") # Good
+  tree_lncvr <- tree_checks(data = lnCVRQ10_data, tree = tree_p0.7, dataCol = "species_full", type = "prune")
+  tree_checks(data = lnCVRQ10_data, tree = tree_lncvr, dataCol = "species_full", type = "check") # Good
 
 # Create the phylo correlation matrix
-  phylo_cor_VR <- vcv(tree_lnVR, cor = TRUE)
-          A_VR <- vcv(tree_lnVR, cor = FALSE) # For bayes, need cov matrix
-
+  phylo_cor_CVR <- vcv(tree_lncvr, cor = TRUE)
+          A_CVR <- vcv(tree_lncvr, cor = FALSE) # For bayes, need cov matrix
 
 ###################################################
-  # Model 3.1: Intercept only model.
+  # Model 2.1: Intercept only model.
   # Used for heterogeneity analysis
 ###################################################
 rerun = FALSE
 if(rerun){
-  model3.1 <- metafor::rma.mv(effect_size ~ 1, V = V, 
+  model2.1 <- metafor::rma.mv(effect_size ~ 1, V = V, 
                               random = list(~1 | record_num,
                                             ~1 | species_full,
                                             ~1 | spp,
                                             ~1 | trait,
                                             ~1 | obs),
-                              R = list(species_full = phylo_cor_VR), dfs = "contain", 
-                              test = "t", data = lnVRQ10_data) 
+                              R = list(species_full = phylo_cor_CVR), dfs = "contain", 
+                              test = "t", data = lnCVRQ10_data) 
   
-  model3.1_bayes <- brms::brm(effect_size | se(sqrt(V), sigma = TRUE) ~  1 + (~1 | record_num) + (1 | gr(species_full, cov = A_VR)) + (1 | spp) + (1|trait), data2 = list(A_VR=A_VR), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 4, data = lnVRQ10_data)
+  model2.1_bayes <- brms::brm(effect_size | se(sqrt(V), sigma = TRUE) ~  1 + (~1 | record_num) + (1 | gr(species_full, cov = A_CVR)) + (1 | spp) + (1|trait), data2 = list(A_CVR=A_CVR), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.99, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 4, data = lnCVRQ10_data)
   
   # Save model1.1
-  saveRDS(model3.1, file = "./output/models/lnVRQ10_3.1")
-  saveRDS(model3.1_bayes, file = "./output/models/lnVRQ10_3.1_bayes")
+  saveRDS(model2.1, file = "./output/models/lnCVRQ10_2.1")
+  saveRDS(model2.1_bayes, file = "./output/models/lnCVRQ10_2.1_bayes")
 } else{ 
-        model3.1 <- readRDS("./output/models/lnVRQ10_3.1")
-  model3.1_bayes <- readRDS("./output/models/lnVRQ10_3.1_bayes")
+        model2.1 <- readRDS("./output/models/lnCVRQ10_2.1")
+  model2.1_bayes <- readRDS("./output/models/lnCVRQ10_2.1_bayes")
 }
 
 # Heterogeneity analysis
-   w_VR <- with(lnVRQ10_data, 1/V) # weights
-  sv_VR <- sum(w_VR*(dim(lnVRQ10_data)[1]-1)) / (sum(w_VR)^2 + sum(w_VR^2))
+   w_cvr <- with(lnCVRQ10_data, 1/V) # weights
+  sv_cvr <- sum(w_cvr*(dim(lnCVRQ10_data)[1]-1)) / (sum(w_cvr)^2 + sum(w_cvr^2))
 
 # extract posterior sds, but square them to turn to variance
-  posteriors_3.1 <- posterior_samples(model3.1_bayes, pars = c("^sd", "sigma"))^2
-  colnames(posteriors_3.1) <- gsub("__Intercept", "", colnames(posteriors_3.1))
-  colnames(posteriors_3.1) <- gsub("sd_", "", colnames(posteriors_3.1))
+  posteriors_2.1 <- posterior_samples(model2.1_bayes, pars = c("^sd", "sigma"))^2
+  colnames(posteriors_2.1) <- gsub("__Intercept", "", colnames(posteriors_2.1))
+  colnames(posteriors_2.1) <- gsub("sd_", "", colnames(posteriors_2.1))
   
-    res_VR <- posteriors_3.1[,"sigma"]
-   stdy_VR <- posteriors_3.1[,"record_num"]
-  phylo_VR <- posteriors_3.1[,"species_full"]
-    spp_VR <- posteriors_3.1[,"spp"]
-  trait_VR <- posteriors_3.1[,"trait"]
-  total_VR <- phylo_VR + spp_VR + res_VR + sv_VR + stdy_VR + trait_VR
+    res_cvr <- posteriors_2.1[,"sigma"]
+   stdy_cvr <- posteriors_2.1[,"record_num"]
+  phylo_cvr <- posteriors_2.1[,"species_full"]
+    spp_cvr <- posteriors_2.1[,"spp"]
+  trait_cvr <- posteriors_2.1[,"trait"]
+  total_cvr <- phylo_cvr + spp_cvr + res_cvr + sv_cvr + stdy_cvr + trait_cvr
  
   # Calculate I2
-     tot_i2_VR <- (sv_VR / total_VR)*100    ; mean(tot_i2_VR)  ; quantile(tot_i2_VR, c(0.025, 0.975))
-   phylo_i2_VR <- (phylo_VR / total_VR)*100 ; mean(phylo_i2_VR); quantile(phylo_i2_VR, c(0.025, 0.975))
-     spp_i2_VR <- (spp_VR / total_VR)*100   ; mean(spp_i2_VR)  ; quantile(spp_i2_VR, c(0.025, 0.975))
-    stdy_i2_VR <- (stdy_VR / total_VR)*100  ; mean(stdy_i2_VR) ; quantile(stdy_i2_VR, c(0.025, 0.975))
-   trait_i2_VR <- (trait_VR / total_VR)*100 ; mean(trait_i2_VR); quantile(trait_i2_VR, c(0.025, 0.975))
-     res_i2_VR <- (res_VR / total_VR)*100   ; mean(res_i2_VR)  ; quantile(res_i2_VR, c(0.025, 0.975))
+     tot_i2_cvr <- (sv_cvr / total_cvr)*100    ; mean(tot_i2_cvr)  ; quantile(tot_i2_cvr, c(0.025, 0.975))
+   phylo_i2_cvr <- (phylo_cvr / total_cvr)*100 ; mean(phylo_i2_cvr); quantile(phylo_i2_cvr, c(0.025, 0.975))
+     spp_i2_cvr <- (spp_cvr / total_cvr)*100   ; mean(spp_i2_cvr)  ; quantile(spp_i2_cvr, c(0.025, 0.975))
+    stdy_i2_cvr <- (stdy_cvr / total_cvr)*100  ; mean(stdy_i2_cvr) ; quantile(stdy_i2_cvr, c(0.025, 0.975))
+   trait_i2_cvr <- (trait_cvr / total_cvr)*100 ; mean(trait_i2_cvr); quantile(trait_i2_cvr, c(0.025, 0.975))
+     res_i2_cvr <- (res_cvr / total_cvr)*100   ; mean(res_i2_cvr)  ; quantile(res_i2_cvr, c(0.025, 0.975))
   
   # Table
-     i2_lnVR <- data.frame(name = c("Phylogeny", "Species", "Study", "Trait"),
-                           est = c(mean(phylo_i2_VR),mean(spp_i2_VR), mean(stdy_i2_VR), mean(trait_i2_VR)),
-                           lci = c(quantile(phylo_i2_VR, c(0.025, 0.975))[1], quantile(spp_i2_VR, c(0.025, 0.975))[1],
-                                   quantile(stdy_i2_VR, c(0.025, 0.975))[1], quantile(trait_i2_VR, c(0.025, 0.975))[1]),
-                           uci = c(quantile(phylo_i2_VR, c(0.025, 0.975))[2], quantile(spp_i2_VR, c(0.025, 0.975))[2],
-                                   quantile(stdy_i2_VR, c(0.025, 0.975))[2], quantile(trait_i2_VR, c(0.025, 0.975))[2]))  
+     i2_lncvr <- data.frame(name = c("Phylogeny", "Species", "Study", "Trait"),
+                           est = c(mean(phylo_i2_cvr),mean(spp_i2_cvr), mean(stdy_i2_cvr), mean(trait_i2_cvr)),
+                           lci = c(quantile(phylo_i2_cvr, c(0.025, 0.975))[1], quantile(spp_i2_cvr, c(0.025, 0.975))[1],
+                                   quantile(stdy_i2_cvr, c(0.025, 0.975))[1], quantile(trait_i2_cvr, c(0.025, 0.975))[1]),
+                           uci = c(quantile(phylo_i2_cvr, c(0.025, 0.975))[2], quantile(spp_i2_cvr, c(0.025, 0.975))[2],
+                                   quantile(stdy_i2_cvr, c(0.025, 0.975))[2], quantile(trait_i2_cvr, c(0.025, 0.975))[2]))  
   
 ###################################################
-  # Model 3.2: Model controlling for acclimation time, 
+  # Model 2.2: Model controlling for acclimation time, 
   # type and habitat assuming type can vary by habitat
 ###################################################
 
 if(rerun){
   # More realistic model 
-  model3.2 <- metafor::rma.mv(effect_size ~  max_temp_c + c_accl_time + type + habitat + type:habitat, V = V, 
+  model2.2 <- metafor::rma.mv(effect_size ~  max_temp_c + c_accl_time + type + habitat + type:habitat, V = V, 
                               random = list(~1 | record_num,
                                             ~1 | species_full,
                                             ~1 + max_temp_c| spp,
                                             ~1 | trait,
                                             ~1 | obs),
-                              R = list(species_full = phylo_cor_VR), dfs = "contain", 
-                              test = "t", data = lnVRQ10_data)
+                              R = list(species_full = phylo_cor_CVR), dfs = "contain", 
+                              test = "t", data = lnCVRQ10_data)
   
-   model3.2_bayes <- brms::brm(effect_size | se(sqrt(V), sigma = TRUE) ~  max_temp_c + c_accl_time + type + habitat + type:habitat + 
-        (~1 | record_num) + 
-        (1 | gr(species_full, cov = A_VR)) + 
-        (1 + max_temp_c| spp) + 
-        (1|trait), 
-        data2 = list(A_VR=A_VR), family = gaussian(), 
-        prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), 
-        control = list(adapt_delta = 0.98, max_treedepth = 12), 
-        chains = 4, thin = 5, iter = 8000, warmup = 1000, cores = 4, data = lnVRQ10_data)
-                              
+   model2.2_bayes <- brms::brm(effect_size | se(sqrt(V), sigma = TRUE) ~  max_temp_c + c_accl_time + type + habitat + type:habitat + (~1 | record_num) + (1 | gr(species_full, cov = A_CVR)) + (1 + max_temp_c| spp) + (1|trait), data2 = list(A_CVR=A_CVR), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 4, data = lnCVRQ10_data)
+                                  
   # Save model1.2
-  saveRDS(model3.2, file = "./output/models/lnVRQ10_3.2")
-  saveRDS(model3.2_bayes, file = "./output/models/lnVRQ10_3.2_bayes")
+  saveRDS(model2.2, file = "./output/models/lnCVRQ10_2.2")
+  saveRDS(model2.2_bayes, file = "./output/models/lnCVRQ10_2.2_bayes")
 
   } else{
-        model3.2 <- readRDS("./output/models/lnVRQ10_3.2")
-  model3.2_bayes <- readRDS("./output/models/lnVRQ10_3.2_bayes")
+        model2.2 <- readRDS("./output/models/lnCVRQ10_2.2")
+  model2.2_bayes <- readRDS("./output/models/lnCVRQ10_2.2_bayes")
 }
 
 ######################################################
   # Bayesian Contrasts
 ######################################################
 
-  posteriors_3.2 <- posterior_samples(model3.2_bayes, pars = "^b")
-  f_acute_VR  <- posteriors_3.2[,"b_Intercept"]; pmcmc(f_acute_VR)
-  f_acclim_VR <- posteriors_3.2[,"b_Intercept"] + posteriors_3.2[,"b_typeacclim"]
-  m_acute_VR  <- posteriors_3.2[,"b_Intercept"] + posteriors_3.2[,"b_habitatm"]
-  m_acclim_VR <- posteriors_3.2[,"b_Intercept"] + posteriors_3.2[,"b_habitatm"] + posteriors_3.2[,"b_typeacclim"] + posteriors_3.2[,"b_typeacclim:habitatm"]
-  t_acute_VR  <- posteriors_3.2[,"b_Intercept"] + posteriors_3.2[,"b_habitatt"]
-  t_acclim_VR <- posteriors_3.2[,"b_Intercept"] + posteriors_3.2[,"b_habitatt"] + posteriors_3.2[,"b_typeacclim"] + posteriors_3.2[,"b_typeacclim:habitatt"]
+  posteriors_2.2 <- posterior_samples(model2.2_bayes, pars = "^b")
+  f_acute_cvr  <- posteriors_2.2[,"b_Intercept"]; pmcmc(f_acute_cvr)
+  f_acclim_cvr <- posteriors_2.2[,"b_Intercept"] + posteriors_2.2[,"b_typeacclim"]
+  m_acute_cvr  <- posteriors_2.2[,"b_Intercept"] + posteriors_2.2[,"b_habitatm"]
+  m_acclim_cvr <- posteriors_2.2[,"b_Intercept"] + posteriors_2.2[,"b_habitatm"] + posteriors_2.2[,"b_typeacclim"] + posteriors_2.2[,"b_typeacclim:habitatm"]
+  t_acute_cvr  <- posteriors_2.2[,"b_Intercept"] + posteriors_2.2[,"b_habitatt"]
+  t_acclim_cvr <- posteriors_2.2[,"b_Intercept"] + posteriors_2.2[,"b_habitatt"] + posteriors_2.2[,"b_typeacclim"] + posteriors_2.2[,"b_typeacclim:habitatt"]
 
 # We'll take the marginalised mean for each type as there is no difference between acclimation and acute really except for in freshwater, but this effect size is so tiny. It's a 10% reduction at high temps and acclim is only a 2% reduction in variance at high temps.
   # First get sample sizes
-    N <- lnVRQ10_data %>% group_by(habitat, type) %>% summarise(n=n())
+    N <- lnCVRQ10_data %>% group_by(habitat, type) %>% summarise(n=n())
   
   # Calculated weighted mean by sample size. 
-    f_VR_mean <- (f_acute_VR * N[1,"n"][[1]] + f_acclim_VR * N[2,"n"][[1]]) / sum(N[1:2, "n"]); pmcmc(f_VR_mean)
-    m_VR_mean <- (m_acute_VR * N[3,"n"][[1]] + m_acclim_VR * N[3,"n"][[1]]) / sum(N[3:4, "n"]); pmcmc(m_VR_mean)
-    t_VR_mean <- (t_acute_VR * N[5,"n"][[1]] + t_acclim_VR * N[6,"n"][[1]]) / sum(N[5:6, "n"]); pmcmc(t_VR_mean)
+    f_cvr_mean <- (f_acute_cvr * N[1,"n"][[1]] + f_acclim_cvr * N[2,"n"][[1]]) / sum(N[1:2, "n"]); pmcmc(f_cvr_mean)
+    m_cvr_mean <- (m_acute_cvr * N[3,"n"][[1]] + m_acclim_cvr * N[3,"n"][[1]]) / sum(N[3:4, "n"]); pmcmc(m_cvr_mean)
+    t_cvr_mean <- (t_acute_cvr * N[5,"n"][[1]] + t_acclim_cvr * N[6,"n"][[1]]) / sum(N[5:6, "n"]); pmcmc(t_cvr_mean)
   
   # Lets now convert these to a %
-    f_VR_mean_ef  <- abs((exp(f_VR_mean) - 1)*100) 
-    m_VR_mean_ef  <- abs((exp(m_VR_mean) - 1)*100) 
-    t_VR_mean_ef  <- abs((exp(t_VR_mean) - 1)*100) 
+    f_cvr_mean_ef  <- abs((exp(f_cvr_mean) - 1)*100) # ~8.4% reduction
+    m_cvr_mean_ef  <- abs((exp(m_cvr_mean) - 1)*100) # ~15% reduction
+    t_cvr_mean_ef  <- abs((exp(t_cvr_mean) - 1)*100) # ~30% reduction
 
 ###################################################
-  # Model 3.3: Model controlling for acclimation time, 
+  # Model 2.3: Model controlling for acclimation time, 
   # type and trait category assuming type can vary by habitat
 ###################################################
   # Add two general trait categories to test for trait differences (whole-organism vs biochemical)
-    lnVRQ10_data <- lnVRQ10_data %>% 
+    lnCVRQ10_data <- lnCVRQ10_data %>% 
                     mutate(trait_broad = ifelse(trait_category %in% c("cardiac", "rest_MR", "sprint", "muscle", "endurance", "max_MR"), 
                                                 "tissue/organism",
                                          ifelse(trait_category %in% c("ATPase", "metabolic_enzyme", "antiox", "mito_oxidation", "mito_leak"), 
                                                 "biochemical", trait_category)))
  # We can also run subsets for each habitat
-   tree_m_vr <- tree_checks(lnVRQ10_data %>% filter(habitat == "m" & trait_broad != "other"), tree = tree_lnVR, dataCol = "species_full", type = "prune")
-   tree_f_vr <- tree_checks(lnVRQ10_data %>% filter(habitat == "f" & trait_broad != "other"), tree = tree_lnVR, dataCol = "species_full", type = "prune")
-   tree_t_vr <- tree_checks(lnVRQ10_data %>% filter(habitat == "t" & trait_broad != "other"), tree = tree_lnVR, dataCol = "species_full", type = "prune")
+   tree_m_cvr <- tree_checks(lnCVRQ10_data %>% filter(habitat == "m" & trait_broad != "other"), tree = tree_lncvr, dataCol = "species_full", type = "prune")
+   tree_f_cvr <- tree_checks(lnCVRQ10_data %>% filter(habitat == "f" & trait_broad != "other"), tree = tree_lncvr, dataCol = "species_full", type = "prune")
+   tree_t_cvr <- tree_checks(lnCVRQ10_data %>% filter(habitat == "t" & trait_broad != "other"), tree = tree_lncvr, dataCol = "species_full", type = "prune")
    
  # cor matrices
-   m_phylo_vr <- vcv(tree_m_vr, corr = TRUE)
-   f_phylo_vr <- vcv(tree_f_vr, corr = TRUE)
-   t_phylo_vr <- vcv(tree_t_vr, corr = TRUE)
+   m_phylo_cvr <- vcv(tree_m_cvr, corr = TRUE)
+   f_phylo_cvr <- vcv(tree_f_cvr, corr = TRUE)
+   t_phylo_cvr <- vcv(tree_t_cvr, corr = TRUE)
     
 if(rerun){
   
   # Full Bayesian model   
-   model3.3_btrait_bayes <- brms::brm(effect_size | se(sqrt(V)) ~  max_temp_c + c_accl_time + type*trait_broad*habitat + 
+   model2.3_btrait_bayes <- brms::brm(effect_size | se(sqrt(V)) ~  max_temp_c + c_accl_time + type*trait_broad*habitat + 
                                            (1 | record_num) + 
-                                           (1 | gr(species_full, cov = A_VR)) + 
+                                           (1 | gr(species_full, cov = A)) + 
                                            (1 + max_temp_c | spp) +(1|trait) + 
                                            (1 + trait_broad |gr(obs, cor = FALSE)),  
-                                         data2 = list(A_VR=A_VR), family = gaussian(), 
+                                         data2 = list(A=A), family = gaussian(), 
                                          prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), 
                                          control = list(adapt_delta = 0.98, max_treedepth = 12), 
-                                         chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 8, data = filter(lnVRQ10_data, trait_broad != "other"))
-    saveRDS(model3.3_btrait_bayes, "./output/models/model3.3_btrait_bayes")
+                                         chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 8, data = filter(lnCVRQ10_data, trait_broad != "other"))
+    saveRDS(model2.3_btrait_bayes, "./output/models/model2.3_btrait_bayes")
     
   # Metafor models for creating plots. Subset by habitat to make this easier
       # Marine
-         model3.3_m_broad <- metafor::rma.mv(effect_size ~  max_temp_c + c_accl_time + type + trait_broad + type:trait_broad, V = V, 
+         model2.3_m_broad <- metafor::rma.mv(effect_size ~  max_temp_c + c_accl_time + type + trait_broad + type:trait_broad, V = V, 
                               random = list(~1 | record_num,
                                             ~1 | species_full,
                                             ~1 + max_temp_c| spp,
                                             ~1 | trait,
                                             ~1 + trait_broad| obs),
-                              R = list(species_full = m_phylo_vr), dfs = "contain", 
+                              R = list(species_full = m_phylo_cvr), dfs = "contain", 
                               test = "t", struct = c("GEN","HCS"), phi = 0,
-                              data = filter(lnVRQ10_data, habitat == "m" & trait_broad != "other"))
-         saveRDS(model3.3_m_broad, "output/models/model3.3_m_broad")
+                              data = filter(lnCVRQ10_data, habitat == "m" & trait_broad != "other"))
+         saveRDS(model2.3_m_broad, "output/models/model2.3_m_broad")
     
       # Freshwater
-         model3.3_f_broad <- metafor::rma.mv(effect_size ~  max_temp_c + c_accl_time + type + trait_broad + type:trait_broad, V = V, 
+         model2.3_f_broad <- metafor::rma.mv(effect_size ~  max_temp_c + c_accl_time + type + trait_broad + type:trait_broad, V = V, 
                               random = list(~1 | record_num,
                                             ~1 | species_full,
                                             ~1 + max_temp_c| spp,
                                             ~1 | trait,
                                             ~1 + trait_broad| obs),
-                              R = list(species_full = f_phylo_vr), dfs = "contain", 
+                              R = list(species_full = f_phylo_cvr), dfs = "contain", 
                               test = "t", struct = c("GEN","HCS"),  phi = 0,
-                              data = filter(lnVRQ10_data, habitat == "f" & trait_broad != "other"))
-          saveRDS(model3.3_f_broad, "output/models/model3.3_f_broad")
+                              data = filter(lnCVRQ10_data, habitat == "f" & trait_broad != "other"))
+          saveRDS(model2.3_f_broad, "output/models/model2.3_f_broad")
       
       # Terrestrial
-         model3.3_t_broad <- metafor::rma.mv(effect_size ~  max_temp_c + c_accl_time + type + trait_broad + type:trait_broad, V = V, 
+         model2.3_t_broad <- metafor::rma.mv(effect_size ~  max_temp_c + c_accl_time + type + trait_broad + type:trait_broad, V = V, 
                               random = list(~1 | record_num,
                                             ~1 | species_full,
                                             ~1 + max_temp_c| spp,
                                             ~1 | trait,
                                             ~1 + trait_broad| obs),
-                              R = list(species_full = t_phylo_vr), dfs = "contain", 
+                              R = list(species_full = t_phylo_cvr), dfs = "contain", 
                               test = "t", struct = c("GEN","HCS"), phi = 0,
-                              data = filter(lnVRQ10_data, habitat == "t" & trait_broad != "other"))
-         saveRDS(model3.3_t_broad, "output/models/model3.3_t_broad")
+                              data = filter(lnCVRQ10_data, habitat == "t" & trait_broad != "other"))
+         saveRDS(model2.3_t_broad, "output/models/model2.3_t_broad")
   
   } else{
-    model3.3_btrait_bayes <- readRDS("./output/models/model3.3_btrait_bayes")
-    model3.3_m_broad <- readRDS("output/models/model3.3_m_broad")
-    model3.3_f_broad <- readRDS("output/models/model3.3_f_broad")
-    model3.3_t_broad <- readRDS("output/models/model3.3_t_broad")
+    model2.3_btrait_bayes <- readRDS("./output/models/model2.3_btrait_bayes")
+    model2.3_m_broad <- readRDS("output/models/model2.3_m_broad")
+    model2.3_f_broad <- readRDS("output/models/model2.3_f_broad")
+    model2.3_t_broad <- readRDS("output/models/model2.3_t_broad")
 }
-    
-    
+
 ###########################################################
   # Processing Bayesian Posteriors
 ###########################################################
@@ -4050,62 +4060,69 @@ if(rerun){
                              trait_broad = rep(c("tissue/organism", "biochemical"), each = 2))     
       
        # Predict from model. Note this is the summary.
-         pred_lnvr_traitb <- fitted(model3.3_btrait_bayes, 
+         pred_lncvr_traitb <- fitted(model2.3_btrait_bayes, 
                                      newdata = trait_b_data, re_formula = NA,
                                      summary = TRUE, 
                                      robust = FALSE)
-         pred_lnvr_traitb <- cbind(trait_b_data, pred_lnvr_traitb)
+         pred_lncvr_traitb <- cbind(trait_b_data, pred_lncvr_traitb)
     
        # Predict to get the posterior. Note that we have the full posterior distribution here for each of the 12 categories in the new data. Here, we want to look at the difference between acute and acclimation within each of the categories. 
-            pred_lnvr_traitb_post <- fitted(model3.3_btrait_bayes, 
+            pred_lncvr_traitb_post <- fitted(model2.3_btrait_bayes, 
                                      newdata = trait_b_data, re_formula = NA,
                                      summary = FALSE, 
                                      robust = FALSE)
-        contrast_lnvr_trait_post <-  pred_lnvr_traitb_post[,c(1,3,5,7,9,11)] - pred_lnvr_traitb_post[,c(2,4,6,8,10,12)] # Acclimation - acute.
+        contrast_lncvr_trait_post <-  pred_lncvr_traitb_post[,c(1,3,5,7,9,11)] - pred_lncvr_traitb_post[,c(2,4,6,8,10,12)] # Acclimation - acute.
             
         # Contrast statistics
-            contrast_lnvr_trait_stats <- data.frame( habitat = rep(c("t", "m", "f"), each = 2),
+            contrast_lncvr_trait_stats <- data.frame( habitat = rep(c("t", "m", "f"), each = 2),
                                                      trait = rep(c("tissue/organism", "biochemical"), each = 1),
-                                                    diff = sapply(data.frame(contrast_lnvr_trait_post), mean),
-                                                     l95 = sapply(data.frame(contrast_lnvr_trait_post), function(x) quantile(x, 0.025)),
-                                                     u95 = sapply(data.frame(contrast_lnvr_trait_post), function(x) quantile(x, 0.975)),
-                                                       p = sapply(data.frame(contrast_lnvr_trait_post), function(x) p_value(pmcmc(x))))
+                                                    diff = sapply(data.frame(contrast_lncvr_trait_post), mean),
+                                                     l95 = sapply(data.frame(contrast_lncvr_trait_post), function(x) quantile(x, 0.025)),
+                                                     u95 = sapply(data.frame(contrast_lncvr_trait_post), function(x) quantile(x, 0.975)),
+                                                       p = sapply(data.frame(contrast_lncvr_trait_post), function(x) p_value(pmcmc(x))))
+
+   # Contrasts for pooled acute and acclimation across trait categories
+            
+            contrast_lncvr_trait_cat_stats <- rbind(get_whole_bio(pred_lncvr_traitb_post, habitat = "t", trait_b_data),
+                                                        get_whole_bio(pred_lncvr_traitb_post, habitat = "m", trait_b_data),
+                                                        get_whole_bio(pred_lncvr_traitb_post, habitat = "f", trait_b_data))
+
 
 ###################################################
-  # Model 3.4: Model controlling for acclimation time, 
+  # Model 2.4: Model controlling for acclimation time, 
   # type and life history stage assuming type can vary by habitat
 ###################################################
 
 if(rerun){
   # More realistic model 
-  model3.4 <- metafor::rma.mv(effect_size ~  max_temp_c + c_accl_time + type*habitat*life.hist, V = V, 
+  model2.4 <- metafor::rma.mv(effect_size ~  max_temp_c + c_accl_time + type*habitat*life.hist, V = V, 
                               random = list(~1 | record_num,
                                             ~1 | species_full,
                                             ~1 + max_temp_c| spp,
                                             ~1 | trait,
                                             ~1 | obs),
-                              R = list(species_full = phylo_cor_VR), dfs = "contain", 
-                              test = "t", data = lnVRQ10_data)
+                              R = list(species_full = phylo_cor_CVR), dfs = "contain", 
+                              test = "t", data = lnCVRQ10_data)
   # Save model
-  saveRDS(model3.4, file = "./output/models/lnVRQ10_3.4")
+  saveRDS(model2.4, file = "./output/models/lnCVRQ10_2.4")
 
-   model3.4_bayes <- brms::brm(effect_size | se(sqrt(V)) ~  max_temp_c + c_accl_time + type*habitat*life.hist + 
+   model2.4_bayes <- brms::brm(effect_size | se(sqrt(V)) ~  max_temp_c + c_accl_time + type*habitat*life.hist + 
                                  (~1 | record_num) + 
-                                 (1 | gr(species_full, cov = A_VR)) + 
+                                 (1 | gr(species_full, cov = A_CVR)) + 
                                  (1 + max_temp_c| spp) + 
                                  (1|trait) +
                                  (1|obs), 
-                               data2 = list(A_VR=A_VR), family = gaussian(), 
+                               data2 = list(A_CVR=A_CVR), family = gaussian(), 
                                prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), 
                                control = list(adapt_delta = 0.98, max_treedepth = 12), 
                                chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 4, data = lnCVRQ10_data)
                                   
   # Save model
-  saveRDS(model3.4_bayes, file = "./output/models/lnVRQ10_3.4_bayes")
+  saveRDS(model2.4_bayes, file = "./output/models/lnCVRQ10_2.4_bayes")
 
   } else{
-        model3.4 <- readRDS("./output/models/lnVRQ10_3.4")
-  model3.4_bayes <- readRDS("./output/models/lnVRQ10_3.4_bayes")
+        model2.4 <- readRDS("./output/models/lnCVRQ10_2.4")
+  model2.4_bayes <- readRDS("./output/models/lnCVRQ10_2.4_bayes")
 }
 
 ###########################################################
@@ -4122,59 +4139,81 @@ if(rerun){
             X <- model.matrix(~max_temp_c + c_accl_time + type*habitat*life.hist, data = lh_b_data) 
    
             # Extract posteriors
-              post_lh_vr <- posterior_samples(model3.4_bayes, pars = "^b")
+              post_lh <- posterior_samples(model2.4_bayes, pars = "^b")
         
         # Now we can do all the calculations in one shot.# Predict to get the posterior. Note that we have the full posterior distribution here for each of the 12 categories in the new data. Here, we want to look at the difference between acute and acclimation within each of the categories. 
-            pred_lh_vr <- apply(t(post_lh_vr),2 , function(x) as.matrix(X)%*%x)
+            pred_lh <- apply(t(post_lh),2 , function(x) as.matrix(X)%*%x)
 
-        contrast_lnvr_lh_post <-  pred_lh_vr[c(1,3,5,7,9,11),] - pred_lh_vr[c(2,4,6,8,10,12),] # Acclimation - acute.
+        contrast_lncvr_lh_post <-  pred_lh[c(1,3,5,7,9,11),] - pred_lh[c(2,4,6,8,10,12),] # Acclimation - acute.
             
         # Contrast statistics
-            contrast_lnvr_lh_stats <- data.frame( habitat = rep(c("t", "m", "f"), each = 2),
+            contrast_lncvr_lh_stats <- data.frame( habitat = rep(c("t", "m", "f"), each = 2),
                                                      stage = rep(c("j", "a"), each = 1),
-                                                    diff = apply(data.frame(contrast_lnvr_lh_post), 1, mean),
-                                                     l95 = apply(data.frame(contrast_lnvr_lh_post), 1, function(x) quantile(x, 0.025)),
-                                                     u95 = apply(data.frame(contrast_lnvr_lh_post), 1, function(x) quantile(x, 0.975)),
-                                                       p = apply(data.frame(contrast_lnvr_lh_post), 1, function(x) p_value(pmcmc(x))))
+                                                    diff = apply(data.frame(contrast_lncvr_lh_post), 1, mean),
+                                                     l95 = apply(data.frame(contrast_lncvr_lh_post), 1, function(x) quantile(x, 0.025)),
+                                                     u95 = apply(data.frame(contrast_lncvr_lh_post), 1, function(x) quantile(x, 0.975)),
+                                                       p = apply(data.frame(contrast_lncvr_lh_post), 1, function(x) p_value(pmcmc(x))))
 ```
 
-Analysis of $lnVR_{Q_{10}}$ suggested that variance increases with
+Overall, analyses with $lnCVR_{Q_{10}}$ showed similar patterns to those with $lnVR_{Q_{10}}$, except that, because of rates being taken into consideration and there is a strong mean-variance relationship, the patterns were generally opposite in direction. Either way, the relative differences are quite similar. Overall, analysis of $lnCVR_{Q_{10}}$ suggested that relative variance decreased with
 higher temperatures across all habitat types, with terrestrial
-ectotherms having the smallest increase in variance (@fig-s1 & @tbl-s1).
+ectotherms having the largest decrease in relative variance (@fig-s1). There were also no major differences in the relative differences among broad trait categories (@fig-cvrbtrait) or life-history stages (@fig-lncvrlh).
 
 ```{r, fig-s1}
 #| label: fig-s1
 #| fig-align: center
 #| fig-cap: "Estimated mean acute and acclimation $lnVR_{Q_{10}}$ for marine, freshwater and terrestrial habitats. The percentage change in variance is also back calculated. Note that these are raw variances and do not account for changes in mean physiological rates. k = total number of effect size estimates while the numbers in brackets indicate the number of species. Thick bars are 95% confidence intervals (CI) and thin bars 95% prediction intervals (PI). $\\Beta$ values are the contrasts between acute and acclimation means within each habitat with 'NS' signifiying . $\\mu$ values are the overall meta-analytic means averaged across acute and acclimation types within each habitat type. In both cases, their 95% CI's are indicated within square brackets. $p_{MCMC}$ values are the posterior probability of the contrast or overall meta-analytic mean being different from zero. For ease of visualisation, all the raw data plotted for both acute and acclimation type effect sizes are presented as circles."
 
-k_vr <- manual_extract(model3.2, mod = "habitat", group = "spp", exclude = NULL)
+#################
+# Fig S CVR
+##################
+  # Clear from the model that there really is no difference between the change in variance for acute or acclimation CVR. But, there is a clear reduction in between individual variance for terrestrial species. As temperature get hotter then the variance in physiological rates decreases. This is not true of aquatic systems. 
+  col <- c("#0871B9", "#F3B40D", "#1BB908")
+  k_cvr <- manual_extract(model2.2, mod = "habitat", group = "record_num", exclude = NULL)
+
+  x1 = 1.4
+  x2 = 2.4
+  x3 = 3.4
+  
+  p3b <- orchard_plot(model2.2, xlab = TeX("$lnCVR_{Q_{10}}$"), by = "type", at = list(type = c("acute", "acclim")), mod = "habitat", group  = "record_num", weights = "prop", angle = 45, trunk.size = 1.8, branch.size = 2.8,  k.pos = "none")  +
+              scale_x_discrete(labels = c("T" = "Terrestrial","M" = "Marine" ,"F" = "Freshwater")) +  
+  
+  scale_fill_manual(values = col) + scale_color_manual(values = rep("black",3)) +
+  
+  annotate("text", x = x1, y = -1.5, label =TeX(paste0("$\\mu = $", round(mean(f_cvr_mean), 3), "[", round(quantile(f_cvr_mean, 0.025), 2)," to ", round(quantile(f_cvr_mean, 0.975),2), "] ")), hjust = 0, size = 8) + 
+         annotate("text", x = x1, y = 0.5, label =TeX(paste0("$\\beta = $", "NS")), hjust = 0, size = 8) +
+  annotate("text", x = x1-0.20, y = -1.5, label = TeX(paste0("$p_{MCMC} = $", round(pmcmc(f_cvr_mean), digit = 2))), hjust = 0, size = 8) + 
+  annotate("text", x = x1-0.20, y = 1, label =paste0(round(mean(exp(f_cvr_mean)-1)*100, 2), "%"), hjust = 0, size = 8) + 
+  
+  annotate("text", x = x2, y = -1.5, label =TeX(paste0("$\\mu = $", round(mean(m_cvr_mean), 3), "[", round(quantile(m_cvr_mean, 0.025), 2)," to ", round(quantile(m_cvr_mean, 0.975),2), "] ")), hjust = 0, size = 8) + 
+     annotate("text", x = x2, y = 0.5, label =TeX(paste0("$\\beta = $", "NS")), hjust = 0, size = 8) +
+  annotate("text", x = x2-0.20, y = -1.5, label = TeX(paste0("$p_{MCMC} = $", round(pmcmc(m_cvr_mean), digit = 2))), hjust = 0, size = 8) +
+  annotate("text", x = x2-0.20, y = 1, label =paste0(round(mean(exp(m_cvr_mean)-1)*100, 2), "%"), hjust = 0, size = 8) + 
+  
+  annotate("text", x = x3+0.10, y = -1.5, label =TeX(paste0("$\\mu = $", round(mean(t_cvr_mean), 3), "[", round(quantile(t_cvr_mean, 0.025), 2)," to ", round(quantile(t_cvr_mean, 0.975),2), "] ")), hjust = 0, size = 8) + 
+  annotate("text", x = x3+0.10, y = 0.5, label =TeX(paste0("$\\beta = $", "NS")), hjust = 0, size = 8) +
+  annotate("text", x = x3-0.10, y = 1, label =paste0(round(mean(exp(t_cvr_mean)-1)*100, 2), "%"), hjust = 0, size = 8) + 
+  annotate("text", x = x3-0.10, y = -1.5, label = TeX(paste0("$p_{MCMC} = $", round(pmcmc(t_cvr_mean), digit = 3))), hjust = 0, size = 8) + 
+    
+    labs(shape = "Type") +
+    annotate("text", label= paste0("k = ", k_cvr$k, " (", k_cvr$sdy, ")"), x = c(0.8, 1.8, 2.8), y = 1.3, size = 5) + ylim (-1.5, 1.5) 
+   
+  p3b <- p3b + theme_classic() + theme(axis.title  = element_text(size = 24),
+                                       axis.text = element_text(size = 24),
+                                       axis.text.y = element_blank(),
+                                       legend.title = element_text(size = 30),
+                               legend.text = element_text(size = 24),
+                               title = element_text(size = 24), legend.position = "top") + guides(shape = "none")
+
+
+########
+
+
 
 ##################
   # Figure S1
 ################## 
-  # Sensitivity analysis that looks at how variance changes but not controlling for the mean.
-  col <- c("#0871B9", "#F3B40D", "#1BB908")
-  p3 <- orchard_plot(model3.2, xlab = TeX("$lnVR_{Q_{10}}$"), mod = "habitat", by = "type", group  = "record_num", weights = "prop", angle = 45, trunk.size = 1.8, branch.size = 2.8) +
-              scale_x_discrete(labels = c("T" = "Terrestrial","M" = "Marine" ,"F" = "Freshwater")) + ylim(-2,3) +
-    
-     annotate("text", x = 1.5, y = -2, label =TeX(paste0("$\\mu = $", round(mean(f_VR_mean), 2), " [", round(quantile(f_VR_mean, 0.025), 2)," to ", round(quantile(f_VR_mean, 0.975),2), "] ", " $\\,p_{MCMC}$", p_value(round(pmcmc(f_VR_mean), digit = 2)))), hjust = 0, size = 8) + 
-    annotate("text", x = 1.2, y = 1.5, label =TeX(paste0("$\\beta = $", "NS")), hjust = 0, size = 8) +
-  annotate("text", x = 1.20, y = -2, label =paste0(round(mean(f_VR_mean_ef), 1), "%"), hjust = 0, size = 8) + labs(shape = "Type") +
-    
-    annotate("text", x = 2.5, y = -2, label =TeX(paste0("$\\mu = $", round(mean(m_VR_mean), 2), " [", round(quantile(m_VR_mean, 0.025), 2)," to ", round(quantile(m_VR_mean, 0.975),2), "] ", " $\\,p_{MCMC}$", p_value(round(pmcmc(m_VR_mean), digit = 2)))), hjust = 0, size = 8) + 
-    annotate("text", x = 2.2, y = 1.5, label =TeX(paste0("$\\beta = $", "NS")), hjust = 0, size = 8) +
-  annotate("text", x = 2.20, y = -2, label =paste0(round(mean(m_VR_mean_ef), 1), "%"), hjust = 0, size = 8) + labs(shape = "Type") +
-    
-        annotate("text", x = 3.5, y = -2, label =TeX(paste0("$\\mu = $", round(mean(t_VR_mean), 2), " [", round(quantile(t_VR_mean, 0.025), 2)," to ", round(quantile(t_VR_mean, 0.975),2), "] ", " $\\,p_{MCMC}$ = ", p_value(round(pmcmc(t_VR_mean), digit = 2)))), hjust = 0, size = 8) + 
-    annotate("text", x = 3.2, y = 1.5, label =TeX(paste0("$\\beta = $", "NS")), hjust = 0, size = 8) +
-  annotate("text", x = 3.20, y = -2, label =paste0(round(mean(t_VR_mean_ef), 1), "%"), hjust = 0, size = 8) + labs(shape = "Type") + scale_fill_manual(values = c(col)) + annotate("text", y = 2.5, x = c(1.3, 2.3, 3.3)+0.1, label = TeX(paste0("\\it{k} = ", k_vr$k, " (", k_vr$sdy, ")")), size = 6)
-  
-  p3 <- p3 + theme_classic() + theme(axis.title  = element_text(size = 24),
-                                       axis.text = element_text(size = 24),
-                                       axis.text.y = element_text(angle = 45, size = 24),
-                                       legend.title = element_text(size = 30),
-                               legend.text = element_text(size = 24),
-                               title = element_text(size = 24), legend.position = "top") 
+
   
   ggsave(p3, filename = "./output/figures/figS8.pdf", width = 11.5, height = 8)
 
@@ -4182,31 +4221,11 @@ k_vr <- manual_extract(model3.2, mod = "habitat", group = "spp", exclude = NULL)
   figs1
 ```
 
-```{r, tbl-s1}
-#| label: tbl-s1
+```{r, fig-cvrbtrait}
+#| label: fig-btrait
+#| fig-cap: "Estimated mean acclimation and acute $lnCVR_{Q_{10}}$ for tissue/whole-orgamism traits and biochemical traits across marine (A), freshwater (B) and terrestrial (C) habitats. Across all plots, thick bars indicate 95% confidence intervals and thin bars indicate 95% prediction intervals. k = total number of effect size estimates while the numbers in brackets indicate the number of species. For ease of visualisation, raw data for both trait categories are presented but points are not distinguished by different symbols. $\\Beta$ values are the contrasts between acute and acclimation means within each life stage. $p_{MCMC}$ values are the posterior probability of the contrast being different from zero."
 #| echo: false
-#| tbl-cap: "Model estimates, standard error, and 95% credible intervals comparing changes in acute and acclimation $lnVR_{Q_{10}}$ across habitat types. Model estimates are based off 1,253 effect sizes from 139 studies."
- 
- # Extract the fixed / population-level effect summaries of the posterior
-    fixed <- do.call(rbind, apply(posterior_samples(model3.2_bayes, pars = "^b"), 2,  function(x) post_summary(x)))
-    fixed <- cbind(Parameter = c("Intercept", "Mximum Temperature (centered)", "Acclimation Time (centered)", "Acclimation Effect", "Habitat (Marine)", "Habitat (Terrestrial)", "Acclimation*Marine", "Acclimation*Terrestrial"), fixed)
-    rownames(fixed) <- NULL
-
- # Extract the random effect summaries of the posteriors (SDs)
-    random <- rbind(header = rep(0, 4), do.call(rbind, apply(posterior_samples(model3.2_bayes, pars = "^sd"), 2,  function(x) post_summary(x))))
-    random <- cbind(Parameter = c(" ", "Study", "Phylogeny", "Species (intercept)", "Species (slope max temp)", "Trait"), random)
-    rownames(random) <- NULL
-
-# Create the table
-    tabs1 <- rbind(fixed, random)
-
-    flextable(tabs1) %>% bold(part = "header") %>% autofit() %>% add_body_row(values = as_paragraph(as_b("Fixed Effects")), top = TRUE, colwidths = 5) %>% compose(value = as_paragraph(as_b(c(("Random Effects"), rep("", 4)))), i = 10)
-```
-
-```{r, fig-lnvrlh}
-#| label: fig-lnvrlh
-#| echo: false
-#| fig-cap: "Estimated mean acclimation and acute $lnVR_{Q_{10}}$ for adult (a) and juvenile (j) life-history stages for marine (A), freshwater (B) and terrestrial (C) ectotherms. Across all plots, thick bars indicate 95% confidence intervals and thin bars indicate 95% prediction intervals. k = total number of effect size estimates while the numbers in brackets indicate the number of species. For ease of visualisation, raw data for both adult and juvenile life-history stages are presented but points are not distinguished by different symbols. $\\Beta$ values are the contrasts between acute and acclimation means within each life stage. $p_{MCMC}$ values are the posterior probability of the contrast being different from zero."
+#| warning: false
 
 add_theme  <- function(){theme(axis.title  = element_text(size = 30),
                                axis.text.y = element_text(size = 30),
@@ -4218,36 +4237,265 @@ add_theme  <- function(){theme(axis.title  = element_text(size = 30),
 branch.size = 2.8
 trunk.size = 1.8
 
-n_lnvr_lh <- lnVRQ10_data %>% group_by(habitat, life.hist, type) %>% summarise(k = n(), spp = length(unique(spp))) %>% arrange(type, life.hist, habitat)
+n_lncvr_btrait  <- lnCVRQ10_data  %>% filter(trait_broad != "other") %>% 
+              group_by(habitat, trait_broad, type) %>% summarise(k = n(), spp = length(unique(spp))) %>% arrange(trait_broad, type, habitat)
+
+       col <- c("#0871B9", "#F3B40D", "#1BB908")
+     x.pos <- c(0.7, 1.30, 1.70, 2.30)
+size_annot <- 5.5
+
+############
+# CVR
+############
+m_cv <- n_lncvr_btrait %>% filter(habitat == "m")
+f_cv <- n_lncvr_btrait %>% filter(habitat == "f")
+t_cv <- n_lncvr_btrait %>% filter(habitat == "t")
+
+t_trait_b_cvr <- contrast_lncvr_trait_stats %>% filter(habitat == "t") %>% purrr::modify_if(~is.numeric(.), ~round(., 2)) %>% arrange(trait)
+m_trait_b_cvr <- contrast_lncvr_trait_stats %>% filter(habitat == "m") %>% purrr::modify_if(~is.numeric(.), ~round(., 2)) %>% arrange(trait)
+f_trait_b_cvr <- contrast_lncvr_trait_stats %>% filter(habitat == "f") %>% purrr::modify_if(~is.numeric(.), ~round(., 2)) %>% arrange(trait)
+
+
+p1_cvr <- orchard_plot(model2.3_m_broad, mod = "trait_broad", at = list(c_accl_time = 0, habitat = "m"), group = "record_num", xlab = TeX("$lnCVR_{Q_{10}}$"), condition.lab = "Type", by = "type",  g = FALSE, k = FALSE, angle = 45, branch.size = branch.size, trunk.size = trunk.size) + ylim(c(-2, 2.2)) + add_theme() + ylim(-1.7, 1.6)  + annotate("text", x = x.pos, y = 0.8, label = TeX(paste0("\\it{k} = ", m_cv$k, " (", m_cv$spp, ")")), size = size_annot) + theme(legend.position = "none", axis.text.y = element_blank()) + scale_fill_manual(values = rep(col[2],4)) + scale_color_manual(values = rep("black", 4)) + annotate("text", x = yloc, y = -1.7, label = TeX(paste0("$\\beta$ = ", m_trait_b_cvr$diff, " [", m_trait_b_cvr$l95, " to ", m_trait_b_cvr$u95, "] ", "$\\,p_{MCMC}$ = ", m_trait_b_cvr$p)), hjust = 0, size = 8)
+
+p2_cvr <- orchard_plot(model2.3_f_broad, mod = "trait_broad", at = list(c_accl_time = 0, habitat = "f"), group = "record_num", xlab = TeX("$lnCVR_{Q_{10}}$"), condition.lab = "Type", by = "type", angle = 45, g = FALSE, k = FALSE, branch.size = branch.size, trunk.size = trunk.size)  + add_theme() + ylim(-1.6, 1.3) + annotate("text", x = x.pos, y = 0.8, label = TeX(paste0("\\it{k} = ", f_cv$k, " (", f_cv$spp, ")")), size = size_annot) + theme(legend.position = "right", legend.justification = c(1, 1), axis.text.y = element_blank()) + guides(shape = guide_legend(direction = "vertical"), size = guide_legend(direction = "vertical")) + scale_fill_manual(values = rep(col[1], 4)) + scale_color_manual(values = rep("black", 4)) + annotate("text", x = yloc, y = -1.6, label = TeX(paste0("$\\beta$ = ", f_trait_b_cvr$diff, " [", f_trait_b_cvr$l95, " to ", f_trait_b_cvr$u95, "] ", "$\\,p_{MCMC}$ = ", f_trait_b_cvr$p)), hjust = 0, size = 8)
+
+p3_cvr <- orchard_plot(model2.3_t_broad, mod = "trait_broad", at = list(c_accl_time = 0, habitat = "t"), angle = 45, group = "record_num", xlab = TeX("$lnCVR_{Q_{10}}$"), condition.lab = "Type", by = "type",  g = FALSE, k = FALSE, branch.size = branch.size, trunk.size = trunk.size)+ add_theme()  + ylim(-2, 2) + annotate("text", x = x.pos, y = 1.5, label = TeX(paste0("\\it{k} = ", t_cv$k, " (", t_cv$spp, ")")), size = size_annot) +  theme(legend.position = "none") + scale_fill_manual(values = rep(col[3], 4)) + scale_color_manual(values = rep("black", 4)) + annotate("text", x = yloc, y = -2, label = TeX(paste0("$\\beta$ = ", t_trait_b_cvr$diff, " [", t_trait_b_cvr$l95, " to ", t_trait_b_cvr$u95, "] ", "$\\,p_{MCMC}$ = ", t_trait_b_cvr$p)), hjust = 0, size = 8)
+
+
+############
+# Full fig
+############
+figbtrait_vr <-(p1_cvr | p2_cvr | p3_cvr) + plot_annotation(tag_levels = "A") 
+ggsave(figbtrait_vr, filename = "./output/figures/figStrait_cvr.png", width = 28, height = 8, device = "png")
+
+figbtrait <- magick::image_read("./output/figures/figStrait_cvr.png")
+figbtrait
+```
+
+```{r, fig-lncvrlh}
+#| label: fig-lnvrlh
+#| echo: false
+#| fig-cap: "Estimated mean acclimation and acute $lnCVR_{Q_{10}}$ for adult (a) and juvenile (j) life-history stages for marine (A), freshwater (B) and terrestrial (C) ectotherms. Across all plots, thick bars indicate 95% confidence intervals and thin bars indicate 95% prediction intervals. k = total number of effect size estimates while the numbers in brackets indicate the number of species. For ease of visualisation, raw data for both adult and juvenile life-history stages are presented but points are not distinguished by different symbols. $\\Beta$ values are the contrasts between acute and acclimation means within each life stage. $p_{MCMC}$ values are the posterior probability of the contrast being different from zero."
+
+add_theme  <- function(){theme(axis.title  = element_text(size = 30),
+                               axis.text.y = element_text(size = 30),
+                               axis.text.x = element_text(size = 30),
+                              legend.title = element_text(size = 30),
+                               legend.text = element_text(size = 24),
+                               title = element_text(size = 36))}
+
+branch.size = 2.8
+trunk.size = 1.8
+
+n_lncvr_lh <- lnCVRQ10_data %>% group_by(habitat, life.hist, type) %>% summarise(k = n(), spp = length(unique(spp))) %>% arrange(type, life.hist, habitat)
 
 x.pos = c(0.7, 1.30, 1.70, 2.30)
 size_annot <- 5.5
 
 ###############
-## lnVR Q10
+# ln CVR
 ###############
+m_cv <- n_lncvr_lh %>% filter(habitat == "m")
+f_cv <- n_lncvr_lh %>% filter(habitat == "f")
+t_cv <- n_lncvr_lh %>% filter(habitat == "t")
 
-t_trait_b <- contrast_lnvr_lh_stats %>% filter(habitat == "t") %>% purrr::modify_if(~is.numeric(.), ~round(., 2)) %>% arrange(stage)
-m_trait_b <- contrast_lnvr_lh_stats %>% filter(habitat == "m") %>% purrr::modify_if(~is.numeric(.), ~round(., 2)) %>% arrange(stage)
-f_trait_b <- contrast_lnvr_lh_stats %>% filter(habitat == "f") %>% purrr::modify_if(~is.numeric(.), ~round(., 2)) %>% arrange(stage)
+  t_trait_cvr <- contrast_lncvr_lh_stats %>% filter(habitat == "t") %>% purrr::modify_if(~is.numeric(.), ~round(., 2)) %>% arrange(stage)
+m_trait_b_cvr <- contrast_lncvr_lh_stats %>% filter(habitat == "m") %>% purrr::modify_if(~is.numeric(.), ~round(., 2)) %>% arrange(stage)
+f_trait_b_cvr <- contrast_lncvr_lh_stats %>% filter(habitat == "f") %>% purrr::modify_if(~is.numeric(.), ~round(., 2)) %>% arrange(stage)
 
-yloc = c(1.5, 2.5)
 
-m_r <- n_lnvr_lh %>% filter(habitat == "m")
-f_r <- n_lnvr_lh %>% filter(habitat == "f")
-t_r <- n_lnvr_lh %>% filter(habitat == "t")
+p1_cvr <- orchard_plot(model2.4, mod = "life.hist", at = list(c_accl_time = 0, habitat = "m"), group = "record_num", xlab = TeX("$lnCVR_{Q_{10}}$"), condition.lab = "Type", by = "type",  g = FALSE, k = FALSE, angle = 45, branch.size = branch.size, trunk.size = trunk.size) + ylim(c(-2, 2.2)) + add_theme() + ylim(-1.5, 1.1)  + annotate("text", x = x.pos, y = 0.8, label = TeX(paste0("\\it{k} = ", m_cv$k, " (", m_cv$spp, ")")), size = size_annot) + theme(legend.position = "none", axis.text.y = element_blank()) + annotate("text", x = yloc, y = -1.3, label = TeX(paste0("$\\beta$ = ", m_trait_b_cvr$diff, " [", m_trait_b_cvr$l95, " to ", m_trait_b_cvr$u95, "] ", "$\\,p_{MCMC}$ = ", m_trait_b_cvr$p)), hjust = 0, size = 8)
 
-p1_vr <- orchard_plot(model3.4, mod = "life.hist", at = list(c_accl_time = 0, habitat = "m"), group = "spp", xlab = TeX("$lnVR_{Q_{10}}$"), condition.lab = "Type", by = "type",  g = FALSE, k = FALSE, angle = 45, branch.size = branch.size, trunk.size = trunk.size) + labs(title = "Marine") + add_theme() + ylim(-1.5, 3) + theme(legend.position = "none", axis.text.y = element_blank()) + annotate("text", x = x.pos, y = 2.5, label = TeX(paste0("\\it{k} = ", m_r$k, " (", m_r$spp, ")")), size = size_annot) + annotate("text", x = yloc, y = -1.5, label = TeX(paste0("$\\beta$ = ", m_trait_b$diff, " [", m_trait_b$l95, " to ", m_trait_b$u95, "] ", "$\\,p_{MCMC}$ = ", m_trait_b$p)), hjust = 0, size = 8)
+p2_cvr <- orchard_plot(model2.4, mod = "life.hist", at = list(c_accl_time = 0, habitat = "f"), group = "record_num", xlab = TeX("$lnCVR_{Q_{10}}$"), condition.lab = "Type", by = "type", angle = 45, g = FALSE, k = FALSE, branch.size = branch.size, trunk.size = trunk.size)  + add_theme() + ylim(-1.3, 1.1) + annotate("text", x = x.pos, y = 0.8, label = TeX(paste0("\\it{k} = ", f_cv$k, " (", f_cv$spp, ")")), size = size_annot) + theme(legend.position = "right", legend.justification = c(1, 1), axis.text.y = element_blank()) + guides(shape = guide_legend(direction = "vertical"), size = guide_legend(direction = "vertical")) + annotate("text", x = yloc, y = -1.3, label = TeX(paste0("$\\beta$ = ", f_trait_b_cvr$diff, " [", f_trait_b_cvr$l95, " to ", f_trait_b_cvr$u95, "] ", "$\\,p_{MCMC}$ = ", f_trait_b_cvr$p)), hjust = 0, size = 8)
 
-p2_vr <- orchard_plot(model3.4, mod = "life.hist", at = list(c_accl_time = 0, habitat = "f"), group = "record_num", xlab = TeX("$lnVR_{Q_{10}}$"), condition.lab = "Type", by = "type",  g = FALSE, k = FALSE, branch.size = branch.size, trunk.size = trunk.size, angle = 45)+ labs(title = "Freshwater")  + add_theme() + theme(legend.position = "none", axis.text.y = element_blank()) + ylim(-1.5, 3) + annotate("text", x = x.pos, y = 2.5, label = TeX(paste0("\\it{k} = ", f_r$k, " (", f_r$spp, ")")), size = size_annot) + theme(legend.position = "right", legend.justification = c(1, 1)) + guides(shape = guide_legend(direction = "vertical"), size = guide_legend(direction = "vertical")) + annotate("text", x = yloc, y = -1.5, label = TeX(paste0("$\\beta$ = ", f_trait_b$diff, " [", f_trait_b$l95, " to ", f_trait_b$u95, "] ", "$\\,p_{MCMC}$ = ", f_trait_b$p)), hjust = 0, size = 8)
+p3_cvr <- orchard_plot(model2.4, mod = "life.hist", at = list(c_accl_time = 0, habitat = "t"), angle = 45, group = "record_num", xlab = TeX("$lnCVR_{Q_{10}}$"), condition.lab = "Type", by = "type",  g = FALSE, k = FALSE, branch.size = branch.size, trunk.size = trunk.size)+ add_theme()  + ylim(-1.55, 1.1) + annotate("text", x = x.pos, y = 0.6, label = TeX(paste0("\\it{k} = ", t_cv$k, " (", t_cv$spp, ")")), size = size_annot) +  theme(legend.position = "none") + annotate("text", x = yloc, y = -1.55, label = TeX(paste0("$\\beta$ = ", t_trait_cvr$diff, " [", t_trait_cvr$l95, " to ", t_trait_cvr$u95, "] ", "$\\,p_{MCMC}$ = ", t_trait_cvr$p)), hjust = 0, size = 8) + scale_x_discrete(labels = c("A" = "Adult","J" = "Juvenile")) 
 
-p3_vr <- orchard_plot(model3.4, mod = "life.hist", at = list(c_accl_time = 0, habitat = "t", legend.pos = "none"), group = "record_num", xlab = TeX("$lnVR_{Q_{10}}$"), condition.lab = "Type", by = "type",  g = FALSE, k = FALSE, branch.size = branch.size, trunk.size = trunk.size, angle = 45)+ labs(title = "Terrestrial") + add_theme()  +  ylim(-1.5,3) + theme(legend.position = "none") + annotate("text", x = x.pos, y = 2.5, label = TeX(paste0("\\it{k} = ", t_r$k, " (", t_r$spp, ")")), size = size_annot) + annotate("text", x = yloc, y = -1.5, label = TeX(paste0("$\\beta$ = ", t_trait_b$diff, " [", t_trait_b$l95, " to ", t_trait_b$u95, "] ", "$\\,p_{MCMC}$ = ", t_trait_b$p)), hjust = 0, size = 8) +scale_x_discrete(labels = c("A" = "Adult","J" = "Juvenile")) 
 
-figvr_lh <-(p3_vr | p1_vr | p2_vr) + plot_annotation(tag_levels = "A") 
-ggsave(figvr_lh, filename = "./output/figures/figSlh.pdf", width = 28, height = 10, device = "pdf")
+figvr_lh <-(p3_cvr | p1_cvr | p2_cvr) + plot_annotation(tag_levels = "A") 
+ggsave(figcvr_lh, filename = "./output/figures/figSlh.pdf", width = 28, height = 10, device = "pdf")
 
-figvr_lh <- magick::image_read("./output/figures/figSlh.pdf")
-figvr_lh
+figcvr_lh <- magick::image_read("./output/figures/figSlh.pdf")
+figcvr_lh
+
+```
+
+```{r wildlncvr}
+#| label: wildlncvr
+#| cache: true
+#| include: false
+#| echo: false
+#| warning: false
+#| 
+#######################################
+  ## lnCVRQ10 from Wild Populations ##
+#######################################
+##################################################
+  # Organise the data and prune tree
+##################################################
+
+# Bring in  historial climate data
+  climate <- read.csv("./output/climate_data/ERA5_air_and_SST_timeseries.csv")
+
+# Create a match column.
+  climate2 <- climate %>% mutate(match = interaction(Species, Latitude, Longitude)) %>% 
+                          dplyr::select(Species, Latitude, Longitude, match, cv, sd, mean, acf_lag1, acf_all)
+
+# Populations and species?
+  pop_spp_w <- climate2[complete.cases(climate2),]
+
+# Subset the data
+  lnCVRQ10_data_wild <- data_long2 %>% 
+    filter(grepl("lnCVR", name) & !is.na(effect_size) & !is.na(V) & !V == 0 & !is.na(acclim_period) & source == "w") %>% 
+                        mutate(spp = species_full, 
+                                     c_accl_time = acclim_period - mean(acclim_period, na.rm = TRUE), 
+                                     match = interaction(spp, lat, long),
+                                     max_temp_c = scale(temp_2, scale = FALSE))
+
+# Now, join climate data to full data. This will give us all the climate variability data for each site across time
+  lnCVRQ10_data_wild <- left_join(lnCVRQ10_data_wild, climate2, by = "match")
+
+# Look at the environment details across different habitats. 
+  lnCVRQ10_data_wild  %>% group_by(habitat) %>% summarise(mean(sd))
+
+# Check and prune tree
+  tree_lncvr_wild <- tree_checks(data = lnCVRQ10_data_wild, tree = tree_p0.7, dataCol = "species_full", type = "prune")
+  tree_checks(data = lnCVRQ10_data_wild, tree = tree_lncvr_wild, dataCol = "species_full", type = "check") # Good
+
+# Create the phylo correlation matrix
+  phylo_cor_wild_cvr <- vcv(tree_lncvr_wild, cor = TRUE)
+          A_wild_cvr <- vcv(tree_lncvr_wild, cor = FALSE) # For bayes, need cov matrix
+
+# Scale environment variables
+    lnCVRQ10_data_wild <- lnCVRQ10_data_wild %>% mutate(     cv_c = scale(cv),
+                                                        acf_all_c = scale(acf_all),
+                                                        acf_lag1_c = scale(acf_lag1))
+
+####################################################
+  # Model 4.3: Model environmental variability by acute/acclim
+####################################################
+rerun = FALSE
+if(rerun){
+  # More realistic model with 
+  model4.3          <- metafor::rma.mv(effect_size ~ max_temp_c + c_accl_time + cv_c + type + type:cv_c, V = V,
+                                       random = list(~1 | record_num,
+                                            ~1 | species_full,
+                                            ~1 | trait,
+                                            ~1 + max_temp_c| spp,
+                                            ~1 | obs),
+                              R = list(species_full = phylo_cor_wild_cvr), dfs = "contain", 
+                              test = "t", data = lnCVRQ10_data_wild)
+  
+   model4.3_bayes <- brms::brm(effect_size | se(sqrt(V), sigma = TRUE) ~  max_temp_c + c_accl_time + cv_c + type + type:cv_c + (~1 | record_num) + (1 | gr(species_full, cov = A_wild_cvr)) + (1 + max_temp_c| spp) + (1|trait), data2 = list(A_wild_cvr=A_wild_cvr), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 8, data = lnCVRQ10_data_wild)
+                                  
+  # Save model4.3
+  saveRDS(model4.3, file = "./output/models/lnCVRQ10_4.3")
+  saveRDS(model4.3_bayes, file = "./output/models/lnCVRQ10_4.3_bayes")
+
+  } else{
+        model4.3 <- readRDS("./output/models/lnCVRQ10_4.3")
+  model4.3_bayes <- readRDS("./output/models/lnCVRQ10_4.3_bayes")
+}
+  
+
+############################################################################################
+# Model 4.9: Acclimatization lnCVRQ10 only. Test if environmental variance explains 
+# differently in each habitat
+############################################################################################          
+  lnCVRQ10_data_wild_acclim <- lnCVRQ10_data_wild %>%  filter(type == "acclim")
+  
+  # Create the phylo correlation matrix
+  
+  # Check and prune tree
+tree_lncvr_wild_acclim <- tree_checks(data = lnCVRQ10_data_wild_acclim, tree = tree_p0.7, dataCol = "species_full", type = "prune")
+tree_checks(data = lnCVRQ10_data_wild_acclim, tree = tree_lncvr_wild_acclim, dataCol = "species_full", type = "check")
+
+phylo_cor_wild_acclim <- vcv(tree_lncvr_wild_acclim, cor = TRUE)
+        A_wild_acclim <- vcv(tree_lncvr_wild_acclim, cor = FALSE) # For bayes, need cov matrix
+  
+  
+if(rerun){
+  # More realistic model with 
+  model4.9  <- metafor::rma.mv(effect_size ~ max_temp_c + c_accl_time + cv_c + habitat + habitat:cv_c, V = V,
+                                       random = list(~1 | record_num,
+                                            ~1 | species_full,
+                                            ~1 | trait,
+                                            ~1 | spp,
+                                            ~1 | obs),
+                              R = list(species_full = phylo_cor_wild_acclim), dfs = "contain", 
+                              test = "t", data = lnCVRQ10_data_wild_acclim)
+  
+   model4.9_bayes <- brms::brm(effect_size | se(sqrt(V), sigma = TRUE) ~  max_temp_c + c_accl_time + cv_c + habitat + habitat:cv_c + (~1 | record_num) + (1 | gr(species_full, cov = A_wild_acclim)) + (1 | spp) + (1|trait), data2 = list(A_wild_acclim=A_wild_acclim), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.99, max_treedepth = 12), chains = 4, thin = 1, iter = 5000, warmup = 1000, cores = 8, data = lnCVRQ10_data_wild_acclim)
+                                  
+  # Save model3.8
+  saveRDS(model4.9, file = "./output/models/lnCVRQ10_4.9")
+  saveRDS(model4.9_bayes, file = "./output/models/lnCVRQ10_4.9_bayes")
+
+  } else{
+        model4.9 <- readRDS("./output/models/lnCVRQ10_4.9")
+  model4.9_bayes <- readRDS("./output/models/lnCVRQ10_4.9_bayes")
+}
+                  
+#################################################
+### Bayesian Slopes from Model 4.9
+#################################################
+ posteriors4.9 <- posterior_samples(model4.9_bayes, "^b") 
+        
+    slope_f_4.9 <- posteriors4.9[,"b_cv_c"]; mean(slope_f_4.9); pmcmc(slope_f_4.9); quantile(slope_f_4.9, c(0.025, 0.975))
+    slope_m_4.9 <- posteriors4.9[,"b_cv_c"] + posteriors4.9[,"b_cv_c:habitatm"]; mean(slope_m_4.9); pmcmc(slope_m_4.9); quantile(slope_m_4.9, c(0.025, 0.975))
+    slope_t_4.9 <- posteriors4.9[,"b_cv_c"] + posteriors4.9[,"b_cv_c:habitatt"]; mean(slope_t_4.9); pmcmc(slope_t_4.9); quantile(slope_t_4.9, c(0.025, 0.975))
+
+##################################################
+    # Model 4.8, 4.9 and 4.10 - Habitat subset
+    # Used for making plots
+##################################################
+    # Subset data to habitat
+    lnCVRQ10_data_wild_acclim_t <- lnCVRQ10_data_wild_acclim %>% filter(habitat == "t")
+    lnCVRQ10_data_wild_acclim_f <- lnCVRQ10_data_wild_acclim %>% filter(habitat == "f")
+    lnCVRQ10_data_wild_acclim_m <- lnCVRQ10_data_wild_acclim %>% filter(habitat == "m")
+
+if(rerun){
+    # Terrestrial Models
+    model4.9_t  <- metafor::rma.mv(effect_size ~ max_temp_c + c_accl_time + cv_c, V = V,
+                                       random = list(~1 | record_num,
+                                            ~1 | species_full,
+                                            ~1 | trait,
+                                            ~1 + max_temp_c| spp,
+                                            ~1 | obs),
+                              R = list(species_full = phylo_cor_wild_acclim), dfs = "contain", 
+                              test = "t", data = lnCVRQ10_data_wild_acclim_t)
+    saveRDS(model4.9_t, "./output/models/model4.9_t")
+                   
+    # Freshwater Models
+    
+    model4.9_f  <- metafor::rma.mv(effect_size ~ max_temp_c + c_accl_time + cv_c, V = V,
+                                       random = list(~1 | record_num,
+                                            ~1 | species_full,
+                                            ~1 | trait,
+                                            ~1 + max_temp_c| spp,
+                                            ~1 | obs),
+                              R = list(species_full = phylo_cor_wild_acclim), dfs = "contain", 
+                              test = "t", data = lnCVRQ10_data_wild_acclim_f)
+
+    saveRDS(model4.9_f, "./output/models/model4.9_f")
+
+    # Marine Models
+
+    model4.9_m  <- metafor::rma.mv(effect_size ~ max_temp_c + c_accl_time + cv_c, V = V,
+                                       random = list(~1 | record_num,
+                                            ~1 | species_full,
+                                            ~1 | trait,
+                                            ~1 + max_temp_c| spp,
+                                            ~1 | obs),
+                              R = list(species_full = phylo_cor_wild_acclim), dfs = "contain", 
+                              test = "t", data = lnCVRQ10_data_wild_acclim_m)
+    saveRDS(model4.9_m, "./output/models/model4.9_m")
+    
+  } else {
+     model4.9_t <- readRDS("./output/models/model4.9_t")
+     model4.9_f <- readRDS("./output/models/model4.9_f")
+     model4.9_m <- readRDS("./output/models/model4.9_m")
+}
 
 ```
 

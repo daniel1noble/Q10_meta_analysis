@@ -1,5 +1,5 @@
 ---
-title: "Physiological plasticity and variance in physiological rates vary across ectotherm populations"
+title: "Limited plasticity but increased variance in physiological rates across ectotherm populations under climate change"
 bibliography: ./bib/refs.bib
 csl: ./bib/ecology-letters.csl
 format:
@@ -4449,8 +4449,9 @@ Acclimation capacity varied across trait categories and habiats with measures of
 #| include: false
 #| warning: false
 
-## Detailed trait category analyses for lnRR
-
+##########################################
+## lnRR - Detailed trait category analyses 
+##########################################
   # Filter out antioxidant and NAs. For terrestrial, need to filter out endurance and max_MR because only 3 effect sizes
   lnRRQ10_data_m <- lnRRQ10_data %>% filter(habitat == "m" & !trait_category =="antiox") %>% filter(!is.na(c_accl_time))
   lnRRQ10_data_f <- lnRRQ10_data %>% filter(habitat == "f" & !is.na(c_accl_time))
@@ -4617,7 +4618,9 @@ if(rerun){
   model1.3_t_bayes <- readRDS("./output/models/lnRRQ10_1.3_bayes_t")
 }
 
-## Detailed trait category analyses for lnCVR
+##########################################
+# lnCVR - Detailed trait analysis
+##########################################
 
   # Filter out antioxidant and NAs. For terrestrial, need to filter out endurance and max_MR because only 3 effect sizes
   lnCVRQ10_data_m <- lnCVRQ10_data %>% filter(habitat == "m" & !trait_category =="antiox") %>% filter(!is.na(c_accl_time))
@@ -4706,6 +4709,103 @@ if(rerun){
         model2.3m <- readRDS("./output/models/lnCVRQ10_model2.3m")
         model2.3t <- readRDS("./output/models/lnCVRQ10_model2.3t")
   model2.3_bayes <- readRDS("./output/models/lnCVRQ10_2.3_bayes")
+  }
+
+##########################################
+## lnVR - Detailed trait category analyses
+##########################################
+  # Filter out antioxidant and NAs. For terrestrial, need to filter out endurance and max_MR because only 3 effect sizes
+  lnVRQ10_data_m <- lnVRQ10_data %>% filter(habitat == "m" & !trait_category =="antiox") %>% filter(!is.na(c_accl_time))
+  lnVRQ10_data_f <- lnVRQ10_data %>% filter(habitat == "f" & !is.na(c_accl_time))
+  lnVRQ10_data_t <- lnVRQ10_data %>% filter(habitat == "t" & !is.na(c_accl_time)) %>% filter(!trait_category %in% c("endurance", "max_MR", "other"))
+  
+  # Prune tree
+   tree_m_VR <- tree_checks(lnVRQ10_data_m, tree = tree_lnVR, dataCol = "species_full", type = "prune")
+   tree_f_VR <- tree_checks(lnVRQ10_data_f, tree = tree_lnVR, dataCol = "species_full", type = "prune")
+   tree_t_VR <- tree_checks(lnVRQ10_data_t, tree = tree_lnVR, dataCol = "species_full", type = "prune")
+   
+   # cor matrices
+   m_phylo_VR <- vcv(tree_m_VR, corr = TRUE)
+   f_phylo_VR <- vcv(tree_f_VR, corr = TRUE)
+   t_phylo_VR <- vcv(tree_t_VR, corr = TRUE)
+    
+if(rerun){
+#########################
+  # Detailed Trait Categories
+  # Models for the supplement
+#########################
+  # More realistic model 
+  model3.3 <- metafor::rma.mv(effect_size ~  max_temp_c + c_accl_time + type + trait_category + type:trait_category, 
+                                   V = V, 
+                              random = list(~1 | record_num,
+                                            ~1 | species_full,
+                                            ~1 + max_temp_c| spp,
+                                            ~1 | trait,
+                                            ~1 | obs),
+                              R = list(species_full = phylo_cor_VR), dfs = "contain", 
+                              test = "t", data = lnVRQ10_data)
+  
+   model3.3_bayes <- brms::brm(effect_size | se(sqrt(V), sigma = TRUE) ~  max_temp_c + c_accl_time + type + trait_category + type:trait_category + 
+                                 (~1 | record_num) + 
+                                 (1 | gr(species_full, cov = A_VR)) + 
+                                 (1 + max_temp_c| spp) + 
+                                 (1|trait), 
+                               data2 = list(A_VR=A_VR), family = gaussian(), 
+                               prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), 
+                               control = list(adapt_delta = 0.98, max_treedepth = 12), 
+                               chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 4, data = lnVRQ10_data)
+                                  
+  # Save models
+  saveRDS(model3.3, file = "./output/models/lnVRQ10_3.3")
+  saveRDS(model3.3_bayes, file = "./output/models/lnVRQ10_3.3_bayes")
+
+  # Models for plotting
+ 
+  model3.3f <- metafor::rma.mv(effect_size ~  max_temp_c + c_accl_time + type + trait_category + type:trait_category, 
+                                  V = V, 
+                              random = list(~1 | record_num,
+                                            ~1 | species_full,
+                                            ~1 + max_temp_c| spp,
+                                            ~1 | trait,
+                                            ~1 + trait_category | obs),
+                              R = list(species_full = f_phylo_vr), dfs = "contain", 
+                              test = "t", struct = c("GEN", "HCS"), phi = 0, data = lnVRQ10_data_f)
+
+  saveRDS(model3.3f, file = "./output/models/lnVRQ10_model3.3f")
+
+  model3.3m <- metafor::rma.mv(effect_size ~  max_temp_c + c_accl_time + type + trait_category + type:trait_category, 
+                                   V = V, 
+                              random = list(~1 | record_num,
+                                            ~1 | species_full,
+                                            ~1 + max_temp_c| spp,
+                                            ~1 | trait,
+                                            ~1 + trait_category| obs),
+                              R = list(species_full = m_phylo_vr), dfs = "contain", 
+                              test = "t", struct = c("GEN", "HCS"),  phi = 0, data = lnVRQ10_data_m)
+  saveRDS(model3.3m, file = "./output/models/lnVRQ10_model3.3m")
+
+  # Note that we need to drop interaction for terrestrial as it's not able to estimate. 
+  model3.3t <- metafor::rma.mv(effect_size ~  max_temp_c + c_accl_time + type + trait_category, 
+                                   V = V, 
+                              random = list(~1 | record_num,
+                                            ~1 | species_full,
+                                            ~1 + max_temp_c | spp,
+                                            ~1 | trait,
+                                            ~1 + trait_category | obs),
+                              R = list(species_full = t_phylo_vr), dfs = "contain", 
+                              test = "t", struct = c("GEN", "HCS"),  phi = 0, data = lnVRQ10_data_t)
+  saveRDS(model3.3t, file = "./output/models/lnVRQ10_model3.3t")
+
+  } else{
+#########################
+  # Detailed Trait Categories
+  # Models for the supplement
+#########################
+        model3.3 <- readRDS("./output/models/lnCVRQ10_3.3")
+        model3.3f <- readRDS("./output/models/lnCVRQ10_model3.3f")
+        model3.3m <- readRDS("./output/models/lnCVRQ10_model3.3m")
+        model3.3t <- readRDS("./output/models/lnCVRQ10_model3.3t")
+  model3.3_bayes <- readRDS("./output/models/lnCVRQ10_3.3_bayes")
 }
 ```
 

@@ -50,6 +50,15 @@ colfunc <- colorRampPalette(rev(brewer.pal(10,"RdBu")))
     source("./R/functions.R")
   
   options(digits = 2, scipen = 3)
+
+my_theme <- function(){
+  theme(
+           axis.title.y = element_text(size = 20), 
+           axis.title.x = element_text(size = 20),
+           axis.text.x = element_text(size = 18),
+            axis.text.y = element_text(size = 18),
+            plot.title = element_text(size = 28))
+}
 ```
 
 ```{r, data_setup_summary}
@@ -1179,6 +1188,18 @@ n_acutes <- lnRRQ10_data_acute  %>% group_by(name, habitat) %>% summarise(n = n(
 
 ```
 
+### *Performance Curve Simulation*
+To better understand the characteristics of the performance curves in a sample that would lead to observed changes in variance across temperature we conducted a simple simulation. To simulate performance curves, we used a asymmetrical Gaussian function (@eq-sim):
+
+$$
+P_{T} = 2\epsilon^{-\frac{(T-\delta)^2}{2\sigma^2}}\Phi\left(\alpha\frac{T-\delta}{\sigma}\right)
+$$ {#eq-sim}
+
+where $T$ is the temperature gradient, $\delta$ is the optimal temperature (the temperature where performance is maximized), $\sigma$ the performance breadth, and $\alpha$ the skewness of the performance function or rate variation (see *Supplementary Materials* showing curves).  While we could have used other performance curve functions (e.g., Arrhenius), our intentions were not to model the exact curves (which are not know) but rather identify what might vary across the major habitat types that could contribute to the different patterns of variance change at higher temperatures we observed across habitats.
+
+We simulated *n* = 1000 individual performance curves by varying the amount of between individual variance on each of the key parameters ($\delta$, $\sigma$, $\alpha$) in all possible combinations from 0.01 to 2. We then took the mean and standard deviation of the performance at two temperatures 10 degrees apart (18 and 28 degrees) to calculate the log variance ratio $lnVR_{Q_{10}}$. Our simulations assume that the value of variance does not change depending on the temperatures choosen, but given our analysis restricts the data to temperatures within the normal thermal range of each species we do not envisage this being problematic.
+
+
 ## **Results**
 
 ### *Data Summary*
@@ -1795,42 +1816,59 @@ if(rerun){
 ### *Variation in physiological rates increases in aquatic but not terrestrial ectotherms*
 
 Variance in physiological rates ($lnVR_{Q_{10}}$) showed an
-increase with increasing temperature across all habitat types. However, physiological rate variance increase significantly more in freshwater (freshwater vs terrestrial: $\beta$ = `r mean(f_t_c)`, 95% CI: `r quantile(f_t_c, 0.025)` to `r quantile(f_t_c, 0.975)`, $p_{MCMC}$ = `r p_value(pmcmc(f_t_c))`) and marine ectotherms (marine vs terrestrial: $\beta$ = `r mean(m_t_c)`, 95% CI: `r quantile(m_t_c, 0.025)` to `r quantile(m_t_c, 0.975)`, $p_{MCMC}$ = `r p_value(pmcmc(m_t_c))`) compared to the limited increase in terrestrial ecotherms (@fig-2). The total
-proportion of heterogeneity in $lnVR_{Q_{10}}$ was lower compared to
-$lnRR_{Q_{10}}$ ($I^2_{sv}$ = `r mean(tot_i2_VR)`, 95% CI:
-`r quantile(tot_i2_VR, 0.025)` to `r quantile(tot_i2_VR, 0.975)`),
-with most variation being driven by between-study and trait differences
-("Model 1"; see *Supplementary Materials* @fig-s3). There were no differences between
-$lnVR_{Q_{10_{acute}}}$ and $lnVR_{Q_{10_{acclimation}}}$. Reductions
-in variance were driven by slower increases in the variance in
-physiological rates as mean physiological rates increased with scaling
-relationships between log standard deviation and log mean all being
-smaller than 1 and varying across habitats (see *Supplementary
+increase with increasing temperature across all habitat types with less heterogeneity overall ($I^2_{sv}$ = `r mean(tot_i2_VR)`, 95% CI:
+`r quantile(tot_i2_VR, 0.025)` to `r quantile(tot_i2_VR, 0.975)`; "Model 1"; see *Supplementary Materials* @fig-s3). However, physiological rate variance increased significantly more in freshwater (freshwater vs terrestrial: $\beta$ = `r mean(f_t_c)`, 95% CI: `r quantile(f_t_c, 0.025)` to `r quantile(f_t_c, 0.975)`, $p_{MCMC}$ = `r p_value(pmcmc(f_t_c))`) and marine ectotherms (marine vs terrestrial: $\beta$ = `r mean(m_t_c)`, 95% CI: `r quantile(m_t_c, 0.025)` to `r quantile(m_t_c, 0.975)`, $p_{MCMC}$ = `r p_value(pmcmc(m_t_c))`) compared to the limited increase in terrestrial ecotherms (@fig-2). There were no differences between
+$lnVR_{Q_{10_{acute}}}$ and $lnVR_{Q_{10_{acclimation}}}$. Differences
+in variance between habitats were driven by different scaling relationships between mean and variance across habitats (see *Supplementary
 Materials*; @tbl-slopes & @fig-mv). There was a `r mean(t_VR_mean_ef)`%
 (95% CI: `r quantile(t_VR_mean_ef, 0.025)[1]` to
 `r quantile(t_VR_mean_ef, 0.975)[1]`, $p_{MCMC}$ =
-`r pmcmc(t_VR_mean)`) reduction in relative physiological rate variance
+`r pmcmc(t_VR_mean)`) increase in physiological rate variance
 for terrestrial ectotherms and a `r mean(m_VR_mean_ef)`% (95% CI:
 `r quantile(m_VR_mean_ef, 0.025)[1]` to
 `r quantile(m_VR_mean_ef, 0.975)[1]`, $p_{MCMC}$ =
-`r pmcmc(m_VR_mean)`) reduction in relative variation for marine
+`r pmcmc(m_VR_mean)`) increase in variation for marine
 ectotherms when temperatures increased by 10$^\circ$C. In contrast,
-freshwater ectotherms exhibited a smaller reduction in relative
-physiological rate variance at high temperatures
-(`r mean(f_VR_mean_ef)`%, 95% CI: `r quantile(f_VR_mean_ef, 0.025)[1]`
+freshwater ectotherms exhibited a `r mean(f_VR_mean_ef)`%, 95% CI: `r quantile(f_VR_mean_ef, 0.025)[1]`
 to `r quantile(f_VR_mean_ef, 0.975)[1]`, $p_{MCMC}$ =
-`r pmcmc(f_VR_mean)`) (results from "Model 2"). The relative differences between habitats were similar when considering $lnCVR_{Q_{10}}$ (See *Supplementary Materials*).
+`r pmcmc(f_VR_mean)` increase in variance at high temperatures
+(@fig-2). (results from "Model 2"). The relative differences between habitats were similar when considering $lnCVR_{Q_{10}}$ (See *Supplementary Materials*).
+
+$lnVR_{Q_{10}}$ values from our simulations matched our empirical results quite nicely in key areas of parameter space (@fig-sim2). Interestingly, for a given between individual variance in thermal breadth, terrestrial ectotherms are predicted to have lower levels of between individual variation in thermal optima compared to marine and freshwater ectotherms ([@fig-sim2]). In contrast, terrestrial ectotherms are expected to have higher levels of between individual variation in thermal breadth when controlling for between individual variation in thermal optima ([@fig-sim2])
+
+
+```{r, fig-sim2}
+#| label: fig-sim2
+#| fig-align: center
+#| fig-cap: "Expected $lnVR_{Q_{10}}$ when varying $\\sigma_{_b_{\\delta}}$ = {0.01, 2} and  $\\sigma_{_b_{\\sigma}}$ = {0.01, 2} while fixing $\\sigma_{_b_{\\alpha}}$ = 0.01. In all simulations, $\\delta$ = 35, $\\sigma$ = 9, $\\alpha$ = -15, and *n* = 1000 individuals were simulated for each combination of $\\sigma_{_b_{\\delta}}$, $\\sigma_{_b_{\\sigma}}$. The parameter space that match observed mean $lnVR_{Q_{10}}$ for terrestrial (green), marine (orange) and freshwater (blue) ectotherms. Dashed lines indicate the relative differences between the three habitat types when holding one parameter constant."
+
+sim_results <- readRDS("./output/sim_results")
+bins_vr = 20
+
+lnvr_sim_delta_sigma1 <- ggplot(sim_results, aes(x = delta, y = sigma, z = lnVR)) +
+  geom_contour_filled(bins = bins_vr) +
+  scale_color_viridis() +
+  labs(x = TeX("Variation in Thermal Optima ($\\sigma_{\\delta}$)"),
+       y = TeX("Variation in Thermal Breadth ($\\sigma_{\\sigma}$)"),
+       fill = TeX("$lnVR_{Q_{10}}$")) + theme_classic() + my_theme() + theme(legend.title = element_text(size = 20), legend.text = element_text(size = 12))
+
+#ggsave(lnvr_sim_delta_sigma1, width = 9.5, height = 8, filename = "./output/figures/figsim_new2.pdf")
+
+p_sim2 <- image_read("./output/figures/figsim_new.pdf")
+p_sim2
+```
+
 
 Across habitats whole-organism versus biochemical processes showed a
 similar change in variance in physiological rates
-([@fig-btrait]D-F; see *Supplementary Materials*, @fig-cvrtrait) for more detailed trait
+([@fig-btrait]D-F; see *Supplementary Materials*, @fig-vrtrait) for more detailed trait
 analysis), except for biochemical processes in ectotherms occupying
 freshwater habitats, which showed small, albeit significant increase in
 relative variance when acclimated ([@fig-btrait]F). Reduced relative
 variance was particularly prominent for resting metabolic rates and
 sprint speed although traits differed in whether they exhibited a
 reduction in variation in physiological rates at high temperatures (see
-*Supplemental Material*, @fig-cvrtrait) ("Model 3"). Each life-history stage
+*Supplemental Material*, @fig-vrtrait) ("Model 3"). Each life-history stage
 exhibited the same pattern of relative variance change in each of the
 habitats ("Model 4"; @fig-cvrlh).
 
@@ -5372,18 +5410,11 @@ little evidence for publication bias.
 To better understand the characteristics of the performance curves in a sample that would lead to observed changes in variance (and relative variance) across temperature we conducted a simple simulation. To simulate performance curves, we used a asymmetrical Gaussian function (@eq-sim):
 
 $$
-P_{z} = 2\epsilon^{-\frac{(z-\delta)^2}{2\sigma^2}}\Phi\left(\alpha\frac{z-\delta}{\sigma}\right)
+P_{T} = 2\epsilon^{-\frac{(T-\delta)^2}{2\sigma^2}}\Phi\left(\alpha\frac{T-\delta}{\sigma}\right)
 $$ {#eq-sim}
 
-where $z$ is the temperature gradient, $\delta$ is the optimal temperature (the temperature where performance is maximized), $\sigma$ is the performance breadth, and $\alpha$ is the skewness of the performance function or rate variation.  While we could have used other performance curve functions (e.g., Arrhenius), our intentions were not to model the exact curves (which are not know) but rather identify what might vary across the major habitat types that could contribute to the different patterns of variance change at higher temperatures we observed across habitats.
+where $T$ is the temperature gradient, $\delta$ is the optimal temperature (the temperature where performance is maximized), $\sigma$ is the performance breadth, and $\alpha$ is the skewness of the performance function or rate variation.  To understand how each parameter impacts the shape of performance curces, we simulated 40 individuals with varying amounts of between individual variation in performance breadth, optima and rate variation. We then calculated the relative variance in performance across the temperature gradient as the variance in performance at each temperature divided by the maximum performance at that temperature. This simple analysis identified thermal optima and breath as being the major factors likely leading to the observed patterns in $lnVR_{Q_{10}}$ we identify in our meta-analysis.
 
-We first explored four hypothetical examples to identify key parameters from this function that appear to impact $lnVR_{Q_{10}}$ and $lnCVR_{Q_{10}}$ the most (@fig-sim). To achieve this, we simulated 40 individuals with varying amounts of between individual variation in performance breadth, optima and rate variation. We then calculated the relative variance in performance across the temperature gradient as the variance in performance at each temperature divided by the maximum performance at that temperature. This simple analysis identified thermal optima and breath as being the major factors likely leading to the observed patterns in $lnVR_{Q_{10}}$ and $lnCVR_{Q_{10}}$ we identify in our meta-analysis.
-
-We then conducted a larger simulation that expanded the parameter space by manipulating the level of between individual variation in both the thermal optima and performance breadth while holding constant rate variation because optima and breadth appeared to be most important (@fig-sim). We simulated *n* = 1000 individual performance curves and took the mean and standard deviation of the performance at two temperatures 10 degrees apart (18 and 28 degrees) to calculate the log coefficient of variation (CV) and log variance ratio in performance. Our simulations assume that the value of variance does not change depending on the temperatures choose, but given our analysis restricts the data to temperatures within the normal thermal range of each species, standardising a temperature window in this way is likely comparable.  
-
-Overall, our simulations recovered plausible parameter space for levels of between individual variation in thermal optima and breath that matched some of our empirical results (@fig-sim2). While $lnCVR_{Q_{10}}$ ([@fig-sim2]A) values were overestimated compared to our empirical results, $lnVR_{Q_{10}}$ nicely matched ([@fig-sim2]B). Overestimation of $lnCVR_{Q_{10}}$ is likely the result of the rate parameter being too steep in our model (i.e., $Q_{10}$ being too high) compared to what is typical in nature resulting in rates at higher temperatures to be larger than what is expected. This would inflate the coefficient of variation because the variance is standardised by the rates at the respective temperatures. Using alternative performance functions may correct this deviation, but this question is out of scope here and would require a much larger simulation. Regardless, $lnCVR_{Q_{10}}$ largely showed similar patterns to $lnVR_{Q_{10}}$.
-
-Importantly, our $lnVR_{Q_{10}}$ values matched our empirical results quite nicely. Interestingly, for a given between individual variance in thermal breadth, terrestrial ectotherms are predicted to have lower levels of between individual variation in thermal optima compared to marine and freshwater ectotherms ([@fig-sim2]B). In contrast, terrestrial ectotherms are expected to have higher levels of between individual variation in thermal breadth when controlling for between individual variation in thermal optima ([@fig-sim2]B). 
 
 ```{r, sim}
 #| label: sim
@@ -5464,15 +5495,6 @@ ws4 <- data.frame(do.call(cbind, ws4)) %>% pivot_longer(everything(), names_to =
 #| label: fig-sim
 #| fig-align: center
 #| fig-cap: "Simulated performance curves for *n* = 40 individuals in four hypothetical scenerios with varying performance breadth ($\\sigma$), optima ($\\delta$) and skewness ($\\alpha$). Individual performance curves are different colours. $lnCVR_{Q_{10}}$ is calculated as the log transformed ratio of the coefficient of variance (CV) in performance at the higher temperature divided by the CV in performance at that temperature at each point along the curve. $lnVR_{Q_{10}}$ is calculated as the log transformed ratio of the standard deviation in performance at the higher temperature divided by the standard deviation in performance at that temperature. The dashed red line indicates the higher temperature (28$^\\circ$C) and the dashed blue line indicates the lower temperature (18$^\\circ$C). Note that the mean ($\\mu$) and standard deviation ($\\sigma$) of physiological rates are shown for each temperature. In all simulations, $\\delta$ = 35, $\\sigma$ = 9 and $\\alpha$ = -15, while between individual variation for $\\sigma_{_b_{\\delta}}$ = 1,  $\\sigma_{_b_{\\sigma}}$ = 0.5 and $\\sigma_{_b_{\\alpha}}$ = 0.5."
-
-my_theme <- function(){
-  theme(
-           axis.title.y = element_text(size = 20), 
-           axis.title.x = element_text(size = 20),
-           axis.text.x = element_text(size = 18),
-            axis.text.y = element_text(size = 18),
-            plot.title = element_text(size = 28))
-}
 
 my_annotate  <- function(data, size_ano){
   list(annotate("text", x = 18-15, y = 2, label = TeX("18$^\\circ$C"), size = size_ano), 
@@ -5576,35 +5598,5 @@ colnames(sim_results) <- c("delta", "alpha", "sigma", "lnCVR", "lnVR")
 # Save simulation so that we don't have to re-run each time
   saveRDS(sim_results, file = "./output/sim_results")
 
-```
-
-```{r, fig-sim2}
-#| label: fig-sim2
-#| fig-align: center
-#| fig-cap: "Expected $lnCVR_{Q_{10}}$ (A) and $lnVR_{Q_{10}}$ (B) when varying $\\sigma_{_b_{\\delta}}$ = {0.01, 2} and  $\\sigma_{_b_{\\sigma}}$ = {0.01, 2} while fixing $\\sigma_{_b_{\\alpha}}$ = 0.01. In all simulations, $\\delta$ = 35, $\\sigma$ = 9, $\\alpha$ = -15, and *n* = 1000 individuals were simulated for each combination of $\\sigma_{_b_{\\delta}}$, $\\sigma_{_b_{\\sigma}}$ and $\\sigma_{_b_{\\alpha}}$. (B) The parameter space that match observed mean $lnVR_{Q_{10}}$ for terrestrial (green), marine (orange) and freshwater (blue) ectotherms. Dashed lines indicate the relative differences between the three habitat types when holding one parameter constant."
-
-sim_results <- readRDS("./output/sim_results")
-bins_cvr = 20
-bins_vr = 20
-
-lncvr_sim_delta_sigma1 <- ggplot(sim_results, aes(x = delta, y = sigma, z = lnCVR)) +
-  geom_contour_filled(bins = bins_cvr) +
-  scale_color_viridis(direction = -1) +
-  labs(x = TeX("Variation in Thermal Optima ($\\sigma_{\\delta}$)"),
-       y = TeX("Variation in Thermal Breadth ($\\sigma_{\\sigma}$)"),
-       fill = TeX("$lnCVR_{Q_{10}}$"), title = TeX("Variation in Rates ($\\sigma_{\\alpha}$ = 0.01)")) + theme_classic()+ my_theme() + theme(legend.title = element_text(size = 20), legend.text = element_text(size = 12))
-
-lnvr_sim_delta_sigma1 <- ggplot(sim_results, aes(x = delta, y = sigma, z = lnVR)) +
-  geom_contour_filled(bins = bins_vr) +
-  scale_color_viridis() +
-  labs(x = TeX("Variation in Thermal Optima ($\\sigma_{\\delta}$)"),
-       y = TeX("Variation in Thermal Breadth ($\\sigma_{\\sigma}$)"),
-       fill = TeX("$lnVR_{Q_{10}}$")) + theme_classic() + my_theme() + theme(legend.title = element_text(size = 20), legend.text = element_text(size = 12))
-
-p_sim2 <- ((lncvr_sim_delta_sigma1 + lnvr_sim_delta_sigma1)) + plot_annotation(tag_levels = "A") & theme(plot.tag = element_text(size = 30))
-ggsave(p_sim2, width = 20, height = 10, filename = "./output/figures/figS13_new.pdf")
-
-p_sim2 <- image_read("./output/figures/figS13.pdf")
-p_sim2
 ```
 

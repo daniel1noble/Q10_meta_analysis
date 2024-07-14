@@ -308,7 +308,11 @@ physiological rates (e.g., metabolic rate) at two or more temperatures
 after having been acclimated (or acclimatized) at these temperatures. We
 used data from a previous meta-analysis [@Seebacher2015-wi] and updated
 @Seebacher2015-wi's data by extracting data from suitable studies from
-our own searches that followed the same search protocol. For full
+our own searches that followed the same search protocol. We extracted data from an extra
+`r length(unique(new_papers$record_num))` papers (with a total of
+`r dim(new_papers)[1]` effects; a
+`r  (length(unique(new_papers$record_num)) / length(unique(old_papers$record_num)))*100`%
+increase in the number of published articles). For full
 details on the search protocol see the *Supplementary Materials*, where
 we also provide a PRISMA flow diagram of our extraction process
 (@fig-prisma).
@@ -460,47 +464,6 @@ biochemical processes, and biochemical processes (e.g., enzyme reaction
 rates, proton leak). Traits that could not be categorised into these two
 we classified as ‘Other’.
 
-### *Climate Data*
-
-To understand how climate is related to a species’ physiological
-acclimation abilities and changes in relative variance we used the
-coordinates reported by each study to extract temperature data from
-terrestrial and aquatic environments. It was unclear whether climate at
-the locations of captive reared organisms would be representative of a
-population's climate history - particularly for species reared under
-captive condition for many generations. Given that we were interested in
-understanding climate driven effects on acclimation capacity we only
-used studies on wild populations for climate analyses.
-
-Monthly average temperature data were extracted from the ERA5 climate
-model, available from the Copernicus climate data store
-[@Hersbach2020-hx]. For each population and species in the dataset we
-extracted a 72-year period (1950-2022) of either surface air temperature
-(0.01° resolution) for both terrestrial and freshwater taxa, or sea
-surface temperature for the marine taxa (at 0.25° resolution) using the
-*ncdf4* R package [vers. `r utils::packageVersion("ncdf4")`,
-@Pierce2021-lc]. We chose surface temperature because we believed that
-it was more likely to reflect the micro-thermal environment experienced
-by terrestrial and freshwater ectotherms at those locations.
-
-Using the thermal time-series data for each location we calculated
-metrics of thermal variability across months and years as well as
-estimates of thermal predictability (i.e., autocorrelation). To estimate
-thermal variability, we calculated the coefficient of variation
-($\frac{SD}{M}$, where SD = standard deviation in temperature and M =
-the mean temperature for each year). We also estimated thermal
-predictability, by calculating the auto-regressive time lag across
-months (i.e., a measure of how correlated temperatures were between
-months), however, identifying biologically relevant lags for such
-diverse taxa is challenging. As such, we present a coarse analysis using
-this metric of thermal predictability in the *Supplemental Materials*.
-
-Lastly, to illustrate the effects that climate warming could have on
-physiological rate variance we also extracted climate projections and
-calculated thermal variability into the future. We used the CanESM2
-climate model (2005-2100) [vers. 1.2.0; @koen_hufkens_2019_2647541]
-under a high emissions scenario (RCP8.5).
-
 ### *Meta-Analysis*
 
 We analysed our data using multilevel meta-analytic (MLMA) and
@@ -587,7 +550,7 @@ variation (*Supplementary Materials*, @fig-accl_time).
 In addition to acclimation, all our models corrected for the possibility
 of the log-linearity assumption of our effect sizes being violated
 ([@fig-concept]; and see Supplementary Materials @fig-lnrrq10_temp). We
-predicted that, if $lnRR_{Q_{10}}$ and $lnCVR_{Q_{10}}$ were not
+predicted that, if $lnRR_{Q_{10}}$ and $lnVR_{Q_{10}}$ were not
 strictly log-linear than we would see a decrease in average effect size
 for studies applying higher temperature treatments because these
 temperatures are expected to either converge on or cross the thermal
@@ -612,7 +575,7 @@ average level of acclimation time (i.e.,
 temperature (i.e., 23$^\circ C$) across the dataset.
 
 We first tested the degree to which the difference in acute and
-acclimation $lnRR_{Q_{10}}$ and $lnCVR_{Q_{10}}$ effects varied by
+acclimation $lnRR_{Q_{10}}$ and $lnVR_{Q_{10}}$ effects varied by
 habitat type (i.e., terrestrial, freshwater, and marine). Models
 included an interaction between effect type (i.e., acute or acclimation)
 and habitat (referred to as “Model 2”). Reduced mean
@@ -623,12 +586,12 @@ whereas no differences between $lnRR_{Q_{10_{acute}}}$ and
 $lnRR_{Q_{10_{acclimation}}}$ suggests organisms are not capable of
 physiological plasticity [@Havird2020-mj; @Seebacher2015-wi]. In
 contrast, a difference in $lnCVR_{Q_{10_{acclimation}}}$ relative to
-$lnCVR_{Q_{10_{acute}}}$ would imply that changes in between individual
+$lnVR_{Q_{10_{acute}}}$ would imply that changes in between individual
 variation in physiological rates across 10°C differ depending on whether
 acute or acclimation responses are measured.
 
 Second, we tested whether acute and acclimation $lnRR_{Q_{10}}$ and
-$lnCVR_{Q_{10}}$ differed between whole-organism versus biochemical
+$lnVR_{Q_{10}}$ differed between whole-organism versus biochemical
 traits across habitats by fitting an model with an interaction between
 type, habitat and trait category (referred to as "Model 3"). We also
 explored how acute and acclimation effects varied across more detailed
@@ -653,13 +616,13 @@ given the different constraints faced by different early life stages
 across major habitat types.
 
 Finally, we tested whether the change in $lnRR_{Q_{10_{acclimation}}}$
-and $lnCVR_{Q_{10}}$ were predicted by a populations climate variability
+and $lnVR_{Q_{10}}$ were predicted by a populations climate variability
 (CV). We only used $lnRR_{Q_{10_{acclimation}}}$ for these models
 because our predictions were specifically focused on the plastic
-adjustments to physiological rates. We used all $lnCVR_{Q_{10}}$ data
-because there were no differences between $lnCVR_{Q_{10_{acclimation}}}$
-and $lnCVR_{Q_{10_{acute}}}$ and we had no *a priori* reason to believe
-climate would impact acclimation and acute $lnCVR_{Q_{10}}$ differently.
+adjustments to physiological rates. We used all $lnVR_{Q_{10}}$ data
+because there were no differences between $lnVR_{Q_{10_{acclimation}}}$
+and $lnVR_{Q_{10_{acute}}}$ and we had no *a priori* reason to believe
+climate would impact acclimation and acute $lnVR_{Q_{10}}$ differently.
 To test how climate variability impacted mean effect size in wild
 populations we fit models that included an interaction between habitat
 type and thermal coefficient of variability (CV) as moderators while
@@ -680,14 +643,14 @@ To understand the consequences of human-induced climate change on the
 potential to impact relative variance in physiological rates we fit a
 model that included an interaction between acclimation type, habitat
 type, latitude and longitude (referred to as "Model 6"). We assumed that
-any change in $lnCVR_{Q_{10}}$ across latitude and longitude could vary
+any change in $lnVR_{Q_{10}}$ across latitude and longitude could vary
 by habitat type (i.e., an interaction between habitat). We used
 non-linear tensors for latitude and longitude as any response could be
 complicated by local factors (e.g., altitude). Our model included random
 effects of species, trait, phylogeny and study. We predicted the
-expected change in $lnCVR_{Q_{10}}$ for each wild population in our
+expected change in $lnVR_{Q_{10}}$ for each wild population in our
 dataset at the specific populations latitude and longitude. To do this,
-we first converted the predicted $lnCVR_{Q_{10}}$ to a 1°C change as
+we first converted the predicted $lnVR_{Q_{10}}$ to a 1°C change as
 opposed to 10°C as follows:
 
 $$
@@ -1106,9 +1069,9 @@ if(rerun){
   newdata <- cbind(newdata, est = sum_pred, L = sum_predL95, u = sum_predU95, p = p)  
 
 # Now, lets calculate the contrasts between acute and acclim for a and j within each habitat. We need to use pred for that because it's the entire posterior distribution
-  ############
+############
     # Contrast between Acclimation and Acute WITHIN each life-history stage. Double checked a bunch of calculations to make sure the right contrasts were being done. 
-  ############
+############
   contrast_lnrr_lh_post <-  pred[c(1,3,5,7,9,11),] - pred[c(2,4,6,8,10,12),] # Acclimation - acute.
             
         # Contrast statistics
@@ -1118,9 +1081,9 @@ if(rerun){
                                                      l95 = apply(data.frame(contrast_lnrr_lh_post), 1, function(x) quantile(x, 0.025)),
                                                      u95 = apply(data.frame(contrast_lnrr_lh_post), 1, function(x) quantile(x, 0.975)),
                                                        p = apply(data.frame(contrast_lnrr_lh_post), 1, function(x) p_value(pmcmc(x))))
-    ############
+############
     # Contrast between Acclimation and Acute ACROSS each life-history stage. Double checked a bunch of comparisons.
-    ############
+############
           contrast_lnrr_lh_post_type <-  pred[c(4,3,8,7,12,11),] - pred[c(2,1,6,5,10,9),] # Adult - Jeu.
             
         # Contrast statistics
@@ -1135,6 +1098,11 @@ if(rerun){
      acute_all_lh <- c(contrast_lnrr_lh_post_type[1,], contrast_lnrr_lh_post_type[3,], contrast_lnrr_lh_post_type[5,]) 
     acclim_all_lh <- c(contrast_lnrr_lh_post_type[2,], contrast_lnrr_lh_post_type[4,], contrast_lnrr_lh_post_type[6,])
 
+  # Contrats adult vs juv across habitats regardless of the acute/acclim
+               contrast_lnrr_lh_cat_stats <- rbind(get_lifestage(pred, habitat = "t", newdata),
+                                                   get_lifestage(pred, habitat = "m", newdata),
+                                                   get_lifestage(pred, habitat = "f", newdata))
+               
 ####################################################
 # Sensitivity analysis -- Do Acute Q10's (hot / cold) differ?
 ####################################################
@@ -1189,13 +1157,13 @@ n_acutes <- lnRRQ10_data_acute  %>% group_by(name, habitat) %>% summarise(n = n(
 ```
 
 ### *Performance Curve Simulation*
-To better understand the characteristics of the performance curves in a sample that would lead to observed changes in variance across temperature we conducted a simple simulation. To simulate performance curves, we used a asymmetrical Gaussian function (@eq-sim):
+To better understand the characteristics of the performance curves in a sample that would lead to observed changes in variance across temperature we conducted a simple simulation. To simulate performance curves, we used an asymmetrical Gaussian function:
 
 $$
 P_{T} = 2\epsilon^{-\frac{(T-\delta)^2}{2\sigma^2}}\Phi\left(\alpha\frac{T-\delta}{\sigma}\right)
 $$ {#eq-sim}
 
-where $T$ is the temperature gradient, $\delta$ is the optimal temperature (the temperature where performance is maximized), $\sigma$ the performance breadth, and $\alpha$ the skewness of the performance function or rate variation (see *Supplementary Materials* showing curves).  While we could have used other performance curve functions (e.g., Arrhenius), our intentions were not to model the exact curves (which are not know) but rather identify what might vary across the major habitat types that could contribute to the different patterns of variance change at higher temperatures we observed across habitats.
+where $T$ is the temperature gradient, $\delta$ is the optimal temperature (the temperature where performance is maximized), $\sigma$ the performance breadth, and $\alpha$ the skewness of the performance function or rate variation (see @fig-sim in *Supplementary Materials* for example curves).  While we could have modelled performance curves differently than @eq-sim (e.g., Arrhenius), our intentions were not to model the exact curves (which are not know) but rather identify what might vary across the major habitat types that could contribute to the different patterns of variance change at higher temperatures we observed across habitats.
 
 We simulated *n* = 1000 individual performance curves by varying the amount of between individual variance on each of the key parameters ($\delta$, $\sigma$, $\alpha$) in all possible combinations from 0.01 to 2. We then took the mean and standard deviation of the performance at two temperatures 10 degrees apart (18 and 28 degrees) to calculate the log variance ratio $lnVR_{Q_{10}}$. Our simulations assume that the value of variance does not change depending on the temperatures choosen, but given our analysis restricts the data to temperatures within the normal thermal range of each species we do not envisage this being problematic.
 
@@ -1375,7 +1343,7 @@ contrast, terrestrial ectotherms showed no acclimation (possibly even
 inverse acclimation) -- showing a `r abs(mean(change_t))`% increase in
 $lnRR_{Q_{10_{acclimation}}}$ (95% CI:
 `r quantile(change_t, c(0.025, 0.975))[1]` to
-`r quantile(change_t, c(0.025, 0.975))[2]`, [@fig-2]B). All results are
+`r quantile(change_t, c(0.025, 0.975))[2]`, [@fig-2]A). All results are
 from Model 2 (see “Meta-Analysis” above).
 
 Across habitats the extent to which whole-organism versus biochemical
@@ -1384,7 +1352,7 @@ processes acclimated varied ("Model 3"; [@fig-btrait]A-C; and see
 processes were more effective at acclimating compared to whole-organism
 traits for ectotherms occupying marine habitats ([@fig-btrait]B),
 whereas both whole-organism and biochemical traits acclimated in
-freshwater ectotherms ([@fig-btrait]C). Unsurprisingly, neither broad
+freshwater ectotherms ([@fig-btrait]C). Unsurprisingly, neither
 trait category showed evidence of acclimation in terrestrial ectotherms
 ([@fig-btrait]A).
 
@@ -1544,16 +1512,20 @@ if(rerun){
     f_VR_mean <- (f_acute_VR * N[1,"n"][[1]] + f_acclim_VR * N[2,"n"][[1]]) / sum(N[1:2, "n"]); pmcmc(f_VR_mean)
     m_VR_mean <- (m_acute_VR * N[3,"n"][[1]] + m_acclim_VR * N[3,"n"][[1]]) / sum(N[3:4, "n"]); pmcmc(m_VR_mean)
     t_VR_mean <- (t_acute_VR * N[5,"n"][[1]] + t_acclim_VR * N[6,"n"][[1]]) / sum(N[5:6, "n"]); pmcmc(t_VR_mean)
-  
+
   # Lets now convert these to a %
     f_VR_mean_ef  <- abs((exp(f_VR_mean) - 1)*100) 
     m_VR_mean_ef  <- abs((exp(m_VR_mean) - 1)*100) 
     t_VR_mean_ef  <- abs((exp(t_VR_mean) - 1)*100) 
 
-  # Now, lets get contrasts between habitats averaged over type
-      f_m_c <- f_VR_mean - m_VR_mean   ; pmcmc(f_m_c); mean(f_m_c)
-      f_t_c <- t_VR_mean_ef - f_VR_mean; pmcmc(f_t_c); mean(f_t_c)
-      m_t_c <- t_VR_mean_ef - m_VR_mean; pmcmc(m_t_c); mean(m_t_c)
+  # Now, lets get contrasts between habitats for acute and acclimation. Keep seperate because the challenge is the rates acclimate so adds quite a bif of variability
+      f_m_c_a <- f_acute_VR - m_acute_VR; pmcmc(f_m_c_a); mean(f_m_c_a)
+      f_t_c_a <- f_acute_VR - t_acute_VR; pmcmc(f_t_c_a); mean(f_t_c_a)
+      m_t_c_a <- m_acute_VR - t_acute_VR; pmcmc(m_t_c_a); mean(m_t_c_a)
+      
+      f_m_c_aclim <- f_acclim_VR - m_acclim_VR; pmcmc(f_m_c_aclim); mean(f_m_c_aclim)
+      f_t_c_aclim <- f_acclim_VR - t_acclim_VR; pmcmc(f_t_c_aclim); mean(f_t_c_aclim)
+      m_t_c_aclim <- m_acclim_VR - t_acclim_VR; pmcmc(m_t_c_aclim); mean(m_t_c_aclim)
       
 ###################################################
   # Model 3.3: Model controlling for acclimation time, 
@@ -1652,9 +1624,6 @@ if(rerun){
                                      robust = FALSE)
          pred_lnvr_traitb <- cbind(trait_b_data, pred_lnvr_traitb)
          
-
-         
-      
        # Predict to get the posterior. Note that we have the full posterior distribution here for each of the 12 categories in the new data. Here, we want to look at the difference between acute and acclimation within each of the categories. 
             pred_lnvr_traitb_post <- fitted(model3.3_btrait_bayes, 
                                      newdata = trait_b_data, re_formula = NA,
@@ -1742,11 +1711,16 @@ if(rerun){
                                                      l95 = apply(data.frame(contrast_lnvr_lh_post), 1, function(x) quantile(x, 0.025)),
                                                      u95 = apply(data.frame(contrast_lnvr_lh_post), 1, function(x) quantile(x, 0.975)),
                                                        p = apply(data.frame(contrast_lnvr_lh_post), 1, function(x) p_value(pmcmc(x))))
+            
+        # Contrasts for pooled acute and acclimation across life stage categories. Checked freshwater and looks correct.
+            contrast_lnvr_lh_cat_stats <- rbind(get_lifestage(pred_lh_vr, habitat = "t", lh_b_data),
+                                                get_lifestage(pred_lh_vr, habitat = "m", lh_b_data),
+                                                get_lifestage(pred_lh_vr, habitat = "f", lh_b_data))
 ```
 
 ```{r, fig-2}
 #| label: fig-2
-#| fig-cap: "A) Mean acute and acclimation $lnRR_{Q_{10}}$ across ectotherms in marine, freshwater, and terrestrial habitats. B) Mean acute and acclimation $lnVR_{Q_{10}}$ across ectotherms in marine, freshwater and terrestrial habitats. For both plots, k = total number of effect size estimates while the numbers in brackets indicate the number of species. Sample sizes are the same for panel A) and B). In panels A) and B), thick bars are 95% confidence intervals (CI) and thin bars 95% prediction intervals (PI). $\\Beta$ values are the contrasts between acute and acclimation means within each habitat. $\\mu$ values are the overall meta-analytic means averaged across acute and acclimation types within each habitat type. In both cases, their 95% CI's are indicated within square brackets. $p_{MCMC}$ values are the posterior probability of the contrast or overall meta-analytic mean being different from zero. For ease of visualisation, all the raw data plotted for both acute and acclimation type effect sizes are presented as circles."
+#| fig-cap: "(A) Mean acute and acclimation $lnRR_{Q_{10}}$ across ectotherms in marine, freshwater, and terrestrial habitats. (B) Mean acute and acclimation $lnVR_{Q_{10}}$ across ectotherms in marine, freshwater and terrestrial habitats. For both plots, k = total number of effect size estimates while the numbers in brackets indicate the number of species. Sample sizes are the same for panel A and B. In both panels, thick bars are 95% confidence intervals (CI) and thin bars 95% prediction intervals (PI). $\\Beta$ values are the contrasts between acute and acclimation means within each habitat. $\\mu$ values are the overall meta-analytic means averaged across acute and acclimation types within each habitat type. In both cases, their 95% CI's are indicated within square brackets. $p_{MCMC}$ values are the posterior probability of the contrast or overall meta-analytic mean being different from zero. For ease of visualisation, all the raw data plotted for both acute and acclimation type effect sizes are presented as circles."
 #| warning: false
 #| echo: false
 
@@ -1812,65 +1786,6 @@ if(rerun){
   fig3 <- magick::image_read("./output/figures/fig3.png")
   fig3
 ```
-
-### *Variation in physiological rates increases in aquatic but not terrestrial ectotherms*
-
-Variance in physiological rates ($lnVR_{Q_{10}}$) showed an
-increase with increasing temperature across all habitat types with less heterogeneity overall ($I^2_{sv}$ = `r mean(tot_i2_VR)`, 95% CI:
-`r quantile(tot_i2_VR, 0.025)` to `r quantile(tot_i2_VR, 0.975)`; "Model 1"; see *Supplementary Materials* @fig-s3). However, physiological rate variance increased significantly more in freshwater (freshwater vs terrestrial: $\beta$ = `r mean(f_t_c)`, 95% CI: `r quantile(f_t_c, 0.025)` to `r quantile(f_t_c, 0.975)`, $p_{MCMC}$ = `r p_value(pmcmc(f_t_c))`) and marine ectotherms (marine vs terrestrial: $\beta$ = `r mean(m_t_c)`, 95% CI: `r quantile(m_t_c, 0.025)` to `r quantile(m_t_c, 0.975)`, $p_{MCMC}$ = `r p_value(pmcmc(m_t_c))`) compared to the limited increase in terrestrial ecotherms (@fig-2). There were no differences between
-$lnVR_{Q_{10_{acute}}}$ and $lnVR_{Q_{10_{acclimation}}}$. Differences
-in variance between habitats were driven by different scaling relationships between mean and variance across habitats (see *Supplementary
-Materials*; @tbl-slopes & @fig-mv). There was a `r mean(t_VR_mean_ef)`%
-(95% CI: `r quantile(t_VR_mean_ef, 0.025)[1]` to
-`r quantile(t_VR_mean_ef, 0.975)[1]`, $p_{MCMC}$ =
-`r pmcmc(t_VR_mean)`) increase in physiological rate variance
-for terrestrial ectotherms and a `r mean(m_VR_mean_ef)`% (95% CI:
-`r quantile(m_VR_mean_ef, 0.025)[1]` to
-`r quantile(m_VR_mean_ef, 0.975)[1]`, $p_{MCMC}$ =
-`r pmcmc(m_VR_mean)`) increase in variation for marine
-ectotherms when temperatures increased by 10$^\circ$C. In contrast,
-freshwater ectotherms exhibited a `r mean(f_VR_mean_ef)`%, 95% CI: `r quantile(f_VR_mean_ef, 0.025)[1]`
-to `r quantile(f_VR_mean_ef, 0.975)[1]`, $p_{MCMC}$ =
-`r pmcmc(f_VR_mean)` increase in variance at high temperatures
-(@fig-2). (results from "Model 2"). The relative differences between habitats were similar when considering $lnCVR_{Q_{10}}$ (See *Supplementary Materials*).
-
-$lnVR_{Q_{10}}$ values from our simulations matched our empirical results quite nicely in key areas of parameter space (@fig-sim2). Interestingly, for a given between individual variance in thermal breadth, terrestrial ectotherms are predicted to have lower levels of between individual variation in thermal optima compared to marine and freshwater ectotherms ([@fig-sim2]). In contrast, terrestrial ectotherms are expected to have higher levels of between individual variation in thermal breadth when controlling for between individual variation in thermal optima ([@fig-sim2])
-
-
-```{r, fig-sim2}
-#| label: fig-sim2
-#| fig-align: center
-#| fig-cap: "Expected $lnVR_{Q_{10}}$ when varying $\\sigma_{_b_{\\delta}}$ = {0.01, 2} and  $\\sigma_{_b_{\\sigma}}$ = {0.01, 2} while fixing $\\sigma_{_b_{\\alpha}}$ = 0.01. In all simulations, $\\delta$ = 35, $\\sigma$ = 9, $\\alpha$ = -15, and *n* = 1000 individuals were simulated for each combination of $\\sigma_{_b_{\\delta}}$, $\\sigma_{_b_{\\sigma}}$. The parameter space that match observed mean $lnVR_{Q_{10}}$ for terrestrial (green), marine (orange) and freshwater (blue) ectotherms. Dashed lines indicate the relative differences between the three habitat types when holding one parameter constant."
-
-sim_results <- readRDS("./output/sim_results")
-bins_vr = 20
-
-lnvr_sim_delta_sigma1 <- ggplot(sim_results, aes(x = delta, y = sigma, z = lnVR)) +
-  geom_contour_filled(bins = bins_vr) +
-  scale_color_viridis() +
-  labs(x = TeX("Variation in Thermal Optima ($\\sigma_{\\delta}$)"),
-       y = TeX("Variation in Thermal Breadth ($\\sigma_{\\sigma}$)"),
-       fill = TeX("$lnVR_{Q_{10}}$")) + theme_classic() + my_theme() + theme(legend.title = element_text(size = 20), legend.text = element_text(size = 12))
-
-#ggsave(lnvr_sim_delta_sigma1, width = 9.5, height = 8, filename = "./output/figures/figsim_new2.pdf")
-
-p_sim2 <- image_read("./output/figures/figsim_new.pdf")
-p_sim2
-```
-
-
-Across habitats whole-organism versus biochemical processes showed a
-similar change in variance in physiological rates
-([@fig-btrait]D-F; see *Supplementary Materials*, @fig-vrtrait) for more detailed trait
-analysis), except for biochemical processes in ectotherms occupying
-freshwater habitats, which showed small, albeit significant increase in
-relative variance when acclimated ([@fig-btrait]F). Reduced relative
-variance was particularly prominent for resting metabolic rates and
-sprint speed although traits differed in whether they exhibited a
-reduction in variation in physiological rates at high temperatures (see
-*Supplemental Material*, @fig-vrtrait) ("Model 3"). Each life-history stage
-exhibited the same pattern of relative variance change in each of the
-habitats ("Model 4"; @fig-cvrlh).
 
 ```{r, fig-btrait}
 #| label: fig-btrait
@@ -1939,9 +1854,9 @@ p3_vr_trait <- orchard_plot(model3.3_t_broad, mod = "trait_broad", at = list(c_a
 # Full fig
 ############
 figbtrait <-(p3 | p1 | p2) / (p3_vr_trait | p1_vr_trait | p2_vr_trait) + plot_annotation(tag_levels = "A") 
-ggsave(figbtrait, filename = "./output/figures/fig4.png", width = 28, height = 14, device = "png")
+ggsave(figbtrait, filename = "./output/figures/fig5.png", width = 28, height = 14, device = "png")
 
-figbtrait <- magick::image_read("./output/figures/fig4.png")
+figbtrait <- magick::image_read("./output/figures/fig5.png")
 figbtrait
 ```
 
@@ -2010,11 +1925,65 @@ p3_vr <- orchard_plot(model3.4, mod = "life.hist", at = list(c_accl_time = 0, ha
 
 
 fig4 <-(p3 | p1 | p2) / (p3_vr | p1_vr | p2_vr) + plot_annotation(tag_levels = "A") 
-ggsave(fig4, filename = "./output/figures/fig5.pdf", width = 28, height = 14, device = "pdf")
+ggsave(fig4, filename = "./output/figures/fig6.pdf", width = 28, height = 14, device = "pdf")
 
-fig4 <- magick::image_read("./output/figures/fig5.pdf")
+fig4 <- magick::image_read("./output/figures/fig6.pdf")
 fig4
 ```
+
+### *Variation in physiological rates increases but to a greater extent in aquatic compared terrestrial ectotherms*
+
+Variance in physiological rates ($lnVR_{Q_{10}}$) showed an
+increase with increasing temperature across all habitat types ([@fig-2]B) with less heterogeneity overall ($I^2_{sv}$ = `r mean(tot_i2_VR)`, 95% CI:
+`r quantile(tot_i2_VR, 0.025)` to `r quantile(tot_i2_VR, 0.975)`; "Model 1"; see *Supplementary Materials* @fig-s3). However, physiological rate variance increased significantly more in freshwater for acute resposnes (freshwater vs terrestrial: $\beta$ = `r mean(f_m_c_a)`, 95% CI: `r quantile(f_m_c_a, 0.025)` to `r quantile(f_m_c_a, 0.975)`, $p_{MCMC}$ = `r p_value(pmcmc(f_m_c_a))`), but not for acclimation responses because increases in rates were dampended by acclimation resulting in smaller increases in variance (freshwater vs terrestrial: $\beta$ = `r mean(f_m_c_aclim)`, 95% CI: `r quantile(f_m_c_aclim, 0.025)` to `r quantile(f_m_c_aclim, 0.975)`, $p_{MCMC}$ = `r p_value(pmcmc(f_m_c_aclim))`). While marine ectotherms had larger increases in physiological rate variance compared to terrestrial ectoterms these were not signigicant (Acute: $\beta$ = `r mean(m_t_c_a)`, 95% CI: `r quantile(m_t_c_a, 0.025)` to `r quantile(m_t_c_a, 0.975)`, $p_{MCMC}$ = `r p_value(pmcmc(m_t_c_a))`; Acclimation: $\beta$ = `r mean(m_t_c_aclim)`, 95% CI: `r quantile(m_t_c_aclim, 0.025)` to `r quantile(m_t_c_aclim, 0.975)`, $p_{MCMC}$ = `r p_value(pmcmc(m_t_c_aclim))`)([@fig-2]B). Marine and freshwater did not differ in how much variance changed at higher temperatures (Acute: $\beta$ = `r mean(f_m_c_a)`, 95% CI: `r quantile(f_m_c_a, 0.025)` to `r quantile(f_m_c_a, 0.975)`, $p_{MCMC}$ = `r p_value(pmcmc(f_m_c_a))`; Acclimation: $\beta$ = `r mean(f_m_c_aclim)`, 95% CI: `r quantile(f_m_c_aclim, 0.025)` to `r quantile(f_m_c_aclim, 0.975)`, $p_{MCMC}$ = `r p_value(pmcmc(f_m_c_aclim))`). There were no differences between
+$lnVR_{Q_{10_{acute}}}$ and $lnVR_{Q_{10_{acclimation}}}$ in any habitat ([@fig-2]B). Differences
+in variance between habitats were driven by different scaling relationships between mean and variance with slopes varying across habitat types (see *Supplementary
+Materials* analyses with $lnCVR_{Q_{10}}$; @tbl-slopes & @fig-mv). 
+
+Overall, there was a `r mean(t_VR_mean_ef)`%
+(95% CI: `r quantile(t_VR_mean_ef, 0.025)[1]` to
+`r quantile(t_VR_mean_ef, 0.975)[1]`, $p_{MCMC}$ =
+`r pmcmc(t_VR_mean)`) increase in physiological rate variance
+for terrestrial ectotherms and a `r mean(m_VR_mean_ef)`% (95% CI:
+`r quantile(m_VR_mean_ef, 0.025)[1]` to
+`r quantile(m_VR_mean_ef, 0.975)[1]`, $p_{MCMC}$ =
+`r pmcmc(m_VR_mean)`) increase in variation for marine
+ectotherms when temperatures increased by 10$^\circ$C. In contrast,
+freshwater ectotherms exhibited a `r mean(f_VR_mean_ef)`%, 95% CI: `r quantile(f_VR_mean_ef, 0.025)[1]`
+to `r quantile(f_VR_mean_ef, 0.975)[1]`, $p_{MCMC}$ =
+`r pmcmc(f_VR_mean)` increase in variance at high temperatures
+(@fig-2). (results from "Model 2"). The relative differences between habitats were similar when considering $lnCVR_{Q_{10}}$ (See *Supplementary Materials*).
+
+$lnVR_{Q_{10}}$ values from our simulations matched our empirical results quite nicely in key areas of parameter space (@fig-sim2). Interestingly, for a given between individual variance in thermal breadth, terrestrial ectotherms are predicted to have lower levels of between individual variation in thermal optima compared to marine and freshwater ectotherms ([@fig-sim2]). In contrast, terrestrial ectotherms are expected to have higher levels of between individual variation in thermal breadth when controlling for between individual variation in thermal optima ([@fig-sim2])
+
+
+```{r, fig-sim2}
+#| label: fig-sim2
+#| fig-align: center
+#| fig-cap: "Expected $lnVR_{Q_{10}}$ when varying individual variation in thermal breadth($\\sigma_{_b_{\\delta}}$ = {0.01, 2}) and  thermal optima ($\\sigma_{_b_{\\sigma}}$ = {0.01, 2}) while fixing the rate variance constant ($\\sigma_{_b_{\\alpha}}$ = 0.01). In all simulations, $\\delta$ = 35, $\\sigma$ = 9, $\\alpha$ = -15, and *n* = 1000 individuals were simulated for each combination of $\\sigma_{_b_{\\delta}}$ and $\\sigma_{_b_{\\sigma}}$. The parameter space that matches the observed mean $lnVR_{Q_{10}}$ for terrestrial (green), marine (orange) and freshwater (blue) ectotherms is also shown. Dashed lines indicate the relative differences between the three habitat types when holding one variance parameter constant."
+
+sim_results <- readRDS("./output/sim_results")
+bins_vr = 20
+
+lnvr_sim_delta_sigma1 <- ggplot(sim_results, aes(x = delta, y = sigma, z = lnVR)) +
+  geom_contour_filled(bins = bins_vr) +
+  scale_color_viridis() +
+  labs(x = TeX("Variation in Thermal Optima ($\\sigma_{\\delta}$)"),
+       y = TeX("Variation in Thermal Breadth ($\\sigma_{\\sigma}$)"),
+       fill = TeX("$lnVR_{Q_{10}}$")) + theme_classic() + my_theme() + theme(legend.title = element_text(size = 20), legend.text = element_text(size = 12))
+
+#ggsave(lnvr_sim_delta_sigma1, width = 9.5, height = 8, filename = "./output/figures/fig4.pdf")
+
+p_sim2 <- image_read("./output/figures/fig4_new.pdf")
+p_sim2
+```
+
+Across habitats biochemical processes tended to result in greater increases in variance at higher temperatures, but this was only significant for marine ectotherms (biochemical/whole-organism contrasts: Marine: $\beta$ = `r contrast_lnvr_trait_cat_stats[2,3]`, 95% CI: `r contrast_lnvr_trait_cat_stats[2,4]` to `r contrast_lnvr_trait_cat_stats[2,5]`, $p_{MCMC}$ = `r contrast_lnvr_trait_cat_stats[2,6]`; Freshwater: $\beta$ = `r contrast_lnvr_trait_cat_stats[3,3]`, 95% CI: `r contrast_lnvr_trait_cat_stats[3,4]` to `r contrast_lnvr_trait_cat_stats[3,5]`, $p_{MCMC}$ = `r contrast_lnvr_trait_cat_stats[3,6]`; Terrestrial: $\beta$ = `r contrast_lnvr_trait_cat_stats[1,3]`, 95% CI: `r contrast_lnvr_trait_cat_stats[1,4]` to `r contrast_lnvr_trait_cat_stats[1,5]`, $p_{MCMC}$ = `r contrast_lnvr_trait_cat_stats[1,6]`)
+([@fig-btrait]D-F; see also  *Supplementary Materials*, @fig-vrtrait for more detailed trait
+analysis)("Model 3"). Interestingly, variance increases for biochemical traits is reduced during acclimation in marine ectotherms ([@fig-btrait]E). 
+
+Each life-history stage exhibited the same pattern of variance change in each of the
+habitats (Adult-Juvenile contrasts: Marine: $\beta$ = `r contrast_lnvr_lh_cat_stats[2,3]`, 95% CI: `r contrast_lnvr_lh_cat_stats[2,4]` to `r contrast_lnvr_lh_cat_stats[2,5]`, $p_{MCMC}$ = `r contrast_lnvr_lh_cat_stats[2,6]`; Freshwater: $\beta$ = `r contrast_lnvr_lh_cat_stats[3,3]`, 95% CI: `r contrast_lnvr_lh_cat_stats[3,4]` to `r contrast_lnvr_lh_cat_stats[3,5]`, $p_{MCMC}$ = `r contrast_lnvr_lh_cat_stats[3,6]`; Terrestrial: $\beta$ = `r contrast_lnvr_lh_cat_stats[1,3]`, 95% CI: `r contrast_lnvr_lh_cat_stats[1,4]` to `r contrast_lnvr_lh_cat_stats[1,5]`, $p_{MCMC}$ = `r contrast_lnvr_lh_cat_stats[1,6]`), with no differences between acute and acclimation effect types ("Model 4"; @fig-cvrlh).
 
 ```{r, wildlnRR10}
 #| label: wildlnRR10
@@ -2392,7 +2361,7 @@ freshwater populations ("Model 5").
 ```{r, fig-5}
 #| label: fig-5
 #| fig-align: center
-#| fig-cap: "Predicted mean acclimation (thick black line) $lnRR_{Q_{10_{acclim}}}$ (A) and $lnCVR_{Q_{10_{acclim}}}$ (B) as a function of the Thermal Coefficient of Variation (CV) for wild populations across marine, freshwater and terrestrial habitats. Dashed lines indicate 95% confidence intervals and dotted lines indicate 95% prediction intervals. Model slope ($\\beta$) along with the 95% CI and $p_{MCMC}$ values for the slopes are shown for each habitat."
+#| fig-cap: "Predicted mean acclimation (thick black line) $lnRR_{Q_{10_{acclim}}}$ (A-C) and $lnVR_{Q_{10_{acclim}}}$ (E-G) as a function of the Thermal Coefficient of Variation (CV) for wild populations across marine, freshwater and terrestrial habitats. Dashed lines indicate 95% confidence intervals and dotted lines indicate 95% prediction intervals. Model slope ($\\beta$) along with the 95% CI and $p_{MCMC}$ values for the slopes are shown for each habitat."
 
 size_axis = 20
 col <- c("#0871B9", "#F3B40D", "#1BB908")
@@ -2516,9 +2485,9 @@ p_t_vr <-  bubble_plot(model5.9_t, mod = "cv_c", group = "spp", ylab = TeX("$lnV
   p_cv <- (p_t_rr + p_m_rr + p_f_rr) / (p_t_vr + p_m_vr + p_f_vr) + 
             plot_annotation(tag_levels = "A") & theme(plot.tag = element_text(size = 36))
 
-  ggsave(p_cv, width = 18, height = 10, filename = "./output/figures/fig6.png")
+  ggsave(p_cv, width = 18, height = 10, filename = "./output/figures/fig7.png")
 
-  p_cv <- image_read("./output/figures/fig6.png")
+  p_cv <- image_read("./output/figures/fig7.png")
   p_cv 
 ```
 
@@ -2858,7 +2827,7 @@ climate scenario. All results are taken from "Model 6".
 #| echo: false
 #| warning: false
 #| message: false
-#| fig-cap: "Model predictions for the expected change in acclimation $lnVR_{Q_{10}}$ across the globe for terrestrial, marine and freshwater ecthotherms. Predictions consider the uncertainty in random effects (i.e., species, phylogeny, study).  Predicted change in relative physiological rate variance for each population based on current temperatures (average from 2018-2022; A-C) as well as the expected change from current temperatures based on future temperature predictions (average from 2096-2100, D). Future climate predictions are the reduction in relative variance expected under a RCP8.5 climate scenario relative to current climate conditions (% change)."
+#| fig-cap: "Model predictions for the expected change in $lnVR_{Q_{10}}$ across the globe for terrestrial, marine and freshwater ecthotherms. Predicted change in physiological rate variance for each population based on current temperatures (average from 2018-2022; A-C) as well as the expected change from current temperatures based on future temperature predictions (average from 2096-2100, D). Future climate predictions are the reduction in variance expected under a RCP8.5 climate scenario relative to current climate conditions (% change)."
 
 #devtools::install_github("hughjonesd/ggmagnify") #https://github.com/hughjonesd/ggmagnify
 
@@ -2913,9 +2882,9 @@ map2_future <- ggplot() +
 
 p <- (((zoom_plots[[1]] | zoom_plots[[2]]) / map1_current) + map2_future) + plot_layout(heights  = c(1, 2, 2)) + plot_annotation(tag_levels = "A", tag_suffix = ")") & theme(plot.tag = element_text(size = 20, face = "bold"), plot.margin = unit(c(0, 0, 0, 0), "cm"))
 
-ggsave(p, filename = "./output/figures/fig7.png", width = 7.8, height = 10.1)
+ggsave(p, filename = "./output/figures/fig8.png", width = 7.8, height = 10.1)
 
-image_read("./output/figures/fig7.png")
+image_read("./output/figures/fig8.png")
 ```
 
 ## **Discussion**
@@ -2925,21 +2894,16 @@ rates change across populations and species is important for predicting
 the ecological and evolutionary consequences of climate change
 [@Chevin2017; @Chevin2010; @Bolnick2011; @bush2016incorporating;
 @seebacher2023can; @Sanderson2023; @urban2023and]. Here, acclimation
-responses ($lnRR_{Q_{10}}$) varied across habitats while relative
-variance ($lnCVR_{Q_{10}}$) in physiological rates of ectotherms
-decreased across terrestrial, marine and freshwater habitats as
-temperatures increase. Decreases in relative variance were particularly
-pronounced in terrestrial ectotherms (\~28%). These effects are expected
-to result in a decrease in the variability in physiological rates for
-marine and terrestrial ectotherms between \~4-13% under future climate
-change projections. Our results uncover an hitherto unrecognised dynamic
-where the benefits of acclimation may be counteracted by shifts in trait
-variance impacting how ectotherm populations across different habitats
-will be able to cope with increased temperatures.
+responses ($lnRR_{Q_{10}}$) varied across habitats while
+variance ($lnVR_{Q_{10}}$) in physiological rates of ectotherms
+increased, with the extent of this increase varying across habitats. Our results uncover an hitherto unrecognised dynamic
+where the limited benefits of acclimation are offset by increases in trait
+variance that may have impacts on how ectotherm populations across these different habitats
+will be able to adapt to increased temperatures.
 
-### ***Acclimation capacities and changes in relative variability in physiological rates vary among habitats***
+### ***Acclimation capacities vary among habitats but are often still limited***
 
-We show that acclimation of physiological rates and changes in relative
+We show that acclimation of physiological rates and changes in their
 variance differ across habitats. Our findings confirm previous results
 that quantify the different capacity of terrestrial, marine and
 freshwater ectotherms to acclimate [@Seebacher2015-wi;
@@ -2956,27 +2920,36 @@ $Q_{10}$ effect sizes that allow us to control for sampling variance.
 Greater capacity for acclimation in aquatic organisms may be the result
 of fewer opportunities for behavioural thermoregulation in aquatic
 environments making physiological remodeling important for maintaining
-homeostasis [@Gunderson2015-hz; @morley2019physiological].
-Additionally, aquatic and terrestrial environments can vary in
-nutritional resources [e.g., fatty acid content of prey;
-@twining2019aquatic] that can impact physiological rates and their
-variability by affecting performance curves and acclimation responses
-[@hardison2024diet; @sinclair2016can]. While marine and freshwater ectotherms were
-capable of partial acclimation it is still important to recognise that,
-on average, the effect size was small (amounting to $Q_{10}$ dropping
-from ~1.8 to 1.6).
+homeostasis [@Gunderson2015-hz; @morley2019physiological]. Importantly, even though marine and freshwater ectotherms were
+capable of partial acclimation on average, the effect size was small (amounting to $Q_{10}$ dropping
+from ~1.8 to 1.6), suggesting acclimation will still provide limited opportunity for aquatic ectotherms when coping with higher temperatures.
 
-Changes in relative variance in physiological rates across habitats was
-nearly equivalent (marine) or larger (terrestrial) compared to their
-capacity to acclimate. Only in freshwater ectotherms did acclimation in
+Interestingly, we show that biochemical traits (i.e., enzymes) were more
+likely to acclimate compared to whole-organisms traits as predicted, but
+only for marine ectotherms. In contrast, both whole-organism and
+biochemical traits were equally likely to acclimate in freshwater
+ectotherms. Unsurprisingly, we observed no distinction between traits in
+terrestrial ectotherms.
+
+### ***Increased variability in physiological rates across habitats: insights into the adaptive potential of physiological processes in the face of climate change?***
+In contrast to acclimation capacity, variance in physiological rates increased across habitats with effect sizes being 3-5 times larger than those observed for acclimation. Mechanistically, it is unclear what is contributing to the increased variation in physiological rates at higher temperatures, but it could be the result of increased among-individual variability in how biochemical, cellular and physiologcial processes function at higher temperatures to maintain homeostasis [@tattersall2012coping; @angilletta2009thermal; @somero1995proteins;
+@fields2001protein]. Higher temperatures increase membrane fluidity affecting electrochemical gradients and impact protein structure and function [@somero1995proteins;
+@fields2001protein; @tattersall2012coping]. Such challenges (among others) may increase existing variation among indiviudals within a population. Some support for these mechanisms exist given that variation in biochemical traits did show larger increases in variability at high teperatures compared to whole-organism traits, although this was only significant for marine organisms. Increases in variance are probably dependent on the type of biochemical reaction being measured, and so, the differences across habitats could be attributable to the types of traits being measured. 
+
+Importantly, increased variance in physiological rates was not equal among ectotherms accupying terrestrial, marine and freshwater habitats. For example, increases in variance were particularly
+pronounced in freshwater ectotherms (~60% increase over 10 degrees Celsius) compared to terrestrial ectotherms (~36% increase over 10 degrees Celcius). The changes in variability we observed across habiats can be explained by differences in among individual variation in thermal breath and optima of individual performance curves between habitats. Consistent differences in thermal performance curves across these major habitat types have never been formally compared, probably because of the challeges in measuring full performance curves across taxa. However, a multitude of studies support the general notion that species occupying different habiats (terrestrial vs aquatic) should differ. @p
+
+Understanding the relative role that plasticity and genetic adaptation will play in response to future climates has attracted considerable attention [@urban2023and]. If the increased variability we observed in our study is underpinned by genetic variation then our results suggest evolutionary adaptation will be more important than acclimation as populations experience future climates. Increased expression of genetic variation in response to novel environments has been shown by numerous studies but primarily for morphological and life-history traits [noble rowinsku rogel, ]. Our results further highlight the vulnerability of terrestrial
+ectotherms to climate change. Assuming changes in
+variation in physiological rates are underpinned by genetic variation,
+and there is a genetic correlation with fitness, such reductions in
+physiological variance could limit adaptation in terrestrial habitats more than aquatic habiats in the 
+future [@urban2023and]. For example, under climate we expect an increase of only ~13% in terrestrial habitats whereas for freshwater habiats we expect variation in physiological rates to increase by 29%.
+
+------
+Only in freshwater ectotherms did acclimation in
 physiological rates coincide with no change in relative variation.
-Mechanistically, it is unclear what is contributing to the reduction in
-relative variation in physiological rates at higher temperatures. One
-possible explanation may be that biochemical reactions are operating
-more efficiently or are relying on more conformationally stable enzymes
-at higher temperatures impacting between individual variation
-[@tattersall2012coping; @angilletta2009thermal; @somero1995proteins;
-@fields2001protein]. Such a mechanism may also help explain the
+Such a mechanism may also help explain the
 differences in relative variance across habitat types. For example,
 terrestrial ectotherms may rely on more specialised enzymatic variants
 that operate over a more limited temperature range individually but
@@ -2984,12 +2957,7 @@ together allow for organisms to function over a wider thermal range
 necessary to operate in more variable thermal environments
 [@angilletta2009thermal].
 
-Interestingly, we show that biochemical traits (i.e., enzymes) were more
-likely to acclimate compared to whole-organisms traits as predicted, but
-only for marine ectotherms. In contrast, both whole-organism and
-biochemical traits were equally likely to acclimate in freshwater
-ectotherms. Unsurprisingly, we observed no distinction between traits in
-terrestrial ectotherms. We also expected relative variance to differ
+ We also expected relative variance to differ
 between whole-organism and biochemical traits, but we did not find
 strong support for this except for in freshwater ectotherms where
 biochemical traits were more likely to maintain or increase relative
@@ -2999,14 +2967,7 @@ physiological rates at higher temperatures due to the expression of
 alternative enzyme forms or intracellular stabalising compounds/solutes
 that impact enzyme function [@fields2001protein].
 
-Our results further highlight the vulnerability of terrestrial
-ectotherms to climate change, while calling into question if acclimation
-in marine systems will be able to counteract the potentially negative
-effects of reductions in relative variance. Assuming changes in relative
-variation in physiological rates are underpinned by genetic variation,
-and there is a genetic correlation with fitness, such reductions in
-physiological variance could limit a populations ability to adapt to
-future climates [@urban2023and]. Of course, considering how behavioural
+ Of course, considering how behavioural
 modifications buffer organisms from high temperatures is also needed.
 Terrestrial species likely have greater opportunity for behavioural
 microhabitat selection in thermally heterogeneous environments which is
@@ -3121,8 +3082,7 @@ it is important to recognise that this does not mean such patterns apply
 to all populations. Substantial variation in acclimation responses and
 changes in variance exist among populations and traits, as evidenced by
 wide prediction intervals and substantial study- and trait-level
-variance estimates. Nonetheless, quantitative measures on the changes in
-the relative variance in physiological rates could be better
+variance estimates. Nonetheless, quantitative measures on the changes in variance in physiological rates could be better
 incorporated into physiological and ecological models to provide more
 nuanced, and possibly more realistic, predictions about the impacts of
 climate change on natural populations. While we do not yet understand
@@ -3133,7 +3093,7 @@ predictions. Our meta-analysis now provides the opportunity to
 parameterise such models, and ensure they are better aligned with
 empirical findings.
 
-Nonetheless, it is clear that many fascinating questions remain
+It is clear that many fascinating questions remain
 unanswered that will require greater focus on the consequences of
 changes in variance (rather than just the mean). Particularly
 interesting questions include: How do differences in physiological rate
@@ -3365,6 +3325,47 @@ Sacute
 ggsave(Sacute, file = "./output/figures/figS4.png", height = 10, width = 12)
 ```
 
+### *Climate data*
+
+To understand how climate is related to a species’ physiological
+acclimation abilities and changes in relative variance we used the
+coordinates reported by each study to extract temperature data from
+terrestrial and aquatic environments. It was unclear whether climate at
+the locations of captive reared organisms would be representative of a
+population's climate history - particularly for species reared under
+captive condition for many generations. Given that we were interested in
+understanding climate driven effects on acclimation capacity we only
+used studies on wild populations for climate analyses.
+
+Monthly average temperature data were extracted from the ERA5 climate
+model, available from the Copernicus climate data store
+[@Hersbach2020-hx]. For each population and species in the dataset we
+extracted a 72-year period (1950-2022) of either surface air temperature
+(0.01° resolution) for both terrestrial and freshwater taxa, or sea
+surface temperature for the marine taxa (at 0.25° resolution) using the
+*ncdf4* R package [vers. `r utils::packageVersion("ncdf4")`,
+@Pierce2021-lc]. We chose surface temperature because we believed that
+it was more likely to reflect the micro-thermal environment experienced
+by terrestrial and freshwater ectotherms at those locations.
+
+Using the thermal time-series data for each location we calculated
+metrics of thermal variability across months and years as well as
+estimates of thermal predictability (i.e., autocorrelation). To estimate
+thermal variability, we calculated the coefficient of variation
+($\frac{SD}{M}$, where SD = standard deviation in temperature and M =
+the mean temperature for each year). We also estimated thermal
+predictability, by calculating the auto-regressive time lag across
+months (i.e., a measure of how correlated temperatures were between
+months), however, identifying biologically relevant lags for such
+diverse taxa is challenging. As such, we present a coarse analysis using
+this metric of thermal predictability in the *Supplemental Materials* below.
+
+Lastly, to illustrate the effects that climate warming could have on
+physiological rate variance we also extracted climate projections and
+calculated thermal variability into the future. We used the CanESM2
+climate model (2005-2100) [vers. 1.2.0; @koen_hufkens_2019_2647541]
+under a high emissions scenario (RCP8.5).
+
 #### *Mean-variance relationships to understand patterns in* $lnCVR_{Q_{10}}$
 
 ```{r, mc_models}
@@ -3492,9 +3493,9 @@ what acclimation and test temperature (@tbl-slopes).
                   legend.text = element_text(size = 14), legend.title = element_text(size = 16), strip.text = element_text(size = 16))
 
  p_mv <-  (mv1 / mv2)  + plot_annotation(tag_levels = "A") + theme(plot.tag = element_text(size = 20))
-  ggsave(p_mv, file = "./output/figures/figS7.png", height = 8, width = 8)
+  ggsave(p_mv, file = "./output/figures/figS5.png", height = 8, width = 8)
   
-  p_mv <- magick::image_read("./output/figures/figS7.png")
+  p_mv <- magick::image_read("./output/figures/figS5.png")
   p_mv
 ```
 
@@ -3878,19 +3879,14 @@ ectotherms having the largest decrease in relative variance (@fig-s1). There wer
                                legend.text = element_text(size = 24),
                                title = element_text(size = 24), legend.position = "top") + guides(shape = "none")
 
-
-########
-
-
-
 ##################
-  # Figure S1
+  # Figure 
 ################## 
 
   
-  ggsave(p3, filename = "./output/figures/figS8.pdf", width = 11.5, height = 8)
+  ggsave(p3, filename = "./output/figures/figS6.pdf", width = 11.5, height = 8)
 
-  figs1 <- image_read("./output/figures/figS8.pdf")
+  figs1 <- image_read("./output/figures/figS6.pdf")
   figs1
 ```
 
@@ -3939,10 +3935,10 @@ p3_cvr <- orchard_plot(model2.3_t_broad, mod = "trait_broad", at = list(c_accl_t
 ############
 # Full fig
 ############
-figbtrait_vr <-(p1_cvr | p2_cvr | p3_cvr) + plot_annotation(tag_levels = "A") 
-ggsave(figbtrait_vr, filename = "./output/figures/figStrait_cvr.png", width = 28, height = 8, device = "png")
+figbtrait_vr <-(p3_cvr | p1_cvr | p2_cvr) + plot_annotation(tag_levels = "A") 
+ggsave(figbtrait_vr, filename = "./output/figures/figS7.png", width = 28, height = 8, device = "png")
 
-figbtrait <- magick::image_read("./output/figures/figStrait_cvr.png")
+figbtrait <- magick::image_read("./output/figures/figS7.png")
 figbtrait
 ```
 
@@ -3986,9 +3982,9 @@ p3_cvr <- orchard_plot(model2.4, mod = "life.hist", at = list(c_accl_time = 0, h
 
 
 figcvr_lh <-(p3_cvr | p1_cvr | p2_cvr) + plot_annotation(tag_levels = "A") 
-ggsave(figcvr_lh, filename = "./output/figures/figSlh.pdf", width = 28, height = 10, device = "pdf")
+ggsave(figcvr_lh, filename = "./output/figures/figS8.pdf", width = 28, height = 10, device = "pdf")
 
-figcvr_lh <- magick::image_read("./output/figures/figSlh.pdf")
+figcvr_lh <- magick::image_read("./output/figures/figS8.pdf")
 figcvr_lh
 
 ```
@@ -4461,7 +4457,7 @@ tables_future <- all_pred2 %>% group_by(habitat) %>% summarise(mean = mean(per_c
     
 ```
 
-#### *Acute and acclimation* $lnRR_{Q_{10}}$ for detailed trait categories across marine, freshwater and terrestrial taxa (REMOVE)
+#### *Acute and acclimation* for detailed trait categories across marine, freshwater and terrestrial taxa 
 
 In addition to the broader trait categories we fit models to understand
 how acute and acclimation effect sizes varied across trait categories.
@@ -4479,7 +4475,7 @@ Oxidative Phosphorylation), as well as antioxidant enzymes ('antiox').
 All other traits not falling within these categories were placed into
 'other'.
 
-Acclimation capacity varied across trait categories and habiats with measures of resting metabolic rate, including associated biochemical reactions like oxidative phosphorylation (OXPHOS) and ATPase activity, acclimating in marine and freshwater ectotherms (@fig-lnrrtrait). Whether relative variation in physiological rates changes also depended on trait type, with freshwater ectotherms generally maintaining relative variance in physiological rates better than marine and freshwater ectotherms (@fig-cvrtrait). We note though that some traits have very small sample sizes on their own and should be interpreted with caution.
+Acclimation capacity varied across trait categories and habitat with measures of resting metabolic rate, including associated biochemical reactions like oxidative phosphorylation (OXPHOS) and ATPase activity, acclimating in marine and freshwater ectotherms (@fig-lnrrtrait). Whether relative variation in physiological rates changes also depended on trait type, with freshwater ectotherms generally maintaining variance in physiological rates better than marine and freshwater ectotherms (@fig-vrtrait & @fig-cvrtrait). We note though that some traits have very small sample sizes on their own and should be interpreted with caution.
 
 ```{r, detail_trait}
 #| label: detail_trait
@@ -4806,7 +4802,7 @@ if(rerun){
                                             ~1 + max_temp_c| spp,
                                             ~1 | trait,
                                             ~1 + trait_category | obs),
-                              R = list(species_full = f_phylo_vr), dfs = "contain", 
+                              R = list(species_full = f_phylo_VR), dfs = "contain", 
                               test = "t", struct = c("GEN", "HCS"), phi = 0, data = lnVRQ10_data_f)
 
   saveRDS(model3.3f, file = "./output/models/lnVRQ10_model3.3f")
@@ -4818,7 +4814,7 @@ if(rerun){
                                             ~1 + max_temp_c| spp,
                                             ~1 | trait,
                                             ~1 + trait_category| obs),
-                              R = list(species_full = m_phylo_vr), dfs = "contain", 
+                              R = list(species_full = m_phylo_VR), dfs = "contain", 
                               test = "t", struct = c("GEN", "HCS"),  phi = 0, data = lnVRQ10_data_m)
   saveRDS(model3.3m, file = "./output/models/lnVRQ10_model3.3m")
 
@@ -4830,7 +4826,7 @@ if(rerun){
                                             ~1 + max_temp_c | spp,
                                             ~1 | trait,
                                             ~1 + trait_category | obs),
-                              R = list(species_full = t_phylo_vr), dfs = "contain", 
+                              R = list(species_full = t_phylo_VR), dfs = "contain", 
                               test = "t", struct = c("GEN", "HCS"),  phi = 0, data = lnVRQ10_data_t)
   saveRDS(model3.3t, file = "./output/models/lnVRQ10_model3.3t")
 
@@ -4839,11 +4835,11 @@ if(rerun){
   # Detailed Trait Categories
   # Models for the supplement
 #########################
-        model3.3 <- readRDS("./output/models/lnCVRQ10_3.3")
-        model3.3f <- readRDS("./output/models/lnCVRQ10_model3.3f")
-        model3.3m <- readRDS("./output/models/lnCVRQ10_model3.3m")
-        model3.3t <- readRDS("./output/models/lnCVRQ10_model3.3t")
-  model3.3_bayes <- readRDS("./output/models/lnCVRQ10_3.3_bayes")
+        model3.3 <- readRDS("./output/models/lnVRQ10_3.3")
+        model3.3f <- readRDS("./output/models/lnVRQ10_model3.3f")
+        model3.3m <- readRDS("./output/models/lnVRQ10_model3.3m")
+        model3.3t <- readRDS("./output/models/lnVRQ10_model3.3t")
+  model3.3_bayes <- readRDS("./output/models/lnVRQ10_3.3_bayes")
 }
 ```
 
@@ -4883,10 +4879,51 @@ ptt <- orchard_plot(model1.3_t_het, mod = "trait_category", at = list(type = c("
 
 
 fig2 <- (ptm / ptf / ptt) + plot_annotation(tag_levels = "A")
-ggsave(fig2, filename = "./output/figures/figS5.png", height = 20, width = 15)
+ggsave(fig2, filename = "./output/figures/figS9.png", height = 20, width = 15)
 
-img_fig2 <- magick::image_read("./output/figures/figS5.png")
+img_fig2 <- magick::image_read("./output/figures/figS9.png")
 img_fig2
+```
+
+```{r, fig-vrtrait}
+#| label: fig-vrtrait
+#| fig-cap: "Acute and acclimation $lnVR_{Q_{10}}$ across traits for A) marine, B) freshwater and C) terrestrial systems. k = total number of effect size estimates while the numbers in brackets indicate the number of species. Thick bars indicate 95% confidence intervals and thin bars indicate 95% prediction intervals. The x-axis is truncated for ease of visualisation. See methods section “Moderator Variables” for a full description of the trait categories. "
+#| echo: false
+
+k_marinevr=manual_extract(model3.3m, mod = "trait_category", group = "record_num", exclude = "Antiox")
+ k_freshvr=manual_extract(model3.3f, mod = "trait_category", group = "record_num")
+ k_terrsvr=manual_extract(model3.3t, mod = "trait_category", group = "record_num")
+
+ptm_vr <- orchard_plot(model3.3m, mod = "trait_category", group = "record_num", weights = "prop",  xlab = TeX("$lnVR_{Q_{10}}$"), angle = 0, k.pos = "none", condition.lab = "Type") +
+  scale_x_discrete(labels = c("Mito_leak" = "Proton Leak",
+                              "Metabolic_enzyme" = "Metabolic Enzymes",
+                              "Rest_MR" = "Resting Metabolic Rate",
+                              "Max_MR" = "Maximum Metabolic Rate",
+                              "Mito_oxidation" = "OXPHOS")) + theme_classic() + add_theme() + annotate("text", label= paste0("k = ", k_marinevr$k, " (", k_marinevr$sdy, ")"), x = k_marinevr$moderator, y = 2.4) + ylim(-2, 2.6)
+#ptm$layers[[1]] <- NULL # Lets just remove the data point geom layer as it's too busy
+
+
+ptf_vr <- orchard_plot(model3.3f, mod = "trait_category",  group = "record_num", weights = "prop",  xlab = TeX("$lnVR_{Q_{10}}$"), angle = 0, condition.lab = "Type",  k.pos = "none") +
+  scale_x_discrete(labels = c("Mito_leak" = "Proton Leak",
+                              "Metabolic_enzyme" = "Metabolic Enzymes",
+                              "Rest_MR" = "Resting Metabolic Rate",
+                              "Max_MR" = "Maximum Metabolic Rate",
+                              "Mito_oxidation" = "OXPHOS")) + theme_classic()+ add_theme() + annotate("text", label= paste0("k = ", k_freshvr$k, " (", k_freshvr$sdy, ")"), x = k_freshvr$moderator, y = 2.4) + ylim(-2.5, 2.65)
+#ptf$layers[[1]] <- NULL # Lets just remove the data point geom layer as it's too busy
+
+
+ptt_vr <- orchard_plot(model3.3t, mod = "trait_category",  group = "record_num", weights = "prop",  xlab = TeX("$lnVR_{Q_{10}}$"), angle = 0,  k.pos = "none", condition.lab = "Type") +
+  scale_x_discrete(labels = c("Metabolic_enzyme" = "Metabolic Enzymes",
+                              "Rest_MR" = "Resting Metabolic Rate",
+                              "Max_MR" = "Maximum Metabolic Rate")) + theme_classic() +  annotate("text", label= paste0("k = ", k_terrsvr$k, " (", k_terrsvr$sdy, ")"), x = k_terrsvr$moderator, y = 2.4) + labs(legend = "Type")+ add_theme() + ylim(-2, 2.65)
+#ptt$layers[[1]] <- NULL # Lets just remove the data point geom layer as it's too busy
+
+
+figvrtrait <- (ptm_vr / ptf_vr / ptt_vr) + plot_annotation(tag_levels = "A", tag_suffix = ")")
+ggsave(figvrtrait, filename = "./output/figures/figS10.png", height = 20, width = 15)
+
+img_figvrtrait <- magick::image_read("./output/figures/figS10.png")
+img_figvrtrait
 ```
 
 ```{r, fig-cvrtrait}
@@ -4924,9 +4961,9 @@ ptt <- orchard_plot(model2.3t, mod = "trait_category",  group = "record_num", we
 
 
 figcvrtrait <- (ptm / ptf / ptt) + plot_annotation(tag_levels = "A", tag_suffix = ")")
-ggsave(figcvrtrait, filename = "./output/figures/figS6.png", height = 20, width = 15)
+ggsave(figcvrtrait, filename = "./output/figures/figS11.png", height = 20, width = 15)
 
-img_figcvrtrait <- magick::image_read("./output/figures/figS6.png")
+img_figcvrtrait <- magick::image_read("./output/figures/figS11.png")
 img_figcvrtrait
 ```
 
@@ -4945,9 +4982,9 @@ ps3_2 <- ggplot(i2_lncvr, aes(x = est, y = name)) + xlim(0, 50) + geom_point(siz
 ps3_3 <- ggplot(i2_lnVR, aes(x = est, y = name)) + xlim(0, 50) + geom_point(size = 5) + geom_errorbar(aes(xmin = lci, xmax = uci), width = 0.15) + theme_bw() + labs(x = "Percentage of Variation (%)") + theme(axis.title.y = element_blank(), axis.text = element_blank(), axis.title = element_text(size = 24)) + geom_text(aes(label = paste0(round(est, 2), "% ", "[", round(lci, 2), " - ", round(uci, 2), "%]")), position = position_nudge(x = 5, y = 0.2)) + annotate("text", x = 30, y = 1.5, label = TeX(paste0("$I^2_{sv}$ = ", round(mean(tot_i2_cvr), 2), "%")), size = 10)
 
 figs3 <- (ps3_1 | ps3_2 | ps3_3) + plot_annotation(tag_levels = "A", tag_suffix = ")") & theme(plot.tag = element_text(size = 20))
-ggsave(figs3, width = 16, height = 5.7, filename = "./output/figures/figS9.png")
+ggsave(figs3, width = 16, height = 5.7, filename = "./output/figures/figS12.png")
 
-figs3 <- image_read("./output/figures/figS9.png")
+figs3 <- image_read("./output/figures/figS12.png")
 figs3
 ```
 
@@ -5318,9 +5355,9 @@ p_t_cv_acf <-  bubble_plot(model4.8_t, mod = "acf_lag1_c", group = "spp", ylab =
 
 p_acf <- (p_t_rr_acf + p_m_rr_acf + p_f_rr_acf) / (p_t_cv_acf + p_m_cv_acf + p_f_cv_acf) + plot_annotation(tag_levels = "A") & theme(plot.tag = element_text(size = 36))
 
-ggsave(p_acf, width = 18, height = 10, filename = "./output/figures/figS10.pdf")
+ggsave(p_acf, width = 18, height = 10, filename = "./output/figures/figS13.pdf")
 
-  p_acf <- image_read("./output/figures/figS10.pdf")
+  p_acf <- image_read("./output/figures/figS13.pdf")
   p_acf 
 ```
 
@@ -5382,9 +5419,9 @@ ps2_2 <- ggplot(lnCVRQ10_data, aes(y = 1/sqrt(V), x = effect_size, color = type)
 ps2_3 <- ggplot(lnVRQ10_data, aes(y = 1/sqrt(V), x = effect_size, color = type)) + geom_point() + theme_classic() + labs(y = TeX("Precision\\ $\\left( \\frac{1}{\\sqrt{V}} \\right)$"), x = TeX("$lnVR_{Q_{10}}$"))+geom_vline(xintercept = 0, linetype = 3) + theme(legend.title  = element_text(size = 15), legend.text = element_text(size = 15), axis.title = element_text(size = 15), axis.text = element_text(size = 15),  axis.title.y = element_blank())+ scale_color_manual(name = "Type", values = cols)
 
 figs2 <- (ps2_1 | ps2_2 | ps2_3) + plot_annotation(tag_levels = "A", tag_suffix = ")") & theme(plot.tag = element_text(size = 20))
-ggsave(figs2, width = 11.5, height = 4.8, filename = "./output/figures/figS11.png")
+ggsave(figs2, width = 11.5, height = 4.8, filename = "./output/figures/figS14.png")
 
-figs2 <- image_read("./output/figures/figS11.png")
+figs2 <- image_read("./output/figures/figS14.png")
 figs2
 ```
 
@@ -5542,8 +5579,9 @@ sim3 <- ggplot(ws3, aes(x = z, y = fitness, color = run)) + geom_line() + theme_
 sim4 <- ggplot(ws4, aes(x = z, y = fitness, color = run)) + geom_line() + theme_classic() + labs(y = "Physiological Rate", x = TeX("Temperature ($^\\circ$C)"), color = "Individual", title = "Thermal Breadth") + scale_color_viridis_d() + my_theme()+ geom_vline(xintercept = 28, linetype = "dashed", color = "red") +     geom_vline(xintercept = 18, linetype = "dashed", color = "blue")   + my_annotate(sum_sim4, size_ano)+ theme(legend.position = "none")
 
 p_sim <- ((sim1 + sim2) / (sim4 + sim3)) +plot_annotation(tag_levels = "A") & theme(plot.tag = element_text(size = 30))
-ggsave(p_sim, width = 22.5, height = 18, filename = "./output/figures/figS12.png")
+ggsave(p_sim, width = 22.5, height = 18, filename = "./output/figures/figS15.png")
  
+p_sim <- image_read("./output/figures/figS15.png")
 p_sim
 ```
 

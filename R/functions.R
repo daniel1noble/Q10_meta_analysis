@@ -478,7 +478,7 @@ post_summary <- function(x){
    hab_type <- post[,cols_habit]
    
    # Find cols that match names
-   type1 <- c(hab_type[,1], hab_type[,1])  # Tissue Traits Pooled
+   type1 <- c(hab_type[,1], hab_type[,2])  # Tissue Traits Pooled
    type2 <- c(hab_type[,3], hab_type[,4])  # Biochem Traits Pooled
    
    # Now, find the contrast
@@ -494,3 +494,31 @@ post_summary <- function(x){
    return(data_sum)
    
  }
+ 
+ 
+ #' @title get_lifestage
+ #' @description Takes posterior predictions of acute and acclimation effect sizes across habitats and life stages, pools the acute and acclimation effects and then calculates a contrasts between adult and jeuv for effects sizes. Returns a data frame.
+ get_lifestage <- function(post, habitat, lh_b_data){
+   # Find columns that match and subset cols from posterior
+   cols_habit <- as.numeric(rownames(lh_b_data)[lh_b_data$habitat == habitat])
+   
+   lh_type <- post[cols_habit,]
+   
+   # Find cols that match names
+   type1 <- c(lh_type[1,], lh_type[2,])  # J Pooled
+   type2 <- c(lh_type[3,], lh_type[4,])  # A Pooled
+   
+   # Now, find the contrast
+   contrast <-  type2 - type1
+   
+   # Summarise info about contrast
+   data_sum <- data.frame( habitat = habitat,
+                           comparison = paste0("Adult - Juv"),
+                           Est. = mean(contrast),
+                           `95% L CI` = quantile(contrast, 0.025),
+                           `95% U CI` = quantile(contrast, 0.975),
+                           `pmcmc` = p_value(pmcmc(contrast)), check.names = FALSE, row.names = NULL)
+   return(data_sum)
+   
+ }
+ 

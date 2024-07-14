@@ -1716,6 +1716,7 @@ if(rerun){
             contrast_lnvr_lh_cat_stats <- rbind(get_lifestage(pred_lh_vr, habitat = "t", lh_b_data),
                                                 get_lifestage(pred_lh_vr, habitat = "m", lh_b_data),
                                                 get_lifestage(pred_lh_vr, habitat = "f", lh_b_data))
+
 ```
 
 ```{r, fig-2}

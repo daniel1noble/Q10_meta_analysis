@@ -4541,6 +4541,7 @@ ind_sd = 0.5           # Standard deviation among individuals
 delta =  35  
 sigma =  9 + rnorm(n, 0, ind_sd)
 alpha = -15 + rnorm(n, 0, ind_sd)
+# k=2 # note that, if we want to control the between individual differences in performance we can multiply curve by constant. Can do that and add variation and then all aspects of the curve can be modified. 
 
 ws1<- list()
 for(i in 1:length(alpha)){

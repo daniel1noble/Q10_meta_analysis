@@ -2352,7 +2352,7 @@ image_read("./output/figures/fig8.png")
 
 ## **Discussion**
 
-Understanding acclimation capacity and how variation in physiological rates change across populations and species is important for predicting the ecological and evolutionary consequences of climate change [@Chevin2017; @Chevin2010; @Bolnick2011; @bush2016incorporating; @seebacher2023can; @Sanderson2023; @urban2023and]. Here we show that both acclimation responses ($lnRR_{Q_{10}}$) and increases in physiological rate variance ($lnVR_{Q_{10}}$) of ectotherms varied across habitats. Our results uncover an hitherto unrecognised dynamic where the benefits of partial acclimation are paralleled by increases in trait variance that may have impacts on how ectotherm populations across different habitats will be able to adapt to increased temperatures.
+Understanding acclimation capacity and how variation in physiological rates change across populations and species is important for predicting the ecological and evolutionary consequences of climate change [@Chevin2017; @Chevin2010; @Bolnick2011; @bush2016incorporating; @seebacher2023can; @Sanderson2023; @urban2023and]. Here we show that both acclimation responses ($lnRR_{Q_{10}}$) and increases in physiological rate variance ($lnVR_{Q_{10}}$) of ectotherms varied across habitats. Our results uncover an hitherto unrecognised dynamic where the benefits of partial acclimation are paralleled by increases in trait variance that depend on habitat in ways that may have impacts on how ectotherm populations will be able to adapt to increased temperatures.
 
 ### ***Acclimation capacities vary among habitats but are often still limited***
 

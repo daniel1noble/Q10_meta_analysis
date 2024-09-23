@@ -34,9 +34,8 @@ We can load the dataset using the google sheets
 
 	
 ```{r, echo = TRUE, eval = TRUE, message = FALSE, error = FALSE}
-	  gs <- gs_title("q10_newdata")
-	data <- as.data.frame(gs_read(ss = gs))
-
+	  #gs <- gs_title("q10_newdata")
+	data <- as.data.frame(read.csv("./data/CombinedData_long.csv"))
 ```
 
 ## Explore the data

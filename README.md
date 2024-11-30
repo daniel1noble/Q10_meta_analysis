@@ -36,32 +36,32 @@ Column descriptors for :page_facing_up: `data_final_wide.csv` and `data_final_lo
 - r1.1_N: Sample size for r1.1.	
 - r1.2: Physiological rate for animals measured in acclimation temperature 1 at acute temperature 2.	
 - r1.2_N: Sample size for r1.2.	
-r2.1	
-r2.1_N	
-r2.2	
-r2.2_N	
-units	
-species_full	
-r1.1_sd	
-r1.2_sd	
-r2.1_sd	
-r2.2_sd	
-lnRR_Q10_acute_t1	
-V_lnRR_Q10_acute_t1	
-lnRR_Q10_acute_t2	
-V_lnRR_Q10_acute_t2	
-lnRR_Q10_acclim	
-V_lnRR_Q10_acclim	
-lnVR_Q10_acute_t1	
-V_lnVR_Q10_acute_t1	
-lnVR_Q10_acute_t2	
-V_lnVR_Q10_acute_t2	
-lnVR_Q10_acclim	
-V_lnVR_Q10_acclim	
-lnCVR_Q10_acute_t1	
-V_lnCVR_Q10_acute_t1	
-lnCVR_Q10_acute_t2	
-V_lnCVR_Q10_acute_t2	
-lnCVR_Q10_acclim	
-V_lnCVR_Q10_acclim	
-obs
+- r2.1: Physiological rate for animals measured in acclimation temperature 2 at acute temperature 1.	
+- r2.1_N: Sample size for r2.1.
+- r2.2: Physiological rate for animals measured in acclimation temperature 2 at acute temperature 2.	
+- r2.2_N: Sample size for r2.2.	
+- units: Units of the physiological rate.	
+- species_full: Full species name.	
+- r1.1_sd: Standard deviation of r1.1.	
+- r1.2_sd: Standard deviation of r1.2.	
+- r2.1_sd: Standard deviation of r2.1.	
+- r2.2_sd: 	Standard deviation of r2.2.	
+- lnRR_Q10_acute_t1: Acute Log response ratio for Q10 at temperature 1.	
+- V_lnRR_Q10_acute_t1: Variance of lnRR_Q10_acute_t1.	
+- lnRR_Q10_acute_t2: Acute log response ratio for Q10 at temperature 2.	
+- V_lnRR_Q10_acute_t2: Variance of lnRR_Q10_acute_t2.	
+- lnRR_Q10_acclim: Acclimation Log response ratio for Q10 at acclimation.
+- V_lnRR_Q10_acclim: Variance of lnRR_Q10_acclim. 	
+- lnVR_Q10_acute_t1: Acute Log variance ratio for Q10 at temperature 1.
+- V_lnVR_Q10_acute_t1: Variance of lnVR_Q10_acute_t1.	
+- lnVR_Q10_acute_t2: Acute Log variance ratio for Q10 at temperature 2.	
+- V_lnVR_Q10_acute_t2: Variance of lnVR_Q10_acute_t2.	
+- lnVR_Q10_acclim: Acclimation Log variance ratio for Q10 at acclimation.	
+- V_lnVR_Q10_acclim: Variance of lnVR_Q10_acclim.	
+- lnCVR_Q10_acute_t1: Acute Log coefficient of variation ratio for Q10 at temperature 1.	
+- V_lnCVR_Q10_acute_t1: Variance of lnCVR_Q10_acute_t1.	
+- lnCVR_Q10_acute_t2: Acute Log coefficient of variation ratio for Q10 at temperature 2.	
+- V_lnCVR_Q10_acute_t2: Variance of lnCVR_Q10_acute_t2.	
+- lnCVR_Q10_acclim: Acclimation Log coefficient of variation ratio for Q10 at acclimation.	
+- V_lnCVR_Q10_acclim: Variance of lnCVR_Q10_acclim.	
+- obs: Observation number. 

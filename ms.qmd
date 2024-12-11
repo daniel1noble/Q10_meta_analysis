@@ -412,9 +412,9 @@ model1.1_bayes <- readRDS("./output/models/lnRRQ10_1.1_bayes")
 ###################################################
 
 if(rerun){
-  # More realistic model with 
+  # More realistic model with. *** Reviewers want to control for the fact that we want to estimate the difference in effect sizes between acclimation and acute responses at the level of each effect size within each study. We can do this using random slope and will deal with studies where only acclimation is estimated better without loosing power.***
   model1.2 <- metafor::rma.mv(effect_size ~  max_temp_c + c_accl_time + type + habitat + type:habitat, V = V, 
-                              random = list(~1 | record_num,
+                              random = list(~1 + type | record_num,
                                             ~1 | species_full,
                                             ~1 | trait,
                                             ~1 + max_temp_c| spp,
@@ -438,8 +438,8 @@ if(rerun){
    
    model1.2_rve <- robust(model1.2, cluster = lnRRQ10_data$record_num) # Consistent.
 
-  # Baysian model allows us to propagate error better is should be more robust to non-independence
-   model1.2_bayes <- brms::brm(effect_size | se(sqrt(V), sigma = TRUE) ~  max_temp_c + c_accl_time + type + habitat + type:habitat + (~1 | record_num) + (1 | gr(species_full, cov = A)) + (1 + max_temp_c| spp) + (1|trait), data2 = list(A=A), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 8, data = lnRRQ10_data)
+  # Baysian model allows us to propagate error better is should be more robust to non-independence. *** Reviewers want to control for the fact that we want to estimate the difference in effect sizes between acclimation and acute responses at the level of each effect size within each study. We can do this using random slope and will deal with studies where only acclimation is estimated better without loosing power.***
+   model1.2_bayes <- brms::brm(effect_size | se(sqrt(V), sigma = TRUE) ~  max_temp_c + c_accl_time + type + habitat + type:habitat + (~1 + type| record_num) + (1 | gr(species_full, cov = A)) + (1 + max_temp_c| spp) + (1|trait), data2 = list(A=A), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 8, data = lnRRQ10_data)
                                   
   # Save model1.2
   saveRDS(model1.2, file = "./output/models/lnRRQ10_1.2")

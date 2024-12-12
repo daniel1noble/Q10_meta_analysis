@@ -184,10 +184,14 @@ $\dagger$ contributed equally\
 $\ddagger$ corresponding author, daniel.noble\@anu.edu.au
 
 **Running head**: Physiological rate variation in ectotherms
-
+Havird 
 ## **Abstract**
 
-Climate change causes warmer and more variable temperatures globally, impacting physiological rates and function in ectothermic animals. Acclimation of physiological rates can help maintain function. However, it is unresolved how variance in physiological rates changes with temperature despite its potential ecological and evolutionary importance. We tested the extent to which thermal variation affects variation physiological rates and their capacity to acclimate in ectotherms by conducting a meta-analysis (>1900 effects from 226 species) and applying new effect sizes that quantify how trait mean and variance change as temperature increases. Comparing both the magnitude of acclimation and changes in variation side-by-side provides unique opportunities for evaluating the importance of plasticity or selection under climate change. We show that variance in physiological rates increases at higher temperatures, but that the magnitude of change depends on habitat. Freshwater and marine ectotherms are capable of acclimation and have the greatest increase in variance. In contrast, terrestrial ectotherms lack the capacity for acclimation and have smaller increases in variance. Simulations suggest that these patterns may result from differences in among-individual variation in thermal breadth and optima of performance curves across habitats. Our results highlight the greater vulnerability of terrestrial ectotherms to climate change because limited increases in variance may provide less raw material for evolutionary adaptation. Considering both acclimation capacity and variance in physiological rates side-by-side is therefore important for understanding how climate change will impact populations.
+1.	Climate change causes warmer and more variable temperatures globally, impacting physiological rates and function in ectothermic animals. Acclimation of physiological rates can help maintain function. However, it is unresolved how variance in physiological rates changes with temperature despite its potential ecological and evolutionary importance. 
+2.	2.	We developed new effect sizes that capture how both the mean and variation in physiological rates change across temperature (based on the temperature coefficient, $Q_{10}$), and used them to test how acclimation and acute thermal responses vary across aquatic and terrestrial ectotherms using meta-analysis (>1900 effects from 226 species). Comparing both the magnitude of acclimation and changes in variation side-by-side provides unique opportunities for evaluating the importance of plasticity and selection under climate change.
+3.	We show that variance in physiological rates increases at higher temperatures, but that the magnitude of change depends on habitat. Freshwater and marine ectotherms are capable of acclimation and have the greatest increase in variance. In contrast, terrestrial ectotherms lack the capacity for acclimation and have smaller increases in variance. Simulations suggest that these patterns may result from differences in among-individual variation in thermal breadth and optima of performance curves across habitats. 
+4.	Our results highlight the greater vulnerability of terrestrial ectotherms to climate change because limited increases in variance may provide less raw material for evolutionary adaptation. Considering both acclimation capacity and variance in physiological rates side-by-side is therefore important for understanding how climate change will impact populations.
+
 
 ## **Introduction**
 
@@ -424,13 +428,13 @@ if(rerun){
 
   # Additional model fit as a result of reviewer commenting that acclimation time is assumed to be linear. So, fit a non-linear parameter to see if it improves fit (even though data doesn't suggest it is the case).
    model1.2_nl <- metafor::rma.mv(effect_size ~  max_temp_c + c_accl_time + I(c_accl_time^2) + type + habitat + type:habitat, V = V, 
-                              random = list(~1 | record_num,
+                              random = list(~1 + type | record_num,
                                             ~1 | species_full,
                                             ~1 | trait,
                                             ~1 + max_temp_c| spp,
                                             ~1 | obs),
                               R = list(species_full = phylo_cor), dfs = "contain", 
-                              test = "t", data = lnRRQ10_data)
+                              test = "t", data = lnRRQ10_data, control = list(optimizer = "bobyqa", rel.tol=1e-8, maxeval=1000)) #‘bobyqa’
 
     AIC(model1.2_nl, model1.2) # Again, basically the same and go with most parsimonious model
   
@@ -935,7 +939,7 @@ if(rerun){
 if(rerun){
   # More realistic model 
   model3.2 <- metafor::rma.mv(effect_size ~  max_temp_c + c_accl_time + type + habitat + type:habitat, V = V, 
-                              random = list(~1 | record_num,
+                              random = list(~1 + type | record_num,
                                             ~1 | species_full,
                                             ~1 + max_temp_c| spp,
                                             ~1 | trait,
@@ -944,7 +948,7 @@ if(rerun){
                               test = "t", data = lnVRQ10_data)
   
    model3.2_bayes <- brms::brm(effect_size | se(sqrt(V), sigma = TRUE) ~  max_temp_c + c_accl_time + type + habitat + type:habitat + 
-        (~1 | record_num) + 
+        (~1 + type| record_num) + 
         (1 | gr(species_full, cov = A_VR)) + 
         (1 + max_temp_c| spp) + 
         (1|trait), 
@@ -1021,7 +1025,7 @@ if(rerun){
   
   # Full Bayesian model   
    model3.3_btrait_bayes <- brms::brm(effect_size | se(sqrt(V)) ~  max_temp_c + c_accl_time + type*trait_broad*habitat + 
-                                           (1 | record_num) + 
+                                           (1 + type | record_num) + 
                                            (1 | gr(species_full, cov = A_VR)) + 
                                            (1 + max_temp_c | spp) +(1|trait) + 
                                            (1 + trait_broad |gr(obs, cor = FALSE)),  
@@ -1034,7 +1038,7 @@ if(rerun){
   # Metafor models for creating plots. Subset by habitat to make this easier
       # Marine
          model3.3_m_broad <- metafor::rma.mv(effect_size ~  max_temp_c + c_accl_time + type + trait_broad + type:trait_broad, V = V, 
-                              random = list(~1 | record_num,
+                              random = list(~1 + type | record_num,
                                             ~1 | species_full,
                                             ~1 + max_temp_c| spp,
                                             ~1 | trait,
@@ -1046,7 +1050,7 @@ if(rerun){
     
       # Freshwater
          model3.3_f_broad <- metafor::rma.mv(effect_size ~  max_temp_c + c_accl_time + type + trait_broad + type:trait_broad, V = V, 
-                              random = list(~1 | record_num,
+                              random = list(~1 + type | record_num,
                                             ~1 | species_full,
                                             ~1 + max_temp_c| spp,
                                             ~1 | trait,
@@ -1058,7 +1062,7 @@ if(rerun){
       
       # Terrestrial
          model3.3_t_broad <- metafor::rma.mv(effect_size ~  max_temp_c + c_accl_time + type + trait_broad + type:trait_broad, V = V, 
-                              random = list(~1 | record_num,
+                              random = list(~1 + type | record_num,
                                             ~1 | species_full,
                                             ~1 + max_temp_c| spp,
                                             ~1 | trait,
@@ -1124,7 +1128,7 @@ if(rerun){
 if(rerun){
   # More realistic model 
   model3.4 <- metafor::rma.mv(effect_size ~  max_temp_c + c_accl_time + type*habitat*life.hist, V = V, 
-                              random = list(~1 | record_num,
+                              random = list(~1 + type| record_num,
                                             ~1 | species_full,
                                             ~1 + max_temp_c| spp,
                                             ~1 | trait,
@@ -1135,7 +1139,7 @@ if(rerun){
   saveRDS(model3.4, file = "./output/models/lnVRQ10_3.4")
 
    model3.4_bayes <- brms::brm(effect_size | se(sqrt(V)) ~  max_temp_c + c_accl_time + type*habitat*life.hist + 
-                                 (~1 | record_num) + 
+                                 (1 + type | record_num) + 
                                  (1 | gr(species_full, cov = A_VR)) + 
                                  (1 + max_temp_c| spp) + 
                                  (1|trait) +
@@ -1432,7 +1436,7 @@ if(rerun){
 if(rerun){
   # More realistic model with 
   model3.3          <- metafor::rma.mv(effect_size ~ max_temp_c + c_accl_time + cv_c + type + type:cv_c, V = V,
-                                       random = list(~1 | record_num,
+                                       random = list(~1 + type | record_num,
                                             ~1 | species_full,
                                             ~1 | trait,
                                             ~1 + max_temp_c| spp,
@@ -1440,7 +1444,7 @@ if(rerun){
                               R = list(species_full = phylo_cor_wild), dfs = "contain", 
                               test = "t", data = lnRRQ10_data_wild)
   
-   model3.3_bayes <- brms::brm(effect_size | se(sqrt(V), sigma = TRUE) ~ max_temp_c + c_accl_time + cv_c + type + type:cv_c + (~1 | record_num) + (1 | gr(species_full, cov = A_wild)) + (1 + max_temp_c| spp) + (1|trait), data2 = list(A_wild=A_wild), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 8, data = lnRRQ10_data_wild)
+   model3.3_bayes <- brms::brm(effect_size | se(sqrt(V), sigma = TRUE) ~ max_temp_c + c_accl_time + cv_c + type + type:cv_c + (1 + type | record_num) + (1 | gr(species_full, cov = A_wild)) + (1 + max_temp_c| spp) + (1|trait), data2 = list(A_wild=A_wild), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 8, data = lnRRQ10_data_wild)
                                   
   # Save model3.3
   saveRDS(model3.3, file = "./output/models/lnRRQ10_3.3")
@@ -1559,7 +1563,7 @@ if(rerun){
 #| warning: false
 #| 
 #######################################
-  ## lnCVRQ10 from Wild Populations ##
+  ## lnVRQ10 from Wild Populations ##
 #######################################
 ##################################################
   # Organise the data and prune tree
@@ -1606,7 +1610,7 @@ rerun = FALSE
 if(rerun){
   # More realistic model with 
   model5.3          <- metafor::rma.mv(effect_size ~ max_temp_c + c_accl_time + cv_c + type + type:cv_c, V = V,
-                                       random = list(~1 | record_num,
+                                       random = list(~1 + type | record_num,
                                             ~1 | species_full,
                                             ~1 | trait,
                                             ~1 + max_temp_c| spp,
@@ -1614,7 +1618,7 @@ if(rerun){
                               R = list(species_full = phylo_cor_wild_vr), dfs = "contain", 
                               test = "t", data = lnVRQ10_data_wild)
   
-   model5.3_bayes <- brms::brm(effect_size | se(sqrt(V), sigma = TRUE) ~  max_temp_c + c_accl_time + cv_c + type + type:cv_c + (~1 | record_num) + (1 | gr(species_full, cov = A_wild_vr)) + (1 + max_temp_c| spp) + (1|trait), data2 = list(A_wild_vr=A_wild_vr), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 8, data = lnVRQ10_data_wild)
+   model5.3_bayes <- brms::brm(effect_size | se(sqrt(V), sigma = TRUE) ~  max_temp_c + c_accl_time + cv_c + type + type:cv_c + (1 + type| record_num) + (1 | gr(species_full, cov = A_wild_vr)) + (1 + max_temp_c| spp) + (1|trait), data2 = list(A_wild_vr=A_wild_vr), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 8, data = lnVRQ10_data_wild)
                                   
   # Save model5.3
   saveRDS(model5.3, file = "./output/models/lnVRQ10_5.3")
@@ -1653,7 +1657,7 @@ if(rerun){
                               R = list(species_full = phylo_cor_wild_acclim), dfs = "contain", 
                               test = "t", data = lnVRQ10_data_wild_acclim)
   
-   model5.9_bayes <- brms::brm(effect_size | se(sqrt(V), sigma = TRUE) ~  max_temp_c + c_accl_time + cv_c + habitat + habitat:cv_c + (~1 | record_num) + (1 | gr(species_full, cov = A_wild_acclim)) + (1 + max_temp_c| spp) + (1|trait), data2 = list(A_wild_acclim=A_wild_acclim), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.99, max_treedepth = 12), chains = 4, thin = 1, iter = 5000, warmup = 1000, cores = 8, data = lnVRQ10_data_wild_acclim)
+   model5.9_bayes <- brms::brm(effect_size | se(sqrt(V), sigma = TRUE) ~  max_temp_c + c_accl_time + cv_c + habitat + habitat:cv_c + (1 | record_num) + (1 | gr(species_full, cov = A_wild_acclim)) + (1 + max_temp_c| spp) + (1|trait), data2 = list(A_wild_acclim=A_wild_acclim), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.99, max_treedepth = 12), chains = 4, thin = 1, iter = 5000, warmup = 1000, cores = 8, data = lnVRQ10_data_wild_acclim)
                                   
   # Save models
   saveRDS(model5.9, file = "./output/models/lnVRQ10_5.9")
@@ -1881,7 +1885,7 @@ if(rerun){
   # Model lat and long. Need to exclude missing acclimdation data. That will make it easier to create predcitions and explore the model fit. Include max temp to correct predictions for possible decrease at higher temps.
     
    model6_bayes <- brms::brm(effect_size | se(sqrt(V)) ~  max_temp_c + c_accl_time + type*habitat + t2(Longitude, Latitude) +
-                               (1 | record_num) + 
+                               (1 + type | record_num) + 
                                (1 | gr(species_full, cov = A_wild_vr)) + 
                                (1 + max_temp_c | spp) + 
                                (1 | trait) + 
@@ -2353,7 +2357,7 @@ $$ {#eq-slncvr}
 
 where $CV$ is the coefficient of variation defined as $SD / R$. We refer to $lnCVR_{Q_{10}}$ as relative variance because variance changes are relative to the mean. While we analyse $lnCVR_{Q_{10}}$ it does make the assumption that SD is directly proportional to the mean, and given that we are analysing the mean alongside the variance we present results on $lnCVR_{Q_{10}}$ in the supplement.
 
-#### *Calculating acute and acclimation* $lnRR_{Q_{10}}$, $lnVR_{Q_{10}}$ and $lnCVR_{Q_{10}}$ estimates
+#### *Calculating acute and acclimation* $lnRR_{Q_{10}}$, $lnVR_{Q_{10}}$ and $lnCVR_{Q_{10}}$ estimates*
 
 $R_{1}$, $R_{2}$, $SD_{1}^2$ and $SD_{2}^2$ can all be taken from samples of organisms measured acutely at two temperatures or after having been acclimated these same temperatures ([@fig-concept]A). For studies that measure acute and acclimated responses we used the mean, standard deviation, and sample size to derive both acute and acclimation $lnRR_{Q_{10}}$, $lnVR_{Q_{10}}$ and $lnCVR_{Q_{10}}$ estimates. For studies that only measured $R_{1}$, $R_{2}$, $SD_{1}^2$ and $SD_{2}^2$ acutely we could only calculate acute versions of these effect size estimates. For all effect sizes the higher temperature was in the numerator and the lower of the two temperatures in the denominator. As such, positive effect sizes indicate that the mean (i.e., $lnRR_{Q_{10}}$), variance ($lnVR_{Q_{10}}$) or relative variance (i.e., $lnCVR_{Q_{10}}$) is larger at the higher of the two temperatures (numerator) when standardized to 10°C. Importantly, our effect sizes, as with $Q_{10}$ more generally, all assume that the effect of temperature on physiological rates (or changes in variance) is log-linear (see [@fig-concept]B & *Supplementary Materials* for further discussion). We test and control for any violations of these assumptions in our analysis (see below).
 
@@ -2529,7 +2533,7 @@ if(rerun) {
 
 We explored mean-variance relationships for the acute and acclimation responses across all traits and habitats. We estimated the scaling relationship between log standard deviation in physiological rates [log(SD)] and log mean physiological rates [log(mean)], accounting for non-independence resulting from effects coming from the same species, study and traits (i.e., random effects of species, study and trait) as done in our main analyses. We also included an interaction between log(mean) and habitat type to better understand how the scaling relationship between log(SD) and log(mean) varies across habitats.
 
-Overall, we found that the relationship between log(mean) and log(SD) of the acute and acclimation responses was generally linear (@fig-mv). Overall, the scaling relationship between log(SD) and log(mean) was sub-linear across all habitats (@tbl-slopes), however, ectotherms from terrestrial habitats had much shallower slopes than marine and freshwater ectotherms, particularly at higher treatment temperatures, indicating increased mean physiological rates generally do not result in higher between individual variance in physiological rates (@tbl-slopes). Interestingly, in marine ectotherms the slope was highest at cooler temperatures, whereas the slope was suppressed when acclimated and/or measured at higher temperatures (i.e., r.1. compared to r1.2, r2.1, r2.2) (@tbl-slopes). In freshwater ectotherms, there we some differences in scaling relationships but they were all fairly comparable no matter what acclimation and test temperature (@tbl-slopes).
+Overall, we found that the relationship between log(mean) and log(SD) of the acute and acclimation responses was generally linear (@fig-mv). Overall, the scaling relationship between log(SD) and log(mean) was sub-linear across all habitats (@tbl-slopes), however, ectotherms from terrestrial habitats had much shallower slopes than marine and freshwater ectotherms, particularly at higher treatment temperatures, indicating increased mean physiological rates generally do not result in higher between individual variance in physiological rates (@tbl-slopes). Interestingly, in marine ectotherms the slope was highest at cooler temperatures, whereas the slope was suppressed when acclimated and/or measured at higher temperatures (i.e., r.1. compared to r1.2, r2.1, r2.2) (@tbl-slopes). In freshwater ectotherms, there were some differences in scaling relationships but they were all fairly comparable no matter what acclimation and test temperature (@tbl-slopes).
 
 ```{r, fig-mv}
 #| label: fig-mv
@@ -2660,7 +2664,7 @@ if(rerun){
 if(rerun){
   # More realistic model 
   model2.2 <- metafor::rma.mv(effect_size ~  max_temp_c + c_accl_time + type + habitat + type:habitat, V = V, 
-                              random = list(~1 | record_num,
+                              random = list(~1 + type | record_num,
                                             ~1 | species_full,
                                             ~1 + max_temp_c| spp,
                                             ~1 | trait,
@@ -2668,7 +2672,7 @@ if(rerun){
                               R = list(species_full = phylo_cor_CVR), dfs = "contain", 
                               test = "t", data = lnCVRQ10_data)
   
-   model2.2_bayes <- brms::brm(effect_size | se(sqrt(V), sigma = TRUE) ~  max_temp_c + c_accl_time + type + habitat + type:habitat + (~1 | record_num) + (1 | gr(species_full, cov = A_CVR)) + (1 + max_temp_c| spp) + (1|trait), data2 = list(A_CVR=A_CVR), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 4, data = lnCVRQ10_data)
+   model2.2_bayes <- brms::brm(effect_size | se(sqrt(V), sigma = TRUE) ~  max_temp_c + c_accl_time + type + habitat + type:habitat + (1 + type | record_num) + (1 | gr(species_full, cov = A_CVR)) + (1 + max_temp_c| spp) + (1|trait), data2 = list(A_CVR=A_CVR), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 4, data = lnCVRQ10_data)
                                   
   # Save model1.2
   saveRDS(model2.2, file = "./output/models/lnCVRQ10_2.2")
@@ -2729,7 +2733,7 @@ if(rerun){
   
   # Full Bayesian model   
    model2.3_btrait_bayes <- brms::brm(effect_size | se(sqrt(V)) ~  max_temp_c + c_accl_time + type*trait_broad*habitat + 
-                                           (1 | record_num) + 
+                                           (1 + type | record_num) + 
                                            (1 | gr(species_full, cov = A)) + 
                                            (1 + max_temp_c | spp) +(1|trait) + 
                                            (1 + trait_broad |gr(obs, cor = FALSE)),  
@@ -2742,7 +2746,7 @@ if(rerun){
   # Metafor models for creating plots. Subset by habitat to make this easier
       # Marine
          model2.3_m_broad <- metafor::rma.mv(effect_size ~  max_temp_c + c_accl_time + type + trait_broad + type:trait_broad, V = V, 
-                              random = list(~1 | record_num,
+                              random = list(~1 + type| record_num,
                                             ~1 | species_full,
                                             ~1 + max_temp_c| spp,
                                             ~1 | trait,
@@ -2754,7 +2758,7 @@ if(rerun){
     
       # Freshwater
          model2.3_f_broad <- metafor::rma.mv(effect_size ~  max_temp_c + c_accl_time + type + trait_broad + type:trait_broad, V = V, 
-                              random = list(~1 | record_num,
+                              random = list(~1 + type| record_num,
                                             ~1 | species_full,
                                             ~1 + max_temp_c| spp,
                                             ~1 | trait,
@@ -2766,7 +2770,7 @@ if(rerun){
       
       # Terrestrial
          model2.3_t_broad <- metafor::rma.mv(effect_size ~  max_temp_c + c_accl_time + type + trait_broad + type:trait_broad, V = V, 
-                              random = list(~1 | record_num,
+                              random = list(~1 + type | record_num,
                                             ~1 | species_full,
                                             ~1 + max_temp_c| spp,
                                             ~1 | trait,
@@ -2831,7 +2835,7 @@ if(rerun){
 if(rerun){
   # More realistic model 
   model2.4 <- metafor::rma.mv(effect_size ~  max_temp_c + c_accl_time + type*habitat*life.hist, V = V, 
-                              random = list(~1 | record_num,
+                              random = list(~1 + type | record_num,
                                             ~1 | species_full,
                                             ~1 + max_temp_c| spp,
                                             ~1 | trait,
@@ -2842,7 +2846,7 @@ if(rerun){
   saveRDS(model2.4, file = "./output/models/lnCVRQ10_2.4")
 
    model2.4_bayes <- brms::brm(effect_size | se(sqrt(V)) ~  max_temp_c + c_accl_time + type*habitat*life.hist + 
-                                 (~1 | record_num) + 
+                                 (~1 + type| record_num) + 
                                  (1 | gr(species_full, cov = A_CVR)) + 
                                  (1 + max_temp_c| spp) + 
                                  (1|trait) +
@@ -3475,7 +3479,6 @@ tables_future <- all_pred2 %>% group_by(habitat) %>% summarise(mean = mean(per_c
 
 #### **Acute and acclimation* for detailed trait categories across marine, freshwater and terrestrial taxa**
 
-
 Across habitats, the extent to which whole-organism versus biochemical traits acclimated varied ("Model 3"; [@fig-btrait]A-C). Biochemical traits acclimated to a greater extent compared to whole-organism traits in marine habitats ([@fig-btrait]B), whereas both whole-organism and biochemical traits acclimated similarly in freshwater ectotherms ([@fig-btrait]C). Neither trait category acclimated in terrestrial ectotherms ([@fig-btrait]A).
 
 Across habitats biochemical processes tended to result in greater increases in variance at higher temperatures, but this was only significant for marine ectotherms (biochemical/whole-organism contrasts: Marine: $\beta$ = `r contrast_lnvr_trait_cat_stats[2,3]`, 95% CI: `r contrast_lnvr_trait_cat_stats[2,4]` to `r contrast_lnvr_trait_cat_stats[2,5]`, $p_{MCMC}$ = `r contrast_lnvr_trait_cat_stats[2,6]`; Freshwater: $\beta$ = `r contrast_lnvr_trait_cat_stats[3,3]`, 95% CI: `r contrast_lnvr_trait_cat_stats[3,4]` to `r contrast_lnvr_trait_cat_stats[3,5]`, $p_{MCMC}$ = `r contrast_lnvr_trait_cat_stats[3,6]`; Terrestrial: $\beta$ = `r contrast_lnvr_trait_cat_stats[1,3]`, 95% CI: `r contrast_lnvr_trait_cat_stats[1,4]` to `r contrast_lnvr_trait_cat_stats[1,5]`, $p_{MCMC}$ = `r contrast_lnvr_trait_cat_stats[1,6]`) ([@fig-btrait]D-F; "Model 3"). Variance increases for biochemical traits was reduced during acclimation in marine ectotherms ([@fig-btrait]E). 
@@ -4100,7 +4103,7 @@ phylo_cor_wild_acclim <- vcv(tree_lnrr_wild_acclim, cor = TRUE)
 if(rerun){
   # More realistic model with 
   model3.8  <- metafor::rma.mv(effect_size ~ max_temp_c + c_accl_time + acf_lag1_c + habitat + habitat:acf_lag1_c, V = V,
-                                       random = list(~1 | record_num,
+                                       random = list(~1 + type| record_num,
                                             ~1 | species_full,
                                             ~1 | trait,
                                             ~1 + max_temp_c| spp,
@@ -4108,7 +4111,7 @@ if(rerun){
                               R = list(species_full = phylo_cor_wild_acclim), dfs = "contain", 
                               test = "t", data = lnRRQ10_data_wild_acclim)
   
-   model3.8_bayes <- brms::brm(effect_size | se(sqrt(V), sigma = TRUE) ~  max_temp_c + c_accl_time + acf_lag1_c + habitat + habitat:acf_lag1_c + (~1 | record_num) + (1 | gr(species_full, cov = A_wild_acclim)) + (1 + max_temp_c| spp) + (1|trait), data2 = list(A_wild_acclim=A_wild_acclim), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 8, data = lnRRQ10_data_wild_acclim)
+   model3.8_bayes <- brms::brm(effect_size | se(sqrt(V), sigma = TRUE) ~  max_temp_c + c_accl_time + acf_lag1_c + habitat + habitat:acf_lag1_c + (1 + type | record_num) + (1 | gr(species_full, cov = A_wild_acclim)) + (1 + max_temp_c| spp) + (1|trait), data2 = list(A_wild_acclim=A_wild_acclim), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 8, data = lnRRQ10_data_wild_acclim)
                                   
   # Save model3.8
   saveRDS(model3.8, file = "./output/models/lnRRQ10_3.8")
@@ -4139,7 +4142,7 @@ if(rerun){
 if(rerun){
     # Terrestrial Models
     model3.8_t  <- metafor::rma.mv(effect_size ~ max_temp_c + c_accl_time + acf_lag1_c, V = V,
-                                       random = list(~1 | record_num,
+                                       random = list(~1 + type| record_num,
                                             ~1 | species_full,
                                             ~1 | trait,
                                             ~1 + max_temp_c| spp,
@@ -4151,7 +4154,7 @@ if(rerun){
 
     # Freshwater Models
     model3.8_f  <- metafor::rma.mv(effect_size ~ max_temp_c + c_accl_time + acf_lag1_c, V = V,
-                                       random = list(~1 | record_num,
+                                       random = list(~1 + type | record_num,
                                             ~1 | species_full,
                                             ~1 | trait,
                                             ~1 + max_temp_c| spp,
@@ -4162,7 +4165,7 @@ if(rerun){
     
     # Marine Models
       model3.8_m  <- metafor::rma.mv(effect_size ~ max_temp_c + c_accl_time + acf_lag1_c, V = V,
-                                       random = list(~1 | record_num,
+                                       random = list(~1 + type | record_num,
                                             ~1 | species_full,
                                             ~1 | trait,
                                             ~1 + max_temp_c| spp,
@@ -4195,7 +4198,7 @@ if(rerun){
                               R = list(species_full = phylo_cor_wild_acclim), dfs = "contain", 
                               test = "t", data = lnCVRQ10_data_wild_acclim)
   
-   model4.8_bayes <- brms::brm(effect_size | se(sqrt(V), sigma = TRUE) ~  max_temp_c + c_accl_time + acf_lag1_c + habitat + habitat:acf_lag1_c + (~1 | record_num) + (1 | gr(species_full, cov = A_wild_acclim)) + (1 + max_temp_c| spp) + (1|trait), data2 = list(A_wild_acclim=A_wild_acclim), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 4, data = lnCVRQ10_data_wild_acclim)
+   model4.8_bayes <- brms::brm(effect_size | se(sqrt(V), sigma = TRUE) ~  max_temp_c + c_accl_time + acf_lag1_c + habitat + habitat:acf_lag1_c + (1 | record_num) + (1 | gr(species_full, cov = A_wild_acclim)) + (1 + max_temp_c| spp) + (1|trait), data2 = list(A_wild_acclim=A_wild_acclim), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 4, data = lnCVRQ10_data_wild_acclim)
                                   
   # Save model4.8
   saveRDS(model4.8, file = "./output/models/lnRRQ10_4.8")
@@ -4433,7 +4436,6 @@ ggsave(p_acf, width = 18, height = 10, filename = "./output/figures/figS13.pdf")
 ```
 
 #### **Publication bias analysis**
-### *Publication Bias*
 
 We explored the possibility for publication bias graphically using funnel plots, and more formally by including the square root of the inverse effective sample size ($\sqrt{1/ne}$) in our meta-regression models [@Nakagawa2022-gy]. Funnel plot asymmetry indicates a form of publication bias called the ‘file-drawer’ effect whereby low-powered studies are less likely to be published. However, graphical approaches do not account for sources of non-independence and high heterogeneity which can drive apparent funnel asymmetry [@Nakagawa2022-gy]. As such, we included $\sqrt{1/ne}$ as a moderator in a multilevel meta-regression model that accounted for all the random (i.e, study, species, trait) and fixed effects (acclimation time, type of effect, habitat, trait category and the interaction between habitat type and trait category). There was no evidence for publication bias, and results are presented in the *Supplementary Materials* (see @fig-s2). 
 
@@ -4459,11 +4461,11 @@ if(rerun){
                             ifelse(name == "lnRR_Q10_acute_t2", (r2.1_N + r2.2_N) / (r2.1_N*r2.2_N), # acute 2
                                                                 (r1.1_N + r2.2_N) / (r1.1_N*r2.2_N)))) #acclimation
   
-    model_full_lnrr_pb <- brms::brm(effect_size | se(sqrt(V)) ~  max_temp_c + c_accl_time + sqrt(n_ef) + habitat*life.hist*type + trait_category + habitat:type + habitat:life.hist + habitat:life.hist:type + (~1 | record_num) + (1 | gr(species_full, cov = A)) + (1 + max_temp_c | spp) + (1 | trait) + (1  | obs),  data2 = list(A=A), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 8, data = lnRRQ10_data)
+    model_full_lnrr_pb <- brms::brm(effect_size | se(sqrt(V)) ~  max_temp_c + c_accl_time + sqrt(n_ef) + habitat*life.hist*type + trait_category + habitat:type + habitat:life.hist + habitat:life.hist:type + (~1 + type | record_num) + (1 | gr(species_full, cov = A)) + (1 + max_temp_c | spp) + (1 | trait) + (1  | obs),  data2 = list(A=A), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 8, data = lnRRQ10_data)
 
-    model_full_lncvr_pb <- brms::brm(effect_size | se(sqrt(V)) ~ max_temp_c +  c_accl_time + sqrt(n_ef) + habitat*life.hist*type + trait_category + (~1 | record_num) + (1 | gr(species_full, cov = A_CVR)) + (1 + max_temp_c| spp) + (1 | trait) + (1  | obs),  data2 = list(A_CVR=A_CVR), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 1, iter = 5000, warmup = 1000, cores = 8, data = lnCVRQ10_data)
+    model_full_lncvr_pb <- brms::brm(effect_size | se(sqrt(V)) ~ max_temp_c +  c_accl_time + sqrt(n_ef) + habitat*life.hist*type + trait_category + (~1 + type | record_num) + (1 | gr(species_full, cov = A_CVR)) + (1 + max_temp_c| spp) + (1 | trait) + (1  | obs),  data2 = list(A_CVR=A_CVR), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 1, iter = 5000, warmup = 1000, cores = 8, data = lnCVRQ10_data)
   
-    model_full_lnvr_pb <- brms::brm(effect_size | se(sqrt(V)) ~  max_temp_c + c_accl_time + sqrt(n_ef) + habitat*life.hist*type + trait_category + (~1 | record_num) + (1 | gr(species_full, cov = A_VR)) + (1 + max_temp_c | spp) + (1 | trait) + (1  | obs),  data2 = list(A_VR=A_VR), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 1, iter = 5000, warmup = 1000, cores = 8, data = lnVRQ10_data)
+    model_full_lnvr_pb <- brms::brm(effect_size | se(sqrt(V)) ~  max_temp_c + c_accl_time + sqrt(n_ef) + habitat*life.hist*type + trait_category + (~1 + type| record_num) + (1 | gr(species_full, cov = A_VR)) + (1 + max_temp_c | spp) + (1 | trait) + (1  | obs),  data2 = list(A_VR=A_VR), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 1, iter = 5000, warmup = 1000, cores = 8, data = lnVRQ10_data)
 
   saveRDS(model_full_lnrr_pb, file = "./output/models/lnRRQ10_pubbias")
   saveRDS(model_full_lncvr_pb, file = "./output/models/lnCVRQ10_pubbias")

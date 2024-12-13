@@ -2736,7 +2736,7 @@ if(rerun){
                                          chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 8, data = filter(lnCVRQ10_data, trait_broad != "other"))
     saveRDS(model2.3_btrait_bayes, "./output/models/model2.3_btrait_bayes")
     
-  # Metafor models for creating plots. Subset by habitat to make this easier
+  # Metafor models for creating plots. Subset by habitat to make this easier. Again, cannot include random slope here because it's not possible to do this in metafor.
       # Marine
          model2.3_m_broad <- metafor::rma.mv(effect_size ~  max_temp_c + c_accl_time + type + trait_broad + type:trait_broad, V = V, 
                               random = list(~1 | record_num,
@@ -2839,7 +2839,7 @@ if(rerun){
   saveRDS(model2.4, file = "./output/models/lnCVRQ10_2.4")
 
    model2.4_bayes <- brms::brm(effect_size | se(sqrt(V)) ~  max_temp_c + c_accl_time + type*habitat*life.hist + 
-                                 (~1 + type| record_num) + 
+                                 (1 + type| record_num) + 
                                  (1 | gr(species_full, cov = A_CVR)) + 
                                  (1 + max_temp_c| spp) + 
                                  (1|trait) +
@@ -3103,7 +3103,7 @@ rerun = FALSE
 if(rerun){
   # More realistic model with 
   model4.3          <- metafor::rma.mv(effect_size ~ max_temp_c + c_accl_time + cv_c + type + type:cv_c, V = V,
-                                       random = list(~1 | record_num,
+                                       random = list(~1 + type| record_num,
                                             ~1 | species_full,
                                             ~1 | trait,
                                             ~1 + max_temp_c| spp,
@@ -3111,7 +3111,7 @@ if(rerun){
                               R = list(species_full = phylo_cor_wild_cvr), dfs = "contain", 
                               test = "t", data = lnCVRQ10_data_wild)
   
-   model4.3_bayes <- brms::brm(effect_size | se(sqrt(V), sigma = TRUE) ~  max_temp_c + c_accl_time + cv_c + type + type:cv_c + (~1 | record_num) + (1 | gr(species_full, cov = A_wild_cvr)) + (1 + max_temp_c| spp) + (1|trait), data2 = list(A_wild_cvr=A_wild_cvr), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 8, data = lnCVRQ10_data_wild)
+   model4.3_bayes <- brms::brm(effect_size | se(sqrt(V), sigma = TRUE) ~  max_temp_c + c_accl_time + cv_c + type + type:cv_c + (~1 + type| record_num) + (1 | gr(species_full, cov = A_wild_cvr)) + (1 + max_temp_c| spp) + (1|trait), data2 = list(A_wild_cvr=A_wild_cvr), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 8, data = lnCVRQ10_data_wild)
                                   
   # Save model4.3
   saveRDS(model4.3, file = "./output/models/lnCVRQ10_4.3")
@@ -3239,7 +3239,7 @@ if(rerun){
   # Model lat and long. Need to exclude missing acclimdation data. That will make it easier to create predcitions and explore the model fit. Include max temp to correct predictions for possible decrease at higher temps.
     
    model5_bayes <- brms::brm(effect_size | se(sqrt(V)) ~  max_temp_c + c_accl_time + type*habitat + t2(Longitude, Latitude) +
-                               (1 | record_num) + 
+                               (1 + type | record_num) + 
                                (1 | gr(species_full, cov = A_wild_cvr)) + 
                                (1 + max_temp_c | spp) + 
                                (1 | trait) + 

@@ -227,6 +227,51 @@ We compiled literature on ectothermic animals that measured physiological rates 
 
 We extracted means, standard deviations, and sample sizes for physiological rates measured at the two test temperatures that coincided with acclimation temperatures ([@fig-concept]A). If there were more than two temperatures, we chose only the temperatures that fell within the most likely natural range of temperatures experienced by the species in question (@fig-concept). We extracted these data from text, tables or figures of a given paper. Data were extracted from figures using the R package *metaDigitise* [@Pick2019-mg]. We also recorded the phylum, class, order, genus and species, and the latitude and longitude from where the experimental animals were sourced. For studies that did not provide latitude and longitude for the population, we searched for similar studies by the same lab group to identify where the population was likely to have been sourced. If the experimental animals were derived from the wild, we recorded the nearest latitude and longitude of the field collection site. If the animals were sourced from a commercial supplier, we took the latitude and longitude of the supplier. When it was not possible to find latitude and longitude using these methods, we looked up the distribution of the species in question and took the latitude and longitude of the centroid of the species' distributional range.
 
+### $Q_{10}$ Based Effect Sizes and Sampling Variances for Means and Variances
+
+Following @Noble2022-ty we calculated a series of temperature-corrected effect sizes that compared mean physiological rates ($lnRR_{Q_{10}}$) as well as the variability in physiological rates ($lnVR_{Q_{10}}$ and $lnCVR_{Q_{10}}$) (@fig-concept). These effect sizes are similar to the traditional temperature coefficient ($Q_{10}$), but with formal analytical approximations of their sampling variances. Sampling variances for effect sizes allowed us to make use of traditional meta-analytic modelling approaches.
+
+#### *Comparing changes in mean physiological rates*
+
+To compare mean physiological rates, we calculated the log $Q_{10}$ response ratio, $lnRR_{Q_{10}}$ [@Noble2022-ty] as follows:
+
+$$
+  lnRR_{Q_{10}} = ln\left( \frac{R_{2}}{R_{1}} \right){ \left(\ \frac{10^{\circ}C}{T_{2}-T_{1}} \right) }
+$$ {#eq-lnq10}
+
+Where, $R_{1}$ and $R_{2}$ are mean physiological rates at temperatures $T_{1}$ and $T_{2}$, respectively. Log transformation of this ratio makes the effect size normally distributed. @eq-lnq10 is essentially a temperature corrected equivalent to the log response ratio (lnRR) [@Hedges1999-de; @Lajeunesse2011-fq] when the numerator and denominator are measured at different temperatures. This allows comparisons of the means from two temperature treatments directly regardless of the absolute measurement temperatures. The sampling variance for @eq-lnq10 can be computed as follows [as described in @Noble2022-ty]:
+
+$$
+  s_{lnRR_{Q_{10}}} = \left( \frac{SD_{2}^2}{R^2_{2}N_{2}} + \frac{SD_{1}^2}{R^2_{1}N_{1}} \right){ \left(\ \frac{10^{\circ}C}{T_{2}-T_{1}} \right) }^2
+$$ {#eq-Vlnq10}
+
+Here, $SD_{1}^2$ and $SD_{2}^2$ are the standard deviations, and $N_{1}$ and $N_{2}$ are the sample sizes of the groups measured at $T_{1}$ and $T_{2}$, respectively ([@fig-concept]A).
+
+#### *Comparing variance in physiological rates*
+
+@Nakagawa2015-fo proposed analogous effect size estimates to *lnRR* that allow for comparisons of changes in variance between two groups, the log variance ratio (*lnVR*) and the log coefficient of variation (*lnCVR*). *lnVR* and *lnCVR* are ratios that describe the relative difference in trait variability between two groups. We refer readers to @Nakagawa2015-fo for the equations describing *lnVR* and *lnCVR*, but these can easily be extended to their $Q_{10}$ analogues (and associated sampling variance) as follows:
+
+$$
+lnVR_{Q_{10}} = ln\left( \frac{SD_{2}}{SD_{1}} \right){ \left(\ \frac{10^{\circ}C}{T_{2}-T_{1}} \right) }
+$$ {#eq-lnq10VR} $$
+s_{lnVR_{Q_{10}}} = \left( \frac{1}{2\left( N_{2}-1 \right)} + \frac{1}{2\left(N_{1} - 1\right)} \right){ \left(\ \frac{10^{\circ}C}{T_{2}-T_{1}} \right) }^2
+$$ {#eq-slnq10VR}
+
+where parameters are defined above. @eq-lnq10VR and @eq-slnq10VR describe the change in physiological rate variance (@eq-lnq10VR) normalised to a 10°C temperature change along with its sampling variance (@eq-slnq10VR). As discussed by @Nakagawa2015-fo there is often a strong mean-variance relationship. As such, the coefficient of variation is often used because it permits standardisation of changes in variance as mean trait values change:
+
+$$
+lnCVR_{Q_{10}} = ln\left( \frac{\text{CV}_{2}}{\text{CV}_{1}} \right){ \left(\ \frac{10^{\circ}C}{T_{2}-T_{1}} \right) }
+$$ {#eq-lnq10CVR} $$
+s_{lnCVR_{Q_{10}}} = \left[ \frac{(\text{SD}_{1})^2}{N_{1}({R}_{1})^2} + \frac{(\text{SD}_{2})^2}{N_{2} ({R}_{2})^2} + \frac{1}{2\left( N_{1}-1 \right)} + \frac{1}{2\left(N_{2} - 1\right)} \right]{ \left(\ \frac{10^{\circ}C}{T_{2}-T_{1}} \right) }^2
+$$ {#eq-slncvr}
+
+where $CV$ is the coefficient of variation defined as $SD / R$. We refer to $lnCVR_{Q_{10}}$ as relative variance because variance changes are relative to the mean. While we analyse $lnCVR_{Q_{10}}$ it does make the assumption that SD is directly proportional to the mean, and given that we are analysing the mean alongside the variance we present results on $lnCVR_{Q_{10}}$ in the supplement.
+
+#### *Calculating acute and acclimation* $lnRR_{Q_{10}}$, $lnVR_{Q_{10}}$ and $lnCVR_{Q_{10}}$ estimates*
+
+$R_{1}$, $R_{2}$, $SD_{1}^2$ and $SD_{2}^2$ can all be taken from samples of organisms measured acutely at two temperatures or after having been acclimated these same temperatures ([@fig-concept]A). For studies that measure acute and acclimated responses we used the mean, standard deviation, and sample size to derive both acute and acclimation $lnRR_{Q_{10}}$, $lnVR_{Q_{10}}$ and $lnCVR_{Q_{10}}$ estimates. For studies that only measured $R_{1}$, $R_{2}$, $SD_{1}^2$ and $SD_{2}^2$ acutely we could only calculate acute versions of these effect size estimates. For all effect sizes the higher temperature was in the numerator and the lower of the two temperatures in the denominator. As such, positive effect sizes indicate that the mean (i.e., $lnRR_{Q_{10}}$), variance ($lnVR_{Q_{10}}$) or relative variance (i.e., $lnCVR_{Q_{10}}$) is larger at the higher of the two temperatures (numerator) when standardized to 10°C. Importantly, our effect sizes, as with $Q_{10}$ more generally, all assume that the effect of temperature on physiological rates (or changes in variance) is log-linear (see [@fig-concept]B & *Supplementary Materials* for further discussion). We test and control for any violations of these assumptions in our analysis (see below).
+
+
 ### *Moderator Variables*
 
 We recorded or derived a series of moderator variables from each study that are expected to have an impact on our effect size estimates. This included the duration of acclimation in days given that acclimation responses may depend on how long chronic temperature exposure occurs. We also recorded if the sample of animals were derived from captive or wild stocks, the life-history stage of the animals used ("adult" or "juvenile") and the habitat type ("freshwater", "marine" or "terrestrial") given that @Seebacher2015-wi show that these factors can impact $Q_{10}$ estimates. Physiological rate measures varied widely across the studies but could generally be grouped into two broad categories that included whole-organism measures, which all integrate a diversity of physiological and biochemical processes, and biochemical processes (e.g., enzyme reaction rates, proton leak) [@Seebacher2015-wi; @rezende2019thermal]. We explore differences across more detailed trait categories in *Supplemental Materials*, but note sample sizes are limited for many traits. Traits that could not be categorised into these two we classified as ‘Other’.
@@ -426,18 +471,7 @@ if(rerun){
                               R = list(species_full = phylo_cor), dfs = "contain", 
                               test = "t", data = lnRRQ10_data)
 
-  # Additional model fit as a result of reviewer commenting that acclimation time is assumed to be linear. So, fit a non-linear parameter to see if it improves fit (even though data doesn't suggest it is the case).
-   model1.2_nl <- metafor::rma.mv(effect_size ~  max_temp_c + c_accl_time + I(c_accl_time^2) + type + habitat + type:habitat, V = V, 
-                              random = list(~1 + type | record_num,
-                                            ~1 | species_full,
-                                            ~1 | trait,
-                                            ~1 + max_temp_c| spp,
-                                            ~1 | obs),
-                              R = list(species_full = phylo_cor), dfs = "contain", 
-                              test = "t", data = lnRRQ10_data, control = list(optimizer = "bobyqa", rel.tol=1e-8, maxeval=1000)) #‘bobyqa’
-
-    AIC(model1.2_nl, model1.2) # Again, basically the same and go with most parsimonious model
-  
+   
   # Secondary sensitivity analysis that uses cluster robust variance estimation to deal with unaccounted sources of non-independence. Not completely dealing with sharced sampling covariances in data as when collected these data were never indicated in past studies so hard to build full VCV matrix.
    
    model1.2_rve <- robust(model1.2, cluster = lnRRQ10_data$record_num) # Consistent.
@@ -530,7 +564,7 @@ if(rerun){
 #################################
   # Full Bayesian model   
    model1.3_btrait_bayes <- brms::brm(effect_size | se(sqrt(V)) ~  max_temp_c + c_accl_time + type*trait_broad*habitat + 
-                                           (1 | record_num) + 
+                                           (1 + type | record_num) + 
                                            (1 | gr(species_full, cov = A)) + 
                                            (1 + max_temp_c | spp) +(1|trait) + 
                                            (1 + trait_broad |gr(obs, cor = FALSE)),  
@@ -540,7 +574,7 @@ if(rerun){
                                          chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 8, data = filter(lnRRQ10_data, trait_broad != "other"))
     saveRDS(model1.3_btrait_bayes, "./output/models/model1.3_btrait_bayes")
     
-  # Metafor models for creating plots. Subset by habitat to make this easier
+  # Metafor models for creating plots. Subset by habitat to make this easier. **NOTE: For these models we are only able to include two random slopes. Metafor does not allow additional terms. Given that trait type slope is in Bayeisan model and it doesn't generally impact things much we will not include it here givem these models just make it more convient to plot.
       # Marine
          model1.3_m_broad <- metafor::rma.mv(effect_size ~  max_temp_c + c_accl_time + type + trait_broad + type:trait_broad, V = V, 
                               random = list(~1 | record_num,
@@ -628,7 +662,7 @@ rerun = FALSE
 if(rerun){
   # More realistic model with 
   model1.4 <- metafor::rma.mv(effect_size ~  max_temp_c + c_accl_time + type*habitat*life.hist, V = V, 
-                              random = list(~1 | record_num,
+                              random = list(~1 + type | record_num,
                                             ~1 | species_full,
                                             ~1 | trait,
                                             ~1 + max_temp_c| spp,
@@ -637,7 +671,7 @@ if(rerun){
                               test = "t", data = lnRRQ10_data)
 
   
-   model1.4_bayes <- brms::brm(effect_size | se(sqrt(V), sigma = TRUE) ~  max_temp_c + c_accl_time + type*habitat*life.hist + (~1 | record_num) + (1 | gr(species_full, cov = A)) + (1 + max_temp_c| spp) + (1|trait), data2 = list(A=A), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 8, data = lnRRQ10_data)
+   model1.4_bayes <- brms::brm(effect_size | se(sqrt(V), sigma = TRUE) ~  max_temp_c + c_accl_time + type*habitat*life.hist + (1 + type| record_num) + (1 | gr(species_full, cov = A)) + (1 + max_temp_c| spp) + (1|trait), data2 = list(A=A), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 8, data = lnRRQ10_data)
                                   
   # Save model1.4
   saveRDS(model1.4, file = "./output/models/lnRRQ10_1.4")
@@ -717,33 +751,33 @@ if(rerun){
 
  if(rerun){ 
     model1.s1 <- metafor::rma.mv(effect_size ~  max_temp_c + c_accl_time + name, V = V, 
-                              random = list(~1 | record_num,
+                              random = list(~1 + name | record_num,
                                             ~1 | species_full,
                                             ~1 | trait,
                                             ~1 + max_temp_c| spp,
                                             ~1 | obs),
                               R = list(species_full = phylo_cor), dfs = "contain", 
-                              test = "t", data = lnRRQ10_data_acute)
+                              test = "t", data = lnRRQ10_data_acute, control = list(optimizer = "bobyqa"))
     saveRDS(model1.s1, file = "./output/models/model1.s1")
 
     model1.s1_int <- metafor::rma.mv(effect_size ~  max_temp_c + c_accl_time + name*habitat, V = V, 
-                              random = list(~1 | record_num,
+                              random = list(~1 + name | record_num,
                                             ~1 | species_full,
                                             ~1 | trait,
                                             ~1 + max_temp_c| spp,
                                             ~1 | obs),
                               R = list(species_full = phylo_cor), dfs = "contain", 
-                              test = "t", data = lnRRQ10_data_acute)
+                              test = "t", data = lnRRQ10_data_acute, control = list(optimizer = "bobyqa"))
     saveRDS(model1.s1_int, file = "./output/models/model1.s1_int")
 
-    AIC(model1.s1_int, model1.s1) # AIC basically the same 
+    AIC(model1.s1_int, model1.s1) # AIC better for non-interaction model
 
     # Bayesian models to check its the same result
-    model1.s1_bayes <- brms::brm(effect_size | se(sqrt(V), sigma = TRUE) ~  max_temp_c + c_accl_time + name + (~1 | record_num) + (1 | gr(species_full, cov = A)) + (1 + max_temp_c| spp) + (1|trait), data2 = list(A=A), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 8, data = lnRRQ10_data_acute)
+    model1.s1_bayes <- brms::brm(effect_size | se(sqrt(V), sigma = TRUE) ~  max_temp_c + c_accl_time + name + (~1 + name| record_num) + (1 | gr(species_full, cov = A)) + (1 + max_temp_c| spp) + (1|trait), data2 = list(A=A), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 8, data = lnRRQ10_data_acute)
     
     saveRDS(model1.s1_bayes, file = "./output/models/model1.s1_bayes")
 
-    model1.s1_bayes_int <- brms::brm(effect_size | se(sqrt(V), sigma = TRUE) ~  max_temp_c + c_accl_time + name*habitat + (~1 | record_num) + (1 | gr(species_full, cov = A)) + (1 + max_temp_c| spp) + (1|trait), data2 = list(A=A), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 8, data = lnRRQ10_data_acute)
+    model1.s1_bayes_int <- brms::brm(effect_size | se(sqrt(V), sigma = TRUE) ~  max_temp_c + c_accl_time + name*habitat + (~1 + name | record_num) + (1 | gr(species_full, cov = A)) + (1 + max_temp_c| spp) + (1|trait), data2 = list(A=A), family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), control = list(adapt_delta = 0.98, max_treedepth = 12), chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 8, data = lnRRQ10_data_acute)
     
     saveRDS(model1.s1_bayes_int, file = "./output/models/model1.s1_bayes_int")
 
@@ -948,7 +982,7 @@ if(rerun){
                               test = "t", data = lnVRQ10_data)
   
    model3.2_bayes <- brms::brm(effect_size | se(sqrt(V), sigma = TRUE) ~  max_temp_c + c_accl_time + type + habitat + type:habitat + 
-        (~1 + type| record_num) + 
+        (1 + type| record_num) + 
         (1 | gr(species_full, cov = A_VR)) + 
         (1 + max_temp_c| spp) + 
         (1|trait), 
@@ -1035,10 +1069,10 @@ if(rerun){
                                          chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 8, data = filter(lnVRQ10_data, trait_broad != "other"))
     saveRDS(model3.3_btrait_bayes, "./output/models/model3.3_btrait_bayes")
     
-  # Metafor models for creating plots. Subset by habitat to make this easier
+  # Metafor models for creating plots. Subset by habitat to make this easier. Again, only able to fit two 'random slopes' so need to keep them simplier but still only for plotting.
       # Marine
          model3.3_m_broad <- metafor::rma.mv(effect_size ~  max_temp_c + c_accl_time + type + trait_broad + type:trait_broad, V = V, 
-                              random = list(~1 + type | record_num,
+                              random = list(~1 | record_num,
                                             ~1 | species_full,
                                             ~1 + max_temp_c| spp,
                                             ~1 | trait,
@@ -1050,7 +1084,7 @@ if(rerun){
     
       # Freshwater
          model3.3_f_broad <- metafor::rma.mv(effect_size ~  max_temp_c + c_accl_time + type + trait_broad + type:trait_broad, V = V, 
-                              random = list(~1 + type | record_num,
+                              random = list(~1 | record_num,
                                             ~1 | species_full,
                                             ~1 + max_temp_c| spp,
                                             ~1 | trait,
@@ -1062,7 +1096,7 @@ if(rerun){
       
       # Terrestrial
          model3.3_t_broad <- metafor::rma.mv(effect_size ~  max_temp_c + c_accl_time + type + trait_broad + type:trait_broad, V = V, 
-                              random = list(~1 + type | record_num,
+                              random = list(~1 | record_num,
                                             ~1 | species_full,
                                             ~1 + max_temp_c| spp,
                                             ~1 | trait,
@@ -1147,7 +1181,7 @@ if(rerun){
                                data2 = list(A_VR=A_VR), family = gaussian(), 
                                prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), 
                                control = list(adapt_delta = 0.98, max_treedepth = 12), 
-                               chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 4, data = lnCVRQ10_data)
+                               chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 4, data = lnVRQ10_data)
                                   
   # Save model
   saveRDS(model3.4_bayes, file = "./output/models/lnVRQ10_3.4_bayes")
@@ -2316,50 +2350,6 @@ prisma <- magick::image_read("./output/figures/figS1.png")
 prisma
 ```
 
-
-### $Q_{10}$ Based Effect Sizes and Sampling Variances for Means and Variances
-
-Following @Noble2022-ty we calculated a series of temperature-corrected effect sizes that compared mean physiological rates ($lnRR_{Q_{10}}$) as well as the variability in physiological rates ($lnVR_{Q_{10}}$ and $lnCVR_{Q_{10}}$) (@fig-concept). These effect sizes are similar to the traditional temperature coefficient ($Q_{10}$), but with formal analytical approximations of their sampling variances. Sampling variances for effect sizes allowed us to make use of traditional meta-analytic modelling approaches.
-
-#### *Comparing changes in mean physiological rates*
-
-To compare mean physiological rates, we calculated the log $Q_{10}$ response ratio, $lnRR_{Q_{10}}$ [@Noble2022-ty] as follows:
-
-$$
-  lnRR_{Q_{10}} = ln\left( \frac{R_{2}}{R_{1}} \right){ \left(\ \frac{10^{\circ}C}{T_{2}-T_{1}} \right) }
-$$ {#eq-lnq10}
-
-Where, $R_{1}$ and $R_{2}$ are mean physiological rates at temperatures $T_{1}$ and $T_{2}$, respectively. Log transformation of this ratio makes the effect size normally distributed. @eq-lnq10 is essentially a temperature corrected equivalent to the log response ratio (lnRR) [@Hedges1999-de; @Lajeunesse2011-fq] when the numerator and denominator are measured at different temperatures. This allows comparisons of the means from two temperature treatments directly regardless of the absolute measurement temperatures. The sampling variance for @eq-lnq10 can be computed as follows [as described in @Noble2022-ty]:
-
-$$
-  s_{lnRR_{Q_{10}}} = \left( \frac{SD_{2}^2}{R^2_{2}N_{2}} + \frac{SD_{1}^2}{R^2_{1}N_{1}} \right){ \left(\ \frac{10^{\circ}C}{T_{2}-T_{1}} \right) }^2
-$$ {#eq-Vlnq10}
-
-Here, $SD_{1}^2$ and $SD_{2}^2$ are the standard deviations, and $N_{1}$ and $N_{2}$ are the sample sizes of the groups measured at $T_{1}$ and $T_{2}$, respectively ([@fig-concept]A).
-
-#### *Comparing variance in physiological rates*
-
-@Nakagawa2015-fo proposed analogous effect size estimates to *lnRR* that allow for comparisons of changes in variance between two groups, the log variance ratio (*lnVR*) and the log coefficient of variation (*lnCVR*). *lnVR* and *lnCVR* are ratios that describe the relative difference in trait variability between two groups. We refer readers to @Nakagawa2015-fo for the equations describing *lnVR* and *lnCVR*, but these can easily be extended to their $Q_{10}$ analogues (and associated sampling variance) as follows:
-
-$$
-lnVR_{Q_{10}} = ln\left( \frac{SD_{2}}{SD_{1}} \right){ \left(\ \frac{10^{\circ}C}{T_{2}-T_{1}} \right) }
-$$ {#eq-lnq10VR} $$
-s_{lnVR_{Q_{10}}} = \left( \frac{1}{2\left( N_{2}-1 \right)} + \frac{1}{2\left(N_{1} - 1\right)} \right){ \left(\ \frac{10^{\circ}C}{T_{2}-T_{1}} \right) }^2
-$$ {#eq-slnq10VR}
-
-where parameters are defined above. @eq-lnq10VR and @eq-slnq10VR describe the change in physiological rate variance (@eq-lnq10VR) normalised to a 10°C temperature change along with its sampling variance (@eq-slnq10VR). As discussed by @Nakagawa2015-fo there is often a strong mean-variance relationship. As such, the coefficient of variation is often used because it permits standardisation of changes in variance as mean trait values change:
-
-$$
-lnCVR_{Q_{10}} = ln\left( \frac{\text{CV}_{2}}{\text{CV}_{1}} \right){ \left(\ \frac{10^{\circ}C}{T_{2}-T_{1}} \right) }
-$$ {#eq-lnq10CVR} $$
-s_{lnCVR_{Q_{10}}} = \left[ \frac{(\text{SD}_{1})^2}{N_{1}({R}_{1})^2} + \frac{(\text{SD}_{2})^2}{N_{2} ({R}_{2})^2} + \frac{1}{2\left( N_{1}-1 \right)} + \frac{1}{2\left(N_{2} - 1\right)} \right]{ \left(\ \frac{10^{\circ}C}{T_{2}-T_{1}} \right) }^2
-$$ {#eq-slncvr}
-
-where $CV$ is the coefficient of variation defined as $SD / R$. We refer to $lnCVR_{Q_{10}}$ as relative variance because variance changes are relative to the mean. While we analyse $lnCVR_{Q_{10}}$ it does make the assumption that SD is directly proportional to the mean, and given that we are analysing the mean alongside the variance we present results on $lnCVR_{Q_{10}}$ in the supplement.
-
-#### *Calculating acute and acclimation* $lnRR_{Q_{10}}$, $lnVR_{Q_{10}}$ and $lnCVR_{Q_{10}}$ estimates*
-
-$R_{1}$, $R_{2}$, $SD_{1}^2$ and $SD_{2}^2$ can all be taken from samples of organisms measured acutely at two temperatures or after having been acclimated these same temperatures ([@fig-concept]A). For studies that measure acute and acclimated responses we used the mean, standard deviation, and sample size to derive both acute and acclimation $lnRR_{Q_{10}}$, $lnVR_{Q_{10}}$ and $lnCVR_{Q_{10}}$ estimates. For studies that only measured $R_{1}$, $R_{2}$, $SD_{1}^2$ and $SD_{2}^2$ acutely we could only calculate acute versions of these effect size estimates. For all effect sizes the higher temperature was in the numerator and the lower of the two temperatures in the denominator. As such, positive effect sizes indicate that the mean (i.e., $lnRR_{Q_{10}}$), variance ($lnVR_{Q_{10}}$) or relative variance (i.e., $lnCVR_{Q_{10}}$) is larger at the higher of the two temperatures (numerator) when standardized to 10°C. Importantly, our effect sizes, as with $Q_{10}$ more generally, all assume that the effect of temperature on physiological rates (or changes in variance) is log-linear (see [@fig-concept]B & *Supplementary Materials* for further discussion). We test and control for any violations of these assumptions in our analysis (see below).
 
 #### **Further discussions on the assumptions of $lnRR_{Q_{10}}$, $lnVR_{Q_{10}}$ and $lnCVR_{Q_{10}}$ estimates**
 

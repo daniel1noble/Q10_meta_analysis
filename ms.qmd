@@ -1405,7 +1405,7 @@ Each life-history stage exhibited the same pattern of variance change in each of
 #| include: false
 #| echo: false
 #| warning: false
-#| 
+ 
 #######################################
   ## lnRRQ10 from Wild Populations ##
 #######################################
@@ -1417,11 +1417,14 @@ Each life-history stage exhibited the same pattern of variance change in each of
 climate <- read.csv("./output/climate_data/ERA5_air_and_SST_timeseries.csv")
 
 # Create a match column.
-climate2 <- climate %>% mutate(match = interaction(Species, Latitude, Longitude)) %>% dplyr::select(Species, Latitude, Longitude, match, cv, sd, mean, acf_lag1, acf_all)
+climate2 <- climate %>% 
+            mutate(match = interaction(Species, Latitude, Longitude)) %>% 
+            dplyr::select(Species, Latitude, Longitude, match, cv, sd, mean, acf_lag1, acf_all)
 
 # Subset the data
-lnRRQ10_data_wild <- data_long2 %>% filter(grepl("lnRR", name) & !is.na(effect_size) & !is.na(V) & !V == 0 & !is.na(acclim_period) & source == "w") %>% 
-                              mutate(spp = species_full, c_accl_time = acclim_period - mean(acclim_period, na.rm = TRUE), match = interaction(spp, lat, long), 
+lnRRQ10_data_wild <- data_long2 %>% 
+                    filter(grepl("lnRR", name) & !is.na(effect_size) & !is.na(V) & !V == 0 & !is.na(acclim_period) & source == "w") %>% 
+                      mutate(spp = species_full, c_accl_time = acclim_period - mean(acclim_period, na.rm = TRUE), match = interaction(spp, lat, long), 
                               max_temp_c = scale(temp_2, scale = FALSE))
 
 # Now, join climate data to full data. This will give us all the climate variability data for each site across time
@@ -2727,7 +2730,7 @@ if(rerun){
                                            (1 | gr(species_full, cov = A)) + 
                                            (1 + max_temp_c | spp) +(1|trait) + 
                                            (1 + trait_broad |gr(obs, cor = FALSE)),  
-                                         data2 = list(A=A), family = gaussian(), 
+                                         data2 = list(A=A_CVR), family = gaussian(), 
                                          prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), 
                                          control = list(adapt_delta = 0.98, max_treedepth = 12), 
                                          chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 8, data = filter(lnCVRQ10_data, trait_broad != "other"))
@@ -2736,7 +2739,7 @@ if(rerun){
   # Metafor models for creating plots. Subset by habitat to make this easier
       # Marine
          model2.3_m_broad <- metafor::rma.mv(effect_size ~  max_temp_c + c_accl_time + type + trait_broad + type:trait_broad, V = V, 
-                              random = list(~1 + type| record_num,
+                              random = list(~1 | record_num,
                                             ~1 | species_full,
                                             ~1 + max_temp_c| spp,
                                             ~1 | trait,
@@ -2748,7 +2751,7 @@ if(rerun){
     
       # Freshwater
          model2.3_f_broad <- metafor::rma.mv(effect_size ~  max_temp_c + c_accl_time + type + trait_broad + type:trait_broad, V = V, 
-                              random = list(~1 + type| record_num,
+                              random = list(~1 | record_num,
                                             ~1 | species_full,
                                             ~1 + max_temp_c| spp,
                                             ~1 | trait,
@@ -2760,7 +2763,7 @@ if(rerun){
       
       # Terrestrial
          model2.3_t_broad <- metafor::rma.mv(effect_size ~  max_temp_c + c_accl_time + type + trait_broad + type:trait_broad, V = V, 
-                              random = list(~1 + type | record_num,
+                              random = list(~1 | record_num,
                                             ~1 | species_full,
                                             ~1 + max_temp_c| spp,
                                             ~1 | trait,

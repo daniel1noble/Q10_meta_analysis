@@ -229,7 +229,7 @@ We extracted means, standard deviations, and sample sizes for physiological rate
 
 ### $Q_{10}$ Based Effect Sizes and Sampling Variances for Means and Variances
 
-Following @Noble2022-ty we calculated a series of temperature-corrected effect sizes that compared mean physiological rates ($lnRR_{Q_{10}}$) as well as the variability in physiological rates ($lnVR_{Q_{10}}$ and $lnCVR_{Q_{10}}$) (@fig-concept). These effect sizes are similar to the traditional temperature coefficient ($Q_{10}$), but with formal analytical approximations of their sampling variances. Sampling variances for effect sizes allowed us to make use of traditional meta-analytic modelling approaches.
+Following @Noble2022-ty we calculated a series of temperature-corrected effect sizes that compared mean physiological rates ($lnRR_{Q_{10}}$) as well as the variability in physiological rates ($lnVR_{Q_{10}}$) (@fig-concept). These effect sizes are similar to the traditional temperature coefficient ($Q_{10}$), but with formal analytical approximations of their sampling variances. Sampling variances for effect sizes allowed us to make use of traditional meta-analytic modelling approaches.
 
 #### *Comparing changes in mean physiological rates*
 
@@ -249,7 +249,7 @@ Here, $SD_{1}^2$ and $SD_{2}^2$ are the standard deviations, and $N_{1}$ and $N_
 
 #### *Comparing variance in physiological rates*
 
-@Nakagawa2015-fo proposed analogous effect size estimates to *lnRR* that allow for comparisons of changes in variance between two groups, the log variance ratio (*lnVR*) and the log coefficient of variation (*lnCVR*). *lnVR* and *lnCVR* are ratios that describe the relative difference in trait variability between two groups. We refer readers to @Nakagawa2015-fo for the equations describing *lnVR* and *lnCVR*, but these can easily be extended to their $Q_{10}$ analogues (and associated sampling variance) as follows:
+@Nakagawa2015-fo proposed analogous effect size estimates to *lnRR* that allow for comparisons of changes in variance between two groups, the log variance ratio (*lnVR*) and the log coefficient of variation (*lnCVR*). Here, we focus on *lnVR* but derivations for *lnCVR*, along with re-analyses with lnCVR, are presented in the *Supplementary Materials*. In short, *lnVR* is a ratio that describes the difference in trait variability between two groups. Like *lnRR*, *lnVR* can also easily be extended to its $Q_{10}$ analogue (and associated sampling variance) as follows:
 
 $$
 lnVR_{Q_{10}} = ln\left( \frac{SD_{2}}{SD_{1}} \right){ \left(\ \frac{10^{\circ}C}{T_{2}-T_{1}} \right) }
@@ -257,19 +257,11 @@ $$ {#eq-lnq10VR} $$
 s_{lnVR_{Q_{10}}} = \left( \frac{1}{2\left( N_{2}-1 \right)} + \frac{1}{2\left(N_{1} - 1\right)} \right){ \left(\ \frac{10^{\circ}C}{T_{2}-T_{1}} \right) }^2
 $$ {#eq-slnq10VR}
 
-where parameters are defined above. @eq-lnq10VR and @eq-slnq10VR describe the change in physiological rate variance (@eq-lnq10VR) normalised to a 10°C temperature change along with its sampling variance (@eq-slnq10VR). As discussed by @Nakagawa2015-fo there is often a strong mean-variance relationship. As such, the coefficient of variation is often used because it permits standardisation of changes in variance as mean trait values change:
+where parameters are defined above. @eq-lnq10VR and @eq-slnq10VR describe the change in physiological rate variance (@eq-lnq10VR) normalised to a 10°C temperature change along with its sampling variance (@eq-slnq10VR). 
 
-$$
-lnCVR_{Q_{10}} = ln\left( \frac{\text{CV}_{2}}{\text{CV}_{1}} \right){ \left(\ \frac{10^{\circ}C}{T_{2}-T_{1}} \right) }
-$$ {#eq-lnq10CVR} $$
-s_{lnCVR_{Q_{10}}} = \left[ \frac{(\text{SD}_{1})^2}{N_{1}({R}_{1})^2} + \frac{(\text{SD}_{2})^2}{N_{2} ({R}_{2})^2} + \frac{1}{2\left( N_{1}-1 \right)} + \frac{1}{2\left(N_{2} - 1\right)} \right]{ \left(\ \frac{10^{\circ}C}{T_{2}-T_{1}} \right) }^2
-$$ {#eq-slncvr}
+#### *Calculating acute and acclimation* $lnRR_{Q_{10}}$ and $lnVR_{Q_{10}}$ estimates*
 
-where $CV$ is the coefficient of variation defined as $SD / R$. We refer to $lnCVR_{Q_{10}}$ as relative variance because variance changes are relative to the mean. While we analyse $lnCVR_{Q_{10}}$ it does make the assumption that SD is directly proportional to the mean, and given that we are analysing the mean alongside the variance we present results on $lnCVR_{Q_{10}}$ in the supplement.
-
-#### *Calculating acute and acclimation* $lnRR_{Q_{10}}$, $lnVR_{Q_{10}}$ and $lnCVR_{Q_{10}}$ estimates*
-
-$R_{1}$, $R_{2}$, $SD_{1}^2$ and $SD_{2}^2$ can all be taken from samples of organisms measured acutely at two temperatures or after having been acclimated these same temperatures ([@fig-concept]A). For studies that measure acute and acclimated responses we used the mean, standard deviation, and sample size to derive both acute and acclimation $lnRR_{Q_{10}}$, $lnVR_{Q_{10}}$ and $lnCVR_{Q_{10}}$ estimates. For studies that only measured $R_{1}$, $R_{2}$, $SD_{1}^2$ and $SD_{2}^2$ acutely we could only calculate acute versions of these effect size estimates. For all effect sizes the higher temperature was in the numerator and the lower of the two temperatures in the denominator. As such, positive effect sizes indicate that the mean (i.e., $lnRR_{Q_{10}}$), variance ($lnVR_{Q_{10}}$) or relative variance (i.e., $lnCVR_{Q_{10}}$) is larger at the higher of the two temperatures (numerator) when standardized to 10°C. Importantly, our effect sizes, as with $Q_{10}$ more generally, all assume that the effect of temperature on physiological rates (or changes in variance) is log-linear (see [@fig-concept]B & *Supplementary Materials* for further discussion). We test and control for any violations of these assumptions in our analysis (see below).
+$R_{1}$, $R_{2}$, $SD_{1}^2$ and $SD_{2}^2$ can all be taken from samples of organisms measured acutely at two temperatures or after having been acclimated these same temperatures ([@fig-concept]A). For studies that measure acute and acclimated responses we used the mean, standard deviation, and sample size to derive both acute and acclimation $lnRR_{Q_{10}}$ and $lnVR_{Q_{10}}$ estimates. For studies that only measured $R_{1}$, $R_{2}$, $SD_{1}^2$ and $SD_{2}^2$ acutely we could only calculate acute versions of these effect size estimates. For all effect sizes the higher temperature was in the numerator and the lower of the two temperatures in the denominator. As such, positive effect sizes indicate that the mean (i.e., $lnRR_{Q_{10}}$) or variance ($lnVR_{Q_{10}}$) is larger at the higher of the two temperatures (numerator) when standardized to 10°C. Importantly, our effect sizes, as with $Q_{10}$ more generally, all assume that the effect of temperature on physiological rates (or changes in variance) is log-linear (see [@fig-concept]B & *Supplementary Materials* for further discussion). We test and control for any violations of these assumptions in our analysis (see below).
 
 
 ### *Moderator Variables*
@@ -2353,6 +2345,16 @@ prisma <- magick::image_read("./output/figures/figS1.png")
 prisma
 ```
 
+### *Comparing relative variance changes: the *lnCVR* ratio*
+As discussed by @Nakagawa2015-fo there is often a strong mean-variance relationship. As such, the coefficient of variation is often used because it permits standardisation of changes in variance as mean trait values change:
+
+$$
+lnCVR_{Q_{10}} = ln\left( \frac{\text{CV}_{2}}{\text{CV}_{1}} \right){ \left(\ \frac{10^{\circ}C}{T_{2}-T_{1}} \right) }
+$$ {#eq-lnq10CVR} $$
+s_{lnCVR_{Q_{10}}} = \left[ \frac{(\text{SD}_{1})^2}{N_{1}({R}_{1})^2} + \frac{(\text{SD}_{2})^2}{N_{2} ({R}_{2})^2} + \frac{1}{2\left( N_{1}-1 \right)} + \frac{1}{2\left(N_{2} - 1\right)} \right]{ \left(\ \frac{10^{\circ}C}{T_{2}-T_{1}} \right) }^2
+$$ {#eq-slncvr}
+
+where $CV$ is the coefficient of variation defined as $SD / R$. We refer to $lnCVR_{Q_{10}}$ as relative variance because variance changes are relative to the mean. While we analyse $lnCVR_{Q_{10}}$ it does make the assumption that SD is directly proportional to the mean, and given that we are analysing the mean alongside the variance we present results on $lnCVR_{Q_{10}}$ in the supplement.
 
 #### **Further discussions on the assumptions of $lnRR_{Q_{10}}$, $lnVR_{Q_{10}}$ and $lnCVR_{Q_{10}}$ estimates**
 

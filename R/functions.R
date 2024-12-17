@@ -522,3 +522,17 @@ post_summary <- function(x){
    
  }
  
+#' @title weighted_avg_effects
+#' @description Calculates the weighted average effect for two effect sizes and their sampling variances. This is used to average the two acute effects for the climate analysis.
+ weighted_avg_effects <- function(ef1, ef2, sv1, sv2){
+      w1 = 1/sv1
+      w2 = 1/sv2
+      return((ef1*w1 + ef2*w2)/(w1 + w2))
+  }
+#' @title weighted_avg_sv
+#' @description Calculates the sampling variance for teh weighted average effect size. This is used to average the two acute effects for the climate analysis.
+  weighted_avg_sv <- function(sv1, sv2){
+      w1 = 1/sv1
+      w2 = 1/sv2
+      return(1/(w1 + w2))
+  }

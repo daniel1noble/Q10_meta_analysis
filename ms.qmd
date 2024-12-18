@@ -1627,9 +1627,10 @@ if(rerun){
                   dplyr::select(-lnRR_Q10_acute_t1, -lnRR_Q10_acute_t2, -V_lnRR_Q10_acute_t1, -V_lnRR_Q10_acute_t2)  %>% 
                   mutate(lnRRQ10_ac_acclimate = lnRR_acute - lnRR_Q10_acclim, 
                          lnRRQ10_ac_acclimate_SV = lnRR_acute_SV + V_lnRR_Q10_acclim) %>%
-                  dplyr::select(-lnRR_Q10_acclim, -V_lnRR_Q10_acclim, -lnRR_acute_SV, -lnRR_acute, -grep("r", colnames(.)))  %>% 
+                  dplyr::select(-lnRR_Q10_acclim, -V_lnRR_Q10_acclim, -lnRR_acute_SV, -lnRR_acute, -grep("r[12]", colnames(.)))  %>% 
                   mutate(match = paste(gsub("_", "", species_full), lat, long, sep = "."), 
-                    max_temp_c = scale(temp_2, scale = FALSE))
+                    max_temp_c = scale(temp_2, scale = FALSE),
+                           spp = species_full)
 
 # Now that we have the data calcualted as the difference between acute and acclimation for each effect we want to know of this difference, i.e., the direction and magnitude of plasticity is associated with climate. We do not need to pivot longer because the response is simply the difference now so we are ready for anlaysis 
 
@@ -1641,16 +1642,82 @@ tree_lnrr_wild <- tree_checks(data = lnRRQ10_data_wild_acute_vs_acclim, tree = t
 tree_checks(data = lnRRQ10_data_wild_acute_vs_acclim, tree = tree_lnrr_wild, dataCol = "species_full", type = "check") # Good
 
 # Create the phylo correlation matrix
-phylo_cor_wild <- vcv(tree_lnrr_wild, cor = TRUE)
-        A_wild <- vcv(tree_lnrr_wild, cor = FALSE) # For bayes, need cov matrix
+phylo_cor_wild_ac_acclim <- vcv(tree_lnrr_wild, cor = TRUE)
+        A_wild_ac_acclim <- vcv(tree_lnrr_wild, cor = FALSE) # For bayes, need cov matrix
 
 # Scale data
-        lnRRQ10_data_wild <- lnRRQ10_data_wild %>% mutate(cv_c = scale(cv),
-                                                          acf_all_c = scale(acf_all))
+        lnRRQ10_data_wild_acute_vs_acclim <- lnRRQ10_data_wild_acute_vs_acclim %>% 
+                                                        mutate(cv_c = scale(cv),
+                                                          acf_all_c = scale(acf_all),
+                                                          c_accl_time = acclim_period - mean(acclim_period, na.rm = TRUE))
 
-                  
+# How much data? Quite a bit with both acute and acclimation, which is good.
+        lnRRQ10_data_wild_acute_vs_acclim %>% group_by(habitat) %>% summarise(n = n(), stdy = length(unique(record_num)))
                                   
+# Plot the effects with climate variation and predcitabiliy
+
+  lnRRQ10_data_wild_acute_vs_acclim  %>% 
+    ggplot(aes(x = acf_all, y = lnRRQ10_ac_acclimate, color = habitat)) + geom_point() + facet_wrap(~habitat) + theme_classic() + my_theme() + labs(x = "Autocorrelation", y = "Acute - Acclimation", color = "Habitat") + geom_smooth(method = "lm", se = FALSE) + geom_smooth(method = "lm", se = FALSE, aes(group = habitat), linetype = "dashed") + theme(legend.position = "none")
+
+  lnRRQ10_data_wild_acute_vs_acclim  %>% 
+    ggplot(aes(x = cv, y = lnRRQ10_ac_acclimate, color = habitat)) + geom_point() + facet_wrap(~habitat) + theme_classic() + my_theme() + labs(x = "Coefficient of Variation (CV)", y = "Acute - Acclimation", color = "Habitat") + geom_smooth(method = "lm", se = FALSE) + geom_smooth(method = "lm", se = FALSE, aes(group = habitat), linetype = "dashed") + theme(legend.position = "none")
+
+# How much missing data in acclimation time?
+  lnRRQ10_data_wild_acute_vs_acclim %>% filter(is.na(acclim_period)) %>% group_by(habitat) %>% summarise(n = n(), stdy = length(unique(record_num)))
+
+####################################################
+  # Model3_new: Model environmental variability by acute/acclim
+####################################################
+  rerun = FALSE
+
+# Ok, now that we have it we may as well just rerun the model using the effect size Reviewer 1 is talking about to show that it is nearly the same (rememnber, we lose power here). Also remoember that positive effect sizes show acclimation because it implies the acute slope is larger than the acclimation slope. Sp, we expect freshwater and marine to have positive overall effect sizes. 
+
+if(rerun){
+model3_new_overall  <- metafor::rma.mv(lnRRQ10_ac_acclimate ~ max_temp_c + c_accl_time + habitat, V = lnRRQ10_ac_acclimate_SV,
+                                       random = list(~1 | record_num,
+                                                     ~1 | species_full,
+                                                     ~1 | trait,
+                                                     ~1 + max_temp_c| spp,
+                                                     ~1 | obs),
+                              R = list(species_full = phylo_cor_wild_ac_acclim), dfs = "contain", 
+                              test = "t", data = lnRRQ10_data_wild_acute_vs_acclim)
+  save(model3_new_overall, file = "./output/models/lnRRQ10_3_new_overall")
+} else{
+  model3_new_overall <- readRDS("./output/models/lnRRQ10_3_new_overall")
+}
+
+if(rerun){
+  # More realistic model with 
+  model3_new  <- metafor::rma.mv(lnRRQ10_ac_acclimate ~ max_temp_c + c_accl_time + cv_c + habitat + habitat:cv_c, V = lnRRQ10_ac_acclimate_SV,
+                                       random = list(~1 | record_num,
+                                                     ~1 | species_full,
+                                                     ~1 | trait,
+                                                     ~1 + max_temp_c| spp,
+                                                     ~1 | obs),
+                              R = list(species_full = phylo_cor_wild_ac_acclim), dfs = "contain", 
+                              test = "t", data = lnRRQ10_data_wild_acute_vs_acclim)
+  
+    model3_new_bayes <- brms::brm(lnRRQ10_ac_acclimate | se(sqrt(lnRRQ10_ac_acclimate_SV), sigma = TRUE) ~ max_temp_c + c_accl_time + cv_c + 
+                                  habitat + habitat:cv_c + 
+                                  (1 | record_num) + 
+                                  (1 | gr(species_full, cov = A_wild_ac_acclim)) + 
+                                  (1 + max_temp_c| spp) + 
+                                  (1|trait), data2 = list(A_wild_ac_acclim = A_wild_ac_acclim), 
+                                  family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), 
+                                  control = list(adapt_delta = 0.98, max_treedepth = 12), 
+                                  chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 8, data = lnRRQ10_data_wild_acute_vs_acclim)
                                   
+  # Save model3_new
+    saveRDS(model3_new, file = "./output/models/lnRRQ10_3_new")
+    saveRDS(model3_new_bayes, file = "./output/models/lnRRQ10_3_new_bayes")
+
+  } else{
+        model3.3 <- readRDS("./output/models/lnRRQ10_3.3")
+  model3.3_bayes <- readRDS("./output/models/lnRRQ10_3.3_bayes")
+}
+
+# Orchard plot model3_new
+  orchaRd:orchard_plot(model3_new, )
 
 ```
 

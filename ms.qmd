@@ -1638,7 +1638,7 @@ lnRRQ10_data_wild_acute_vs_acclim <- left_join(lnRRQ10_data_acc_minus_aclim, cli
 
 # Check and prune tree
 tree_lnrr_wild <- tree_checks(data = lnRRQ10_data_wild_acute_vs_acclim, tree = tree_p0.7, dataCol = "species_full", type = "prune")
-tree_checks(data = lnRRQ10_data_wild_acute_vs_acclim, tree = tree_lnrr, dataCol = "species_full", type = "check") # Good
+tree_checks(data = lnRRQ10_data_wild_acute_vs_acclim, tree = tree_lnrr_wild, dataCol = "species_full", type = "check") # Good
 
 # Create the phylo correlation matrix
 phylo_cor_wild <- vcv(tree_lnrr_wild, cor = TRUE)

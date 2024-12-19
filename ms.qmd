@@ -1673,7 +1673,7 @@ phylo_cor_wild_ac_acclim <- vcv(tree_lnrr_wild, cor = TRUE)
 # Ok, now that we have it we may as well just rerun the model using the effect size Reviewer 1 is talking about to show that it is nearly the same (rememnber, we lose power here). Also remoember that positive effect sizes show acclimation because it implies the acute slope is larger than the acclimation slope. Sp, we expect freshwater and marine to have positive overall effect sizes. 
 
 if(rerun){
-model3_new_overall  <- metafor::rma.mv(lnRRQ10_ac_acclimate ~ max_temp_c + c_accl_time + habitat, V = lnRRQ10_ac_acclimate_SV,
+  model3_new_overall  <- metafor::rma.mv(lnRRQ10_ac_acclimate ~ max_temp_c + c_accl_time + habitat, V = lnRRQ10_ac_acclimate_SV,
                                        random = list(~1 | record_num,
                                                      ~1 | species_full,
                                                      ~1 | trait,
@@ -1682,9 +1682,62 @@ model3_new_overall  <- metafor::rma.mv(lnRRQ10_ac_acclimate ~ max_temp_c + c_acc
                               R = list(species_full = phylo_cor_wild_ac_acclim), dfs = "contain", 
                               test = "t", data = lnRRQ10_data_wild_acute_vs_acclim)
   save(model3_new_overall, file = "./output/models/lnRRQ10_3_new_overall")
+
+  model3_new_overall_bayes <- brms::brm(lnRRQ10_ac_acclimate | se(sqrt(lnRRQ10_ac_acclimate_SV), sigma = TRUE) ~ 
+                                max_temp_c + c_accl_time + habitat + (1 | record_num) + 
+                              (1 | gr(species_full, cov = A_wild_ac_acclim)) + 
+                              (1 + max_temp_c| spp) + 
+                              (1|trait), 
+                              data2 = list(A_wild_ac_acclim = A_wild_ac_acclim), 
+                              family = gaussian(), prior = c(prior(normal(0, 10), "Intercept"), prior(student_t(3, 0, 10), "sd")), 
+                              control = list(adapt_delta = 0.98, max_treedepth = 12), 
+                              chains = 4, thin = 5, iter = 5000, warmup = 1000, cores = 8, 
+                              data = lnRRQ10_data_wild_acute_vs_acclim)
+save(model3_new_overall_bayes, file = "./output/models/lnRRQ10_3_new_overall_bayes")
+
 } else{
   model3_new_overall <- readRDS("./output/models/lnRRQ10_3_new_overall")
+  model3_new_overall_bayes <- readRDS("./output/models/lnRRQ10_3_new_overall_bayes")
 }
+
+
+####################################################
+  # Get contrasts from overall model
+####################################################
+
+  # Extract posteriors
+  posteriors_3_overall <- posterior_samples(model3_new_overall_bayes, "^b")
+
+  # Freshwater
+    f_ac_acclim  <- posteriors_3_overall[,"b_Intercept"]; pmcmc(f_ac_acclim); mean(f_ac_acclim); quantile(f_ac_acclim, c(0.025, 0.975))
+  # Marine
+    m_ac_acclim  <- f_ac_acclim + posteriors_3_overall[,"b_habitatm"]; pmcmc(m_ac_acclim); mean(m_ac_acclim); quantile(m_ac_acclim, c(0.025, 0.975))
+  # Terrestrial
+    t_ac_acclim  <- f_ac_acclim + posteriors_3_overall[,"b_habitatt"]; pmcmc(t_ac_acclim); mean(t_ac_acclim); quantile(t_ac_acclim, c(0.025, 0.975))
+
+     col <- c("#0871B9", "#F3B40D", "#1BB908")
+  k_lnrr_ac_acl <- manual_extract(model3_new_overall, mod = "habitat", group = "record_num", exclude = NULL)
+
+  p3_ac_aclim <- orchaRd::orchard_plot(model3_new_overall, mod = "habitat", group  = "record_num", weights = "prop", xlab = TeX("\\Delta $lnRR_{Q_{10}}$ (Acute - Acclimation)"), angle = 20, legend.pos = "top.left", trunk.size = 1.8, branch.size = 2.8) + scale_x_discrete(labels = c("T" = "Terrestrial","M" = "Marine" ,"F" = "Freshwater")) +
+  theme(legend.direction = "vertical") +
+  
+  annotate("text", x = 1.5, y = -1, label =TeX(paste0("$\\mu = $", round(mean(f_ac_acclim), 2), "[", round(quantile(f_ac_acclim, 0.025), 2)," to ", round(quantile(f_ac_acclim, 0.975), 2), "] ", " $\\,p_{MCMC}$ = 0.03")), hjust = 0, size = 8) + 
+  #annotate("text", x = 1.20, y = -0.5, label =paste0(round(mean(change_f), 3), "%"), hjust = 0, size = 8) + labs(shape = "Type") +
+  
+  annotate("text", x = 2.5, y = -1, label =TeX(paste0("$\\mu = $", round(mean(m_ac_acclim), 2), "[", round(quantile(m_ac_acclim, 0.025), 2)," to ", round(quantile(m_ac_acclim, 0.975),2), "] ", " $\\,p_{MCMC}$ = 0.01")), hjust = 0, size = 8) + 
+  #annotate("text", x = 2.20, y = -0.5, label =paste0(round(mean(change_m), 3), "%"), hjust = 0, size = 8) +
+  
+  annotate("text", x = 3.5, y = -1, label =TeX(paste0("$\\mu = $", round(mean(t_ac_acclim), 2), "[", round(quantile(t_ac_acclim, 0.025), 2)," to ", round(quantile(t_ac_acclim, 0.975),2), "] ", "$\\,p_{MCMC}$ = 0.36")), hjust = 0, size = 8) + 
+  #annotate("text", x = 3.20, y = -0.5, label =paste0(round(mean(change_t), 3), "%"), hjust = 0, size = 8) +
+  
+  scale_fill_manual(values = col) + scale_color_manual(values = rep("black",3)) + ylim(-1.2, 1.2)
+    
+  p3_ac_aclim <- p3_ac_aclim + theme_classic() + theme(axis.title  = element_text(size = 24),
+                                       axis.text = element_text(size = 24),
+                                       axis.text.y = element_text(angle = 45, size = 24),
+                                       legend.title = element_text(size = 30),
+                               legend.text = element_text(size = 24),
+                               title = element_text(size = 24), legend.position = "top") 
 
 if(rerun){
   # More realistic model with 

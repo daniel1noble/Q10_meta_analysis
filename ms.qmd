@@ -1715,30 +1715,6 @@ save(model3_new_overall_bayes, file = "./output/models/lnRRQ10_3_new_overall_bay
   # Terrestrial
     t_ac_acclim  <- f_ac_acclim + posteriors_3_overall[,"b_habitatt"]; pmcmc(t_ac_acclim); mean(t_ac_acclim); quantile(t_ac_acclim, c(0.025, 0.975))
 
-     col <- c("#0871B9", "#F3B40D", "#1BB908")
-  k_lnrr_ac_acl <- manual_extract(model3_new_overall, mod = "habitat", group = "record_num", exclude = NULL)
-
-  p3_ac_aclim <- orchaRd::orchard_plot(model3_new_overall, mod = "habitat", group  = "record_num", weights = "prop", xlab = TeX("\\Delta $lnRR_{Q_{10}}$ (Acute - Acclimation)"), angle = 20, legend.pos = "top.left", trunk.size = 1.8, branch.size = 2.8) + scale_x_discrete(labels = c("T" = "Terrestrial","M" = "Marine" ,"F" = "Freshwater")) +
-  theme(legend.direction = "vertical") +
-  
-  annotate("text", x = 1.5, y = -1, label =TeX(paste0("$\\mu = $", round(mean(f_ac_acclim), 2), "[", round(quantile(f_ac_acclim, 0.025), 2)," to ", round(quantile(f_ac_acclim, 0.975), 2), "] ", " $\\,p_{MCMC}$ = 0.03")), hjust = 0, size = 8) + 
-  #annotate("text", x = 1.20, y = -0.5, label =paste0(round(mean(change_f), 3), "%"), hjust = 0, size = 8) + labs(shape = "Type") +
-  
-  annotate("text", x = 2.5, y = -1, label =TeX(paste0("$\\mu = $", round(mean(m_ac_acclim), 2), "[", round(quantile(m_ac_acclim, 0.025), 2)," to ", round(quantile(m_ac_acclim, 0.975),2), "] ", " $\\,p_{MCMC}$ = 0.01")), hjust = 0, size = 8) + 
-  #annotate("text", x = 2.20, y = -0.5, label =paste0(round(mean(change_m), 3), "%"), hjust = 0, size = 8) +
-  
-  annotate("text", x = 3.5, y = -1, label =TeX(paste0("$\\mu = $", round(mean(t_ac_acclim), 2), "[", round(quantile(t_ac_acclim, 0.025), 2)," to ", round(quantile(t_ac_acclim, 0.975),2), "] ", "$\\,p_{MCMC}$ = 0.36")), hjust = 0, size = 8) + 
-  #annotate("text", x = 3.20, y = -0.5, label =paste0(round(mean(change_t), 3), "%"), hjust = 0, size = 8) +
-  
-  scale_fill_manual(values = col) + scale_color_manual(values = rep("black",3)) + ylim(-1.2, 2)
-    
-  p3_ac_aclim <- p3_ac_aclim + theme_classic() + theme(axis.title  = element_text(size = 24),
-                                       axis.text = element_text(size = 24),
-                                       axis.text.y = element_text(angle = 45, size = 24),
-                                       legend.title = element_text(size = 30),
-                               legend.text = element_text(size = 24),
-                               title = element_text(size = 24), legend.position = "top") 
-
 if(rerun){
   # More realistic model with 
   model3_new  <- metafor::rma.mv(lnRRQ10_ac_acclimate ~ max_temp_c + c_accl_time + cv_c + habitat + habitat:cv_c, V = lnRRQ10_ac_acclimate_SV,
@@ -2756,10 +2732,58 @@ Overall, we found that the relationship between log(mean) and log(SD) of the acu
 flextable(table) %>% bold(part = "header") %>% autofit()
 ```
 
-#### **Interaction-based effect sizes**
+#### **Interaction-based effect sizes to compare acute and acclimation $lnRR_{Q_{10}}$ within studies**
 
-When measuring plasticity, what is reletavent is the difference between  lnRR_(Q_10 )acute and acclimation that captures the degree to which organisms plastically adjust (or acclimate). 
+When measuring plasticity, what is reletavent is the difference between $lnRR_{Q_{10_{acute}}}$ and $lnRR_{Q_{10_{acclimation}}}$ because this captures the degree to which organisms plastically adjust (or acclimate). Variation in the magnitude of plasticity across studies is captured in our random slope models and is more powerful given that even studies without acute responses measured can be included. We can then estimate the mean difference between acute and acclimation in our meta-regression models while accounting for variation in responses within studies with our random slope. This analysis is the same as if we were to model the difference in acute and acclimation effect sizes within studies instead of each seperately.
 
+We can validate that our main analysis is similar to an analysis that only includes studies with both acute and acclimation responses. To achive this, we need to derive a new effect size that contrasts the difference between acute and acclimation responses within a given study and trait using the following equation: 
+
+$$
+  \Delta lnRR_{Q_{10}} = lnRR_{Q_{10_{acute}}} - lnRR_{Q_{10_{acclimation}}}
+$$ {#eq-lnq10_diff}
+
+where, $lnRR_{Q_{10_{acute}}}$ and $lnRR_{Q_{10_{acclimation}}}$ are defined as in @eq-lnq10 in the main manuscript. We can calculate the combined sampling variance of the difference in effect sizes using the following equation:
+
+$$
+  s_{\Delta lnRR_{Q_{10}}} = s_{lnRR_{Q_{10_{acute}}}} + s_{lnRR_{Q_{10_{acclimation}}}}
+$$ {#eq-Vlnq10_diff}
+
+where, s_{lnRR_{Q_{10_{acute}}}} and s_{lnRR_{Q_{10_{acclimation}}}} is the sampling variance for the acute and acclimation effect sizes, respectively. Again, all notation is defined in @eq-Vlnq10 in the main manuscript. 
+
+It is noteworthy here that our analysis using @eq-lnq10_diff as our mani effect size means that we are now interested in the overall meta-analytic mean estimates, not the difference between $lnRR_{Q_{10_{acute}}}$ and $lnRR_{Q_{10_{acclimation}}}$ as in our main analyses. Positive $\Delta lnRR_{Q_{10}}$ values indicate that acute responses are higher than acclimated responses, while negative values indicate the opposite. Positive values indicate that organisms are able to plastically adjust their physiological rates to acute temperature changes, while negative values indicate that organisms are not able to plastically adjust their physiological rates.
+
+Using $\Delta lnRR_{Q_{10}}$ for each trait within a study we fit a model that estimated the meta-anlaytic mean effect size for each habitat (freshwater, marine and terrestrial) accounting for acclimation time and maximum temperature as in our main analysis, along with random effects of study, species, phylogeny, and trait. Our analyses given quantitatively and qualitatively similar resuls to our main analysis @fig-delta. 
+
+```{r, fig-delta}
+#| label: fig-delta
+#| fig-cap: "Analysis with $\Delta lnRR_{Q_{10}}$ "
+
+
+     col <- c("#0871B9", "#F3B40D", "#1BB908")
+  k_lnrr_ac_acl <- manual_extract(model3_new_overall, mod = "habitat", group = "record_num", exclude = NULL)
+
+  p3_ac_aclim <- orchaRd::orchard_plot(model3_new_overall, mod = "habitat", group  = "record_num", weights = "prop", xlab = TeX("\\Delta $lnRR_{Q_{10}}$ (Acute - Acclimation)"), angle = 20, legend.pos = "top.left", trunk.size = 1.8, branch.size = 2.8) + scale_x_discrete(labels = c("T" = "Terrestrial","M" = "Marine" ,"F" = "Freshwater")) +
+  theme(legend.direction = "vertical") +
+  
+  annotate("text", x = 1.5, y = -1, label =TeX(paste0("$\\mu = $", round(mean(f_ac_acclim), 2), "[", round(quantile(f_ac_acclim, 0.025), 2)," to ", round(quantile(f_ac_acclim, 0.975), 2), "] ", " $\\,p_{MCMC}$ = 0.03")), hjust = 0, size = 8) + 
+  #annotate("text", x = 1.20, y = -0.5, label =paste0(round(mean(change_f), 3), "%"), hjust = 0, size = 8) + labs(shape = "Type") +
+  
+  annotate("text", x = 2.5, y = -1, label =TeX(paste0("$\\mu = $", round(mean(m_ac_acclim), 2), "[", round(quantile(m_ac_acclim, 0.025), 2)," to ", round(quantile(m_ac_acclim, 0.975),2), "] ", " $\\,p_{MCMC}$ = 0.01")), hjust = 0, size = 8) + 
+  #annotate("text", x = 2.20, y = -0.5, label =paste0(round(mean(change_m), 3), "%"), hjust = 0, size = 8) +
+  
+  annotate("text", x = 3.5, y = -1, label =TeX(paste0("$\\mu = $", round(mean(t_ac_acclim), 2), "[", round(quantile(t_ac_acclim, 0.025), 2)," to ", round(quantile(t_ac_acclim, 0.975),2), "] ", "$\\,p_{MCMC}$ = 0.36")), hjust = 0, size = 8) + 
+  #annotate("text", x = 3.20, y = -0.5, label =paste0(round(mean(change_t), 3), "%"), hjust = 0, size = 8) +
+  
+  scale_fill_manual(values = col) + scale_color_manual(values = rep("black",3)) + ylim(-1.2, 2)
+    
+  p3_ac_aclim <- p3_ac_aclim + theme_classic() + theme(axis.title  = element_text(size = 24),
+                                       axis.text = element_text(size = 24),
+                                       axis.text.y = element_text(angle = 45, size = 24),
+                                       legend.title = element_text(size = 30),
+                               legend.text = element_text(size = 24),
+                               title = element_text(size = 24), legend.position = "top") 
+p3_ac_aclim
+```
 
 #### **Comparing relative variance changes using $lnCVR_{Q_{10}}$**
 

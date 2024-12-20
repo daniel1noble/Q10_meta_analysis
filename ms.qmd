@@ -1730,7 +1730,7 @@ save(model3_new_overall_bayes, file = "./output/models/lnRRQ10_3_new_overall_bay
   annotate("text", x = 3.5, y = -1, label =TeX(paste0("$\\mu = $", round(mean(t_ac_acclim), 2), "[", round(quantile(t_ac_acclim, 0.025), 2)," to ", round(quantile(t_ac_acclim, 0.975),2), "] ", "$\\,p_{MCMC}$ = 0.36")), hjust = 0, size = 8) + 
   #annotate("text", x = 3.20, y = -0.5, label =paste0(round(mean(change_t), 3), "%"), hjust = 0, size = 8) +
   
-  scale_fill_manual(values = col) + scale_color_manual(values = rep("black",3)) + ylim(-1.2, 1.2)
+  scale_fill_manual(values = col) + scale_color_manual(values = rep("black",3)) + ylim(-1.2, 2)
     
   p3_ac_aclim <- p3_ac_aclim + theme_classic() + theme(axis.title  = element_text(size = 24),
                                        axis.text = element_text(size = 24),

@@ -309,7 +309,7 @@ We then multiplied this predicted change by the change in air and sea surface te
 
 ### *Identifying patterns of among-individual variance in performance curves contributing to variance increases*
 
-We conducted a simple simulation as a sensitivity analysis to better understand the characteristics of performance curves that could lead to our observed changes in variance across temperatures and habitats. The simulation varied among-individual variation in performance curves to identify the parameters that could produce the results we observed. To simulate performance curves, we used an asymmetrical Gaussian function [@angilletta2009thermal]:
+Changes in $lnVR_{Q_{10}}$ are expected to depend on differences in the among-individual variation in the thermal performance curves across species [@angilletta2009thermal]. In other words, we expect performance curves to vary among individuals within a population and this variation is expected to co-vary with habitats [@angilletta2009thermal]. To understand how differences in thermal performance curve variation correlate with the empirical patterns of variance change we observe, we conducted a simple simulation as a sensitivity analysis to better understand the characteristics of performance curves that could lead to our observed changes in variance across temperatures and habitats. The simulation varied among-individual variation in performance curves to identify the parameters that could produce the results we observed. To simulate performance curves, we used an asymmetrical Gaussian function [@angilletta2009thermal]:
 
 $$
 P_{T} = 2\epsilon^{-\frac{(T-\delta)^2}{2\sigma^2}}\Phi\left(\alpha\frac{T-\delta}{\sigma}\right)

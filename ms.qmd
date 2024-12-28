@@ -190,7 +190,7 @@ Havird
 1.	Climate change causes warmer and more variable temperatures globally, impacting physiological rates and function in ectothermic animals. Acclimation of physiological rates can help maintain function. However, it is unresolved how variance in physiological rates changes with temperature despite its potential ecological and evolutionary importance. 
 2.	We developed new effect sizes that capture how both the mean and variation in physiological rates change across temperature (based on the temperature coefficient, $Q_{10}$), and used them to test how acclimation and acute thermal responses vary across aquatic and terrestrial ectotherms using meta-analysis (>1900 effects from 226 species). Comparing both the magnitude of acclimation and changes in variation side-by-side provides unique opportunities for evaluating the importance of plasticity and selection under climate change.
 3.	We show that variance in physiological rates increases at higher temperatures, but that the magnitude of change depends on habitat. Freshwater and marine ectotherms are capable of acclimation and have the greatest increase in variance. In contrast, terrestrial ectotherms lack the capacity for acclimation and have smaller increases in variance. Simulations suggest that these patterns may result from differences in among-individual variation in thermal breadth and optima of performance curves across habitats. 
-4.	Our results highlight the greater vulnerability of terrestrial ectotherms to climate change because limited increases in variance may provide less raw material for evolutionary adaptation. Considering both acclimation capacity and variance in physiological rates side-by-side is therefore important for understanding how climate change will impact populations.
+4.	Our results highlight the greater vulnerability of terrestrial ectotherms to climate change because of both a lack of acclimation capacity and a limited increases in variance that may provide less raw material for evolutionary adaptation. Considering both acclimation capacity and variance in physiological rates side-by-side is therefore important for understanding how climate change will impact populations.
 
 
 ## **Introduction**
@@ -272,7 +272,7 @@ We recorded or derived a series of moderator variables from each study that are 
 
 We analysed our data using multilevel meta-analytic (MLMA) and meta-regression (MLMR) models in R (vers.
 `r paste0(R.Version()$major, ".", R.Version()$minor)`) using *brms* [vers. `r utils::packageVersion("brms")` @Burkner2017-wg; @Burkner2018-ur; @noauthor_2021-az] and *metafor* [vers. `r utils::packageVersion("metafor")` @Viechtbauer2010-fn]. We fit both Bayesian and frequentist approaches to ensure that our results were consistent, and to create orchard plots that more easily convey heterogeneity in effects with prediction intervals [vers. 2.0, @Nakagawa2021-ls; @nakagawaorchard]. Prediction intervals can be interpreted as the range of expected effects from future studies [@Noble2022-ty]. In addition, Bayesian methods better protect against type I errors in the presence of complex sources of non-independence [@Nakagawa2021-uf; @Song2021-ba; @Noble2017-mz]. In all cases, frequentist and Bayesian models resulted in the same conclusions. For our Bayesian models, we ran 4 MCMC chains, each with a warm-up (burn-in) of 1000 followed by 4000 sampling iterations keeping every 5 iterations for a minimum of 3200 samples from the posterior distribution. We used flat Gaussian priors for 'fixed' effects (i.e.,$N(0, 10)$) and a student t-distribution for 'random' effects (i.e., $student_{t}$(3, 0, 10)). We checked that all MCMC chains were mixing and had converged (i.e., $R_{hat}$ = 1). 
-We also explored the potential for publication bias in our dataset but there was no evidence it existed (details in *Supplementary Materials*).
+We also explored the potential for publication bias in our dataset but there was no evidence it existed (details in *Supplementary Materials*). We report overall meta-analytic means (denoted by $\mu$) and contrasts between meta-analytic means (denoted by $\beta$) throughout.
 
 #### *Multi-level Meta-analysis (MLMA) Models*
 
@@ -1583,7 +1583,6 @@ if(rerun){
 
 ```
 
-
 ```{r, wildlnRR_acutevsacclim}
 #| label: wildlnRR_acutevsacclim
 #| echo: false
@@ -1746,9 +1745,6 @@ if(rerun){
         model3.3 <- readRDS("./output/models/lnRRQ10_3.3")
   model3.3_bayes <- readRDS("./output/models/lnRRQ10_3.3_bayes")
 }
-
-# Orchard plot model3_new
-  orchaRd:orchard_plot(model3_new, )
 
 ```
 
@@ -2758,7 +2754,7 @@ Using $\Delta lnRR_{Q_{10}}$ for each trait within a study we fit a model that e
 
 ```{r, fig-delta}
 #| label: fig-delta
-#| fig-cap: "Analysis with $\Delta lnRR_{Q_{10}}$. Raw effects are weighted by their precision (inverse sampling variance). "
+#| fig-cap: "Analysis with $\\Delta lnRR_{Q_{10}}$. Raw effects are weighted by their precision (inverse sampling variance). "
 
 
      col <- c("#0871B9", "#F3B40D", "#1BB908")

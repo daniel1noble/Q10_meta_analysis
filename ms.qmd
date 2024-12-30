@@ -2380,7 +2380,7 @@ ggplot2::geom_smooth(data = mod_table, ggplot2::aes(x = moderator, y = upperCL),
             formula = y ~ x, se = FALSE, lty = "dashed", colour = "black") + 
 ggplot2::geom_smooth(data = mod_table, ggplot2::aes(x = moderator, y = estimate), method = "loess", 
             formula = y ~ x, se = FALSE, colour = "black") + 
-            scale_fill_manual(labels = c("f" = "Freshwater", "m" = "Marine", "t" = "Terrestrial"), values = col)+ labs(fill = "Habitat") + facet_wrap(~type)+
+            scale_fill_manual(labels = c("f" = "Freshwater", "m" = "Marine", "t" = "Terrestrial"), values = col) + labs(fill = "Habitat") + facet_wrap(~type) +
 theme_classic() + theme(axis.title  = element_text(size = 30), 
                         axis.text = element_text(size = 26), 
                         axis.text.y = element_text(size = 26),
@@ -2401,7 +2401,7 @@ lnrrq10_temp
 #| fig-cap: "Bubble plot of the relationship between $lnRR_{Q_{10}}$ and acclimation time for terrestrial (green), marine (orange) and freshwater (blue) habitats. Acclimation time is centered around the mean acclimation time (37.5 days) in the data. Not all studies reported acclimation time hence the total number of effects, *k*, was 1767. Raw effects are weighted by their precision (inverse sampling variance)."
   col <- rep(c("#0871B9", "#F3B40D", "#1BB908"), 2)
 
-  accl_time <- bubble_plot(model1.2, mod = "c_accl_time", group = "spp", ylab = TeX("$lnRR_{Q_{10}}$"), xlab = "Centered Acclimaton Time (days)", at = list(type = c("acclim", "acute")), condition.nrow = 1, by = "type", k = FALSE) + geom_point(data = lnRRQ10_data, aes(x = c_accl_time, y = effect_size, fill = habitat), shape = 21, colour = "black") + scale_fill_manual(labels = c("f" = "Freshwater", "m" = "Marine", "t" = "Terrestrial"), values = col) + theme_classic() + theme(axis.title  = element_text(size = 30), 
+  accl_time <- bubble_plot(model1.2, mod = "c_accl_time", group = "spp", ylab = TeX("$lnRR_{Q_{10}}$"), xlab = "Centered Acclimaton Time (days)", at = list(type = c("acclim", "acute")), condition.nrow = 1, by = "type") + geom_point(data = lnRRQ10_data, aes(x = c_accl_time, y = effect_size, fill = habitat), shape = 21, colour = "black") + scale_fill_manual(labels = c("f" = "Freshwater", "m" = "Marine", "t" = "Terrestrial"), values = col) + theme_classic() + theme(axis.title  = element_text(size = 30), 
                         axis.text = element_text(size = 26), 
                         axis.text.y = element_text(size = 26),
                         legend.text = element_text(size = 24), 

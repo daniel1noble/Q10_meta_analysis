@@ -346,6 +346,11 @@ phylo_cor <- vcv(tree_lnrr, cor = TRUE)
 # have a quick look on habitat, development and type. Mostly looks sensible but there is not too much data in terrestrial realm.
 sum_life <- lnRRQ10_data %>% group_by(life.hist, type, habitat) %>% summarise(n=n()) %>% arrange(habitat)
 
+# Look at life stages and trait type distribution
+#life_trait <- lnRRQ10_data %>% group_by(life.hist, trait_broad, habitat) %>% summarise(n=n()) %>% arrange(habitat)
+#colnames(life_trait) <- c("Life Stage", "Trait Category", "Habitat", "# of Effects")
+#flextable(life_trait) %>% save_as_docx(path = "./output/tables/table.docx")
+
 ##################################################
 # Grafen mode comparison test with different power
 ##################################################
@@ -490,6 +495,10 @@ if(rerun){
   t_acute  <- posteriors_1.2[,"b_Intercept"] + posteriors_1.2[,"b_habitatt"]
   t_acclim <- posteriors_1.2[,"b_Intercept"] + posteriors_1.2[,"b_habitatt"] + posteriors_1.2[,"b_typeacclim"] + posteriors_1.2[,"b_typeacclim:habitatt"]
 
+# Slopes for max temp and acclimation time
+  acc_time_slope_model1.2 <- posteriors_1.2[,"b_c_accl_time"]
+  max_temp_slope_model1.2 <- posteriors_1.2[,"b_max_temp_c"]
+  
 # Q10 values for each category. Effect sizes are quite small really
    f_acute_Q10 <- exp(f_acute) ; mean(f_acute_Q10); quantile(f_acute_Q10, c(0.025, 0.975))
   f_acclim_Q10 <- exp(f_acclim); mean(f_acclim_Q10); quantile(f_acclim_Q10, c(0.025, 0.975))
@@ -2331,7 +2340,7 @@ We performed a literature search using the Web of Science database for articles 
 
 Our search resulted in 1,321 papers for screening in Rayyan [@Ouzzani2016-ge]. We also cross-checked papers we found in our searches with a recent paper by @Havird2020-mj, which also updates the dataset of @Seebacher2015-wi's. We included any papers that were missed between our searches and those of @Havird2020-mj. @Havird2020-mj added 7 new studies (mainly because they were focused on metabolic rates), and our searches differed from theirs by only a single paper [i.e., @Bulgarella2015-yl]. Given the physiological traits we included were broader than @Havird2020-mj, we had a substantial increase in additional papers that we added to @Seebacher2015-wi's dataset. More specifically, in addition to the `r length(unique(old_papers$record_num))` papers we included from the @Seebacher2015-wi dataset, we extracted data from an extra `r length(unique(new_papers$record_num))` papers (with a total of `r dim(new_papers)[1]` effects; a `r  (length(unique(new_papers$record_num)) / length(unique(old_papers$record_num)))*100`% increase in the number of published articles). Note that @Seebacher2015-wi included a total of 205 publications, however, not all these contained the necessary statistics we needed to derive effect sizes and associated sampling variances (see below). While we may have missed papers, our goal was to obtain a large representative (and unbiased) sample of acclimation research rather than a comprehensive dataset. As such, our database represents the most up-to-date dataset used since @Seebacher2015-wi to answer questions on physiological rates across ectotherms.
 
-We split the screening of titles and abstracts for the 1,321 papers found in our search among DWAN, FK, FS, and SN evenly. To ensure consistency among authors in title and abstract inclusion, relevant authors went through a randomly selected set of papers together before the formal screening to calibrate selection of papers based on our inclusion criteria (see below). In cases of disagreement regarding inclusion, we conservatively included the paper for full text screening and discussed uncertain papers among authors to come to a decision. After title and abstract screening, there was a total of 149 papers for full text screening. Papers were included only if they: 1) measured a physiological rate acutely at two temperatures on a sample of animals chronically exposed to the same two temperatures for at least 1 week; and 2) where physiological rates measured were burst and sustained locomotion, metabolic rates (standard, resting, routine and maximal), heart rates, and/or enzyme activities. Importantly, as in @Seebacher2015-wi, we only included studies that manipulated temperatures within normal thermal ranges for the species.
+We split the screening of titles and abstracts for the 1,321 papers found in our search among DWAN, FK, FS, and SN evenly. To ensure consistency among authors in title and abstract inclusion, relevant authors went through a randomly selected set of papers together before the formal screening to calibrate selection of papers based on our inclusion criteria (see below). In cases of disagreement regarding inclusion, we conservatively included the paper for full text screening and discussed uncertain papers among authors to come to a decision. After title and abstract screening, there was a total of 149 papers for full text screening. Papers were included only if they: 1) measured a physiological rate at two temperatures on a sample of animals chronically exposed to the same two temperatures for at least 1 week. Studies had to measure, following acclimation, physiological rates at acute temperatures that at least matched acclimation temperatures, but often measurements were fully factorial allowing for both acclimated and acute measurements to be extracted; and 2) where physiological rates measured were burst and sustained locomotion, metabolic rates (standard, resting, routine and maximal), heart rates, and/or enzyme activities. Importantly, as in @Seebacher2015-wi, we only included studies that manipulated temperatures within normal thermal ranges for the species because we expected stressful temperatures would impact physiological rates. We determined which temperatures coincided with normal thermal ranges using information within the study (i.e., self-reported) or, when not provided, information from the internet on typical activity temperatures (e.g., Wikipedia or Google searches). This criterion meant that we often only had a single data set (1 acclimated and 2 acute measurements) for each paper. 
 
 ```{r, fig-prisma}
 #| label: fig-prisma
@@ -2357,6 +2366,8 @@ Lastly, to illustrate the effects that climate warming could have on physiologic
 $lnRR_{Q_{10}}$, $lnCVR_{Q_{10}}$ and $lnVR_{Q_{10}}$, as with $Q_{10}$ more generally, all assume that the effect of temperature on physiological rates (or changes in relative variance) is log-linear. While this is likely in our data given that we restricted our analysis of $Q_{10}$ to standard operating temperatures for a given species, it may not always be satisfied given the diversity of species in our dataset. $Q_{10}$ [@van1884etudes] has been used extensively in the physiological literature to successfully address a multitude of questions [e.g., @Havird2020-mj; @Seebacher2015-wi]. However, there is a preference for using a Boltzmann – Arrhenius (BA) relationship (or its extension, the Sharpe-Schoolfield model [@molnar2017thermal; @michaletz2024hotter]) to model thermal effects on physiological rates [@gillooly2001effects; @michaletz2024hotter]. While debate still exists over the utility of $Q_{10}$ when modelling temperature-dependence it is important to recognise that both BA and $Q_{10}$ can exhibit curvilinearity as temperatures increase (as discussed in [@michaletz2024hotter]). @white2012information also showed that the BA model may not always perform better. For example, in eukaryotes, modelling thermal dependence using $Q_{10}$ provided a 5.8-fold better fit to metabolic rate data than the BA relationship [@white2012information]. Given that studies included in our analysis never measured full performance curves at acute and acclimation temperatures it was not possible for us to compare different models of thermal dependence. Nonetheless, $Q_{10}$-based effect sizes remain the most practical effect-size for comparing thermal dependence when using existing empircial data, with the benefit that these effects having convenient properties that make them suitable for meta-analysis. Nonetheless, we control for possible violations of the log-linearity assumption in our analyses.
 
 #### **Exploring the impact of maximum treatment temperature on $lnRR_{Q_{10}}$**
+
+As predicted, we did find evidence that $lnRR_{Q_{10}}$ was impacted by the maximum temperature used within a study, but this effect was small (Slope from "Model 2": `r mean (max_temp_slope_model1.2)`, 95% CI: `r quantile(max_temp_slope_model1.2, 0.025)` to `r quantile(max_temp_slope_model1.2, 0.975)`, $p_{MCMC}$ = `r round(pmcmc(max_temp_slope_model1.2), digit = 4)`, @fig-lnrrq10_temp). Regardless, we control for maximum temperature in all our models. 
 
 ```{r, fig-lnrrq10_temp}
 #| label: fig-lnrrq10_temp
@@ -2395,6 +2406,8 @@ lnrrq10_temp
 
 #### **How acclimation time is related to $lnRR_{Q_{10}}$**
 
+While we control for acclimation time in all our models, it did not impact $lnRR_{Q_{10}}$ (Slope from "Model 2": `r mean (acc_time_slope_model1.2)`, 95% CI: `r quantile(acc_time_slope_model1.2, 0.025)` to `r quantile(acc_time_slope_model1.2, 0.975)`, $p_{MCMC}$ = `r round(pmcmc(acc_time_slope_model1.2), digit = 4)`, @fig-accl_time)
+
 ```{r, fig-accl_time}
 #| label: fig-accl_time
 #| fig-cap: "Bubble plot of the relationship between $lnRR_{Q_{10}}$ and acclimation time for terrestrial (green), marine (orange) and freshwater (blue) habitats. Acclimation time is centered around the mean acclimation time (37.5 days) in the data. Not all studies reported acclimation time hence the total number of effects, *k*, was 1767. Raw effects are weighted by their precision (inverse sampling variance)."
@@ -2406,7 +2419,7 @@ lnrrq10_temp
                         legend.text = element_text(size = 24), 
                         legend.title = element_text(size = 26))
 
-  ggsave(accl_time, file = "./output/figures/figS3.png", height = 6, width = 8.5)
+  ggsave(accl_time, file = "./output/figures/figS3.png", height = 6, width = 12)
 
 accl_time <- magick::image_read("./output/figures/figS3.png")
 accl_time
@@ -3848,9 +3861,9 @@ tables_future <- all_pred2 %>% group_by(habitat) %>% summarise(mean = mean(per_c
     
 ```
 
-#### **Acute and acclimation for detailed trait categories across marine, freshwater and terrestrial taxa**
+#### **Acute and acclimation for trait categories across marine, freshwater and terrestrial taxa**
 
-Across habitats, the extent to which whole-organism versus biochemical traits acclimated varied ("Model 3"; [@fig-btrait]A-C). Biochemical traits acclimated to a greater extent compared to whole-organism traits in marine habitats ([@fig-btrait]B), whereas both whole-organism and biochemical traits acclimated similarly in freshwater ectotherms ([@fig-btrait]C). Neither trait category acclimated in terrestrial ectotherms ([@fig-btrait]A).
+Across habitats, the extent to which whole-organism versus biochemical traits acclimated varied ("Model 3"; [@fig-btrait]A-C). Biochemical traits acclimated to a greater extent compared to whole-organism traits in marine habitats ([@fig-btrait]B), whereas both whole-organism and biochemical traits acclimated similarly in freshwater ectotherms ([@fig-btrait]C). Neither trait category acclimated in terrestrial ectotherms ([@fig-btrait]A). However, there were no biochemical traits measured for juveniles in terrestrial species confounding life stage and trat category – though there were no differences between adult and juveniles in any case (see results in main manuscript).
 
 Across habitats biochemical processes tended to result in greater increases in variance at higher temperatures, but this was only significant for marine ectotherms (biochemical/whole-organism contrasts: Marine: $\beta$ = `r contrast_lnvr_trait_cat_stats[2,3]`, 95% CI: `r contrast_lnvr_trait_cat_stats[2,4]` to `r contrast_lnvr_trait_cat_stats[2,5]`, $p_{MCMC}$ = `r contrast_lnvr_trait_cat_stats[2,6]`; Freshwater: $\beta$ = `r contrast_lnvr_trait_cat_stats[3,3]`, 95% CI: `r contrast_lnvr_trait_cat_stats[3,4]` to `r contrast_lnvr_trait_cat_stats[3,5]`, $p_{MCMC}$ = `r contrast_lnvr_trait_cat_stats[3,6]`; Terrestrial: $\beta$ = `r contrast_lnvr_trait_cat_stats[1,3]`, 95% CI: `r contrast_lnvr_trait_cat_stats[1,4]` to `r contrast_lnvr_trait_cat_stats[1,5]`, $p_{MCMC}$ = `r contrast_lnvr_trait_cat_stats[1,6]`) ([@fig-btrait]D-F; "Model 3"). Variance increases for biochemical traits was reduced during acclimation in marine ectotherms ([@fig-btrait]E). 
 

@@ -655,6 +655,22 @@ if(rerun){
             contrast_lnrr_trait_cat_stats <- rbind(get_whole_bio(pred_lnrr_trait_post, habitat = "t", trait_b_data),
                                                         get_whole_bio(pred_lnrr_trait_post, habitat = "m", trait_b_data),
                                                         get_whole_bio(pred_lnrr_trait_post, habitat = "f", trait_b_data))
+            
+#######------------------------------------------------------------#########
+# Add overall trait R1
+#######------------------------------------------------------------#########
+  # Tissue/whole-organism acute and acclimation RR
+    pred_lnrr_post_overall_acute_tissue = c(pred_lnrr_trait_post[,2], pred_lnrr_trait_post[,6], pred_lnrr_trait_post[,10])
+    pred_lnrr_post_overall_aclim_tissue = c(pred_lnrr_trait_post[,1], pred_lnrr_trait_post[,5], pred_lnrr_trait_post[,9])
+     contrast_lnrr_tissue <- pred_lnrr_post_overall_aclim_tissue - pred_lnrr_post_overall_acute_tissue
+     
+      # Biochemical acute and acclimation RR
+    pred_lnrr_post_overall_acute_biochem = c(pred_lnrr_trait_post[,4], pred_lnrr_trait_post[,8], pred_lnrr_trait_post[,12])
+    pred_lnrr_post_overall_aclim_biochem = c(pred_lnrr_trait_post[,3], pred_lnrr_trait_post[,7], pred_lnrr_trait_post[,11])
+        contrast_lnrr_biochem <- pred_lnrr_post_overall_aclim_biochem - pred_lnrr_post_overall_acute_biochem
+
+#######------------------------------------------------------------#########              
+            
 ###########################################################
 ## Model 1.4 - whether chance between q10 depends on life stage and habitat
 ###########################################################
@@ -742,7 +758,21 @@ if(rerun){
                contrast_lnrr_lh_cat_stats <- rbind(get_lifestage(pred, habitat = "t", newdata),
                                                    get_lifestage(pred, habitat = "m", newdata),
                                                    get_lifestage(pred, habitat = "f", newdata))
-               
+
+#######------------------------------------------------------------#########  
+# Add overall trait R1 - pool habitats
+#######------------------------------------------------------------#########
+
+ # Adult acute and acclimation RR - Note here we use rows because it's a different matrix calculation
+    pred_lnrr_post_overall_acute_adult <- c(pred[4,], pred[8,], pred[12,]);
+    pred_lnrr_post_overall_aclim_adult <- c(pred[3,], pred[7,], pred[11,])
+                contrast_lnrr_adult_lh <- pred_lnrr_post_overall_aclim_adult - pred_lnrr_post_overall_acute_adult
+     
+  # Juvenile acute and acclimation RR - Note here we use rows because it's a different matrix calculation
+    pred_lnrr_post_overall_acute_jeu <-  c(pred[2,], pred[6,], pred[10,])
+    pred_lnrr_post_overall_aclim_jeu <- c(pred[1,], pred[5,], pred[9,])
+                contrast_lnrr_jeu_lh <- pred_lnrr_post_overall_aclim_jeu - pred_lnrr_post_overall_acute_jeu               
+                              
 ####################################################
 # Sensitivity analysis -- Do Acute Q10's (hot / cold) differ?
 ####################################################
@@ -875,7 +905,7 @@ Results from "Model 1" (see “Meta-Analysis” above) show that effect heteroge
 
 Physiological rates increased more in terrestrial ectotherms ($\mu$ = `r mean(t_RR_mean)`, 95\% CI: `r quantile(t_RR_mean, 0.025)` to `r quantile(t_RR_mean, 0.975)`) compared to marine ($\mu$ = `r mean(m_RR_mean)`, 95\% CI: `r quantile(m_RR_mean, 0.025)` to `r quantile(m_RR_mean, 0.975)`) and freshwater ectotherms ($\mu$ = `r mean(f_RR_mean)`, 95\% CI: `r quantile(f_RR_mean, 0.025)` to `r quantile(f_RR_mean, 0.975)`), but did not differ significantly between aquatic and terrestrial habitats (Terrestrial - Marine: $\beta$ = `r mean(t_m_rates)`, 95\% CI: `r quantile(t_m_rates, 0.025)` to `r quantile(t_m_rates, 0.975)`, $p_{MCMC}$ = `r p_value(pmcmc(t_m_rates))`; Terrestrial - Freshwater: $\beta$ = `r mean(t_f_rates)`, 95\% CI: `r quantile(t_f_rates, 0.025)` to `r quantile(t_f_rates, 0.975)`, $p_{MCMC}$ = `r p_value(pmcmc(t_f_rates))`) ("Model 2"). However, capacity for acclimation depended on the habitat. Ectotherms in marine and freshwater environments showed partial compensation of physiological rates ([@fig-2]A) amounting to reduced $lnRR_{Q_{10_{acclimation}}}$ of `r abs(mean(change_f))`\% (95\% CI: `r quantile(change_f, c(0.025, 0.975))[1]` to `r quantile(change_f, c(0.025, 0.975))[2]`) in freshwater and `r abs(mean(change_m))`\% (95\% CI: `r quantile(change_m, c(0.025, 0.975))[1]` to `r quantile(change_m, c(0.025, 0.975))[2]`) in marine environments. In contrast, terrestrial ectotherms showed no acclimation with a `r abs(mean(change_t))`\% increase in $lnRR_{Q_{10_{acclimation}}}$ (95\% CI: `r quantile(change_t, c(0.025, 0.975))[1]` to `r quantile(change_t, c(0.025, 0.975))[2]`, [@fig-2]A). 
 
-Acclimation capacity did not vary consistently by life-history stage with no differences in $lnRR_{Q_{10_{acclimation}}}$ and $lnRR_{Q_{10_{acute}}}$ between adult and juveniles, except for marine habitats where adults acclimated to a greater extent ("Model 4"; [@fig-cvrlh]A-C). Averaging over acute and acclimation effects there were also no differences between adults and juveniles within habitats (Adult-Juvenile: Terrestrial: `r contrast_lnrr_lh_cat_stats[1,3]`, 95\% CI: `r contrast_lnrr_lh_cat_stats[1,4]` to `r contrast_lnrr_lh_cat_stats[1,5]`, $p_{MCMC}$ = `r contrast_lnrr_lh_cat_stats[1,6]`; Marine: `r contrast_lnrr_lh_cat_stats[2,3]`, 95\% CI: `r contrast_lnrr_lh_cat_stats[2,4]` to `r contrast_lnrr_lh_cat_stats[2,5]`, $p_{MCMC}$ = `r contrast_lnrr_lh_cat_stats[2,6]`; Freshwater: `r contrast_lnrr_lh_cat_stats[3,3]`, 95\% CI: `r contrast_lnrr_lh_cat_stats[3,4]` to `r contrast_lnrr_lh_cat_stats[3,5]`, $p_{MCMC}$ = `r contrast_lnrr_lh_cat_stats[3,6]`).
+Acclimation capacity did not vary consistently by life-history stage with no differences in $lnRR_{Q_{10_{acclimation}}}$ and $lnRR_{Q_{10_{acute}}}$ between adult and juveniles (overall contrast: `mean(c(contrast_lnrr_adult_lh,contrast_lnrr_jeu_lh))` 95\% CI: `r quantile(c(contrast_lnrr_adult_lh,contrast_lnrr_jeu_lh), 0.025)` to `r quantile(c(contrast_lnrr_adult_lh,contrast_lnrr_jeu_lh), 0.975)`, $p_{MCMC}$ = `r pmcmc(c(contrast_lnrr_adult_lh,contrast_lnrr_jeu_lh))`), except for marine habitats where adults acclimated to a greater extent ("Model 4"; [@fig-cvrlh]A-C). Averaging over acute and acclimation effects there were also no differences between adults and juveniles within habitats (Adult-Juvenile: Terrestrial: `r contrast_lnrr_lh_cat_stats[1,3]`, 95\% CI: `r contrast_lnrr_lh_cat_stats[1,4]` to `r contrast_lnrr_lh_cat_stats[1,5]`, $p_{MCMC}$ = `r contrast_lnrr_lh_cat_stats[1,6]`; Marine: `r contrast_lnrr_lh_cat_stats[2,3]`, 95\% CI: `r contrast_lnrr_lh_cat_stats[2,4]` to `r contrast_lnrr_lh_cat_stats[2,5]`, $p_{MCMC}$ = `r contrast_lnrr_lh_cat_stats[2,6]`; Freshwater: `r contrast_lnrr_lh_cat_stats[3,3]`, 95\% CI: `r contrast_lnrr_lh_cat_stats[3,4]` to `r contrast_lnrr_lh_cat_stats[3,5]`, $p_{MCMC}$ = `r contrast_lnrr_lh_cat_stats[3,6]`).
 
 ```{r, lnvrq10}
 #| label: lnvrq10
@@ -1151,7 +1181,21 @@ if(rerun){
                                                         get_whole_bio(pred_lnvr_traitb_post, habitat = "m", trait_b_data),
                                                         get_whole_bio(pred_lnvr_traitb_post, habitat = "f", trait_b_data))
       
-        
+
+#######------------------------------------------------------------#########
+         # Add overall trait R1
+#######------------------------------------------------------------#########
+      # Tissue/whole-organism acute and acclimation VR
+    pred_lnvr_post_overall_acute_tissue = c(pred_lnvr_traitb_post[,2], pred_lnvr_traitb_post[,6], pred_lnvr_traitb_post[,10])
+    pred_lnvr_post_overall_aclim_tissue = c(pred_lnvr_traitb_post[,1], pred_lnvr_traitb_post[,5], pred_lnvr_traitb_post[,9])
+      pooled_tissue = c(pred_lnvr_post_overall_acute_tissue, pred_lnvr_post_overall_aclim_tissue)
+      
+      # Biochemical acute and acclimation VR
+    pred_lnvr_post_overall_acute_biochem = c(pred_lnvr_traitb_post[,4], pred_lnvr_traitb_post[,8], pred_lnvr_traitb_post[,12])
+    pred_lnvr_post_overall_aclim_biochem = c(pred_lnvr_traitb_post[,3], pred_lnvr_traitb_post[,7], pred_lnvr_traitb_post[,11])
+      pooled_biochem = c(pred_lnvr_post_overall_acute_biochem, pred_lnvr_post_overall_aclim_biochem)
+#######------------------------------------------------------------#########                 
+            
 ###################################################
   # Model 3.4: Model controlling for acclimation time, 
   # type and life history stage assuming type can vary by habitat
@@ -1223,6 +1267,19 @@ if(rerun){
                                                 get_lifestage(pred_lh_vr, habitat = "m", lh_b_data),
                                                 get_lifestage(pred_lh_vr, habitat = "f", lh_b_data))
 
+#######------------------------------------------------------------#########
+# Add overall trait R1
+#######------------------------------------------------------------#########
+  # Adult acute and acclimation VR
+    pred_lnvr_post_overall_acute_adult = c(pred_lh_vr[4,], pred_lh_vr[8,], pred_lh_vr[12,])
+    pred_lnvr_post_overall_aclim_adult = c(pred_lh_vr[3,], pred_lh_vr[7,], pred_lh_vr[11,])
+      pooled_adult = c(pred_lnvr_post_overall_aclim_adult, pred_lnvr_post_overall_acute_adult)
+      
+  # Juvenile acute and acclimation VR
+    pred_lnvr_post_overall_acute_jeu = c(pred_lh_vr[2,], pred_lh_vr[6,], pred_lh_vr[10,]); 
+    pred_lnvr_post_overall_aclim_jeu = c(pred_lh_vr[1,], pred_lh_vr[5,], pred_lh_vr[9,]); 
+      pooled_juev = c(pred_lnvr_post_overall_acute_jeu, pred_lnvr_post_overall_aclim_jeu)
+            
 ```
 
 ```{r, fig-2}
@@ -1395,7 +1452,7 @@ p_sim2
 ```
 
 
-Each life-history stage exhibited the same pattern of variance change in each of the habitats (Adult-Juvenile contrasts: Marine: $\beta$ = `r contrast_lnvr_lh_cat_stats[2,3]`, 95\% CI: `r contrast_lnvr_lh_cat_stats[2,4]` to `r contrast_lnvr_lh_cat_stats[2,5]`, $p_{MCMC}$ = `r contrast_lnvr_lh_cat_stats[2,6]`; Freshwater: $\beta$ = `r contrast_lnvr_lh_cat_stats[3,3]`, 95\% CI: `r contrast_lnvr_lh_cat_stats[3,4]` to `r contrast_lnvr_lh_cat_stats[3,5]`, $p_{MCMC}$ = `r contrast_lnvr_lh_cat_stats[3,6]`; Terrestrial: $\beta$ = `r contrast_lnvr_lh_cat_stats[1,3]`, 95\% CI: `r contrast_lnvr_lh_cat_stats[1,4]` to `r contrast_lnvr_lh_cat_stats[1,5]`, $p_{MCMC}$ = `r contrast_lnvr_lh_cat_stats[1,6]`), with no differences between acute and acclimation effect types ("Model 4"; @fig-cvrlh).
+Each life-history stage exhibited the same pattern of variance change in each of the habitats (Adult-Juvenile contrasts: Marine: $\beta$ = `r contrast_lnvr_lh_cat_stats[2,3]`, 95\% CI: `r contrast_lnvr_lh_cat_stats[2,4]` to `r contrast_lnvr_lh_cat_stats[2,5]`, $p_{MCMC}$ = `r contrast_lnvr_lh_cat_stats[2,6]`; Freshwater: $\beta$ = `r contrast_lnvr_lh_cat_stats[3,3]`, 95\% CI: `r contrast_lnvr_lh_cat_stats[3,4]` to `r contrast_lnvr_lh_cat_stats[3,5]`, $p_{MCMC}$ = `r contrast_lnvr_lh_cat_stats[3,6]`; Terrestrial: $\beta$ = `r contrast_lnvr_lh_cat_stats[1,3]`, 95\% CI: `r contrast_lnvr_lh_cat_stats[1,4]` to `r contrast_lnvr_lh_cat_stats[1,5]`, $p_{MCMC}$ = `r contrast_lnvr_lh_cat_stats[1,6]`, overall across habitats: $\beta$ = `r mean(pooled_adult - pooled_juev)`, 95\% CI: `r quantile(pooled_adult - pooled_juev, 0.025)` to `r quantile(pooled_adult - pooled_juev, 0.975)`, $p_{MCMC}$ = `r pmcmc(pooled_adult - pooled_juev)`), with no differences between acute and acclimation effect types ("Model 4"; @fig-cvrlh).
 
 ```{r, wildlnRR10}
 #| label: wildlnRR10
@@ -2721,7 +2778,7 @@ Like our analysis with $lnRR_{Q_{10_{acclimation}}}$, $\Delta lnRR_{Q_{10}}$ was
 
 ```{r, fig-delta}
 #| label: fig-delta
-#| fig-cap: "Meta-analysis results for $\\Delta lnRR_{Q_{10}}$ across different habitats. Thick bars are 95% confidence intervals (CI) and thin bars 95% prediction intervals (PI). $\\beta$ values are the contrasts between acute and acclimation means within each habitat. $\\mu$ values are the overall meta-analytic means averaged across acute and acclimation types within each habitat type. 95% CI's are indicated within square brackets and raw effects are weighted by their precision (inverse sampling variance). $p_{MCMC}$ values are the posterior probability of the contrast or overall meta-analytic mean being different from zero. k = total number of effect size estimates while the numbers in brackets indicate the number of species.  For ease of visualisation, all the raw data plotted for both acute and acclimation type effect sizes are presented as circles. Raw effects are weighted by their precision (inverse sampling variance). "
+#| fig-cap: "Meta-analysis results for $\\Delta lnRR_{Q_{10}}$ across different habitats. Thick bars are 95% confidence intervals (CI) and thin bars 95% prediction intervals (PI). $\\mu$ values are the overall meta-analytic means averaged across acute and acclimation types within each habitat type. 95% CI's are indicated within square brackets and raw effects are weighted by their precision (inverse sampling variance). $p_{MCMC}$ values are the posterior probability of the contrast or overall meta-analytic mean being different from zero. k = total number of effect size estimates while the numbers in brackets indicate the number of species.  For ease of visualisation, all the raw data plotted for both acute and acclimation type effect sizes are presented as circles. Raw effects are weighted by their precision (inverse sampling variance). "
 
 
      col <- c("#0871B9", "#F3B40D", "#1BB908")
@@ -3863,9 +3920,9 @@ tables_future <- all_pred2 %>% group_by(habitat) %>% summarise(mean = mean(per_c
 
 #### **Acute and acclimation for trait categories across marine, freshwater and terrestrial taxa**
 
-Across habitats, the extent to which whole-organism versus biochemical traits acclimated varied ("Model 3"; [@fig-btrait]A-C). Biochemical traits acclimated to a greater extent compared to whole-organism traits in marine habitats ([@fig-btrait]B), whereas both whole-organism and biochemical traits acclimated similarly in freshwater ectotherms ([@fig-btrait]C). Neither trait category acclimated in terrestrial ectotherms ([@fig-btrait]A). However, there were no biochemical traits measured for juveniles in terrestrial species confounding life stage and trat category – though there were no differences between adult and juveniles in any case (see results in main manuscript).
+Across habitats, the extent to which whole-organism versus biochemical traits acclimated varied ("Model 3"; [@fig-btrait]A-C). Overall, there was no difference between the capacity for biochemical and tissue/whole-organism traits to plastically adjust (overall difference between acclimation and acute $lnRR_{Q_{10}}$ across habitats: `r mean(c(contrast_lnrr_tissue, contrast_lnrr_biochem))`, 95% CI: `r quantile(c(contrast_lnrr_tissue, contrast_lnrr_biochem), 0.025)` to `r quantile(c(contrast_lnrr_tissue, contrast_lnrr_biochem), 0.975)`, $p_{MCMC}$ = `r pmcmc(c(contrast_lnrr_tissue, contrast_lnrr_biochem))`). Biochemical traits acclimated to a greater extent compared to whole-organism traits in marine habitats ([@fig-btrait]B), whereas both whole-organism and biochemical traits acclimated similarly in freshwater ectotherms ([@fig-btrait]C). Neither trait category acclimated in terrestrial ectotherms ([@fig-btrait]A). However, there were no biochemical traits measured for juveniles in terrestrial species confounding life stage and trat category – though there were no differences between adult and juveniles in any case (see results in main manuscript).
 
-Across habitats biochemical processes tended to result in greater increases in variance at higher temperatures, but this was only significant for marine ectotherms (biochemical/whole-organism contrasts: Marine: $\beta$ = `r contrast_lnvr_trait_cat_stats[2,3]`, 95% CI: `r contrast_lnvr_trait_cat_stats[2,4]` to `r contrast_lnvr_trait_cat_stats[2,5]`, $p_{MCMC}$ = `r contrast_lnvr_trait_cat_stats[2,6]`; Freshwater: $\beta$ = `r contrast_lnvr_trait_cat_stats[3,3]`, 95% CI: `r contrast_lnvr_trait_cat_stats[3,4]` to `r contrast_lnvr_trait_cat_stats[3,5]`, $p_{MCMC}$ = `r contrast_lnvr_trait_cat_stats[3,6]`; Terrestrial: $\beta$ = `r contrast_lnvr_trait_cat_stats[1,3]`, 95% CI: `r contrast_lnvr_trait_cat_stats[1,4]` to `r contrast_lnvr_trait_cat_stats[1,5]`, $p_{MCMC}$ = `r contrast_lnvr_trait_cat_stats[1,6]`) ([@fig-btrait]D-F; "Model 3"). Variance increases for biochemical traits was reduced during acclimation in marine ectotherms ([@fig-btrait]E). 
+Across habitats biochemical processes tended to result in greater increases in variance at higher temperatures, but not significantly so (overall contrast: `r mean(pooled_biochem - pooled_tissue)`, 95% CI:`r quantile(pooled_biochem - pooled_tissue, 0.025)` to `r quantile(pooled_biochem - pooled_tissue, 0.975)`,  $p_{MCMC}$ = `r pmcmc(pooled_biochem - pooled_tissue)`). However, within habitats there was a significant for marine ectotherms (biochemical/whole-organism contrasts: Marine: $\beta$ = `r contrast_lnvr_trait_cat_stats[2,3]`, 95% CI: `r contrast_lnvr_trait_cat_stats[2,4]` to `r contrast_lnvr_trait_cat_stats[2,5]`, $p_{MCMC}$ = `r contrast_lnvr_trait_cat_stats[2,6]`; Freshwater: $\beta$ = `r contrast_lnvr_trait_cat_stats[3,3]`, 95% CI: `r contrast_lnvr_trait_cat_stats[3,4]` to `r contrast_lnvr_trait_cat_stats[3,5]`, $p_{MCMC}$ = `r contrast_lnvr_trait_cat_stats[3,6]`; Terrestrial: $\beta$ = `r contrast_lnvr_trait_cat_stats[1,3]`, 95% CI: `r contrast_lnvr_trait_cat_stats[1,4]` to `r contrast_lnvr_trait_cat_stats[1,5]`, $p_{MCMC}$ = `r contrast_lnvr_trait_cat_stats[1,6]`) ([@fig-btrait]D-F; "Model 3"). Variance increases for biochemical traits was reduced during acclimation in marine ectotherms ([@fig-btrait]E). 
 
 ```{r, fig-btrait}
 #| label: fig-btrait

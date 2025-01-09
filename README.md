@@ -2,7 +2,7 @@
 
 This repository contains the data, code, model objects and figures used in the following paper:
 
-Noble, D. W., Kar, F., Bush, A., Seebacher, F., & Nakagawa, S. (2024). Reduced plasticity and variance in physiological rates of ectotherm populations under climate change. *EcoEvoRxiv*, https://doi.org/10.32942/X2RS4W. 
+Noble, D. W., Kar, F., Bush, A., Seebacher, F., & Nakagawa, S. (2024). Limited plasticity but increased variance in physiological rates across ectotherm populations under climate change. *EcoEvoRxiv*, https://doi.org/10.32942/X2RS4W. 
 
 ## Reproducing results and manuscript
 

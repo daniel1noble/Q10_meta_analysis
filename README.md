@@ -1,10 +1,8 @@
 # Limited physiological plasticity and reduced relative variance in physiological rates of ectotherm populations under climate change
 
-[![DOI](https://zenodo.org/badge/463093254.svg)](https://doi.org/10.5281/zenodo.11123599)
-
 This repository contains the data, code, model objects and figures used in the following paper:
 
-Limited plasticity but increased variance in physiological rates across ectotherm populations under climate change. 
+Noble et al. 2025. Limited plasticity but increased variance in physiological rates across ectotherm populations under climate change. 
 
 ## Reproducing results and manuscript
 

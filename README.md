@@ -6,7 +6,7 @@ This repository contains the data, code, model objects and figures used in the f
 
 Noble et al. 2025. Limited plasticity but increased variance in physiological rates across ectotherm populations under climate change. 
 
-**IMPORTANT NOTE**: Please note that data and models are extremely large files! We've used Git's 'large file storage' (LFS) to handle these but all large files are replaced with pointers to these files which are stored on the LFS server, so these will not contain the correct data / modles even though the structure of the repository is exactly the same. As such, you will need to download the data and models separately by cloning the repository using the following command. 
+**IMPORTANT NOTE**: Please note that data and models are extremely large files! We've used Git's 'large file storage' (LFS) to handle these but all large files are replaced with pointers to these files which are stored on the LFS server, so these will not contain the correct data / models even though the structure of the repository is exactly the same. As such, you will need to download the data and models separately by cloning the repository using the following command. 
 
 ```
 git clone --recurse-submodules git@github.com:daniel1noble/Q10_meta_analysis.git

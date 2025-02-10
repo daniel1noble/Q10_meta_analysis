@@ -12,7 +12,7 @@ Noble et al. 2025. Limited plasticity but increased variance in physiological ra
 git clone --recurse-submodules git@github.com:daniel1noble/Q10_meta_analysis.git
 ```
 
-Alternatively, if you have downloaded the repo from the most recent [Zenodo]() version you should have all the data and models on hand (note the download may take a while due to the size of the files).
+Alternatively, if you have downloaded the repo from the most recent [Zenodo](https://doi.org/10.5281/zenodo.11123599) version you should have all the data and models on hand (note the download may take a while due to the size of the files).
 
 Should you have *any* issues at all please get in touch with Dan Noble at daniel.noble@anu.edu.au. All data and code should be available and we are happy to help you get it running on your machine.
 
